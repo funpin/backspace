@@ -1313,14 +1313,11 @@ if (!gotTheLock) {
         }
 
         // Provide the selected source — Electron creates the MediaStream.
-        // System audio loopback support varies:
-        //   - Windows: native (Chromium default).
-        //   - macOS 13+: CoreAudio Tap; requires NSAudioCaptureUsageDescription
-        //     in Info.plist (electron-builder injects it via mac.extendInfo).
-        //   - Linux: PulseAudio loopback, gated behind the
-        //     `PulseaudioLoopbackForScreenShare` feature flag we enable above.
-        //     Fails on PipeWire-only systems without pulse compat — the
-        //     renderer catches that and toasts the user.
+        // Chromium/Electron guarantees this loopback path on Windows. Other
+        // platforms are best-effort: the feature flag above only exposes the
+        // Chromium path and does not guarantee that the host audio stack can
+        // satisfy it. The renderer reports a capture failure without claiming
+        // macOS/Linux support.
         callback({ video: selected, ...(shareAudio ? { audio: 'loopback' } : {}) });
       } catch (err) {
         console.error('[Main:ScreenShare] Handler error:', err);

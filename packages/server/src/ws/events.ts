@@ -199,7 +199,7 @@ export function handleClientEvent(
       );
       break;
     case 'voice_status':
-      handleVoiceStatus(event, userId);
+      handleVoiceStatus(event, userId, ws);
       break;
     case 'voice_space_mute':
       handleVoiceSpaceMute(event, userId);
@@ -578,11 +578,17 @@ function handleVoiceJoin(event: Record<string, unknown>, userId: string, ws: Web
   const spaceId = getChannelSpaceId(channelId);
   if (!spaceId) {
     connectionManager.sendToUser(userId, { type: 'error', message: 'Channel not found' });
+    connectionManager.sendToUser(userId, {
+      type: 'voice_disconnected', userId, channelId, reason: 'rejected',
+    });
     return;
   }
 
   if (!hasPermission(userId, spaceId, PermissionBits.CONNECT, channelId)) {
     connectionManager.sendToUser(userId, { type: 'error', message: 'Missing CONNECT permission' });
+    connectionManager.sendToUser(userId, {
+      type: 'voice_disconnected', userId, channelId, reason: 'rejected',
+    });
     return;
   }
 
@@ -783,7 +789,7 @@ function handleVoiceLeave(userId: string): void {
   connectionManager.clearVoiceUserStatus(userId);
 }
 
-function handleVoiceStatus(event: Record<string, unknown>, userId: string): void {
+function handleVoiceStatus(event: Record<string, unknown>, userId: string, ws: WebSocket): void {
   const isMuted = event.isMuted === true;
   const isDeafened = event.isDeafened === true;
   const isCameraOn = event.isCameraOn === true;
@@ -793,6 +799,9 @@ function handleVoiceStatus(event: Record<string, unknown>, userId: string): void
   // This now works for both server channels AND DM calls.
   const userRoom = connectionManager.getUserRoom(userId);
   if (!userRoom) return;
+  // A status from a user who is still in an authoritative room is also a
+  // valid voice-session resume (not merely an ordinary tab reconnect).
+  connectionManager.setVoiceWs(userId, ws);
 
   let isSpaceMuted = false;
   let isSpaceDeafened = false;

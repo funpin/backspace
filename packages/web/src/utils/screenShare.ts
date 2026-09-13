@@ -1,4 +1,4 @@
-import { Room, Track, BackupCodecPolicy } from 'livekit-client';
+import { Room, Track, BackupCodecPolicy, AudioPresets } from 'livekit-client';
 import { useVoiceStore } from '../stores/voiceStore';
 import type { ScreenShareConfig } from '../stores/voiceStore';
 import { getStreamingLimits } from '../stores/settingsStore';
@@ -21,7 +21,6 @@ import {
 export interface OverdriveOptions {
   maxBitrate: number;
   maxFramerate: number;
-  minBitrate: number;
   degradationPreference: RTCDegradationPreference;
 }
 
@@ -33,6 +32,10 @@ export interface ScreenShareBuildResult {
     simulcast: false;
     backupCodec?: { codec: 'vp8' | 'h264'; encoding: { maxBitrate: number; maxFramerate: number } };
     backupCodecPolicy?: BackupCodecPolicy;
+    audioPreset: typeof AudioPresets.musicHighQualityStereo;
+    dtx: false;
+    red: false;
+    forceStereo: true;
   };
   overdrive: OverdriveOptions;
   contentHint: 'motion' | 'detail';
@@ -51,7 +54,6 @@ export const CAMERA_PRESET = {
 export const CAMERA_OVERDRIVE: OverdriveOptions = {
   maxBitrate: 2_000_000,
   maxFramerate: 30,
-  minBitrate: 0,
   degradationPreference: 'maintain-framerate',
 };
 
@@ -133,12 +135,8 @@ export function buildScreenShareOptions(config: ScreenShareConfig): ScreenShareB
 
   // Convert to bps ONLY at the WebRTC boundary
   const bps = clampedKbps * 1000;
-  const minBps = Math.round(bps * 0.25);
-
-  // hwOverdrive forces H.264 with SDP profile override for hardware encoding.
-  // Default is always VP9. Both paths get VP8 SIMULCAST backup (dynacast pauses
-  // the backup when no subscriber needs it — near-zero cost).
-  const hwOverdrive = useVoiceStore.getState().hwOverdrive;
+  // The persisted config is the only source of codec intent. A regression-only
+  // backup avoids continuously encoding VP9/H.264 and VP8 in parallel.
 
   // Backup encoding: cap at 30fps and proportional bitrate to keep CPU overhead low
   const backupFps = Math.min(fps, 30);
@@ -147,20 +145,23 @@ export function buildScreenShareOptions(config: ScreenShareConfig): ScreenShareB
   return {
     capture: { width: captureWidth, height: captureHeight, frameRate: fps },
     publish: {
-      videoCodec: hwOverdrive ? 'h264' : 'vp9',
+      videoCodec: config.codec,
       videoEncoding: { maxBitrate: bps, maxFramerate: fps },
       simulcast: false,
       backupCodec: {
         codec: 'vp8' as const,
         encoding: { maxBitrate: backupBps, maxFramerate: backupFps },
       },
-      backupCodecPolicy: BackupCodecPolicy.SIMULCAST,
+      backupCodecPolicy: BackupCodecPolicy.PREFER_REGRESSION,
+      audioPreset: AudioPresets.musicHighQualityStereo,
+      dtx: false,
+      red: false,
+      forceStereo: true,
     },
     overdrive: {
       maxBitrate: bps,
       maxFramerate: fps,
-      minBitrate: minBps,
-      degradationPreference: mode === 'text' ? 'maintain-resolution' : 'balanced',
+      degradationPreference: mode === 'text' ? 'maintain-resolution' : 'maintain-framerate',
     },
     contentHint: mode === 'text' ? 'detail' : 'motion',
   };
@@ -188,7 +189,6 @@ export function resolveNativeOverdrive(
   // Convert to bps at the mutation point
   const bps = clampedKbps * 1000;
   opts.overdrive.maxBitrate = bps;
-  opts.overdrive.minBitrate = Math.round(bps * 0.25);
   opts.publish.videoEncoding.maxBitrate = bps;
 }
 
@@ -223,11 +223,9 @@ export async function applyOverdrive(
     const idx = params.encodings.length - 1;
     params.encodings[idx]!.maxBitrate = options.maxBitrate;
     params.encodings[idx]!.maxFramerate = options.maxFramerate;
+    params.encodings[idx]!.priority = 'high';
     params.encodings[idx]!.networkPriority = 'high';
     (params as any).degradationPreference = options.degradationPreference;
-    if (options.minBitrate > 0) {
-      (params.encodings[idx] as any).minBitrate = options.minBitrate;
-    }
 
     await sender.setParameters(params);
   } catch (err) {
@@ -363,16 +361,14 @@ let _stopping = false;
 
 export async function publishScreenShare(room: Room, stream: MediaStream): Promise<boolean> {
   const config = useVoiceStore.getState().screenShareConfig;
-  const hwOverdrive = useVoiceStore.getState().hwOverdrive;
   const opts = buildScreenShareOptions(config);
-
+  const needsH264SdpPatch = config.codec === 'h264';
   const videoTrack = stream.getVideoTracks()[0];
   if (!videoTrack || videoTrack.readyState !== 'live') return false;
   const audioTrack = stream.getAudioTracks().find((t) => t.readyState === 'live') ?? null;
 
   // SDP profile override must be in place before the publish negotiation
-  if (hwOverdrive) activateHwOverdrive();
-  else deactivateHwOverdrive();
+  if (needsH264SdpPatch) activateHwOverdrive();
 
   let videoPublished = false;
   try {
@@ -392,20 +388,23 @@ export async function publishScreenShare(room: Room, stream: MediaStream): Promi
     });
     videoPublished = true;
     if (audioTrack) {
-      await room.localParticipant.publishTrack(audioTrack, { source: Track.Source.ScreenShareAudio });
+      await room.localParticipant.publishTrack(audioTrack, {
+        source: Track.Source.ScreenShareAudio,
+        audioPreset: opts.publish.audioPreset,
+        dtx: opts.publish.dtx,
+        red: opts.publish.red,
+        forceStereo: opts.publish.forceStereo,
+      });
     }
 
     _publishedScreenShareCodec = opts.publish.videoCodec;
     useVoiceStore.setState({ isScreenSharing: true });
     applyScreenShareOverdrive(room);
-    if (hwOverdrive) scheduleEncoderDetection(room);
     return true;
   } catch (err) {
     console.error('[ScreenShare] Failed to publish screen share:', err);
-    // A failure after the video went out (a rejected loopback track, a
-    // negotiation error) would otherwise leave a publication whose track we
-    // are about to stop: remote peers see a dead screen share, and no stop
-    // path can clear it because they are all gated on isScreenSharing.
+    // A failure after the video went out would otherwise leave a dead
+    // publication after its underlying staged track is stopped.
     if (videoPublished) {
       try {
         await room.localParticipant.unpublishTrack(videoTrack, false);
@@ -413,9 +412,19 @@ export async function publishScreenShare(room: Room, stream: MediaStream): Promi
         console.error('[ScreenShare] Failed to roll back the video publication:', unpublishErr);
       }
     }
-    if (hwOverdrive) deactivateHwOverdrive();
+    if (config.shareAudio && err instanceof Error && err.name !== 'NotAllowedError') {
+      useUIStore.getState().addToast(
+        i18n.t('voice:streamSettings.systemAudioStartFailed'),
+        'warning',
+        8000,
+      );
+    }
     stopStagedCapture(stream);
     return false;
+  } finally {
+    // The global SDP hook is negotiation-scoped. Leaving it installed would
+    // affect camera/microphone renegotiations later in the call.
+    if (needsH264SdpPatch) deactivateHwOverdrive();
   }
 }
 
@@ -445,7 +454,7 @@ export async function republishScreenShare(room: Room): Promise<void> {
   const ok = await publishScreenShare(room, stream);
   if (!ok) {
     deactivateHwOverdrive();
-    useVoiceStore.setState({ isScreenSharing: false, hwOverdrive: false });
+    useVoiceStore.setState({ isScreenSharing: false });
     // The swap suppressed handleScreenShareUnpublished, and a video publish
     // that never landed emits no rollback unpublish either, so nothing else
     // will carry the stop to the clients outside the LiveKit room. Without
@@ -460,8 +469,7 @@ export async function republishScreenShare(room: Room): Promise<void> {
 // ---------------------------------------------------------------------------
 
 function applyScreenShareOverdrive(room: Room): void {
-  // Overdrive at 2s — after WebRTC finishes negotiation
-  setTimeout(async () => {
+  const apply = async () => {
     if (!useVoiceStore.getState().isScreenSharing) return;
     const freshOpts = buildScreenShareOptions(useVoiceStore.getState().screenShareConfig);
 
@@ -487,9 +495,10 @@ function applyScreenShareOverdrive(room: Room): void {
       resolveNativeOverdrive(screenPub.track.mediaStreamTrack, useVoiceStore.getState().screenShareConfig, freshOpts);
     }
     await applyOverdrive(room, Track.Source.ScreenShare, freshOpts.overdrive);
-  }, 2000);
+  };
+  void apply();
 
-  // Second overdrive at 5s — safety net for slow BWE convergence
+  // One short safety retry covers a sender that appeared just after publish.
   setTimeout(async () => {
     if (!useVoiceStore.getState().isScreenSharing) return;
     const freshOpts = buildScreenShareOptions(useVoiceStore.getState().screenShareConfig);
@@ -499,51 +508,7 @@ function applyScreenShareOverdrive(room: Room): void {
       resolveNativeOverdrive(screenPub5.track.mediaStreamTrack, useVoiceStore.getState().screenShareConfig, freshOpts);
     }
     await applyOverdrive(room, Track.Source.ScreenShare, freshOpts.overdrive);
-  }, 5000);
-}
-
-// ---------------------------------------------------------------------------
-// Hardware encoder detection — checks WebRTC stats after stream starts
-// ---------------------------------------------------------------------------
-
-function scheduleEncoderDetection(room: Room): void {
-  setTimeout(async () => {
-    if (!useVoiceStore.getState().isScreenSharing) return;
-    if (!useVoiceStore.getState().hwOverdrive) return;
-
-    try {
-      const pc = getPublisherPC(room);
-      if (!pc) return;
-
-      const screenPub = room.localParticipant.getTrackPublications()
-        .find(p => p.source === Track.Source.ScreenShare);
-      if (!screenPub?.track) return;
-
-      const mediaTrack = getMediaStreamTrack(screenPub.track);
-      if (!mediaTrack) return;
-
-      const sender = pc.getSenders().find(s => s.track?.id === mediaTrack.id);
-      if (!sender) return;
-
-      const stats = await sender.getStats();
-      let encoderImpl: string | null = null;
-      stats.forEach((report: any) => {
-        if (report.type === 'outbound-rtp' && (report.kind === 'video' || report.mediaType === 'video')) {
-          encoderImpl = report.encoderImplementation ?? null;
-        }
-      });
-
-      if (encoderImpl && /openh264/i.test(encoderImpl)) {
-        useUIStore.getState().addToast(
-          'Hardware encoder not available — using software fallback. Switch to VP9 for better performance.',
-          'warning',
-          8000,
-        );
-      }
-    } catch {
-      // Non-critical — silently ignore detection failures
-    }
-  }, 4000);
+  }, 750);
 }
 
 // ---------------------------------------------------------------------------
@@ -570,7 +535,7 @@ export async function stopScreenShare(room: Room): Promise<void> {
   }
   deactivateHwOverdrive();
   _publishedScreenShareCodec = null;
-  useVoiceStore.setState({ isScreenSharing: false, hwOverdrive: false });
+  useVoiceStore.setState({ isScreenSharing: false });
   // `voice_status` is what carries isScreenSharing to people who are not in the
   // LiveKit room (channel lists, join sheets). Every stop path funnels through
   // here or through handleScreenShareUnpublished, so both must broadcast.
@@ -599,7 +564,7 @@ export function handleScreenShareUnpublished(): void {
   if (_stopping) return;
   deactivateHwOverdrive();
   _publishedScreenShareCodec = null;
-  useVoiceStore.setState({ isScreenSharing: false, hwOverdrive: false });
+  useVoiceStore.setState({ isScreenSharing: false });
   // `voice_status` is what carries isScreenSharing to people who are not in the
   // LiveKit room (channel lists, join sheets). Every stop path funnels through
   // here or through handleScreenShareUnpublished, so both must broadcast.

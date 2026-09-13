@@ -12,11 +12,21 @@ import { getSfxVolume } from '../../utils/sfx';
 import { ScreenShareSettingsPopover } from './ScreenShareSettingsPopover';
 import { useVoiceParticipantMeta } from '../../hooks/useVoiceParticipantMeta';
 import type { StreamTile as StreamTileType } from '../../hooks/useLiveKit';
+import { useTrackStats } from '../../hooks/useTrackStats';
 
 interface StreamTileProps {
   tile: StreamTileType;
   large?: boolean;
 }
+
+const STREAM_HEALTH_KEYS = {
+  publisherNetwork: 'voice:streamDiagnostics.publisherNetwork',
+  publisherCpu: 'voice:streamDiagnostics.publisherCpu',
+  viewerNetwork: 'voice:streamDiagnostics.viewerNetwork',
+  reconnecting: 'voice:streamDiagnostics.reconnecting',
+  unknown: 'voice:streamDiagnostics.unknown',
+} as const;
+type StreamHealthWarning = keyof typeof STREAM_HEALTH_KEYS;
 
 /** Wrapper component for stream quality settings — needs its own state + close guard. */
 function StreamQualityItem() {
@@ -190,6 +200,13 @@ export function StreamTile({ tile, large }: StreamTileProps) {
   const { displayName, avatar, user } = useVoiceParticipantMeta(participant);
 
   const isWatching = watchingStreams.has(userId);
+  const stats = useTrackStats(isLocal || isWatching);
+  const voiceConnectionStatus = useVoiceStore((s) => s.voiceConnectionStatus);
+  const localConnectionQuality = useVoiceStore((s) => s.connectionQuality);
+  const publisherConnectionQuality = useVoiceStore((s) => s.connectionQualities.get(participant.identity) ?? 'unknown');
+  const [healthWarning, setHealthWarning] = useState<StreamHealthWarning | null>(null);
+  const badSamples = useRef(0);
+  const stableTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const liveScreenTrack = tile.screenTrack?.readyState === 'live' ? tile.screenTrack : null;
   const liveLkScreenTrack = liveScreenTrack ? tile.lkScreenTrack : null;
@@ -198,6 +215,54 @@ export function StreamTile({ tile, large }: StreamTileProps) {
   const [qualityBadge, setQualityBadge] = useState<{ height: number; fps: number | null } | null>(null);
 
   const openContextMenu = useContextMenuStore((s) => s.open);
+
+  useEffect(() => {
+    if (!stats) return;
+    const screenStat = stats.videoTracks.find((track) =>
+      track.source === 'screen_share'
+      && (isLocal ? track.direction === 'send' : track.direction === 'recv' && track.participantName === participant.username),
+    );
+    const outboundReason = isLocal ? screenStat?.qualityLimitation : null;
+    const publisherBad = publisherConnectionQuality === 'poor'
+      || publisherConnectionQuality === 'lost'
+      || outboundReason === 'bandwidth'
+      || outboundReason === 'cpu';
+    const viewerBad = !isLocal && (
+      localConnectionQuality === 'poor'
+      || localConnectionQuality === 'lost'
+      || (screenStat?.packetLoss ?? 0) > 5
+      || (screenStat?.jitter ?? 0) > 80
+      || (screenStat?.freezeCountDelta ?? 0) > 0
+    );
+    const reconnecting = voiceConnectionStatus === 'reconnecting';
+    const bad = reconnecting || publisherBad || viewerBad;
+
+    if (bad) {
+      if (stableTimer.current) clearTimeout(stableTimer.current);
+      stableTimer.current = null;
+      badSamples.current += 1;
+      if (badSamples.current < 3) return;
+      if (reconnecting) setHealthWarning('reconnecting');
+      else if (publisherBad && viewerBad) setHealthWarning('unknown');
+      else if (outboundReason === 'cpu') setHealthWarning('publisherCpu');
+      else if (publisherBad) setHealthWarning('publisherNetwork');
+      else if (viewerBad) setHealthWarning('viewerNetwork');
+      else setHealthWarning('unknown');
+      return;
+    }
+
+    badSamples.current = 0;
+    if (healthWarning && !stableTimer.current) {
+      stableTimer.current = setTimeout(() => {
+        stableTimer.current = null;
+        setHealthWarning(null);
+      }, 5000);
+    }
+  }, [stats, isLocal, participant.username, publisherConnectionQuality, localConnectionQuality, voiceConnectionStatus, healthWarning]);
+
+  useEffect(() => () => {
+    if (stableTimer.current) clearTimeout(stableTimer.current);
+  }, []);
 
   // --- VIDEO --- use LiveKit's track.attach() to register the element
   // with the adaptive stream observer (enables SFU layer switching by viewport size)
@@ -408,6 +473,12 @@ export function StreamTile({ tile, large }: StreamTileProps) {
       <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-accent-rose rounded text-[11px] font-bold text-white uppercase tracking-wide">
         {t('voice:badges.live')}
       </div>
+
+      {healthWarning && (
+        <div className="absolute top-9 left-2 right-2 px-2 py-1.5 bg-black/75 border border-status-idle/40 rounded text-[11px] text-white text-center">
+          {t(STREAM_HEALTH_KEYS[healthWarning])}
+        </div>
+      )}
 
       {/* Quality badge — top right */}
       {qualityBadge && hasVideo && (

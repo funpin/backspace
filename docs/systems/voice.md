@@ -60,6 +60,13 @@ UI affordances:
 
 **Multi-tab:** Each user has one `voiceWs` binding. New tab → old socket gets `voice_disconnected { reason: 'displaced' }`
 
+**Transient reconnects:** Closing the voice-owning WebSocket starts a 60-second
+server grace period instead of immediately removing the participant. A
+`voice_join` or `voice_status` received from the replacement socket rebinds
+the existing session without a leave/join broadcast. Explicit leave, moderator
+disconnect, displacement, and rejected joins remain terminal and clean up
+immediately.
+
 ---
 
 ## DM Call State Machine
@@ -250,29 +257,37 @@ Width map: 540→960, 720→1280, 1080→1920, 1440→2560, 2160→3840
 ScreenShareConfig {
   height: number | 'native',       // Resolution or capture at display res
   fps: number,                     // 30-120
-  mode: 'gaming' | 'text',         // Affects bitrate & content hint
+  mode: 'gaming' | 'text',         // Content hint and degradation priority
   customBitrateKbps: number | null, // Admin override (if allowed)
-  shareAudio: boolean               // System audio loopback (see Platform Support below)
+  shareAudio: boolean,              // System audio loopback (see Platform Support below)
+  codec: 'vp9' | 'h264'             // Persisted codec preference
 }
 ```
 
 ### Build Pipeline (`buildScreenShareOptions()`)
 1. Resolve bitrate from matrix (custom > override > default > native estimate)
 2. Clamp to instance limits (minBitrateKbps, maxBitrateKbps)
-3. Compute min bitrate = 25% of max
-4. Codec: VP9 (default) or H.264 (hardware overdrive)
-5. VP8 simulcast backup at reduced framerate/bitrate
-6. Content hint: `'detail'` (text) or `'motion'` (gaming)
+3. Select the persisted codec: VP9 (default) or H.264
+4. Configure a VP8 regression backup at reduced framerate/bitrate; it is not encoded in parallel during normal operation
+5. Content hint: `'detail'` (text) or `'motion'` (gaming)
+6. Degradation preference: preserve resolution for text, preserve framerate for gaming
 
 ### Native Mode
 - Captures at display's full resolution
 - Snaps to nearest known tier for bitrate lookup
 - Scales proportionally: `baseKbps * (capturedPixels / knownPixels) * (fps / knownFps)`
 
-### Hardware Overdrive
-- Forces H.264 hardware encoder via SDP profile override
-- Applied 2s after stream starts (after WebRTC negotiation), re-applied at 5s
-- 4s: detects if using software fallback, warns user
+### Codec and sender parameters
+- H.264 uses an SDP profile override only during its publish negotiation; the
+  hook is removed in `finally` so later camera or microphone negotiations are
+  unaffected.
+- Selecting H.264 does not guarantee hardware encoding. The negotiated codec
+  and `encoderImplementation` reported by WebRTC stats are shown in the
+  connection inspector.
+- Sender parameters set the chosen bitrate ceiling and framerate with high
+  priority. They are applied immediately, retried once after 750 ms, and
+  re-applied after track restart or LiveKit reconnect. No artificial minimum
+  bitrate is forced.
 
 ### Instance-Level Limits (admin-configured)
 - `allowedResolutions`, `allowedFramerates` (CSV in instance_settings)
@@ -290,7 +305,7 @@ The pipeline in `utils/screenShare.ts` is **stage → publish**:
 |------|----------|--------------|
 | Stage | `stageScreenCapture()` | `getDisplayMedia()` with constraints built from `screenShareConfig`. Returns a live but **unpublished** `MediaStream`, previewed in the setup screen. Browsers open their native prompt here, so it must run inside a click. |
 | Tune | `applyStagedCaptureConfig(stream)` | Re-applies resolution/frame rate/content hint to the staged track when the config changes. Local only, no SFU renegotiation — the reason quality can be adjusted after picking. |
-| Publish | `publishScreenShare(room, stream)` | `publishTrack()` for the video track (source `ScreenShare`; codec, `screenShareEncoding`, VP8 simulcast backup) and the audio track if present (source `ScreenShareAudio`). Sets `isScreenSharing`, schedules the overdrive passes and the hardware-encoder probe. |
+| Publish | `publishScreenShare(room, stream)` | `publishTrack()` for the video track (source `ScreenShare`; codec, `screenShareEncoding`, VP8 regression backup) and the audio track if present (source `ScreenShareAudio`; stereo music preset, DTX/RED disabled). Sets `isScreenSharing` and applies sender parameters immediately with one short retry. |
 | Cancel | `stopStagedCapture(stream)` | Stops the staged tracks. Closing the setup screen never sends a frame. |
 
 The card is a fixed, near-viewport `glass-modal` surface (viewport width minus 6 rem, capped at `max-w-6xl`, 88 % of the app-scaled height) so the layout never jumps with its content. Where the app lists sources, a segmented control under the header switches **Screens / Windows** (with a window search field on the Windows tab). Browsers and system-picker mode have no such control: their picker decides, and the stage reports what came back instead. The source area is a **stage**: the app's thumbnail grid, or in browsers and system-picker mode an empty stage (monitor illustration, "Choose screen" button) that becomes the full-size live preview once staged.
@@ -333,20 +348,29 @@ Both control bars close the menu whenever `isScreenSharing` drops to `false`, so
 
 ### System Audio Loopback (`shareAudio`)
 
-The "System audio" toggle in the quality panel adds an audio track to the screen-share publication. `stageScreenCapture` calls `navigator.mediaDevices.getDisplayMedia` directly (not through LiveKit) with constraints from `buildCaptureConstraints`, which include `restrictOwnAudio: true` when the toggle is on and `audio: false` when it is off. In Electron, the `setDisplayMediaRequestHandler` callback (`packages/desktop/src/main.ts`) returns `audio: 'loopback'` to opt into Chromium's system-audio loopback path.
+The "System audio" toggle in the quality panel adds an audio track to the
+screen-share publication. `stageScreenCapture` calls
+`navigator.mediaDevices.getDisplayMedia` directly (not through LiveKit) with
+constraints from `buildCaptureConstraints`: stereo, voice processing disabled,
+`restrictOwnAudio: true` where supported, or `audio: false` when the toggle is
+off. The audio publication uses LiveKit's high-quality stereo music preset with
+stereo forced and DTX/RED disabled.
 
-Electron 43.4+ honors `restrictOwnAudio` in this custom-handler path and selects loopback excluding the app's own playback on macOS and Windows. Linux keeps its existing loopback path; this Electron fix does not add own-audio exclusion there. Older Electron versions ignored the constraint ([electron/electron#52427](https://github.com/electron/electron/issues/52427), fixed by [#52455](https://github.com/electron/electron/pull/52455), with the 43.4.0 backport in [#52533](https://github.com/electron/electron/pull/52533)). The existing stereo capture and disabled voice processing remain unchanged; both display and window selections use the same request.
-
-Own-audio exclusion applies to all audio played by Backspace, including remote voices, notification sounds, and in-app YouTube, Vimeo, or Spotify embeds. On macOS and Windows, viewers no longer hear those embeds through a system-audio share, unlike in Backspace 1.1.2; play the media in a separate application when its audio needs to be shared.
+In Electron, the `setDisplayMediaRequestHandler` callback
+(`packages/desktop/src/main.ts`) requests Chromium's `audio: 'loopback'`
+path. Windows is the supported desktop path. macOS and Linux remain best-effort:
+their host audio stack can reject the capture, and the UI says that support is
+not guaranteed. On Windows, viewers may still hear call audio when Chromium
+cannot honor own-playback exclusion.
 
 **External audio routing.** A third-party audio router can replay call audio through a different process, outside Backspace's own-audio exclusion. If viewers still hear themselves, check this route as well as the capture settings. On macOS with SoundSource, add Backspace to **Settings → Audio → Excluded Applications** to bypass SoundSource processing of Backspace; see the [SoundSource manual](https://rogueamoeba.com/support/manuals/soundsource/?page=settings). Own-audio exclusion does not guarantee removal of copies replayed by external audio routers.
 
 | Platform | Mechanism | Notes |
 |----------|-----------|-------|
 | Browser (Chrome/Edge) | `getDisplayMedia({ audio: true })` | Tab/window/system audio per the user's pick |
-| Electron / Windows | Chromium native loopback | Works out of the box |
-| Electron / macOS 13+ | CoreAudio Tap (Catap) | Requires `NSAudioCaptureUsageDescription` (set by `electron-builder.yml#mac.extendInfo`) |
-| Electron / Linux | PulseAudio loopback | **Requires** the `PulseaudioLoopbackForScreenShare` Chromium feature flag — enabled at startup in `main.ts` for Linux. Works on PulseAudio and on PipeWire systems with the `pipewire-pulse` compat layer. PipeWire-only systems without pulse compat will fail. |
+| Electron / Windows | Chromium native loopback | Supported; own-playback exclusion is best-effort |
+| Electron / macOS | Chromium loopback request | Not officially supported by Backspace; capture may fail |
+| Electron / Linux | Chromium loopback request | Not officially supported by Backspace; availability depends on the host audio stack |
 
 **Failure handling.** When loopback is not supported, Chromium rejects the entire `getDisplayMedia` request — the source-picker selection has already been consumed, so silently retrying without audio would re-prompt the picker. `stageScreenCapture` (`utils/screenShare.ts`) instead surfaces a warning toast directing the user to turn off system audio if their system does not support loopback. We do **not** auto-mutate the user's `shareAudio` preference.
 
@@ -413,6 +437,9 @@ When neither native API is available the effect returns without throwing; the `v
   channelCount: 2             // Stereo
 }
 ```
+
+The publication adds `AudioPresets.musicHighQualityStereo`,
+`forceStereo: true`, `dtx: false`, and `red: false`.
 
 **Persistence:** `voiceStore` with Zustand localStorage. Keys: `echoCancellation`, `autoGainControl`, `rnnoiseEnabled`, `screenShareConfig`.
 
