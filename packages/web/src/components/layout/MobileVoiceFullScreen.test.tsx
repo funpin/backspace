@@ -220,6 +220,10 @@ describe('MobileVoiceFullScreen', () => {
     // badge in the StreamTile.
     expect(container.textContent).toMatch(/LIVE/);
     expect(container.textContent).toMatch(/is streaming/i);
+    expect(container.querySelector('[data-testid="stream-tile-placeholder"]')).toBeInTheDocument();
+    // The placeholder already names the streamer; the normal bottom video
+    // caption must not cover its Watch button before subscription starts.
+    expect(container.querySelector('[data-testid="stream-tile-caption"]')).toBeNull();
   });
 
   it('auto-focuses the first live screen-share publication on mount', async () => {

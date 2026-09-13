@@ -153,6 +153,12 @@
     "reconnecting": "Verbindung verloren — Verbindung wird wiederhergestellt…",
     "unknown": "Die Verbindung ist instabil; die betroffene Seite konnte nicht bestimmt werden"
   },
+  "voiceDiagnostics": {
+    "selfNetwork": "Deine Verbindung ist instabil",
+    "participantNetwork": "{{name}} hat eine instabile Verbindung",
+    "reconnecting": "Die Verbindung zum Sprachserver wurde unterbrochen — Verbindung wird wiederhergestellt…"
+  },
+  "sessionDuration": "Zeit im Kanal: {{duration}}",
   "controls": {
     "spaceMutedSelfMuted": "Im Space stummgeschaltet (auch selbst stummgeschaltet)",
     "unmuteShortcut": "Stummschaltung aufheben (M)",

@@ -153,6 +153,12 @@
     "reconnecting": "Connection lost — reconnecting…",
     "unknown": "The connection is unstable; the affected side could not be determined"
   },
+  "voiceDiagnostics": {
+    "selfNetwork": "Your connection is unstable",
+    "participantNetwork": "{{name}} has an unstable connection",
+    "reconnecting": "Connection to the voice server was interrupted — reconnecting…"
+  },
+  "sessionDuration": "Time in channel: {{duration}}",
   "controls": {
     "spaceMutedSelfMuted": "Space Muted (self-muted)",
     "unmuteShortcut": "Unmute (M)",

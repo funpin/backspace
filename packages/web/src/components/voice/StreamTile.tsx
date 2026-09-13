@@ -449,18 +449,18 @@ export function StreamTile({ tile, large }: StreamTileProps) {
           className="w-full h-full object-contain bg-black"
         />
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-surface-channel">
+        <div data-testid="stream-tile-placeholder" className={`w-full h-full min-h-0 flex flex-col items-center justify-center bg-surface-channel ${large ? 'gap-3 px-4 py-6' : 'gap-1.5 px-3 py-3'}`}>
           <div className="relative">
-            <Avatar src={avatar} name={displayName} size={large ? 80 : 48} userId={avatarUserId} user={user ?? undefined} />
+            <Avatar src={avatar} name={displayName} size={large ? 80 : 40} userId={avatarUserId} user={user ?? undefined} />
           </div>
-          <div className="text-center px-4">
-            <p className="text-txt-primary text-sm font-semibold">
+          <div className="text-center w-full min-w-0">
+            <p className={`text-txt-primary font-semibold ${large ? 'text-sm' : 'text-xs truncate'}`}>
               {t('voice:stream.isStreaming', { name: displayName })}
             </p>
             {!isLocal && (
               <button
                 onClick={handleWatch}
-                className="mt-2 px-4 py-1.5 bg-accent-primary hover:bg-accent-primary/80 rounded text-white text-xs font-semibold transition-colors"
+                className={`${large ? 'mt-2 px-4 py-1.5' : 'mt-1 px-3 py-1'} bg-accent-primary hover:bg-accent-primary/80 rounded text-white text-xs font-semibold transition-colors`}
               >
                 {t('voice:stream.watch')}
               </button>
@@ -474,24 +474,28 @@ export function StreamTile({ tile, large }: StreamTileProps) {
         {t('voice:badges.live')}
       </div>
 
-      {healthWarning && (
-        <div className="absolute top-9 left-2 right-2 px-2 py-1.5 bg-black/75 border border-status-idle/40 rounded text-[11px] text-white text-center">
-          {t(STREAM_HEALTH_KEYS[healthWarning])}
-        </div>
-      )}
-
-      {/* Quality badge — top right */}
-      {qualityBadge && hasVideo && (
-        <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 rounded text-[10px] font-bold text-white/70 uppercase tracking-wide">
-          {qualityBadge.fps !== null
-            ? t('voice:stream.qualityValue', { height: qualityBadge.height, fps: qualityBadge.fps })
-            // i18n-check: allow-literal "720p" is the format's name and reads the same in every language
-            : <>{qualityBadge.height}p</>}
+      {/* Stream status — in focus mode this is the visual peer of the Grid
+          action: same top edge, height, radius, and surface treatment. */}
+      {(healthWarning || (qualityBadge && hasVideo)) && (
+        <div className={`absolute top-2 left-20 ${large ? 'right-24' : 'right-2'} flex items-start justify-end gap-1.5 pointer-events-none`}>
+          {healthWarning && (
+            <div className={`${large ? 'h-7 rounded-lg' : 'rounded'} min-w-0 max-w-full px-2 bg-black/75 border border-status-idle/40 flex items-center text-[10px] leading-[15px] text-white/90 truncate`}>
+              {t(STREAM_HEALTH_KEYS[healthWarning])}
+            </div>
+          )}
+          {qualityBadge && hasVideo && (
+            <div data-testid="stream-quality-badge" className={`${large ? 'h-7 px-3 rounded-lg' : 'px-1.5 py-0.5 rounded'} flex-shrink-0 bg-black/60 flex items-center text-[10px] font-bold text-white/70 uppercase tracking-wide`}>
+              {qualityBadge.fps !== null
+                ? t('voice:stream.qualityValue', { height: qualityBadge.height, fps: qualityBadge.fps })
+                // i18n-check: allow-literal "720p" is the format's name and reads the same in every language
+                : <>{qualityBadge.height}p</>}
+            </div>
+          )}
         </div>
       )}
 
       {/* Bottom overlay */}
-      <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+      {hasVideo && isWatching && <div data-testid="stream-tile-caption" className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
         <div className="flex items-center gap-1.5 min-w-0">
           {/* Screen icon */}
           <svg
@@ -512,7 +516,7 @@ export function StreamTile({ tile, large }: StreamTileProps) {
             <span className="text-[10px] text-white/40 font-medium">{t('voice:badges.you')}</span>
           )}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

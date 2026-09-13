@@ -153,6 +153,12 @@
     "reconnecting": "Соединение потеряно — переподключение…",
     "unknown": "Соединение нестабильно; точную сторону определить не удалось"
   },
+  "voiceDiagnostics": {
+    "selfNetwork": "Нестабильное соединение у вас",
+    "participantNetwork": "Нестабильная сеть у {{name}}",
+    "reconnecting": "Связь с голосовым сервером прервана — переподключение…"
+  },
+  "sessionDuration": "В канале: {{duration}}",
   "controls": {
     "spaceMutedSelfMuted": "Микрофон отключён в пространстве и у вас",
     "unmuteShortcut": "Включить микрофон (M)",

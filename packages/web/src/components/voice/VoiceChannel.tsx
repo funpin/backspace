@@ -1,12 +1,51 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useVoiceStore } from '../../stores/voiceStore';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useContextMenuStore, type ContextMenuItem } from '../../stores/contextMenuStore';
 import { buildVoiceModMenuItems, VolumeSliderItem } from './voiceMenuItems';
 import { VoiceUserRow } from './VoiceUserRow';
+import { useTranslation } from 'react-i18next';
 
 const EMPTY_VOICE_USERS: string[] = [];
+
+export function formatVoiceSessionDuration(elapsedSeconds: number): string {
+  const total = Math.max(0, Math.floor(elapsedSeconds));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  const mm = String(minutes).padStart(2, '0');
+  const ss = String(seconds).padStart(2, '0');
+  return hours > 0 ? `${hours}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+function VoiceSessionTimer({ startedAt }: { startedAt: number }) {
+  const { t } = useTranslation('voice');
+  const [elapsedSeconds, setElapsedSeconds] = useState(() => Math.floor((Date.now() - startedAt) / 1000));
+
+  useEffect(() => {
+    const update = () => setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [startedAt]);
+
+  const duration = formatVoiceSessionDuration(elapsedSeconds);
+  return (
+    <span
+      className="flex flex-shrink-0 items-center gap-1 text-[11px] leading-none tabular-nums text-txt-tertiary"
+      title={t('sessionDuration', { duration })}
+      aria-label={t('sessionDuration', { duration })}
+      data-testid="voice-session-timer"
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </svg>
+      {duration}
+    </span>
+  );
+}
 
 interface VoiceChannelProps {
   channelId: string;
@@ -33,10 +72,12 @@ interface VoiceChannelProps {
 
 /** Wrapper component for the volume slider so it can use hooks (useState). */
 export function VoiceChannel({ channelId, channelName, onClick, locked, canManage, onSettingsClick, voiceUserHandlers, dropZone }: VoiceChannelProps) {
+  const { t } = useTranslation('voice');
   const serverVoiceUsers = useVoiceStore((s) => s.voiceUsers.get(channelId)) ?? EMPTY_VOICE_USERS;
   const currentVoiceChannel = useVoiceStore((s) => s.currentVoiceChannelId);
   const participants = useVoiceStore((s) => s.participants);
   const isLiveKitConnected = useVoiceStore((s) => s.isLiveKitConnected);
+  const voiceSessionStartedAt = useVoiceStore((s) => s.voiceSessionStartedAt);
 
   // For OUR channel: LiveKit participants are the single source of truth.
   // For other channels: use server-provided voiceUsers (only available source).
@@ -55,6 +96,9 @@ export function VoiceChannel({ channelId, channelName, onClick, locked, canManag
   const participantMutes = useVoiceStore((s) => s.participantMutes);
   const unwatchedCameras = useVoiceStore((s) => s.unwatchedCameras);
   const speakingUserIds = useVoiceStore((s) => s.speakingUserIds);
+  const localConnectionQuality = useVoiceStore((s) => s.connectionQuality);
+  const connectionQualities = useVoiceStore((s) => s.connectionQualities);
+  const voiceConnectionStatus = useVoiceStore((s) => s.voiceConnectionStatus);
   const currentUserId = useVoiceStore((s) => {
     const local = s.participants.find(p => p.isLocal);
     return local?.userId ?? null;
@@ -141,6 +185,9 @@ export function VoiceChannel({ channelId, channelName, onClick, locked, canManag
           </svg>
         )}
         <span className="truncate text-[15px] font-medium flex-1 text-left">{channelName}</span>
+        {isActive && voiceSessionStartedAt !== null && (
+          <VoiceSessionTimer startedAt={voiceSessionStartedAt} />
+        )}
         {canManage && (
           <svg
             width="16"
@@ -180,6 +227,20 @@ export function VoiceChannel({ channelId, channelName, onClick, locked, canManag
             const isSpaceMuted = spaceMutedUserIds.has(`${spaceId}:${userId}`);
             const isSpaceDeafened = spaceDeafenedUserIds.has(`${spaceId}:${userId}`);
             const isPermissionMuted = permissionMutedUserIds.has(`${spaceId}:${userId}`);
+            const participantConnectionQuality = participant?.isLocal
+              ? localConnectionQuality
+              : participant
+                ? connectionQualities.get(participant.identity) ?? 'unknown'
+                : 'unknown';
+            const connectionWarning = isActive && participant
+              ? voiceConnectionStatus === 'reconnecting' && participant.isLocal
+                ? t('voiceDiagnostics.reconnecting')
+                : participantConnectionQuality === 'poor' || participantConnectionQuality === 'lost'
+                  ? participant.isLocal
+                    ? t('voiceDiagnostics.selfNetwork')
+                    : t('voiceDiagnostics.participantNetwork', { name: displayName })
+                  : null
+              : null;
 
             const userDrag = voiceUserHandlers?.(userId, channelId);
             const isDraggable = !!(userDrag?.draggable && userId !== myUser?.id);
@@ -211,6 +272,7 @@ export function VoiceChannel({ channelId, channelName, onClick, locked, canManag
                   isPermissionMuted={isPermissionMuted}
                   isLocallyMuted={userId !== myUser?.id && (participantMutes.get(userId) ?? false)}
                   isSpeaking={speakingUserIds.has(userId)}
+                  connectionWarning={connectionWarning}
                 />
               </div>
             );
