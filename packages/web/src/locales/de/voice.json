@@ -143,6 +143,7 @@
     "change": "Stream wechseln",
     "stopWatching": "Nicht mehr ansehen",
     "watch": "Stream ansehen",
+    "watchShort": "Ansehen",
     "mute": "Stream stummschalten",
     "isStreaming": "{{name}} streamt"
   },
@@ -158,7 +159,7 @@
     "participantNetwork": "{{name}} hat eine instabile Verbindung",
     "reconnecting": "Die Verbindung zum Sprachserver wurde unterbrochen — Verbindung wird wiederhergestellt…"
   },
-  "sessionDuration": "Zeit im Kanal: {{duration}}",
+  "channelDuration": "Kanal seit {{duration}} aktiv",
   "controls": {
     "spaceMutedSelfMuted": "Im Space stummgeschaltet (auch selbst stummgeschaltet)",
     "unmuteShortcut": "Stummschaltung aufheben (M)",

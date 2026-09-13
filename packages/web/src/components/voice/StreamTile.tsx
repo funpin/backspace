@@ -449,22 +449,25 @@ export function StreamTile({ tile, large }: StreamTileProps) {
           className="w-full h-full object-contain bg-black"
         />
       ) : (
-        <div data-testid="stream-tile-placeholder" className={`w-full h-full min-h-0 flex flex-col items-center justify-center bg-surface-channel ${large ? 'gap-3 px-4 py-6' : 'gap-1.5 px-3 py-3'}`}>
-          <div className="relative">
-            <Avatar src={avatar} name={displayName} size={large ? 80 : 40} userId={avatarUserId} user={user ?? undefined} />
-          </div>
-          <div className="text-center w-full min-w-0">
-            <p className={`text-txt-primary font-semibold ${large ? 'text-sm' : 'text-xs truncate'}`}>
-              {t('voice:stream.isStreaming', { name: displayName })}
-            </p>
-            {!isLocal && (
-              <button
-                onClick={handleWatch}
-                className={`${large ? 'mt-2 px-4 py-1.5' : 'mt-1 px-3 py-1'} bg-accent-primary hover:bg-accent-primary/80 rounded text-white text-xs font-semibold transition-colors`}
-              >
-                {t('voice:stream.watch')}
-              </button>
-            )}
+        <div data-testid="stream-tile-placeholder" className={`w-full h-full min-h-0 flex items-center justify-center bg-surface-channel ${large ? 'px-4 py-6' : 'px-4 pt-9 pb-3'}`}>
+          <div className={large ? 'flex flex-col items-center gap-3 min-w-0' : 'flex w-full max-w-[280px] min-w-0 items-center gap-3'}>
+            <div className="relative flex-shrink-0">
+              <Avatar src={avatar} name={displayName} size={large ? 80 : 44} userId={avatarUserId} user={user ?? undefined} />
+            </div>
+            <div className={`${large ? 'text-center' : 'text-left flex-1'} min-w-0`}>
+              <p className={`text-txt-primary font-semibold ${large ? 'text-sm' : 'text-xs leading-tight line-clamp-2'}`}>
+                {t('voice:stream.isStreaming', { name: displayName })}
+              </p>
+              {!isLocal && (
+                <button
+                  onClick={handleWatch}
+                  aria-label={t('voice:stream.watch')}
+                  className={`${large ? 'mt-2 px-4 py-1.5' : 'mt-2 w-full min-h-7 px-3 py-1 text-[11px]'} whitespace-nowrap bg-accent-primary hover:bg-accent-primary/80 rounded text-white font-semibold transition-colors`}
+                >
+                  {t(large ? 'voice:stream.watch' : 'voice:stream.watchShort')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

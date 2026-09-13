@@ -9,6 +9,7 @@ import { useVoiceStore } from '../stores/voiceStore';
 export interface SpaceVoiceStateSnapshot {
   spaceId: string;
   voiceStates: Record<string, string[]>;
+  voiceChannelStartedAt: Record<string, number>;
   voiceUserStates: Record<string, { isMuted: boolean; isDeafened: boolean; isCameraOn: boolean; isScreenSharing: boolean }>;
   spaceVoiceStates: Record<string, { spaceMuted: boolean; spaceDeafened: boolean; permissionMuted: boolean }>;
 }
@@ -28,10 +29,13 @@ export interface SpaceVoiceStateSnapshot {
  * is the mid-session join counterpart and deliberately does NOT clear by origin.
  */
 export function applySpaceVoiceState(snapshot: SpaceVoiceStateSnapshot): void {
-  const { setVoiceUsers, setVoiceUserStatus } = useVoiceStore.getState();
+  const { setVoiceUsers, setVoiceChannelStartedAt, setVoiceUserStatus } = useVoiceStore.getState();
 
   for (const [channelId, userIds] of Object.entries(snapshot.voiceStates)) {
     setVoiceUsers(channelId, userIds);
+  }
+  for (const [channelId, startedAt] of Object.entries(snapshot.voiceChannelStartedAt)) {
+    setVoiceChannelStartedAt(channelId, startedAt);
   }
   for (const [userId, status] of Object.entries(snapshot.voiceUserStates)) {
     setVoiceUserStatus(userId, status.isMuted, status.isDeafened, status.isCameraOn, status.isScreenSharing);

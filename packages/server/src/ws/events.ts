@@ -716,6 +716,7 @@ function handleVoiceJoin(event: Record<string, unknown>, userId: string, ws: Web
     channelId,
     userId,
     action: 'join',
+    channelStartedAt: connectionManager.getRoom(channelId)?.startedAt,
   });
 
   // Also broadcast current voice status if it exists (persisted during moves)
@@ -2425,6 +2426,7 @@ function handleVoiceMove(event: Record<string, unknown>, userId: string): void {
     channelId: targetChannelId,
     userId: targetUserId,
     action: 'join',
+    channelStartedAt: connectionManager.getRoom(targetChannelId)?.startedAt,
   });
 
   // Notify the moved user so they reconnect to LiveKit

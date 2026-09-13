@@ -20,6 +20,7 @@ export type VoiceConnectionQuality = 'excellent' | 'good' | 'poor' | 'lost' | 'u
 
 interface VoiceState {
   voiceUsers: Map<string, string[]>; // channelId → userIds
+  voiceChannelStartedAt: Map<string, number>; // channelId → server-authoritative occupied-since timestamp
   currentVoiceChannelId: string | null;
   isMuted: boolean;
   isDeafened: boolean;
@@ -30,7 +31,6 @@ interface VoiceState {
   speakingUserIds: Set<string>;
   connectionError: string | null;
   isLiveKitConnected: boolean;
-  voiceSessionStartedAt: number | null;
   voiceConnectionStatus: VoiceConnectionStatus;
   setVoiceConnectionStatus: (status: VoiceConnectionStatus) => void;
   connectionQuality: VoiceConnectionQuality;
@@ -98,6 +98,7 @@ interface VoiceState {
   setFederatedCallId: (id: string | null) => void;
   setCallOrigin: (origin: string | null) => void;
   setVoiceUsers: (channelId: string, userIds: string[]) => void;
+  setVoiceChannelStartedAt: (channelId: string, startedAt: number | null) => void;
   addVoiceUser: (channelId: string, userId: string) => void;
   removeVoiceUser: (channelId: string, userId: string) => void;
   setCurrentVoiceChannel: (channelId: string | null) => void;
@@ -171,6 +172,7 @@ export const useVoiceStore = create<VoiceState>()(
   persist(
     (set, get) => ({
       voiceUsers: new Map(),
+      voiceChannelStartedAt: new Map(),
       currentVoiceChannelId: null,
       isMuted: false,
       pttActive: false,
@@ -183,7 +185,6 @@ export const useVoiceStore = create<VoiceState>()(
       speakingUserIds: new Set(),
       connectionError: null,
       isLiveKitConnected: false,
-      voiceSessionStartedAt: null,
       voiceConnectionStatus: 'disconnected',
       connectionQuality: 'unknown',
       connectionQualities: new Map(),
@@ -347,6 +348,15 @@ export const useVoiceStore = create<VoiceState>()(
         });
       },
 
+      setVoiceChannelStartedAt: (channelId, startedAt) => {
+        set((state) => {
+          const next = new Map(state.voiceChannelStartedAt);
+          if (startedAt === null) next.delete(channelId);
+          else next.set(channelId, startedAt);
+          return { voiceChannelStartedAt: next };
+        });
+      },
+
       addVoiceUser: (channelId, userId) => {
         set((state) => {
           const newMap = new Map(state.voiceUsers);
@@ -362,20 +372,20 @@ export const useVoiceStore = create<VoiceState>()(
         set((state) => {
           const newMap = new Map(state.voiceUsers);
           const current = newMap.get(channelId) ?? [];
-          newMap.set(channelId, current.filter(id => id !== userId));
-          return { voiceUsers: newMap };
+          const remaining = current.filter(id => id !== userId);
+          newMap.set(channelId, remaining);
+          if (remaining.length > 0) return { voiceUsers: newMap };
+
+          const voiceChannelStartedAt = new Map(state.voiceChannelStartedAt);
+          voiceChannelStartedAt.delete(channelId);
+          return { voiceUsers: newMap, voiceChannelStartedAt };
         });
       },
 
-      setCurrentVoiceChannel: (channelId) => set((state) => ({
+      setCurrentVoiceChannel: (channelId) => set({
         currentVoiceChannelId: channelId,
         activeDmCall: null, // Clear active DM call when joining a server channel
-        // A channel switch starts a new session. Re-selecting the current channel
-        // preserves the timer while LiveKit negotiates or reconnects.
-        voiceSessionStartedAt: channelId === state.currentVoiceChannelId
-          ? state.voiceSessionStartedAt
-          : null,
-      })),
+      }),
 
       setParticipants: (participants) => set({ participants }),
       setSpeakingParticipants: (ids) => {
@@ -387,13 +397,7 @@ export const useVoiceStore = create<VoiceState>()(
         set({ speakingParticipantIds: ids, speakingUserIds: userIds });
       },
       setConnectionError: (error) => set({ connectionError: error }),
-      setIsLiveKitConnected: (connected) => set((state) => ({
-        isLiveKitConnected: connected,
-        // Keep the original timestamp through transient LiveKit reconnects.
-        voiceSessionStartedAt: connected && state.currentVoiceChannelId && state.voiceSessionStartedAt === null
-          ? Date.now()
-          : state.voiceSessionStartedAt,
-      })),
+      setIsLiveKitConnected: (connected) => set({ isLiveKitConnected: connected }),
       setVoiceConnectionStatus: (voiceConnectionStatus) => set({ voiceConnectionStatus }),
       setConnectionQuality: (quality, identity) => set((state) => {
         if (!identity) return { connectionQuality: quality };
@@ -541,11 +545,16 @@ export const useVoiceStore = create<VoiceState>()(
 
       getVoiceUsers: (channelId) => get().voiceUsers.get(channelId) ?? [],
 
-      clearAllVoiceUsers: () => set({ voiceUsers: new Map(), voiceUserStates: new Map() }),
+      clearAllVoiceUsers: () => set({
+        voiceUsers: new Map(),
+        voiceChannelStartedAt: new Map(),
+        voiceUserStates: new Map(),
+      }),
 
       resetSession: () => set({
         // Connection state
         voiceUsers: new Map(),
+        voiceChannelStartedAt: new Map(),
         voiceUserStates: new Map(),
         currentVoiceChannelId: null,
         participants: [],
@@ -553,7 +562,6 @@ export const useVoiceStore = create<VoiceState>()(
         speakingUserIds: new Set(),
         connectionError: null,
         isLiveKitConnected: false,
-        voiceSessionStartedAt: null,
         voiceConnectionStatus: 'disconnected',
         connectionQuality: 'unknown',
         connectionQualities: new Map(),
@@ -587,12 +595,14 @@ export const useVoiceStore = create<VoiceState>()(
         const { channelOriginMap } = useSpaceStore.getState();
         set((state) => {
           const newVoiceUsers = new Map(state.voiceUsers);
+          const voiceChannelStartedAt = new Map(state.voiceChannelStartedAt);
           for (const [channelId] of newVoiceUsers) {
             if ((channelOriginMap.get(channelId) ?? '') === origin) {
               newVoiceUsers.delete(channelId);
+              voiceChannelStartedAt.delete(channelId);
             }
           }
-          return { voiceUsers: newVoiceUsers };
+          return { voiceUsers: newVoiceUsers, voiceChannelStartedAt };
         });
       },
 
@@ -603,13 +613,17 @@ export const useVoiceStore = create<VoiceState>()(
 
         set((state) => {
           // Optimistic: immediately remove self from the channel's voice users
-          const voiceUsers = (channelId && myId)
-            ? (() => {
-                const m = new Map(state.voiceUsers);
-                m.set(channelId, (m.get(channelId) ?? []).filter(id => id !== myId));
-                return m;
-              })()
-            : state.voiceUsers;
+          let voiceUsers = state.voiceUsers;
+          let voiceChannelStartedAt = state.voiceChannelStartedAt;
+          if (channelId && myId) {
+            const remaining = (state.voiceUsers.get(channelId) ?? []).filter(id => id !== myId);
+            voiceUsers = new Map(state.voiceUsers);
+            voiceUsers.set(channelId, remaining);
+            if (remaining.length === 0) {
+              voiceChannelStartedAt = new Map(state.voiceChannelStartedAt);
+              voiceChannelStartedAt.delete(channelId);
+            }
+          }
 
           return {
             currentVoiceChannelId: null,
@@ -620,7 +634,6 @@ export const useVoiceStore = create<VoiceState>()(
             speakingUserIds: new Set(),
             connectionError: null,
             isLiveKitConnected: false,
-            voiceSessionStartedAt: null,
             voiceConnectionStatus: 'disconnected',
             connectionQuality: 'unknown',
             connectionQualities: new Map(),
@@ -639,6 +652,7 @@ export const useVoiceStore = create<VoiceState>()(
             unwatchedCameras: new Set(),
             streamWatchers: new Map(),
             voiceUsers,
+            voiceChannelStartedAt,
             // Reset mic permission flag on leave so the next join attempts a
             // fresh getUserMedia (the user may have granted permission via
             // OS settings while disconnected).
@@ -669,7 +683,6 @@ export const useVoiceStore = create<VoiceState>()(
           speakingUserIds: new Set(),
           connectionError: null,
           isLiveKitConnected: false,
-          voiceSessionStartedAt: null,
           voiceConnectionStatus: 'disconnected',
           connectionQuality: 'unknown',
           connectionQualities: new Map(),
@@ -693,6 +706,7 @@ export const useVoiceStore = create<VoiceState>()(
 
       reset: () => set({
         voiceUsers: new Map(),
+        voiceChannelStartedAt: new Map(),
         currentVoiceChannelId: null,
         isMuted: false,
         isDeafened: false,
@@ -703,7 +717,6 @@ export const useVoiceStore = create<VoiceState>()(
         speakingUserIds: new Set(),
         connectionError: null,
         isLiveKitConnected: false,
-        voiceSessionStartedAt: null,
         voiceConnectionStatus: 'disconnected',
         connectionQuality: 'unknown',
         connectionQualities: new Map(),
@@ -836,6 +849,7 @@ export const useVoiceStore = create<VoiceState>()(
         merged.spaceDeafenedUserIds = currentState.spaceDeafenedUserIds;
         merged.permissionMutedUserIds = currentState.permissionMutedUserIds;
         merged.voiceUsers = currentState.voiceUsers;
+        merged.voiceChannelStartedAt = currentState.voiceChannelStartedAt;
         merged.participants = currentState.participants;
         merged.speakingParticipantIds = currentState.speakingParticipantIds;
         merged.speakingUserIds = currentState.speakingUserIds;

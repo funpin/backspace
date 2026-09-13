@@ -23,6 +23,7 @@ describe('applySpaceVoiceState', () => {
     applySpaceVoiceState({
       spaceId: 'sp1',
       voiceStates: { ch1: ['uA', 'uB'] },
+      voiceChannelStartedAt: { ch1: 123_456 },
       voiceUserStates: { uA: { isMuted: true, isDeafened: false, isCameraOn: false, isScreenSharing: false } },
       spaceVoiceStates: {
         'sp1:uA': { spaceMuted: true, spaceDeafened: false, permissionMuted: false },
@@ -32,6 +33,7 @@ describe('applySpaceVoiceState', () => {
 
     const s = useVoiceStore.getState();
     expect(s.getVoiceUsers('ch1')).toEqual(['uA', 'uB']);
+    expect(s.voiceChannelStartedAt.get('ch1')).toBe(123_456);
     expect(s.voiceUserStates.get('uA')).toEqual({ isMuted: true, isDeafened: false, isCameraOn: false, isScreenSharing: false });
     expect(s.spaceMutedUserIds.has('sp1:uA')).toBe(true);
     expect(s.permissionMutedUserIds.has('sp1:uB')).toBe(true);
@@ -45,6 +47,7 @@ describe('applySpaceVoiceState', () => {
     applySpaceVoiceState({
       spaceId: 'sp1',
       voiceStates: {},
+      voiceChannelStartedAt: {},
       voiceUserStates: {},
       spaceVoiceStates: { 'sp1:uNew': { spaceMuted: true, spaceDeafened: false, permissionMuted: false } },
     });

@@ -13,7 +13,7 @@ Source files:
 1. Client sends `voice_join { channelId }` via WS
 2. Server checks CONNECT permission, enforces one-room-per-user
 3. Server loads voice restrictions from DB (space mute/deafen)
-4. Server broadcasts `voice_state_update { action: 'join' }` to space
+4. Server broadcasts `voice_state_update { action: 'join', channelStartedAt }` to space. `channelStartedAt` is the server-owned creation time of the occupied room, so every client shows the same channel-duration timer; it survives participant joins and reconnect grace, and resets when the last participant leaves.
 5. Client calls `POST /api/livekit/token { channelId }` → gets JWT + LiveKit URL
 6. Client connects to LiveKit room with token
 

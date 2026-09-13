@@ -398,6 +398,7 @@ class ConnectionManager {
       type: 'space_voice_state',
       spaceId,
       voiceStates: snapshot.voiceStates,
+      voiceChannelStartedAt: snapshot.voiceChannelStartedAt,
       voiceUserStates: snapshot.voiceUserStates,
       spaceVoiceStates: snapshot.spaceVoiceStates,
     });
@@ -425,11 +426,13 @@ class ConnectionManager {
    */
   buildSpaceVoiceState(spaceId: string, userId: string): {
     voiceStates: Record<string, string[]>;
+    voiceChannelStartedAt: Record<string, number>;
     voiceUserStates: Record<string, { isMuted: boolean; isDeafened: boolean; isCameraOn: boolean; isScreenSharing: boolean }>;
     spaceVoiceStates: Record<string, { spaceMuted: boolean; spaceDeafened: boolean; permissionMuted: boolean }>;
   } {
     const db = getDb();
     const voiceStates: Record<string, string[]> = {};
+    const voiceChannelStartedAt: Record<string, number> = {};
     const voiceUserStates: Record<string, { isMuted: boolean; isDeafened: boolean; isCameraOn: boolean; isScreenSharing: boolean }> = {};
     const spaceVoiceStates: Record<string, { spaceMuted: boolean; spaceDeafened: boolean; permissionMuted: boolean }> = {};
 
@@ -442,10 +445,12 @@ class ConnectionManager {
       const chPerms = computePermissions(userId, spaceId, ch.id);
       const hasView = (chPerms & PermissionBits.VIEW_CHANNEL) !== 0n || (chPerms & PermissionBits.ADMINISTRATOR) !== 0n;
       if (!hasView) continue;
-      const participants = this.getRoomParticipants(ch.id);
+      const room = this.getRoom(ch.id);
+      const participants = room?.participants ?? new Set<string>();
       if (participants.size > 0) {
         const ids = Array.from(participants);
         voiceStates[ch.id] = ids;
+        voiceChannelStartedAt[ch.id] = room!.startedAt;
         for (const uid of ids) {
           const status = this.getVoiceUserStatus(uid);
           if (status) voiceUserStates[uid] = status;
@@ -483,7 +488,7 @@ class ConnectionManager {
       }
     }
 
-    return { voiceStates, voiceUserStates, spaceVoiceStates };
+    return { voiceStates, voiceChannelStartedAt, voiceUserStates, spaceVoiceStates };
   }
 
   // ─── Unified VoiceRoom API ─────────────────────────────────────────────────
@@ -1183,6 +1188,7 @@ function buildReadyPayload(userId: string): {
   spaceLayout: SpaceLayoutItem[] | null;
   layoutUpdatedAt: number | null;
   voiceStates: Record<string, string[]>;
+  voiceChannelStartedAt: Record<string, number>;
   voiceUserStates: Record<string, { isMuted: boolean; isDeafened: boolean; isCameraOn: boolean; isScreenSharing: boolean }>;
   spaceVoiceStates: Record<string, { spaceMuted: boolean; spaceDeafened: boolean; permissionMuted: boolean }>;
   readStates: ReadState[];
@@ -1587,10 +1593,12 @@ function buildReadyPayload(userId: string): {
   // The helper applies the same VIEW_CHANNEL filtering used when building the
   // `spaces` array above.
   const voiceStates: Record<string, string[]> = {};
+  const voiceChannelStartedAt: Record<string, number> = {};
   const spaceVoiceStates: Record<string, { spaceMuted: boolean; spaceDeafened: boolean; permissionMuted: boolean }> = {};
   for (const space of spaces) {
     const snap = connectionManager.buildSpaceVoiceState(space.id, userId);
     Object.assign(voiceStates, snap.voiceStates);
+    Object.assign(voiceChannelStartedAt, snap.voiceChannelStartedAt);
     Object.assign(spaceVoiceStates, snap.spaceVoiceStates);
   }
 
@@ -1729,7 +1737,7 @@ function buildReadyPayload(userId: string): {
     pendingApprovalCount = countResult?.count ?? 0;
   }
 
-  return { user, spaces, dmChannels, folders, spaceLayout, layoutUpdatedAt, voiceStates, voiceUserStates, spaceVoiceStates, readStates, activeCalls, userActivities, rejectedPeerOrigins, awaitingApprovalPeerOrigins, activePeerOrigins, pendingApprovalCount };
+  return { user, spaces, dmChannels, folders, spaceLayout, layoutUpdatedAt, voiceStates, voiceChannelStartedAt, voiceUserStates, spaceVoiceStates, readStates, activeCalls, userActivities, rejectedPeerOrigins, awaitingApprovalPeerOrigins, activePeerOrigins, pendingApprovalCount };
 }
 
 export async function registerWebSocket(app: FastifyInstance): Promise<void> {

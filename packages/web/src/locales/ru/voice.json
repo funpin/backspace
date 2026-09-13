@@ -143,6 +143,7 @@
     "change": "Сменить трансляцию",
     "stopWatching": "Прекратить просмотр",
     "watch": "Смотреть трансляцию",
+    "watchShort": "Смотреть",
     "mute": "Заглушить трансляцию",
     "isStreaming": "{{name}} ведёт трансляцию"
   },
@@ -158,7 +159,7 @@
     "participantNetwork": "Нестабильная сеть у {{name}}",
     "reconnecting": "Связь с голосовым сервером прервана — переподключение…"
   },
-  "sessionDuration": "В канале: {{duration}}",
+  "channelDuration": "Канал активен {{duration}}",
   "controls": {
     "spaceMutedSelfMuted": "Микрофон отключён в пространстве и у вас",
     "unmuteShortcut": "Включить микрофон (M)",

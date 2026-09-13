@@ -143,6 +143,7 @@
     "change": "Change Stream",
     "stopWatching": "Stop Watching",
     "watch": "Watch Stream",
+    "watchShort": "Watch",
     "mute": "Mute Stream",
     "isStreaming": "{{name}} is streaming"
   },
@@ -158,7 +159,7 @@
     "participantNetwork": "{{name}} has an unstable connection",
     "reconnecting": "Connection to the voice server was interrupted — reconnecting…"
   },
-  "sessionDuration": "Time in channel: {{duration}}",
+  "channelDuration": "Channel active for {{duration}}",
   "controls": {
     "spaceMutedSelfMuted": "Space Muted (self-muted)",
     "unmuteShortcut": "Unmute (M)",

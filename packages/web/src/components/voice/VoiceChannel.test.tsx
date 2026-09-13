@@ -43,9 +43,9 @@ beforeEach(() => {
     currentVoiceChannelId: 'voice-1',
     isLiveKitConnected: true,
     voiceConnectionStatus: 'connected',
-    voiceSessionStartedAt: null,
     participants: [participant('1', 'ada', true), participant('2', 'bob', false)],
     voiceUsers: new Map([['voice-1', ['1', '2']]]),
+    voiceChannelStartedAt: new Map(),
     voiceUserStates: new Map(),
     connectionQuality: 'good',
     connectionQualities: new Map(),
@@ -62,12 +62,14 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-function renderChannel() {
+function renderChannel(canManage = false) {
   return render(
     <VoiceChannel
       channelId="voice-1"
       channelName="Voice"
       onClick={() => {}}
+      canManage={canManage}
+      onSettingsClick={() => {}}
     />,
   );
 }
@@ -92,36 +94,42 @@ describe('VoiceChannel connection diagnostics', () => {
   });
 });
 
-describe('VoiceChannel session timer', () => {
-  it('shows and updates elapsed time for the active channel', () => {
+describe('VoiceChannel occupancy timer', () => {
+  it('shows and updates the server-authoritative channel duration even when viewing another channel', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-14T00:01:05Z'));
-    useVoiceStore.setState({ voiceSessionStartedAt: Date.now() - 65_000 });
+    useVoiceStore.setState({
+      currentVoiceChannelId: 'voice-2',
+      voiceChannelStartedAt: new Map([['voice-1', Date.now() - 65_000]]),
+    });
 
     renderChannel();
 
-    expect(screen.getByTestId('voice-session-timer')).toHaveTextContent('01:05');
+    expect(screen.getByTestId('voice-channel-timer')).toHaveTextContent('01:05');
     act(() => {
       vi.advanceTimersByTime(1_000);
     });
-    expect(screen.getByTestId('voice-session-timer')).toHaveTextContent('01:06');
+    expect(screen.getByTestId('voice-channel-timer')).toHaveTextContent('01:06');
 
   });
 
-  it('keeps its start time across reconnects and clears it when switching channels', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-09-14T00:00:00Z'));
-    const state = useVoiceStore.getState();
-    state.setCurrentVoiceChannel('voice-1');
-    state.setIsLiveKitConnected(true);
-    const startedAt = useVoiceStore.getState().voiceSessionStartedAt;
+  it('clears the server timestamp only when the channel becomes empty', () => {
+    const startedAt = Date.now() - 65_000;
+    useVoiceStore.setState({ voiceChannelStartedAt: new Map([['voice-1', startedAt]]) });
 
-    vi.advanceTimersByTime(10_000);
-    useVoiceStore.getState().setIsLiveKitConnected(false);
-    useVoiceStore.getState().setIsLiveKitConnected(true);
-    expect(useVoiceStore.getState().voiceSessionStartedAt).toBe(startedAt);
+    useVoiceStore.getState().removeVoiceUser('voice-1', '2');
+    expect(useVoiceStore.getState().voiceChannelStartedAt.get('voice-1')).toBe(startedAt);
 
-    useVoiceStore.getState().setCurrentVoiceChannel('voice-2');
-    expect(useVoiceStore.getState().voiceSessionStartedAt).toBeNull();
+    useVoiceStore.getState().removeVoiceUser('voice-1', '1');
+    expect(useVoiceStore.getState().voiceChannelStartedAt.has('voice-1')).toBe(false);
+  });
+
+  it('overlays channel settings without reserving space beside the timer', () => {
+    useVoiceStore.setState({ voiceChannelStartedAt: new Map([['voice-1', Date.now()]]) });
+
+    renderChannel(true);
+
+    expect(screen.getByTestId('voice-channel-timer')).toHaveClass('group-hover:opacity-0');
+    expect(screen.getByTestId('voice-channel-settings')).toHaveClass('absolute', 'right-[10px]');
   });
 });

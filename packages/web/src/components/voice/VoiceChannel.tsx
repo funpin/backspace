@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 const EMPTY_VOICE_USERS: string[] = [];
 
-export function formatVoiceSessionDuration(elapsedSeconds: number): string {
+export function formatVoiceChannelDuration(elapsedSeconds: number): string {
   const total = Math.max(0, Math.floor(elapsedSeconds));
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
@@ -19,7 +19,7 @@ export function formatVoiceSessionDuration(elapsedSeconds: number): string {
   return hours > 0 ? `${hours}:${mm}:${ss}` : `${mm}:${ss}`;
 }
 
-function VoiceSessionTimer({ startedAt }: { startedAt: number }) {
+function VoiceChannelTimer({ startedAt, hidesForSettings }: { startedAt: number; hidesForSettings: boolean }) {
   const { t } = useTranslation('voice');
   const [elapsedSeconds, setElapsedSeconds] = useState(() => Math.floor((Date.now() - startedAt) / 1000));
 
@@ -30,13 +30,13 @@ function VoiceSessionTimer({ startedAt }: { startedAt: number }) {
     return () => window.clearInterval(timer);
   }, [startedAt]);
 
-  const duration = formatVoiceSessionDuration(elapsedSeconds);
+  const duration = formatVoiceChannelDuration(elapsedSeconds);
   return (
     <span
-      className="flex flex-shrink-0 items-center gap-1 text-[11px] leading-none tabular-nums text-txt-tertiary"
-      title={t('sessionDuration', { duration })}
-      aria-label={t('sessionDuration', { duration })}
-      data-testid="voice-session-timer"
+      className={`flex flex-shrink-0 items-center gap-1 text-[11px] leading-none tabular-nums text-txt-tertiary transition-opacity ${hidesForSettings ? 'group-hover:opacity-0' : ''}`}
+      title={t('channelDuration', { duration })}
+      aria-label={t('channelDuration', { duration })}
+      data-testid="voice-channel-timer"
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <circle cx="12" cy="12" r="9" />
@@ -77,7 +77,7 @@ export function VoiceChannel({ channelId, channelName, onClick, locked, canManag
   const currentVoiceChannel = useVoiceStore((s) => s.currentVoiceChannelId);
   const participants = useVoiceStore((s) => s.participants);
   const isLiveKitConnected = useVoiceStore((s) => s.isLiveKitConnected);
-  const voiceSessionStartedAt = useVoiceStore((s) => s.voiceSessionStartedAt);
+  const channelStartedAt = useVoiceStore((s) => s.voiceChannelStartedAt.get(channelId) ?? null);
 
   // For OUR channel: LiveKit participants are the single source of truth.
   // For other channels: use server-provided voiceUsers (only available source).
@@ -185,16 +185,17 @@ export function VoiceChannel({ channelId, channelName, onClick, locked, canManag
           </svg>
         )}
         <span className="truncate text-[15px] font-medium flex-1 text-left">{channelName}</span>
-        {isActive && voiceSessionStartedAt !== null && (
-          <VoiceSessionTimer startedAt={voiceSessionStartedAt} />
+        {voiceUsers.length > 0 && channelStartedAt !== null && (
+          <VoiceChannelTimer startedAt={channelStartedAt} hidesForSettings={!!canManage} />
         )}
         {canManage && (
           <svg
+            data-testid="voice-channel-settings"
             width="16"
             height="16"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="flex-shrink-0 opacity-0 group-hover:opacity-100 text-txt-tertiary hover:text-txt-primary transition-opacity"
+            className="absolute right-[10px] opacity-0 group-hover:opacity-100 text-txt-tertiary hover:text-txt-primary transition-opacity"
             onClick={(e) => {
               e.stopPropagation();
               onSettingsClick?.();
