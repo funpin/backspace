@@ -28,6 +28,11 @@ const STREAM_HEALTH_KEYS = {
 } as const;
 type StreamHealthWarning = keyof typeof STREAM_HEALTH_KEYS;
 
+function finitePositiveRounded(value: number | undefined): number | null {
+  if (value === undefined || !Number.isFinite(value) || value <= 0) return null;
+  return Math.round(value);
+}
+
 /** Wrapper component for stream quality settings — needs its own state + close guard. */
 function StreamQualityItem() {
   const { t } = useTranslation(['voice', 'common']);
@@ -285,12 +290,14 @@ export function StreamTile({ tile, large }: StreamTileProps) {
     }
     const update = () => {
       const settings = liveScreenTrack.getSettings();
-      const h = settings.height ?? 0;
-      const fps = Math.round(settings.frameRate ?? 0);
-      if (h > 0 && fps > 0) {
+      const h = finitePositiveRounded(settings.height);
+      const fps = finitePositiveRounded(settings.frameRate);
+      if (h !== null && fps !== null) {
         setQualityBadge({ height: h, fps });
-      } else if (h > 0) {
+      } else if (h !== null) {
         setQualityBadge({ height: h, fps: null });
+      } else {
+        setQualityBadge(null);
       }
     };
     update();
