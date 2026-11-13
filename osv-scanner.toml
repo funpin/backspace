@@ -119,3 +119,39 @@ reason = "braces 3.0.3, no fixed release exists. Build-time only via tailwindcss
 id = "CVE-2026-97058"
 ignoreUntil = 2026-12-01
 reason = "sprintf-js 1.1.3, no fixed release exists. Build-time only via electron-builder. Does not ship to users."
+
+# ─── Added by the funpin fork, November 2026 ────────────────────────────────
+# Three advisories published after upstream's last pass. None has a fixed
+# release inside the major its consumers accept, so a pnpm override cannot
+# clear them; undici, fast-uri and zod from the same batch were cleared that
+# way. Each was checked against how the package is actually called here.
+
+# minimatch 9.0.9 and 10.2.6. Fixed only in 11.0.1. The flaw is a pattern that
+# an attacker controls amplifying during preprocessing. Every pattern here is
+# written by the project: eslint and typescript-eslint config, electron-builder
+# file lists, and glob, whose one server caller passes the constant '**/**'.
+# No request ever supplies a minimatch pattern.
+[[IgnoredVulns]]
+id = "CVE-2026-118764"
+ignoreUntil = 2027-01-15
+reason = "minimatch 9.0.9 and 10.2.6, fixed in 11.0.1 only; glob 10/11, eslint 10 and app-builder-lib pin 9.x/10.x. Needs an attacker-controlled pattern; every pattern here is project-authored."
+
+# glob 10.5.0 and 11.1.0. Fixed only in 14.0.2. The flaw is that an aborted
+# walk keeps reading directories, so a caller that bounds a walk with an
+# AbortSignal is not actually bounded. @fastify/static 7 (the server) calls
+# glob once at startup over the built web client, with no signal; workbox-build
+# calls it at build time. Nothing here aborts a walk, so there is no bound to
+# bypass. Goes away with the @fastify/static 10 upgrade already tracked above.
+[[IgnoredVulns]]
+id = "CVE-2026-118773"
+ignoreUntil = 2027-01-15
+reason = "glob 10.5.0 and 11.1.0, fixed in 14.0.2 only; @fastify/static 7 and workbox-build 7 pin 10.x/11.x. Needs a caller that aborts a walk; neither passes an AbortSignal."
+
+# deepmerge 4.3.1. No fixed release exists: the advisory covers every version
+# through 4.3.1, which is the latest. Build-time only: @rollup/plugin-node-resolve
+# inside workbox-build, merging the project's own build options. Not in the
+# server image or the packaged app.
+[[IgnoredVulns]]
+id = "CVE-2026-93753"
+ignoreUntil = 2027-01-15
+reason = "deepmerge 4.3.1, no fixed release exists. Build-time only via workbox-build's @rollup/plugin-node-resolve. Does not ship to users."
