@@ -178,6 +178,20 @@
     display: none;
   }
 
+  /* Stage zoom (hooks/useStageZoom.ts). The stage carries the numbers; only
+     the tile's own picture takes them, so the badges, the caption and the
+     corner inset drawn over it stay put. */
+  [data-zoom-stage] > [data-context-menu] > video {
+    transform-origin: 0 0;
+    transform: translate(var(--stage-zoom-x, 0px), var(--stage-zoom-y, 0px)) scale(var(--stage-zoom-scale, 1));
+  }
+  [data-zoom-stage][data-zoomed] {
+    cursor: grab;
+  }
+  [data-zoom-stage][data-zoomed]:active {
+    cursor: grabbing;
+  }
+
   /* Dark theme auto-fill */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,

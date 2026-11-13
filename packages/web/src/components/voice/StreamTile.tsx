@@ -441,7 +441,7 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
       {/* Stream status — in focus mode this is the visual peer of the Grid
           action: same top edge, height, radius, and surface treatment. */}
       {!compact && (healthWarning || (qualityBadge && hasVideo)) && (
-        <div className={`absolute top-2 left-20 ${large ? 'right-36' : 'right-2'} flex items-start justify-end gap-1.5 pointer-events-none`}>
+        <div className={`absolute top-2 left-20 ${large ? 'right-64' : 'right-2'} flex items-start justify-end gap-1.5 pointer-events-none`}>
           {healthWarning && (
             <div className={`${large ? 'h-7 rounded-lg' : 'rounded'} min-w-0 max-w-full px-2 bg-black/75 border border-status-idle/40 flex items-center text-[10px] leading-[15px] text-white/90 truncate`}>
               {t(STREAM_HEALTH_KEYS[healthWarning])}

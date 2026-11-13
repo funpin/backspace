@@ -42,7 +42,8 @@
     "showHiddenTile": "Показать: {{name}}",
     "swapSources": "Поменять экран и камеру местами",
     "splitCamera": "Вынести камеру отдельно",
-    "mergeCamera": "Вернуть камеру в угол"
+    "mergeCamera": "Вернуть камеру в угол",
+    "resetZoom": "Сбросить масштаб"
   },
   "connectionInfo": {
     "title": "Сведения о соединении",

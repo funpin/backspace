@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VoiceGrid } from './VoiceGrid';
 import { useVoiceStore } from '../../stores/voiceStore';
@@ -204,5 +204,43 @@ describe('VoiceGrid one tile per participant', () => {
     expect(
       screen.getAllByTestId('voice-grid-cell').map((cell) => cell.textContent?.replace('(you)', '').trim()),
     ).toEqual(['Bbob', 'Eeve', 'Aada']);
+  });
+
+  it('zooms the focused picture with the wheel, keeps the click for panning, and resets', async () => {
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream' });
+    render(<VoiceGrid participants={[participant('ada', true), sharing('bob', { screen: true })]} />);
+    const stage = screen.getByTestId('stream-tile-placeholder').closest('[data-zoom-stage]') as HTMLElement;
+    stage.getBoundingClientRect = () => ({ left: 0, top: 0, width: 1000, height: 500, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) });
+    expect(screen.queryByTestId('zoom-reset')).toBeNull();
+
+    fireEvent.wheel(stage, { deltaY: -400, clientX: 500, clientY: 250 });
+
+    expect(stage).toHaveAttribute('data-zoomed', 'true');
+    expect(Number(stage.style.getPropertyValue('--stage-zoom-scale'))).toBeGreaterThan(1);
+    expect(screen.getByTestId('zoom-reset')).toBeInTheDocument();
+
+    // While zoomed a click on the picture does not leave focus mode.
+    await userEvent.click(screen.getByTestId('stream-tile-placeholder'));
+    expect(useVoiceStore.getState().focusedParticipantId).toBe('bob:stream');
+
+    // Escape undoes the zoom first, then focus.
+    await userEvent.keyboard('{Escape}');
+    expect(stage).not.toHaveAttribute('data-zoomed');
+    expect(useVoiceStore.getState().focusedParticipantId).toBe('bob:stream');
+    await userEvent.keyboard('{Escape}');
+    expect(useVoiceStore.getState().focusedParticipantId).toBeNull();
+  });
+
+  it('opens a newly focused picture unzoomed', () => {
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream' });
+    render(<VoiceGrid participants={[participant('ada', true), sharing('bob', { screen: true }), sharing('eve', { screen: true })]} />);
+    const stage = () => document.querySelector('[data-zoom-stage]') as HTMLElement;
+    stage().getBoundingClientRect = () => ({ left: 0, top: 0, width: 1000, height: 500, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) });
+    fireEvent.wheel(stage(), { deltaY: -400, clientX: 500, clientY: 250 });
+    expect(stage()).toHaveAttribute('data-zoomed', 'true');
+
+    act(() => useVoiceStore.setState({ focusedParticipantId: 'eve:stream' }));
+
+    expect(stage()).not.toHaveAttribute('data-zoomed');
   });
 });

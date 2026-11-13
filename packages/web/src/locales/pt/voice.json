@@ -42,7 +42,8 @@
     "showHiddenTile": "Mostrar {{name}}",
     "swapSources": "Trocar tela e câmera",
     "splitCamera": "Mostrar câmera separadamente",
-    "mergeCamera": "Devolver a câmera ao canto"
+    "mergeCamera": "Devolver a câmera ao canto",
+    "resetZoom": "Redefinir zoom"
   },
   "connectionInfo": {
     "title": "Informações da conexão",
