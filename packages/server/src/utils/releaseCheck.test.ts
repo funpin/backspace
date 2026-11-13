@@ -6,6 +6,7 @@ import {
   getLatestRelease,
   resetReleaseCacheForTest,
   type ReleaseCheckResult,
+  parseForkRevision,
 } from './releaseCheck.js';
 import { config } from '../config.js';
 
@@ -81,6 +82,38 @@ describe('compareVersions', () => {
     expect(compareVersions('nightly', '1.0.4')).toBeNull();
     expect(compareVersions('1.0.4', '')).toBeNull();
     expect(compareVersions('1.0', '1.0.4')).toBeNull();
+  });
+});
+
+describe('fork versions (upstream release plus -f.<major>.<minor>)', () => {
+  it('reads the fork revision and nothing else', () => {
+    expect(parseForkRevision('1.11.0-f.2.1')).toEqual([2, 1]);
+    expect(parseForkRevision('1.11.0')).toBeNull();
+    expect(parseForkRevision('1.11.0-dev')).toBeNull();
+    expect(parseForkRevision('1.11.0-f2.1')).toBeNull();
+  });
+
+  it('orders releases on the same upstream base by revision, as numbers', () => {
+    expect(compareVersions('1.11.0-f.1.0', '1.11.0-f.1.1')).toBe(-1);
+    expect(compareVersions('1.11.0-f.2.0', '1.11.0-f.10.0')).toBe(-1);
+    expect(compareVersions('1.11.0-f.1.3', '1.11.0-f.1.3')).toBe(0);
+  });
+
+  it('lets a newer upstream base win over any revision', () => {
+    expect(compareVersions('1.11.0-f.9.9', '1.12.0-f.1.0')).toBe(-1);
+    expect(compareVersions('1.12.0-f.1.0', '1.11.5-f.3.0')).toBe(1);
+  });
+
+  it('puts a fork build after the upstream release it is built on', () => {
+    expect(compareVersions('1.11.0', '1.11.0-f.1.0')).toBe(-1);
+    expect(compareVersions('1.11.0-f.1.0', '1.12.0')).toBe(-1);
+  });
+
+  it('reports an update between two fork releases and accepts a fork tag', () => {
+    const latest = parseLatestRelease({ tag_name: 'v1.11.0-f.1.1', html_url: 'https://github.com/funpin/backspace/releases/tag/v1.11.0-f.1.1' });
+    expect(latest?.version).toBe('1.11.0-f.1.1');
+    expect(deriveState('1.11.0-f.1.0', { latest, checkedAt: 0, error: null } as never)).toBe('update-available');
+    expect(deriveState('1.11.0-f.1.1', { latest, checkedAt: 0, error: null } as never)).toBe('up-to-date');
   });
 });
 

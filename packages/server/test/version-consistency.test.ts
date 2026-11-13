@@ -42,7 +42,7 @@ describe('release version consistency', () => {
     // cannot disagree, and this asserts the value rather than its type.
     const { config } = await import('../src/config.js');
     expect(config.version).toBe(versionOf('packages/server/package.json'));
-    expect(config.version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(config.version).toMatch(/^\d+\.\d+\.\d+(-f\.\d+\.\d+)?$/);
   });
 
   it('resolves the manifest the runtime image actually ships', () => {

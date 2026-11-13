@@ -51,8 +51,11 @@ export const PROJECT_LINKS: ProjectLinks = {
   community: null,
 };
 
-/** Release tags are `v1.5.1` form; only a plain three-part version has one. */
-const RELEASE_VERSION = /^\d+\.\d+\.\d+$/;
+/**
+ * Release tags are `v1.5.1` form, or this fork's `v1.11.0-f.1.0` (the upstream
+ * release it is built on plus the fork's revision); only those have one.
+ */
+const RELEASE_VERSION = /^\d+\.\d+\.\d+(-f\.\d+\.\d+)?$/;
 
 /**
  * The release page for `version`, or the release list when the version has no

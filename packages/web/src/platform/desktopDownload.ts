@@ -56,7 +56,9 @@ export interface NavigatorLike {
 /** The release listing, not `releases/latest`: filenames carry the version, so there is no fixed-name asset. */
 export const RELEASES_URL = 'https://github.com/funpin/backspace/releases';
 
-const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
+// A release is tagged `v<version>`: an upstream-style triple, or this fork's
+// form, the upstream release it is built on plus `-f.<major>.<minor>`.
+const VERSION_PATTERN = /^\d+\.\d+\.\d+(-f\.\d+\.\d+)?$/;
 
 interface BuildSpec {
   os: Exclude<DesktopOs, 'other'>;

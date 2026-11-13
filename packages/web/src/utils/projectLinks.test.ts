@@ -102,6 +102,7 @@ describe('projectLinksProblems', () => {
 describe('releaseNotesUrl', () => {
   it('links a release version to its tag', () => {
     expect(releaseNotesUrl('1.5.1')).toBe(`${REPO}/releases/tag/v1.5.1`);
+    expect(releaseNotesUrl('1.11.0-f.1.0')).toBe(`${REPO}/releases/tag/v1.11.0-f.1.0`);
   });
 
   it.each([

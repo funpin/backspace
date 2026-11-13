@@ -100,7 +100,26 @@ export function parseVersion(value: string): [number, number, number] | null {
 }
 
 /**
- * Compares two `major.minor.patch` versions.
+ * Reads this fork's revision off a version string. A fork release is named
+ * after the upstream release it is built on plus `-f.<major>.<minor>`:
+ * `1.11.0-f.2.1` is the fork's revision 2.1 of upstream 1.11.0. Returns null
+ * for a version with no such suffix (an upstream release, a dev build).
+ */
+export function parseForkRevision(value: string): [number, number] | null {
+  const match = /^\d+\.\d+\.\d+-f\.(\d+)\.(\d+)$/.exec(value.trim());
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2])];
+}
+
+/**
+ * Compares two versions: `major.minor.patch` first, then the fork revision.
+ *
+ * The upstream base decides before the fork revision does, so a release built
+ * on a newer upstream is newer whatever the revision numbers say, and two
+ * releases on the same base order by revision. A version with no fork revision
+ * sorts before any revision of the same base: the fork's build is that upstream
+ * release plus the fork's changes. (This is deliberately not semver precedence,
+ * which would put every `-f.` build before the release it is built on.)
  *
  * Returns null when either side does not parse, which the caller reports as
  * `unknown`. Answering "you are up to date" off an unparseable comparison would
@@ -113,6 +132,13 @@ export function compareVersions(a: string, b: string): number | null {
   for (let i = 0; i < 3; i++) {
     const l = left[i] ?? 0;
     const r = right[i] ?? 0;
+    if (l !== r) return l < r ? -1 : 1;
+  }
+  const leftFork = parseForkRevision(a) ?? [-1, -1];
+  const rightFork = parseForkRevision(b) ?? [-1, -1];
+  for (let i = 0; i < 2; i++) {
+    const l = leftFork[i] ?? -1;
+    const r = rightFork[i] ?? -1;
     if (l !== r) return l < r ? -1 : 1;
   }
   return 0;
