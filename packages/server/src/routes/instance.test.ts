@@ -107,7 +107,7 @@ describe('GET /api/instance/info', () => {
     // type check here is not coverage. config.version is read from
     // packages/server/package.json; see test/version-consistency.test.ts.
     expect(body.version).toBe(config.version);
-    expect(body.version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(body.version).toMatch(/^\d+\.\d+\.\d+(-f\.\d+\.\d+)?$/);
     expect(typeof body.registrationOpen).toBe('boolean');
     expect(typeof body.federatedRegistrationOpen).toBe('boolean');
     // AGPL § 13 source offer — always a URL; commit is a string or null.

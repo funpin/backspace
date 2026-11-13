@@ -97,7 +97,7 @@ jobs:
             echo "| **Windows 10/11** | $(badge "Setup x64" "Setup-x64-2B6CB0" windows "Backspace-$version-win-x64.exe") |"
             echo "| **macOS 12+** | $(badge "DMG Apple Silicon" "DMG-Apple%20Silicon-111111" apple "Backspace-$version-mac-arm64.dmg") |"
             echo
-            echo "Файлы \`.blockmap\` и \`latest*.yml\` читает автообновление, скачивать их вручную не нужно."
+            echo "Файлы \`.blockmap\` и \`.yml\` читает автообновление, скачивать их вручную не нужно."
             echo
             echo "---"
             echo

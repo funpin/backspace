@@ -45,8 +45,15 @@ export function findVersionedManifests(root = REPO_ROOT) {
   return found.sort();
 }
 
-/** Accepts a plain semver release. Prereleases and build metadata are not used here. */
-const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
+/**
+ * Accepts a plain semver release, or this fork's form: the upstream release it
+ * is built on plus `-f.<major>.<minor>` (1.11.0-f.1.0). The dot after `f`
+ * matters: semver compares `f.10.0` and `f.2.0` as numbers, and electron-updater
+ * reads the first identifier (`f`) as the update channel, which therefore stays
+ * the same across every fork release. Other prereleases and build metadata are
+ * not used here.
+ */
+const VERSION_PATTERN = /^\d+\.\d+\.\d+(-f\.\d+\.\d+)?$/;
 
 async function main() {
   const next = process.argv[2];
@@ -57,7 +64,7 @@ async function main() {
   }
 
   if (!VERSION_PATTERN.test(next)) {
-    console.error(`Not a release version: ${next}. Expected three dot-separated numbers, for example 1.0.3.`);
+    console.error(`Not a release version: ${next}. Expected three dot-separated numbers, optionally followed by the fork revision, for example 1.0.3 or 1.11.0-f.1.0.`);
     process.exit(1);
   }
 

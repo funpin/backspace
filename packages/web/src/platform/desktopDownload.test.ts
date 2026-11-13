@@ -227,6 +227,11 @@ describe('buildDesktopDownloads', () => {
     expect(names(links.others)).toEqual(['Backspace-1.2.1-win-x64.exe', 'Backspace-1.2.1-mac-arm64.dmg']);
   });
 
+  it('builds download links for a fork version', () => {
+    const links = buildDesktopDownloads('1.11.0-f.1.0', platform('windows', 'x64'));
+    expect(links.primary?.url).toBe(`${RELEASES_URL}/download/v1.11.0-f.1.0/Backspace-1.11.0-f.1.0-win-x64.exe`);
+  });
+
   it('points every link at the releases page for a version that is not major.minor.patch', () => {
     const links = buildDesktopDownloads('0.0.0-dev', platform('windows', 'x64'));
     expect(links.primary?.url).toBe(RELEASES_URL);
