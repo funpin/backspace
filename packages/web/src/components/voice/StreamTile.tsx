@@ -21,6 +21,11 @@ import {
 interface StreamTileProps {
   tile: StreamTileType;
   large?: boolean;
+  /**
+   * A thumbnail too small for the tile's chrome (the ribbon's own-share
+   * preview): no LIVE badge, no quality or health row, a bare-name caption.
+   */
+  compact?: boolean;
   stats: TrackStatsSnapshot | null;
 }
 
@@ -172,7 +177,7 @@ function StreamAttenuationItem() {
   );
 }
 
-export function StreamTile({ tile, large, stats }: StreamTileProps) {
+export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
   const { t } = useTranslation(['voice', 'common']);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -429,13 +434,13 @@ export function StreamTile({ tile, large, stats }: StreamTileProps) {
       )}
 
       {/* LIVE badge — top left */}
-      <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-accent-rose rounded text-[11px] font-bold text-white uppercase tracking-wide">
+      {!compact && <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-accent-rose rounded text-[11px] font-bold text-white uppercase tracking-wide">
         {t('voice:badges.live')}
-      </div>
+      </div>}
 
       {/* Stream status — in focus mode this is the visual peer of the Grid
           action: same top edge, height, radius, and surface treatment. */}
-      {(healthWarning || (qualityBadge && hasVideo)) && (
+      {!compact && (healthWarning || (qualityBadge && hasVideo)) && (
         <div className={`absolute top-2 left-20 ${large ? 'right-36' : 'right-2'} flex items-start justify-end gap-1.5 pointer-events-none`}>
           {healthWarning && (
             <div className={`${large ? 'h-7 rounded-lg' : 'rounded'} min-w-0 max-w-full px-2 bg-black/75 border border-status-idle/40 flex items-center text-[10px] leading-[15px] text-white/90 truncate`}>
@@ -467,11 +472,11 @@ export function StreamTile({ tile, large, stats }: StreamTileProps) {
             <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z" />
           </svg>
           <span
-            className={`font-semibold text-white truncate ${large ? 'text-base' : 'text-[13px]'}`}
+            className={`font-semibold text-white truncate ${large ? 'text-base' : compact ? 'text-[11px]' : 'text-[13px]'}`}
           >
-            {displayName}
+            {isLocal && compact ? t('voice:badges.youShort') : displayName}
           </span>
-          {isLocal && (
+          {isLocal && !compact && (
             <span className="text-[10px] text-white/40 font-medium">{t('voice:badges.you')}</span>
           )}
         </div>

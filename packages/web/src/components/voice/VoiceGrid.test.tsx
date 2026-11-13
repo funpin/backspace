@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VoiceGrid } from './VoiceGrid';
 import { useVoiceStore } from '../../stores/voiceStore';
@@ -169,5 +169,23 @@ describe('VoiceGrid one tile per participant', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Show Camera Separately' }));
     expect(useVoiceStore.getState().splitCameraUserIds.has('bob')).toBe(true);
     expect(screen.queryByTestId('tile-inset')).toBeNull();
+  });
+
+  it('moves the inset to another corner on drag without touching focus or swapping', () => {
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream' });
+    render(<VoiceGrid participants={[participant('ada', true), sharing('bob', { screen: true, camera: true })]} />);
+    const inset = screen.getByTestId('tile-inset');
+    inset.setPointerCapture = vi.fn();
+
+    fireEvent.pointerDown(inset, { pointerId: 1, button: 0, clientX: 500, clientY: 400 });
+    fireEvent.pointerMove(inset, { pointerId: 1, clientX: -40, clientY: -40 });
+    fireEvent.pointerUp(inset, { pointerId: 1, clientX: -40, clientY: -40 });
+    // Pointer capture delivers the click that ends a drag to the inset itself.
+    fireEvent.click(inset);
+
+    const state = useVoiceStore.getState();
+    expect(state.tileInsetCorners.get('bob')).toBe('top-left');
+    expect(state.focusedParticipantId).toBe('bob:stream');
+    expect(state.swappedTileUserIds.has('bob')).toBe(false);
   });
 });

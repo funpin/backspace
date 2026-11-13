@@ -10,7 +10,8 @@
     "spaceDeafened": "Space Deafened",
     "locallyMuted": "Locally Muted",
     "live": "LIVE",
-    "you": "(you)"
+    "you": "(you)",
+    "youShort": "You"
   },
   "moderation": {
     "spaceMute": "Space Mute",

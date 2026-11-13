@@ -140,11 +140,11 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
   }
 
   // Render a single tile polymorphically
-  const renderTile = (tile: GridTile, large?: boolean) =>
+  const renderTile = (tile: GridTile, large?: boolean, compact?: boolean) =>
     tile.kind === 'user' ? (
       <VoiceUser tile={tile} large={large} />
     ) : (
-      <StreamTile tile={tile} large={large} stats={streamStats} />
+      <StreamTile tile={tile} large={large} compact={compact} stats={streamStats} />
     );
 
   // A camera the viewer moved out of its owner's screen tile can go back.
@@ -197,13 +197,13 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
    * `full` is a grid or focused cell: it carries its inset. A thumbnail is too
    * small for one and marks the second source with a badge instead.
    */
-  const renderCell = (cell: GridCell, variant: 'grid' | 'focused' | 'thumbnail') => {
+  const renderCell = (cell: GridCell, variant: 'grid' | 'focused' | 'thumbnail', compact?: boolean) => {
     const showInset = cell.inset !== null
       && (variant === 'focused' || (variant === 'grid' && tileWidth >= MIN_TILE_WIDTH_FOR_INSET));
     const actions = variant === 'grid' ? cellActions(cell) : [];
     return (
       <div className="relative h-full w-full group/cell">
-        {renderTile(cell.main, variant === 'focused')}
+        {renderTile(cell.main, variant === 'focused', compact)}
         {showInset && <TileInset cell={cell} />}
         {cell.inset !== null && !showInset && (
           <div
@@ -226,13 +226,13 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
     );
   };
 
-  const renderThumbnail = (cell: GridCell) => (
+  const renderThumbnail = (cell: GridCell, compact?: boolean) => (
     <div
       key={cell.key}
       onClick={() => setFocusedParticipant(cell.key)}
       className="h-full aspect-video flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
     >
-      {renderCell(cell, 'thumbnail')}
+      {renderCell(cell, 'thumbnail', compact)}
     </div>
   );
 
@@ -306,9 +306,9 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
         {!stripHidden && hasStrip && (
           <div
             data-testid="voice-strip"
-            className={`${otherCells.length > 0 ? 'h-[120px] max-h-[calc(20*var(--app-vh))] min-h-[80px]' : 'h-12'} flex-shrink-0 flex items-center justify-center gap-2 p-2 bg-surface-base/50 overflow-x-auto no-scrollbar`}
+            className={`${otherCells.length > 0 ? 'h-[120px] max-h-[calc(20*var(--app-vh))] min-h-[80px]' : 'h-[76px]'} flex-shrink-0 flex items-center justify-center gap-2 p-2 bg-surface-base/50 overflow-x-auto no-scrollbar`}
           >
-            {otherCells.map(renderThumbnail)}
+            {otherCells.map((cell) => renderThumbnail(cell))}
             <VoiceRibbon entries={layout.ribbon} />
           </div>
         )}
@@ -345,9 +345,9 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
       {layout.ribbon.length > 0 && (
         <div
           data-testid="voice-ribbon"
-          className={`${selfRibbonCells.length > 0 ? 'h-[72px]' : 'h-12'} flex-shrink-0 flex items-center justify-center gap-2 px-3 py-2 overflow-x-auto no-scrollbar`}
+          className="h-[76px] flex-shrink-0 flex items-center justify-center gap-2 px-3 py-2 overflow-x-auto no-scrollbar"
         >
-          {selfRibbonCells.map(renderThumbnail)}
+          {selfRibbonCells.map((cell) => renderThumbnail(cell, true))}
           <VoiceRibbon entries={layout.ribbon} />
         </div>
       )}

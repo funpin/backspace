@@ -103,18 +103,24 @@ export function TileInset({ cell }: TileInsetProps) {
     );
   };
 
-  const handleSwap = (e: React.MouseEvent) => {
-    // The tile underneath focuses on click; the inset's click is its own.
+  // A drag ends in a click too. Pointer capture retargets that click to this
+  // root, past the buttons, so it is swallowed here in the capture phase:
+  // otherwise it reaches the tile underneath and toggles focus.
+  const swallowDragClick = (e: React.MouseEvent) => {
+    if (!draggedRef.current) return;
+    draggedRef.current = false;
     e.stopPropagation();
-    if (draggedRef.current) {
-      draggedRef.current = false;
-      return;
-    }
+    e.preventDefault();
+  };
+
+  // The tile underneath focuses on click; a click on the inset is its own.
+  const stopClick = (e: React.MouseEvent) => e.stopPropagation();
+
+  const handleSwap = () => {
     useVoiceStore.getState().toggleTileSwap(userId);
   };
 
-  const handleSplit = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleSplit = () => {
     useVoiceStore.getState().setCameraSplit(userId, true);
   };
 
@@ -128,12 +134,13 @@ export function TileInset({ cell }: TileInsetProps) {
       onPointerMove={handlePointerMove}
       onPointerUp={(e) => endPress(e, true)}
       onPointerCancel={(e) => endPress(e, false)}
+      onClickCapture={swallowDragClick}
+      onClick={stopClick}
     >
       <button
         type="button"
         onClick={handleSwap}
         aria-label={t('voice:grid.swapSources')}
-        title={t('voice:grid.swapSources')}
         className="block w-full h-full"
       >
         {lkTrack ? (

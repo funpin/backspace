@@ -10,7 +10,8 @@
     "spaceDeafened": "Ensurdecido no espaço",
     "locallyMuted": "Silenciado localmente",
     "live": "AO VIVO",
-    "you": "(você)"
+    "you": "(você)",
+    "youShort": "Você"
   },
   "moderation": {
     "spaceMute": "Silenciar no espaço",

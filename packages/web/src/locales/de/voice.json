@@ -10,7 +10,8 @@
     "spaceDeafened": "Ton im Space ausgeschaltet",
     "locallyMuted": "Lokal stummgeschaltet",
     "live": "LIVE",
-    "you": "(du)"
+    "you": "(du)",
+    "youShort": "Du"
   },
   "moderation": {
     "spaceMute": "Im Space stummschalten",
