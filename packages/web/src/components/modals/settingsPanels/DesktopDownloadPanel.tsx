@@ -97,7 +97,12 @@ function selectionFor(detected: DetectedPlatform): Selection {
   return DEFAULT_SELECTION;
 }
 
-/** The build a tile's picker currently names, out of the eight the release carries. */
+/**
+ * The build a tile's picker currently names, out of the ones the release
+ * carries. A selection the release has no build for (an Intel Mac, when only
+ * the Apple Silicon image ships) falls back to the platform's first build
+ * rather than to no link at all.
+ */
 function downloadFor(
   builds: readonly DesktopDownload[],
   platform: Platform,
@@ -107,12 +112,16 @@ function downloadFor(
     builds.find((build) => build.os === platform && build.kind === kind && build.arch === arch) ?? null;
   switch (platform) {
     case 'windows':
-      return matches('exe', selection.windowsArch);
+      return matches('exe', selection.windowsArch) ?? firstFor(builds, platform);
     case 'mac':
-      return matches('dmg', selection.macArch);
+      return matches('dmg', selection.macArch) ?? firstFor(builds, platform);
     case 'linux':
-      return matches(selection.linuxKind, selection.linuxArch);
+      return matches(selection.linuxKind, selection.linuxArch) ?? firstFor(builds, platform);
   }
+}
+
+function firstFor(builds: readonly DesktopDownload[], platform: Platform): DesktopDownload | null {
+  return builds.find((build) => build.os === platform) ?? null;
 }
 
 interface Segment<T extends string> {
@@ -370,8 +379,17 @@ export function DesktopDownloadPanel({ version }: { version: string | null }) {
   const hrefFor = (platform: Platform): string =>
     downloadFor(builds, platform, selection)?.url ?? links?.allReleasesUrl ?? RELEASES_URL;
 
-  const heroPlatform: Platform | null = detected && detected.os !== 'other' ? detected.os : null;
-  const quietPlatforms = PLATFORMS.filter((platform) => platform !== heroPlatform);
+  // The tiles and pickers follow the build list: a platform the release has no
+  // build for gets no tile, and a picker with one choice left is not drawn.
+  const offeredPlatforms = PLATFORMS.filter((platform) => builds.some((build) => build.os === platform));
+  // The hero is the build that runs on this machine, so it exists only when
+  // the link builder found one (an Intel Mac or a Linux box has none).
+  const heroPlatform: Platform | null = links?.primary?.os ?? null;
+  const quietPlatforms = offeredPlatforms.filter((platform) => platform !== heroPlatform);
+  const offeredArchs = <T extends Segment<DesktopArch>>(platform: Platform, segments: readonly T[]) =>
+    segments.filter((segment) => builds.some((build) => build.os === platform && build.arch === segment.value));
+  const offeredKinds = (segments: readonly Segment<LinuxKind>[]) =>
+    segments.filter((segment) => builds.some((build) => build.os === 'linux' && build.kind === segment.value));
 
   const macSegments: readonly Segment<DesktopArch>[] = [
     { value: 'arm64', label: t('desktopDownload.arch.appleSilicon') },
@@ -387,47 +405,60 @@ export function DesktopDownloadPanel({ version }: { version: string | null }) {
     { value: 'arm64', label: t('desktopDownload.arch.arm64') },
   ];
 
-  /** Windows and mac choose a chip; Linux a format and a chip. */
+  /** Windows and mac choose a chip; Linux a format and a chip. Null when there is nothing to choose. */
   const pickersFor = (platform: Platform): ReactNode => {
     if (platform === 'windows') {
+      const segments = offeredArchs('windows', plainArchSegments);
+      if (segments.length < 2) return null;
       return (
         <SegmentedPicker
           label={t('desktopDownload.picker.architecture')}
           value={selection.windowsArch}
-          segments={plainArchSegments}
+          segments={segments}
           onChange={(windowsArch) => setSelection((current) => ({ ...current, windowsArch }))}
         />
       );
     }
     if (platform === 'mac') {
+      const segments = offeredArchs('mac', macSegments);
+      if (segments.length < 2) return null;
       return (
         <SegmentedPicker
           label={t('desktopDownload.picker.architecture')}
           value={selection.macArch}
-          segments={macSegments}
+          segments={segments}
           onChange={(macArch) => setSelection((current) => ({ ...current, macArch }))}
         />
       );
     }
+    const kindSegments = offeredKinds(linuxKindSegments);
+    const archSegments = offeredArchs('linux', plainArchSegments);
+    if (kindSegments.length < 2 && archSegments.length < 2) return null;
     return (
       <>
-        <SegmentedPicker
-          label={t('desktopDownload.picker.format')}
-          value={selection.linuxKind}
-          segments={linuxKindSegments}
-          onChange={(linuxKind) => setSelection((current) => ({ ...current, linuxKind }))}
-        />
-        <SegmentedPicker
-          label={t('desktopDownload.picker.architecture')}
-          value={selection.linuxArch}
-          segments={plainArchSegments}
-          onChange={(linuxArch) => setSelection((current) => ({ ...current, linuxArch }))}
-        />
+        {kindSegments.length > 1 && (
+          <SegmentedPicker
+            label={t('desktopDownload.picker.format')}
+            value={selection.linuxKind}
+            segments={kindSegments}
+            onChange={(linuxKind) => setSelection((current) => ({ ...current, linuxKind }))}
+          />
+        )}
+        {archSegments.length > 1 && (
+          <SegmentedPicker
+            label={t('desktopDownload.picker.architecture')}
+            value={selection.linuxArch}
+            segments={archSegments}
+            onChange={(linuxArch) => setSelection((current) => ({ ...current, linuxArch }))}
+          />
+        )}
       </>
     );
   };
 
-  const guessedNote = detected?.archGuessed && heroPlatform ? t(ARCH_GUESSED_KEYS[heroPlatform]) : null;
+  // The note explains a guessed architecture; with one build per platform there was nothing to guess between.
+  const heroHasArchChoice = heroPlatform !== null && builds.filter((build) => build.os === heroPlatform).length > 1;
+  const guessedNote = detected?.archGuessed && heroPlatform && heroHasArchChoice ? t(ARCH_GUESSED_KEYS[heroPlatform]) : null;
 
   return (
     <div className="ddl-panel">

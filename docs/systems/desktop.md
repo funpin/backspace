@@ -1,5 +1,7 @@
 # Desktop & Electron System
 
+> **Fork builds (funpin/backspace).** This fork ships two desktop builds and no others: **Windows x64** (NSIS installer) and **macOS Apple Silicon** (DMG). The release matrix in `.github/workflows/release.yml`, the build list in `packages/web/src/platform/desktopDownload.ts` and the download table in the release notes name exactly those two; wherever this document describes Linux, Windows arm64 or Intel Mac artifacts it describes the upstream project, not this fork. `publish.owner` in `electron-builder.yml`, `RELEASES_URL` (desktop and web), the server's release check and the default AGPL section 13 source offer all point at `funpin/backspace`. The Desktop tab draws a tile only for a platform the build list has, a picker only when there is more than one choice, and a hero only when a build runs on the visitor's machine (Windows on ARM gets the x64 installer, which runs under emulation; an Intel Mac and Linux get none).
+
 Source files:
 - `packages/desktop/src/main.ts` — Main process: window management, tray, IPC handlers, auto-update, deep links, app lifecycle
 - `packages/desktop/src/preload.ts` — Context bridge: exposes `window.backspace` API to renderer

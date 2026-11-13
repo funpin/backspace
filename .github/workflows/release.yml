@@ -56,21 +56,13 @@ jobs:
         # because `releaseInfo.releaseName` is not set in electron-builder.yml.
         #
         # The body starts as a "# Backspace X.Y.Z" heading followed by a
-        # Downloads table. GitHub sorts the asset list by name and offers no
-        # other order, which puts Linux first and Windows last; the table is
-        # what a visitor reads instead, in Windows, Linux, macOS order with
-        # plain labels. It is written before any asset exists (the draft is not
-        # visible until published) from the names electron-builder will
-        # produce, so it has to move with `artifactName` in
-        # packages/desktop/electron-builder.yml.
-        #
-        # The heading is the one flatpak/release-summary.mjs requires. The
-        # human step before publishing is to write the summary paragraph
-        # directly under it, and the "What's new" sections below that. That
-        # paragraph is the Flatpak "What's New" text: publishing the release
-        # starts flatpak-release-metadata.yml, which copies it into the
-        # AppStream release entry, and fails if the heading is followed by the
-        # `## Downloads` heading instead of a paragraph.
+        # download table: two badges, Windows x64 and macOS Apple Silicon, the
+        # only builds this fork ships, then the install notes. It is written
+        # before any asset exists (the draft is not visible until published)
+        # from the names electron-builder will produce, so it has to move with
+        # `artifactName` in packages/desktop/electron-builder.yml. The human
+        # step before publishing is to add the "what changed" sections between
+        # the table and the install notes.
         run: |
           set -euo pipefail
 
@@ -91,25 +83,35 @@ jobs:
 
           version="${TAG#v}"
           base="https://github.com/$GH_REPO/releases/download/$TAG"
-          asset() { printf '[%s](%s/%s)' "$1" "$base" "$1"; }
+          # This fork ships two builds: Windows x64 and macOS Apple Silicon.
+          # The table is two badges that link straight to the files.
+          badge() { printf '[![%s](https://img.shields.io/badge/%s?style=for-the-badge&logo=%s&logoColor=white)](%s/%s)' "$1" "$2" "$3" "$base" "$4"; }
           notes="$(mktemp)"
           {
             echo "# Backspace $version"
             echo
-            echo "## Downloads"
+            echo "### Скачать"
             echo
-            echo "| Platform | Download |"
+            echo "| ОС | Файл |"
             echo "|---|---|"
-            echo "| Windows x64 | $(asset "Backspace-$version-win-x64.exe") |"
-            echo "| Windows arm64 | $(asset "Backspace-$version-win-arm64.exe") |"
-            echo "| Linux AppImage x86_64 | $(asset "Backspace-$version-linux-x86_64.AppImage") |"
-            echo "| Linux AppImage arm64 | $(asset "Backspace-$version-linux-arm64.AppImage") |"
-            echo "| Linux deb amd64 | $(asset "Backspace-$version-linux-amd64.deb") |"
-            echo "| Linux deb arm64 | $(asset "Backspace-$version-linux-arm64.deb") |"
-            echo "| macOS Apple Silicon | $(asset "Backspace-$version-mac-arm64.dmg") |"
-            echo "| macOS Intel | $(asset "Backspace-$version-mac-x64.dmg") |"
+            echo "| **Windows 10/11** | $(badge "Setup x64" "Setup-x64-2B6CB0" windows "Backspace-$version-win-x64.exe") |"
+            echo "| **macOS 12+** | $(badge "DMG Apple Silicon" "DMG-Apple%20Silicon-111111" apple "Backspace-$version-mac-arm64.dmg") |"
             echo
-            echo "The \`.blockmap\` and \`latest*.yml\` files are read by the auto-updater and are not meant to be downloaded by hand."
+            echo "Файлы \`.blockmap\` и \`latest*.yml\` читает автообновление, скачивать их вручную не нужно."
+            echo
+            echo "---"
+            echo
+            echo "### Как установить"
+            echo
+            echo "**Windows.** Запустите установщик и следуйте шагам. Новую версию ставьте поверх старой: настройки и вход сохраняются. Если SmartScreen предупредит о неизвестном издателе: «Подробнее» → «Выполнить в любом случае»."
+            echo
+            echo "**macOS (Apple Silicon).** Откройте DMG и перетащите Backspace в «Программы» (при обновлении — «Заменить»). Приложение не подписано сертификатом Apple, поэтому первый раз откройте его так: правый клик → «Открыть» → «Открыть». Если macOS пишет, что приложение повреждено, выполните в Терминале:"
+            echo
+            echo '```bash'
+            echo 'xattr -dr com.apple.quarantine "/Applications/Backspace.app"'
+            echo '```'
+            echo
+            echo "Это форк [TheZwiss/backspace](https://github.com/TheZwiss/backspace). Лицензия — AGPL-3.0."
           } > "$notes"
 
           echo "No release carries $TAG yet — creating the draft."
@@ -131,22 +133,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS — universal build (arm64 + x64) on Apple Silicon runner
+          # This fork ships two builds and no others: macOS Apple Silicon and
+          # Windows x64. packages/web/src/platform/desktopDownload.ts and the
+          # table above list the same two.
+          # macOS — arm64 on the Apple Silicon runner
           - os: macos-latest
-            args: --mac --arm64 --x64
-          # Windows — x64 + arm64 on x64 runner.
+            args: --mac --arm64
+          # Windows — x64 on the x64 runner.
           # Pinned to windows-2022 (VS 2022 / v17): the windows-latest image
           # ships VS "18", which the node-gyp bundled with electron-rebuild
           # cannot detect ("unknown version undefined") when compiling
           # uiohook-napi in postinstall.
           - os: windows-2022
-            args: --win --x64 --arm64
-          # Linux — x64 on x64 runner
-          - os: ubuntu-latest
-            args: --linux --x64
-          # Linux — arm64 on arm64 runner
-          - os: ubuntu-24.04-arm
-            args: --linux --arm64
+            args: --win --x64
 
     runs-on: ${{ matrix.os }}
 
@@ -256,14 +255,12 @@ jobs:
           case "$RUNNER_OS" in
             macOS)
               artifacts=(
-                "dist-electron/mac/Backspace.app"
                 "dist-electron/mac-arm64/Backspace.app"
               )
               ;;
             Windows)
               artifacts=(
                 "dist-electron/win-unpacked/Backspace.exe"
-                "dist-electron/win-arm64-unpacked/Backspace.exe"
               )
               ;;
             Linux)
