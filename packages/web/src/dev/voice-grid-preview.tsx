@@ -30,6 +30,8 @@ interface Scene {
   hidden?: string[];
   /** Screens the viewer has not pressed "Watch" on. */
   unwatched?: string[];
+  /** Sharer to the others who watch them, as their clients would have announced. */
+  watchers?: Record<string, string[]>;
 }
 
 const SCENES: Record<string, Scene> = {
@@ -54,6 +56,7 @@ const SCENES: Record<string, Scene> = {
     ],
     hidden: ['leo'],
     unwatched: ['vera'],
+    watchers: { akk0: ['fox', 'marsel', 'nika'], marsel: ['nika'] },
   },
   focus: {
     caption: 'One tile in focus: the rest and the people without media share the strip',
@@ -65,6 +68,7 @@ const SCENES: Record<string, Scene> = {
       { name: 'nika' },
     ],
     focus: 'marsel:stream',
+    watchers: { marsel: ['akk0', 'fox'], funpin: ['akk0', 'fox', 'nika'] },
   },
   self: {
     caption: 'Your own share steps into the ribbon once someone else shares',
@@ -167,6 +171,7 @@ async function main(): Promise<void> {
     hiddenTileUserIds: new Set(scene.hidden ?? []),
     watchingStreams: new Set(scene.people.filter((p) => p.screen && !unwatched.has(p.name)).map((p) => p.name)),
     speakingParticipantIds: new Set(scene.people.filter((p) => p.speaking).map((p) => p.name)),
+    streamWatchers: new Map(Object.entries(scene.watchers ?? {}).map(([sharer, viewers]) => [sharer, new Set(viewers)])),
   });
   createRoot(host).render(<Workbench scene={scene} participants={participants} />);
 }

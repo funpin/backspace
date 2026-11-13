@@ -169,7 +169,10 @@
     "watch": "Смотреть трансляцию",
     "watchShort": "Смотреть",
     "mute": "Заглушить трансляцию",
-    "isStreaming": "{{name}} ведёт трансляцию"
+    "isStreaming": "{{name}} ведёт трансляцию",
+    "viewers": "Зрители",
+    "viewersLabel": "Зрителей: {{count}}",
+    "noViewers": "Пока никто не смотрит"
   },
   "streamDiagnostics": {
     "publisherNetwork": "Нестабильная сеть у транслирующего",

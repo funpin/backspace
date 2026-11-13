@@ -169,7 +169,10 @@
     "watch": "Watch Stream",
     "watchShort": "Watch",
     "mute": "Mute Stream",
-    "isStreaming": "{{name}} is streaming"
+    "isStreaming": "{{name}} is streaming",
+    "viewers": "Viewers",
+    "viewersLabel": "Viewers: {{count}}",
+    "noViewers": "Nobody is watching yet"
   },
   "streamDiagnostics": {
     "publisherNetwork": "The streamer's network is unstable",

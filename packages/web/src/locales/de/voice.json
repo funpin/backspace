@@ -169,7 +169,10 @@
     "watch": "Stream ansehen",
     "watchShort": "Ansehen",
     "mute": "Stream stummschalten",
-    "isStreaming": "{{name}} streamt"
+    "isStreaming": "{{name}} streamt",
+    "viewers": "Zuschauer",
+    "viewersLabel": "Zuschauer: {{count}}",
+    "noViewers": "Noch schaut niemand zu"
   },
   "streamDiagnostics": {
     "publisherNetwork": "Das Netzwerk des Streamers ist instabil",

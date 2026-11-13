@@ -243,4 +243,18 @@ describe('VoiceGrid one tile per participant', () => {
 
     expect(stage()).not.toHaveAttribute('data-zoomed');
   });
+
+  it('shows how many people watch a stream, counting this client', async () => {
+    useVoiceStore.setState({
+      participants: [participant('ada', true), sharing('bob', { screen: true }), participant('eve', false)],
+      watchingStreams: new Set(['bob']),
+      streamWatchers: new Map([['bob', new Set(['eve'])]]),
+    });
+    render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
+
+    expect(screen.getByTestId('stream-viewer-count')).toHaveTextContent('2');
+
+    act(() => useVoiceStore.getState().recordStreamWatch('bob', 'eve', false));
+    expect(screen.getByTestId('stream-viewer-count')).toHaveTextContent('1');
+  });
 });
