@@ -10,7 +10,8 @@
     "spaceDeafened": "Ensurdecido no espaço",
     "locallyMuted": "Silenciado localmente",
     "live": "AO VIVO",
-    "you": "(você)"
+    "you": "(você)",
+    "youShort": "Você"
   },
   "moderation": {
     "spaceMute": "Silenciar no espaço",
@@ -33,11 +34,15 @@
   },
   "grid": {
     "waitingForOthers": "Aguardando a entrada de outras pessoas...",
-    "returnToGridHint": "Clique para voltar à visualização em grade",
     "backToGrid": "Voltar à visualização em grade",
     "gridButton": "Grade",
     "showMembers": "Mostrar membros",
-    "hideMembers": "Ocultar membros"
+    "hideMembers": "Ocultar membros",
+    "hideTile": "Ocultar",
+    "showHiddenTile": "Mostrar {{name}}",
+    "swapSources": "Trocar tela e câmera",
+    "splitCamera": "Mostrar câmera separadamente",
+    "mergeCamera": "Devolver a câmera ao canto"
   },
   "connectionInfo": {
     "title": "Informações da conexão",

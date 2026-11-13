@@ -2,14 +2,46 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VoiceUser } from './VoiceUser';
 import { StreamTile } from './StreamTile';
+import { TileInset } from './TileInset';
+import { VoiceRibbon } from './VoiceRibbon';
 import { useVoiceStore } from '../../stores/voiceStore';
-import { deriveGridTiles } from '../../hooks/useLiveKit';
+import { useUIStore } from '../../stores/uiStore';
 import { useGridLayout } from '../../hooks/useGridLayout';
 import type { ParticipantInfo, GridTile } from '../../hooks/useLiveKit';
 import { useTrackStats } from '../../hooks/useTrackStats';
+import {
+  deriveVoiceGridLayout,
+  findFocusedCell,
+  focusableCells,
+  reorderCells,
+  type GridCell,
+} from '../../utils/voiceGridLayout';
+import { hideParticipantTile } from '../../utils/voiceTileActions';
 
 interface VoiceGridProps {
   participants: ParticipantInfo[];
+}
+
+/** Below this tile width a corner inset is a smudge; the cell shows a badge instead. */
+const MIN_TILE_WIDTH_FOR_INSET = 280;
+
+const OVERLAY_BUTTON =
+  'h-7 bg-black/60 hover:bg-black/80 rounded-lg flex items-center justify-center text-white/70 hover:text-white transition-colors';
+
+function EyeOffIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" />
+    </svg>
+  );
+}
+
+function MergeIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19 11h-8v6h8v-6zm4 8V4.98C23 3.88 22.1 3 21 3H3c-1.1 0-2 .88-2 1.98V19c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2zm-2 .02H3V4.97h18v14.05z" />
+    </svg>
+  );
 }
 
 export function VoiceGrid({ participants }: VoiceGridProps) {
@@ -17,45 +49,82 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
   const focusedParticipantId = useVoiceStore((s) => s.focusedParticipantId);
   const setFocusedParticipant = useVoiceStore((s) => s.setFocusedParticipant);
   const watchingStreams = useVoiceStore((s) => s.watchingStreams);
+  const hiddenTileUserIds = useVoiceStore((s) => s.hiddenTileUserIds);
+  const swappedTileUserIds = useVoiceStore((s) => s.swappedTileUserIds);
+  const splitCameraUserIds = useVoiceStore((s) => s.splitCameraUserIds);
+  const setCameraSplit = useVoiceStore((s) => s.setCameraSplit);
+  const tileOrder = useVoiceStore((s) => s.tileOrder);
+  // Drag-to-reorder in grid mode: the cell being dragged and the one under it.
+  const [draggedKey, setDraggedKey] = useState<string | null>(null);
+  const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
   const [stripHidden, setStripHidden] = useState(false);
 
-  const tiles = useMemo(() => deriveGridTiles(participants), [participants]);
-  const shouldCollectStreamStats = tiles.some((tile) =>
-    tile.kind === 'stream'
-    && (tile.participant.isLocal || watchingStreams.has(tile.participant.userId)),
+  const layout = useMemo(
+    () => deriveVoiceGridLayout(participants, {
+      hidden: hiddenTileUserIds,
+      swapped: swappedTileUserIds,
+      split: splitCameraUserIds,
+      order: tileOrder,
+    }),
+    [participants, hiddenTileUserIds, swappedTileUserIds, splitCameraUserIds, tileOrder],
+  );
+  const focusable = useMemo(() => focusableCells(layout), [layout]);
+  const selfRibbonCells = useMemo(
+    () => layout.ribbon.flatMap((entry) => (entry.kind === 'self' ? [entry.cell] : [])),
+    [layout],
+  );
+
+  const shouldCollectStreamStats = focusable.some((cell) =>
+    [cell.main, cell.inset].some((tile) =>
+      tile?.kind === 'stream'
+      && (tile.participant.isLocal || watchingStreams.has(tile.participant.userId)),
+    ),
   );
   // One WebRTC poller feeds every stream tile. Running useTrackStats inside
   // each tile multiplied full PeerConnection scans by the number of streams.
   const streamStats = useTrackStats(shouldCollectStreamStats);
 
-  const { cols, tileWidth, tileHeight, ref: gridRef } = useGridLayout(tiles.length);
+  const { cols, tileWidth, tileHeight, ref: gridRef } = useGridLayout(layout.cells.length);
 
   // Reset strip visibility when focus target changes
   useEffect(() => {
     setStripHidden(false);
   }, [focusedParticipantId]);
 
-  // Unfocus if the focused stream tile no longer exists
+  // Unfocus when what was in focus is gone: the share ended, or its owner now
+  // sits in the ribbon (nothing left to show, or the viewer hid the tile).
   useEffect(() => {
-    const currentStreamKeys = new Set(
-      tiles
-        .filter(
-          (t): t is GridTile & { kind: 'stream' } =>
-            t.kind === 'stream' && t.screenTrack?.readyState === 'live',
-        )
-        .map((t) => t.key),
+    if (!focusedParticipantId) return;
+    const cell = findFocusedCell(focusable, focusedParticipantId);
+    if (!cell) {
+      setFocusedParticipant(null);
+      return;
+    }
+    if (!focusedParticipantId.endsWith(':stream')) return;
+    const stream = [cell.main, cell.inset].find(
+      (tile): tile is GridTile & { kind: 'stream' } => tile?.kind === 'stream',
     );
-
-    if (
-      focusedParticipantId &&
-      focusedParticipantId.endsWith(':stream') &&
-      !currentStreamKeys.has(focusedParticipantId)
-    ) {
+    if (stream?.screenTrack?.readyState !== 'live') {
       setFocusedParticipant(null);
     }
-  }, [tiles, focusedParticipantId, setFocusedParticipant]);
+  }, [focusable, focusedParticipantId, setFocusedParticipant]);
 
-  if (tiles.length === 0) {
+  // Escape leaves focus mode. In voice fullscreen the same key leaves
+  // fullscreen (VoiceControlBar), and one press should do one thing.
+  useEffect(() => {
+    if (!focusedParticipantId) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (useUIStore.getState().voiceFullscreen) return;
+      const target = e.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
+      setFocusedParticipant(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [focusedParticipantId, setFocusedParticipant]);
+
+  if (participants.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
@@ -76,55 +145,148 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
     );
   }
 
-  const focusedTile = focusedParticipantId
-    ? tiles.find((t) => t.key === focusedParticipantId)
-    : null;
-
   // Render a single tile polymorphically
-  const renderTile = (tile: GridTile, large?: boolean) =>
+  const renderTile = (tile: GridTile, large?: boolean, compact?: boolean) =>
     tile.kind === 'user' ? (
       <VoiceUser tile={tile} large={large} />
     ) : (
-      <StreamTile tile={tile} large={large} stats={streamStats} />
+      <StreamTile tile={tile} large={large} compact={compact} stats={streamStats} />
     );
 
-  // Focus mode: one large tile + bottom strip
-  if (focusedTile) {
-    const otherTiles = tiles.filter((t) => t.key !== focusedParticipantId);
+  // A camera the viewer moved out of its owner's screen tile can go back.
+  const canMerge = (cell: GridCell) =>
+    cell.main.kind === 'user'
+    && cell.inset === null
+    && cell.participant.isScreenSharing
+    && splitCameraUserIds.has(cell.participant.userId);
+
+  const cellActions = (cell: GridCell) => {
+    const actions: React.ReactNode[] = [];
+    if (canMerge(cell)) {
+      actions.push(
+        <button
+          key="merge"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCameraSplit(cell.participant.userId, false);
+          }}
+          className={`${OVERLAY_BUTTON} w-7`}
+          aria-label={t('voice:grid.mergeCamera')}
+          title={t('voice:grid.mergeCamera')}
+        >
+          <MergeIcon />
+        </button>,
+      );
+    }
+    if (layout.mediaMode && !cell.participant.isLocal) {
+      actions.push(
+        <button
+          key="hide"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            hideParticipantTile(cell.participant);
+          }}
+          className={`${OVERLAY_BUTTON} w-7`}
+          aria-label={t('voice:grid.hideTile')}
+          title={t('voice:grid.hideTile')}
+        >
+          <EyeOffIcon />
+        </button>,
+      );
+    }
+    return actions;
+  };
+
+  /**
+   * `full` is a grid or focused cell: it carries its inset. A thumbnail is too
+   * small for one and marks the second source with a badge instead.
+   */
+  const renderCell = (cell: GridCell, variant: 'grid' | 'focused' | 'thumbnail', compact?: boolean) => {
+    const showInset = cell.inset !== null
+      && (variant === 'focused' || (variant === 'grid' && tileWidth >= MIN_TILE_WIDTH_FOR_INSET));
+    const actions = variant === 'grid' ? cellActions(cell) : [];
+    return (
+      <div className="relative h-full w-full group/cell">
+        {renderTile(cell.main, variant === 'focused', compact)}
+        {showInset && <TileInset cell={cell} />}
+        {cell.inset !== null && !showInset && (
+          <div
+            data-testid="tile-inset-badge"
+            className="absolute bottom-2 right-2 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white/80 pointer-events-none"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              {cell.inset.kind === 'user'
+                ? <path d="M17 10.5V7c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                : <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z" />}
+            </svg>
+          </div>
+        )}
+        {actions.length > 0 && (
+          <div className="absolute top-10 right-2 z-10 flex items-center gap-1.5 transition-opacity opacity-0 group-hover/cell:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100">
+            {actions}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderThumbnail = (cell: GridCell, compact?: boolean) => (
+    <div
+      key={cell.key}
+      onClick={() => setFocusedParticipant(cell.key)}
+      className="h-full aspect-video flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+    >
+      {renderCell(cell, 'thumbnail', compact)}
+    </div>
+  );
+
+  const focusedCell = findFocusedCell(focusable, focusedParticipantId);
+
+  // Focus mode: one large cell, and under it a single strip that holds every
+  // other picture and every person without one.
+  if (focusedCell) {
+    const otherCells = focusable.filter((cell) => cell !== focusedCell);
+    const hasStrip = otherCells.length > 0 || layout.ribbon.some((entry) => entry.kind !== 'self');
     return (
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        {/* Main focused view */}
+        {/* Main focused view. A click anywhere on it returns to the grid. */}
         <div
           className="flex-1 p-2 min-h-0 cursor-pointer relative"
           onClick={() => setFocusedParticipant(null)}
-          title={t('voice:grid.returnToGridHint')}
         >
-          {renderTile(focusedTile, true)}
-          {/* Grid button — top-right */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setFocusedParticipant(null);
-            }}
-            className="absolute top-4 right-4 z-10 h-7 px-3 bg-black/60 hover:bg-black/80 rounded-lg flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-            title={t('voice:grid.backToGrid')}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="currentColor"
+          {renderCell(focusedCell, 'focused')}
+          {/* Tile actions and the Grid button — top-right */}
+          <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+            {cellActions(focusedCell)}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setFocusedParticipant(null);
+              }}
+              className={`${OVERLAY_BUTTON} px-3 gap-2`}
+              title={t('voice:grid.backToGrid')}
             >
-              <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z" />
-            </svg>
-            <span className="text-xs font-medium">{t('voice:grid.gridButton')}</span>
-          </button>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z" />
+              </svg>
+              <span className="text-xs font-medium">{t('voice:grid.gridButton')}</span>
+            </button>
+          </div>
         </div>
 
         {/* Centered Hide/Show Members button — divider between focused tile and strip */}
-        {otherTiles.length > 0 && (
+        {hasStrip && (
           <div className="flex justify-center flex-shrink-0 py-1">
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setStripHidden(!stripHidden);
@@ -146,47 +308,91 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
           </div>
         )}
 
-        {/* Bottom strip of other tiles */}
-        {!stripHidden && otherTiles.length > 0 && (
-          <div className="h-[120px] max-h-[calc(20*var(--app-vh))] min-h-[80px] flex-shrink-0 flex items-center justify-center gap-2 p-2 bg-surface-base/50 overflow-x-auto no-scrollbar">
-            {otherTiles.map((t) => (
-              <div
-                key={t.key}
-                onClick={() => setFocusedParticipant(t.key)}
-                className="h-full aspect-video flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-              >
-                {renderTile(t)}
-              </div>
-            ))}
+        {/* Bottom strip: the other pictures, then the people without one */}
+        {!stripHidden && hasStrip && (
+          <div
+            data-testid="voice-strip"
+            className={`${otherCells.length > 0 ? 'h-[120px] max-h-[calc(20*var(--app-vh))] min-h-[80px]' : 'h-[76px]'} flex-shrink-0 flex items-center justify-center gap-2 p-2 bg-surface-base/50 overflow-x-auto no-scrollbar`}
+          >
+            {otherCells.map((cell) => renderThumbnail(cell))}
+            <VoiceRibbon entries={layout.ribbon} />
           </div>
         )}
       </div>
     );
   }
 
-  // Default grid mode — container-aware layout via ResizeObserver
+  // Default grid mode — container-aware layout via ResizeObserver. The ribbon
+  // row under it exists only while someone shows a camera or a screen.
   return (
-    <div ref={gridRef} className="flex-1 overflow-hidden min-h-0">
-      <div
-        className="grid h-full w-full"
-        style={{
-          gridTemplateColumns: `repeat(${cols}, ${tileWidth}px)`,
-          gridAutoRows: `${tileHeight}px`,
-          gap: '8px',
-          justifyContent: 'center',
-          alignContent: 'center',
-        }}
-      >
-        {tiles.map((t) => (
-          <div
-            key={t.key}
-            onClick={() => setFocusedParticipant(t.key)}
-            className="cursor-pointer hover:opacity-90 transition-opacity"
-          >
-            {renderTile(t)}
-          </div>
-        ))}
+    <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+      <div ref={gridRef} className="flex-1 overflow-hidden min-h-0">
+        <div
+          className="grid h-full w-full"
+          style={{
+            gridTemplateColumns: `repeat(${cols}, ${tileWidth}px)`,
+            gridAutoRows: `${tileHeight}px`,
+            gap: '8px',
+            justifyContent: 'center',
+            alignContent: 'center',
+          }}
+        >
+          {layout.cells.map((cell) => (
+            <div
+              key={cell.key}
+              data-testid="voice-grid-cell"
+              onClick={() => setFocusedParticipant(cell.key)}
+              // Drag a cell onto another to take its place. The order is the
+              // viewer's own and is remembered; a drag never counts as a click.
+              draggable={layout.cells.length > 1}
+              onDragStart={(e) => {
+                setDraggedKey(cell.key);
+                if (e.dataTransfer) {
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', cell.key);
+                }
+              }}
+              onDragOver={(e) => {
+                if (!draggedKey || draggedKey === cell.key) return;
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                if (dropTargetKey !== cell.key) setDropTargetKey(cell.key);
+              }}
+              onDragLeave={() => {
+                if (dropTargetKey === cell.key) setDropTargetKey(null);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (draggedKey && draggedKey !== cell.key) {
+                  useVoiceStore.getState().setTileOrder(
+                    reorderCells(layout.cells.map((c) => c.key), tileOrder, draggedKey, cell.key),
+                  );
+                }
+                setDraggedKey(null);
+                setDropTargetKey(null);
+              }}
+              onDragEnd={() => {
+                setDraggedKey(null);
+                setDropTargetKey(null);
+              }}
+              className={`cursor-pointer rounded-xl transition-opacity ${
+                draggedKey === cell.key ? 'opacity-40' : 'hover:opacity-90'
+              } ${dropTargetKey === cell.key ? 'ring-2 ring-accent-primary ring-offset-2 ring-offset-surface-chat' : ''}`}
+            >
+              {renderCell(cell, 'grid')}
+            </div>
+          ))}
+        </div>
       </div>
+      {layout.ribbon.length > 0 && (
+        <div
+          data-testid="voice-ribbon"
+          className="h-[76px] flex-shrink-0 flex items-center justify-center gap-2 px-3 py-2 overflow-x-auto no-scrollbar"
+        >
+          {selfRibbonCells.map((cell) => renderThumbnail(cell, true))}
+          <VoiceRibbon entries={layout.ribbon} />
+        </div>
+      )}
     </div>
   );
 }

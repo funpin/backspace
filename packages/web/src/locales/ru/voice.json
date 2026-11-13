@@ -10,7 +10,8 @@
     "spaceDeafened": "Звук отключён в пространстве",
     "locallyMuted": "Звук отключён локально",
     "live": "В ЭФИРЕ",
-    "you": "(вы)"
+    "you": "(вы)",
+    "youShort": "Вы"
   },
   "moderation": {
     "spaceMute": "Отключить микрофон в пространстве",
@@ -33,11 +34,15 @@
   },
   "grid": {
     "waitingForOthers": "Ждём, пока присоединятся другие…",
-    "returnToGridHint": "Нажмите, чтобы вернуться к сетке",
     "backToGrid": "Вернуться к сетке",
     "gridButton": "Сетка",
     "showMembers": "Показать участников",
-    "hideMembers": "Скрыть участников"
+    "hideMembers": "Скрыть участников",
+    "hideTile": "Скрыть",
+    "showHiddenTile": "Показать: {{name}}",
+    "swapSources": "Поменять экран и камеру местами",
+    "splitCamera": "Вынести камеру отдельно",
+    "mergeCamera": "Вернуть камеру в угол"
   },
   "connectionInfo": {
     "title": "Сведения о соединении",

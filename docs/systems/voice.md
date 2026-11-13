@@ -572,6 +572,45 @@ Viewers: `TrackPublished` subscribes a `ScreenShareAudio` publication when the v
 
 ---
 
+## Voice Grid Layout
+
+**One place per person.** `VoiceGrid` (shared by desktop and mobile) never shows a participant twice. `deriveVoiceGridLayout(participants, prefs)` in `utils/voiceGridLayout.ts` is the pure function that decides where everyone goes; `VoiceGrid` renders what it returns and holds no placement rules of its own.
+
+| The participant publishes | Where they appear |
+|---|---|
+| Nothing | Ribbon chip (`idle`) |
+| A screen | One cell, keyed `${identity}:stream` |
+| A camera | One cell, keyed `identity` |
+| A screen and a camera | One cell keyed `${identity}:stream`: the screen large (`main`), the camera in the corner (`inset`) |
+
+"Publishes" means `isScreenSharing || isCameraOn`, not "is being received": a share the viewer has not pressed Watch on is still a cell (the `StreamTile` placeholder), and a camera the viewer unwatched still belongs to someone with media. A corner inset needs a camera that is actually arriving (`UserTile.videoTrack !== null`).
+
+**Media mode.** While nobody publishes a camera or a screen (`mediaMode === false`) the grid is the plain avatar grid and there is no ribbon. The ribbon row exists only in media mode.
+
+**The viewer's own media.** While it is the only media in the call it fills the grid. As soon as a remote cell exists it moves to the ribbon as a thumbnail (`self` entry, still focusable): your own picture is for checking, not for watching. If every remote tile is hidden it comes back to the grid.
+
+**Viewer preferences** (all in `voiceStore`, keyed by `userId`):
+
+| Field | Meaning | Lifetime |
+|---|---|---|
+| `hiddenTileUserIds` | Tile moved to the ribbon as a `hidden` chip | Per call (reset with `watchingStreams`) |
+| `swappedTileUserIds` | Camera large, screen in the corner | Per call |
+| `tileInsetCorners` | Which corner the inset sits in (`TileInsetCorner`) | Per call |
+| `splitCameraUserIds` | Camera kept as its own cell beside the screen | Persisted (`partialize` writes an array, `merge` rebuilds the `Set`) |
+| `tileOrder` | The viewer's own order of grid cells, as cell keys (at most 200) | Persisted |
+
+Split wins over swapped. A split camera cell carries a "return to corner" action. The local participant cannot be hidden.
+
+**The viewer's own order.** In grid mode a cell can be dragged onto another (HTML5 drag and drop on the cell wrapper; `reorderCells` computes the new list): it takes the target's place and the cells between shift by one. `deriveVoiceGridLayout` sorts cells by `tileOrder` and leaves cells it does not name in the call's order after the named ones, so a newcomer never jumps into the middle of an arrangement. Keys not on screen stay remembered behind the visible ones. The order applies to the avatar grid and to media cells alike; the ribbon and the focus strip are not reorderable. A drag that starts on a `TileInset` moves the inset, not the cell. Touch devices do not fire HTML5 drags, so there is no reordering on phones.
+
+**Hiding is unsubscribing.** `hideParticipantTile` / `showParticipantTile` (`utils/voiceTileActions.ts`) are the only writers of `hiddenTileUserIds`. Hiding stops the share (picture and sound, through `unwatchStream` + `setStreamSubscription`, with the same viewer cue and streamer notification as "Stop Watching") and the camera (`unwatchCamera` + `setCameraSubscription`); the person's voice is untouched. Showing a tile again resumes both, and resumes the share as watched rather than as a placeholder: asking to see the tile is asking to watch it. `handleViewerWatchToggle` lives in the same module and is shared with `StreamTile`.
+
+**Focus.** `focusedParticipantId` keeps its existing values (a tile key). `findFocusedCell` accepts the cell's key or the key of either source inside it, so focus set on a camera survives its owner starting a share, mobile auto-focus on `${identity}:stream` still lands when the viewer swapped that tile, and a swap never drops focus. `VoiceGrid` clears focus when no cell answers the key (the share ended, the owner went idle, the viewer hid the tile). Focus mode shows the focused cell large and one strip under it: every other cell as a thumbnail (the viewer's own included), then the ribbon chips. A click on the focused cell, the Grid button, or Escape returns to the grid (in voice fullscreen Escape leaves fullscreen instead, so one press does one thing); the cell carries no tooltip.
+
+**Components.** `TileInset` is the corner picture: click swaps, its button splits the camera out, a drag past 6 px parks it in the nearest corner. It is drawn on grid cells at least 280 px wide and on the focused cell; narrower cells and strip thumbnails show a small badge instead. `VoiceRibbon` renders `idle` and `hidden` entries as an avatar with the name under it and no frame of its own: the speaking ring goes around the avatar, and one badge on it says hidden, deafened or muted (in that order of precedence). The viewer's own share in the ribbon is a `compact` `StreamTile`: no LIVE badge, no quality row. Chips and avatar tiles share `useVoiceParticipantStatus` (what the mic and headphone marks say) and `useVoiceUserContextMenu` (moderation, camera, mute, volume), so a person cannot read differently in the two places.
+
+**Workbench.** `packages/web/dev-voice-grid.html` (`src/dev/voice-grid-preview.tsx`) renders the real `VoiceGrid` over painted stand-in tracks, one arrangement per `?scene=` (`idle`, `screens`, `mixed`, `focus`, `self`, `alone`).
+
 ## Mobile Voice Rendering
 
 Mobile (`MobileVoiceFullScreen`) renders the **same** `VoiceGrid` component as desktop. There is no mobile-specific tile component — the rendering, attach/detach, adaptive-stream subscription, focused-publisher layout, and context menus all come from the shared `VoiceGrid` / `VoiceUser` / `StreamTile` pipeline. The only mobile-specific addition is auto-focus on the first live screen-share publication (so phone users don't have to discover tap-to-focus).

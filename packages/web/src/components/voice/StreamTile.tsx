@@ -8,9 +8,7 @@ import { getActiveRoom, setStreamSubscription } from '../../hooks/useLiveKit';
 import { stopScreenShare, changeScreenShare, effectiveScreenShareConfig } from '../../utils/screenShare';
 import { useStreamHostLimits } from '../../utils/streamHostLimits';
 import { DEFAULT_STREAMING_LIMITS } from '../../stores/settingsStore';
-import { encodeStreamWatch, streamWatchFor, type StreamWatchTarget } from '../../utils/streamWatchProtocol';
-import { AudioManager } from '../../audio/AudioManager';
-import { getSfxVolume } from '../../utils/sfx';
+import { handleViewerWatchToggle } from '../../utils/voiceTileActions';
 import { ScreenShareSettingsPopover } from './ScreenShareSettingsPopover';
 import { useVoiceParticipantMeta } from '../../hooks/useVoiceParticipantMeta';
 import type { StreamTile as StreamTileType } from '../../hooks/useLiveKit';
@@ -23,6 +21,11 @@ import {
 interface StreamTileProps {
   tile: StreamTileType;
   large?: boolean;
+  /**
+   * A thumbnail too small for the tile's chrome (the ribbon's own-share
+   * preview): no LIVE badge, no quality or health row, a bare-name caption.
+   */
+  compact?: boolean;
   stats: TrackStatsSnapshot | null;
 }
 
@@ -174,34 +177,7 @@ function StreamAttenuationItem() {
   );
 }
 
-/**
- * Handles a deliberate viewer watch / stop-watch action: plays the local
- * feedback cue on the viewer's OWN machine and notifies the streamer so their
- * streamer-side watcher set updates.
- *
- * Called only from explicit user-action sites (the "Watch Stream" button and
- * the watch/stop context-menu items) — never from automatic teardown paths
- * (streamer stops sharing, participant disconnect), which must stay silent on
- * the viewer side. The local cue is played directly rather than derived from a
- * `watchingStreams` diff precisely so those teardown paths don't trigger it.
- *
- * The cue plays unconditionally (independent of the data-channel round-trip to
- * the streamer), so the viewer gets identical feedback on every platform —
- * Safari and the Electron desktop app alike.
- */
-function handleViewerWatchToggle(sharer: StreamWatchTarget, watching: boolean): void {
-  AudioManager.getInstance().playSound(
-    watching ? 'stream_user_joined' : 'stream_user_left',
-    { volume: getSfxVolume() },
-  );
-  const room = getActiveRoom();
-  if (!room) return;
-  const payload = encodeStreamWatch(streamWatchFor(sharer, watching));
-  // Reliable delivery; data channels are room-scoped and small (under 1KB).
-  void room.localParticipant.publishData(payload, { reliable: true });
-}
-
-export function StreamTile({ tile, large, stats }: StreamTileProps) {
+export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
   const { t } = useTranslation(['voice', 'common']);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -458,14 +434,14 @@ export function StreamTile({ tile, large, stats }: StreamTileProps) {
       )}
 
       {/* LIVE badge — top left */}
-      <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-accent-rose rounded text-[11px] font-bold text-white uppercase tracking-wide">
+      {!compact && <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-accent-rose rounded text-[11px] font-bold text-white uppercase tracking-wide">
         {t('voice:badges.live')}
-      </div>
+      </div>}
 
       {/* Stream status — in focus mode this is the visual peer of the Grid
           action: same top edge, height, radius, and surface treatment. */}
-      {(healthWarning || (qualityBadge && hasVideo)) && (
-        <div className={`absolute top-2 left-20 ${large ? 'right-24' : 'right-2'} flex items-start justify-end gap-1.5 pointer-events-none`}>
+      {!compact && (healthWarning || (qualityBadge && hasVideo)) && (
+        <div className={`absolute top-2 left-20 ${large ? 'right-36' : 'right-2'} flex items-start justify-end gap-1.5 pointer-events-none`}>
           {healthWarning && (
             <div className={`${large ? 'h-7 rounded-lg' : 'rounded'} min-w-0 max-w-full px-2 bg-black/75 border border-status-idle/40 flex items-center text-[10px] leading-[15px] text-white/90 truncate`}>
               {t(STREAM_HEALTH_KEYS[healthWarning])}
@@ -496,11 +472,11 @@ export function StreamTile({ tile, large, stats }: StreamTileProps) {
             <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z" />
           </svg>
           <span
-            className={`font-semibold text-white truncate ${large ? 'text-base' : 'text-[13px]'}`}
+            className={`font-semibold text-white truncate ${large ? 'text-base' : compact ? 'text-[11px]' : 'text-[13px]'}`}
           >
-            {displayName}
+            {isLocal && compact ? t('voice:badges.youShort') : displayName}
           </span>
-          {isLocal && (
+          {isLocal && !compact && (
             <span className="text-[10px] text-white/40 font-medium">{t('voice:badges.you')}</span>
           )}
         </div>
