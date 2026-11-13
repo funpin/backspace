@@ -24,8 +24,10 @@ export interface PayloadContext {
   nodeMajor: number;
 }
 
-// Kept in step with config.ts: an instance whose AGPL section 13 source offer
-// points anywhere else is running a fork, and reports itself as modified.
+// The upstream project's repository, deliberately not config.ts's default:
+// an instance whose AGPL section 13 source offer points anywhere else is
+// running a fork, and reports itself as modified. This fork's default offer
+// points at the fork, so its instances report `modified: true`, which is true.
 const UPSTREAM_SOURCE_URL = 'https://github.com/TheZwiss/backspace';
 
 export function payloadContextFromConfig(

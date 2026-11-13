@@ -54,7 +54,7 @@ export interface NavigatorLike {
 }
 
 /** The release listing, not `releases/latest`: filenames carry the version, so there is no fixed-name asset. */
-export const RELEASES_URL = 'https://github.com/TheZwiss/backspace/releases';
+export const RELEASES_URL = 'https://github.com/funpin/backspace/releases';
 
 const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
 
@@ -73,16 +73,15 @@ interface BuildSpec {
   ext: string;
 }
 
-/** Exactly what electron-builder emits for a release, in the canonical windows, linux, mac order. */
+/**
+ * Exactly what this fork's release workflow emits, in windows, mac order: one
+ * Windows x64 installer and one Apple Silicon disk image. A visitor on anything
+ * else (Linux, an Intel Mac, Windows on ARM without x64 emulation) gets no
+ * primary build and the link to the release page.
+ */
 const BUILDS: readonly BuildSpec[] = [
   { os: 'windows', arch: 'x64', kind: 'exe', fileSuffix: '-win-x64', ext: 'exe' },
-  { os: 'windows', arch: 'arm64', kind: 'exe', fileSuffix: '-win-arm64', ext: 'exe' },
-  { os: 'linux', arch: 'x64', kind: 'appimage', fileSuffix: '-linux-x86_64', ext: 'AppImage' },
-  { os: 'linux', arch: 'arm64', kind: 'appimage', fileSuffix: '-linux-arm64', ext: 'AppImage' },
-  { os: 'linux', arch: 'x64', kind: 'deb', fileSuffix: '-linux-amd64', ext: 'deb' },
-  { os: 'linux', arch: 'arm64', kind: 'deb', fileSuffix: '-linux-arm64', ext: 'deb' },
   { os: 'mac', arch: 'arm64', kind: 'dmg', fileSuffix: '-mac-arm64', ext: 'dmg' },
-  { os: 'mac', arch: 'x64', kind: 'dmg', fileSuffix: '-mac-x64', ext: 'dmg' },
 ];
 
 /**
@@ -211,8 +210,13 @@ function orderedBuilds(detected: DetectedPlatform): BuildSpec[] {
 function primaryBuild(detected: DetectedPlatform): BuildSpec | null {
   if (detected.os === 'other') return null;
   const arch = detected.arch ?? DEFAULT_ARCH[detected.os];
-  // BUILDS lists the AppImage before the deb, so the first Linux match is the AppImage.
-  return BUILDS.find((build) => build.os === detected.os && build.arch === arch) ?? null;
+  const exact = BUILDS.find((build) => build.os === detected.os && build.arch === arch);
+  if (exact) return exact;
+  // Windows on ARM runs the x64 installer under emulation, so it is still the
+  // build to offer there. Nothing else crosses architectures: the Apple Silicon
+  // image does not start on an Intel Mac, which therefore gets no primary build.
+  if (detected.os === 'windows') return BUILDS.find((build) => build.os === 'windows' && build.arch === 'x64') ?? null;
+  return null;
 }
 
 function toDownload(build: BuildSpec, version: string, versionIsReleasable: boolean): DesktopDownload {

@@ -1,12 +1,10 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProfileAvatar } from '../ui/ProfileAvatar';
 import { useVoiceStore } from '../../stores/voiceStore';
-import { useContextMenuStore, type ContextMenuItem } from '../../stores/contextMenuStore';
-import { buildVoiceModMenuItems, VolumeSliderItem } from './voiceMenuItems';
-import { useSpaceStore } from '../../stores/spaceStore';
 import { useVoiceParticipantMeta } from '../../hooks/useVoiceParticipantMeta';
-import { getActiveRoom, setCameraSubscription } from '../../hooks/useLiveKit';
+import { useVoiceParticipantStatus } from '../../hooks/useVoiceParticipantStatus';
+import { useVoiceUserContextMenu } from './useVoiceUserContextMenu';
 import type { UserTile } from '../../hooks/useLiveKit';
 
 interface VoiceUserProps {
@@ -19,18 +17,10 @@ export function VoiceUser({ tile, large }: VoiceUserProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { participant } = tile;
-  const isDeafened = useVoiceStore((s) => s.isDeafened);
-  const currentVoiceChannelId = useVoiceStore((s) => s.currentVoiceChannelId);
-  const isSpeaking = useVoiceStore((s) => s.speakingParticipantIds.has(participant.identity));
-  const spaceMutedUserIds = useVoiceStore((s) => s.spaceMutedUserIds);
-  const spaceDeafenedUserIds = useVoiceStore((s) => s.spaceDeafenedUserIds);
-  const permissionMutedUserIds = useVoiceStore((s) => s.permissionMutedUserIds);
+  const status = useVoiceParticipantStatus(participant);
+  const { isSpeaking } = status;
   const unwatchedCameras = useVoiceStore((s) => s.unwatchedCameras);
   const participantMutes = useVoiceStore((s) => s.participantMutes);
-  const spaceId = useSpaceStore((s) => currentVoiceChannelId ? s.channelToSpaceMap.get(currentVoiceChannelId) : null);
-
-  const openContextMenu = useContextMenuStore((s) => s.open);
-
   const [, forceUpdate] = useState(0);
 
   const isLocal = participant.isLocal;
@@ -64,82 +54,7 @@ export function VoiceUser({ tile, large }: VoiceUserProps) {
     }
   }, [tile.lkVideoTrack]);
 
-  // Context Menu
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent) => {
-      if (isLocal || !currentVoiceChannelId) return;
-      e.preventDefault();
-      e.stopPropagation();
-
-      const targetUserId = participant.userId;
-      const channelId = currentVoiceChannelId;
-
-      // Build moderation items
-      const modItems = buildVoiceModMenuItems(targetUserId, channelId);
-
-      const items: ContextMenuItem[] = [...modItems];
-
-      // Separator after mod items
-      if (modItems.length > 0) {
-        items.push({ key: 'mod-end-sep', type: 'separator' });
-      }
-
-      // Camera watch/unwatch
-      const targetParticipant = useVoiceStore.getState().participants.find((p) => p.userId === targetUserId);
-      const targetHasCamera = targetParticipant?.isCameraOn ?? false;
-      const isCameraUnwatched = useVoiceStore.getState().unwatchedCameras.has(targetUserId);
-
-      if (targetHasCamera) {
-        items.push({
-          key: 'camera-toggle',
-          type: 'action',
-          label: isCameraUnwatched ? t('voice:participantMenu.watchCamera') : t('voice:participantMenu.stopWatchingCamera'),
-          icon: React.createElement('svg', { width: 14, height: 14, viewBox: '0 0 24 24', fill: 'currentColor', className: 'flex-shrink-0' },
-            ...(isCameraUnwatched
-              ? [React.createElement('path', { key: 'cam', d: 'M17 10.5V7c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z' })]
-              : [
-                  React.createElement('path', { key: 'cam', d: 'M17 10.5V7c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z' }),
-                  React.createElement('line', { key: 'slash', x1: 1, y1: 1, x2: 23, y2: 23, stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' }),
-                ]),
-          ),
-          onClick: () => {
-            const room = getActiveRoom();
-            const identity = targetParticipant?.identity;
-            if (isCameraUnwatched) {
-              useVoiceStore.getState().rewatchCamera(targetUserId);
-              if (identity) setCameraSubscription(room, identity, true);
-            } else {
-              useVoiceStore.getState().unwatchCamera(targetUserId);
-              if (identity) setCameraSubscription(room, identity, false);
-            }
-          },
-        });
-        items.push({ key: 'camera-sep', type: 'separator' });
-      }
-
-      // Mute User checkbox
-      items.push({
-        key: 'mute-user',
-        type: 'checkbox',
-        label: t('voice:participantMenu.muteUser'),
-        subscribe: useVoiceStore.subscribe,
-        getChecked: () => useVoiceStore.getState().participantMutes.get(targetUserId) ?? false,
-        onChange: (checked) => useVoiceStore.getState().setParticipantMute(targetUserId, checked),
-      });
-
-      items.push({ key: 'vol-sep', type: 'separator' });
-
-      // Volume slider (custom, needs store subscription via wrapper component)
-      items.push({
-        key: 'volume',
-        type: 'custom',
-        render: () => React.createElement(VolumeSliderItem, { userId: targetUserId }),
-      });
-
-      openContextMenu({ x: e.clientX, y: e.clientY }, items);
-    },
-    [isLocal, currentVoiceChannelId, participant.userId, openContextMenu, t],
-  );
+  const handleContextMenu = useVoiceUserContextMenu(participant);
 
   return (
     <div
@@ -193,15 +108,11 @@ export function VoiceUser({ tile, large }: VoiceUserProps) {
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             {(() => {
-              const isSpaceMutedUser = spaceId ? spaceMutedUserIds.has(`${spaceId}:${participant.userId}`) : false;
-              const isSpaceDeafenedUser = spaceId ? spaceDeafenedUserIds.has(`${spaceId}:${participant.userId}`) : false;
-              const isPermissionMutedUser = spaceId ? permissionMutedUserIds.has(`${spaceId}:${participant.userId}`) : false;
-              const effectivelyMuted = participant.isMuted || isSpaceMutedUser || isSpaceDeafenedUser || isPermissionMutedUser;
-              const effectivelyDeafened = (isLocal ? isDeafened : participant.isDeafened) || isSpaceDeafenedUser;
+              const { effectivelyMuted, effectivelyDeafened, restrictedMute, restrictedDeafen } = status;
               return (
                 <>
                   {effectivelyMuted && (
-                    <div className={`w-5 h-5 ${(isSpaceMutedUser || isSpaceDeafenedUser || isPermissionMutedUser) ? 'bg-accent-amber/90' : 'bg-accent-rose/90'} rounded-full flex items-center justify-center`}>
+                    <div className={`w-5 h-5 ${restrictedMute ? 'bg-accent-amber/90' : 'bg-accent-rose/90'} rounded-full flex items-center justify-center`}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
                         <path d="M12 2C10.9 2 10 2.9 10 4V12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12V4C14 2.9 13.1 2 12 2Z" />
                         <line
@@ -216,7 +127,7 @@ export function VoiceUser({ tile, large }: VoiceUserProps) {
                     </div>
                   )}
                   {effectivelyDeafened && (
-                    <div className={`w-5 h-5 ${isSpaceDeafenedUser ? 'bg-accent-amber/90' : 'bg-accent-rose/90'} rounded-full flex items-center justify-center`}>
+                    <div className={`w-5 h-5 ${restrictedDeafen ? 'bg-accent-amber/90' : 'bg-accent-rose/90'} rounded-full flex items-center justify-center`}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
                         <path d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h2v-7H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-2v7h2c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z" />
                         <line

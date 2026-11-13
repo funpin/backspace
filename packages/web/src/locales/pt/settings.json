@@ -388,7 +388,7 @@
   "desktopDownload": {
     "title": "Desktop",
     "intro": "Atalhos globais, início com o sistema e ícone na bandeja do sistema.",
-    "unsupported": "O app para desktop roda no Windows, Linux e macOS.",
+    "unsupported": "O aplicativo para desktop roda no Windows (x64) e no macOS (Apple Silicon).",
     "name": {
       "windows": "Windows",
       "mac": "macOS",
@@ -400,8 +400,8 @@
       "linux": "Esta máquina"
     },
     "covers": {
-      "windows": "x64 ou arm64",
-      "mac": "Funciona em Macs com Apple Silicon e Intel",
+      "windows": "Windows 10 e 11, x64",
+      "mac": "Macs com Apple Silicon, macOS 12 ou posterior",
       "linux": "AppImage ou pacote deb, x64 ou arm64"
     },
     "download": {

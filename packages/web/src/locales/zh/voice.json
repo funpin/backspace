@@ -10,7 +10,8 @@
     "spaceDeafened": "已被空间拒听",
     "locallyMuted": "本地静音",
     "live": "LIVE",
-    "you": "(您)"
+    "you": "(您)",
+    "youShort": "你"
   },
   "moderation": {
     "spaceMute": "空间静音",
@@ -33,11 +34,15 @@
   },
   "grid": {
     "waitingForOthers": "正在等待其他人加入…",
-    "returnToGridHint": "点击返回网格视图",
     "backToGrid": "返回网格视图",
     "gridButton": "网格",
     "showMembers": "显示成员",
-    "hideMembers": "隐藏成员"
+    "hideMembers": "隐藏成员",
+    "hideTile": "隐藏",
+    "showHiddenTile": "显示 {{name}}",
+    "swapSources": "交换屏幕和摄像头",
+    "splitCamera": "单独显示摄像头",
+    "mergeCamera": "将摄像头放回角落"
   },
   "connectionInfo": {
     "title": "连接信息",

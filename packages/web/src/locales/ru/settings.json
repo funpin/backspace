@@ -389,7 +389,7 @@
   "desktopDownload": {
     "title": "Приложение",
     "intro": "Глобальные сочетания клавиш, запуск при входе в систему и значок в системном трее.",
-    "unsupported": "Настольное приложение работает в Windows, Linux и macOS.",
+    "unsupported": "Настольное приложение работает в Windows (x64) и macOS (Apple Silicon).",
     "name": {
       "windows": "Windows",
       "mac": "macOS",
@@ -401,8 +401,8 @@
       "linux": "Этот компьютер"
     },
     "covers": {
-      "windows": "x64 или arm64",
-      "mac": "Работает на Mac с Apple Silicon и Intel",
+      "windows": "Windows 10 и 11, x64",
+      "mac": "Mac с Apple Silicon, macOS 12 и новее",
       "linux": "Пакет AppImage или deb, x64 или arm64"
     },
     "download": {

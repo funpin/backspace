@@ -57,7 +57,7 @@ describe('parseLatestRelease', () => {
       tag_name: 'v1.0.4',
       html_url: 'https://evil.example.com/phish',
     });
-    expect(result?.url).toBe('https://github.com/TheZwiss/backspace/releases/tag/v1.0.4');
+    expect(result?.url).toBe('https://github.com/funpin/backspace/releases/tag/v1.0.4');
   });
 
   it('tolerates a missing published_at', () => {

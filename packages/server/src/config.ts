@@ -88,10 +88,10 @@ if (publicOrigin !== undefined) {
 // AGPL-3.0 § 13 "network-use source offer": users interacting over the network
 // must be able to obtain the Corresponding Source of the *running* version.
 // Operators who modify Backspace and self-host MUST point this at their own
-// fork's source so the offer stays accurate. Defaults to the upstream repo for
-// unmodified deployments.
-const UPSTREAM_SOURCE_URL = 'https://github.com/TheZwiss/backspace';
-const sourceCodeUrl = envOptional('BACKSPACE_SOURCE_URL') ?? UPSTREAM_SOURCE_URL;
+// fork's source so the offer stays accurate. This build is the funpin fork, so
+// the default is the fork's repository, not the upstream project's.
+const PROJECT_SOURCE_URL = 'https://github.com/funpin/backspace';
+const sourceCodeUrl = envOptional('BACKSPACE_SOURCE_URL') ?? PROJECT_SOURCE_URL;
 if (!/^https?:\/\//i.test(sourceCodeUrl)) {
   throw new Error(
     `BACKSPACE_SOURCE_URL must start with http:// or https:// — got: ${sourceCodeUrl}`
@@ -179,7 +179,7 @@ if (trustedProxyHops > MAX_TRUSTED_PROXY_HOPS) {
     `and it is what every rate limit keys on. Got ${trustedProxyHops}; the maximum is ${MAX_TRUSTED_PROXY_HOPS}. ` +
     `A CDN in front of your own reverse proxy in front of a tunnel is 3 hops, so if you meant 1 or 2 this is a typo. ` +
     `If your deployment really does have more than ${MAX_TRUSTED_PROXY_HOPS}, that is the limit to raise and not your ` +
-    `setting: open an issue at ${UPSTREAM_SOURCE_URL}/issues describing the hops in front of this instance.`
+    `setting: open an issue at ${PROJECT_SOURCE_URL}/issues describing the hops in front of this instance.`
   );
 }
 
