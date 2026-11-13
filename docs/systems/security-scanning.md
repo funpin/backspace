@@ -336,6 +336,16 @@ dismissed:
 | `braces` 3.0.3 | 1 | build-time (`tailwindcss` 3 through `chokidar` and `micromatch`) | no fixed release |
 | `sprintf-js` 1.1.3 | 1 | build-time (`electron-builder` to `@electron/get` to `global-agent` to `roarr`) | no fixed release |
 
+**Added by the funpin fork (November 2026), three more, held until 2027-01-15.** They were published after upstream's last pass and none has a fixed release inside the major its consumers accept; `undici` (7.30.2, 6.29.1), `fast-uri` (2.4.8, 3.1.9) and `zod` (4.6.7) from the same batch were cleared by raising `pnpm.overrides`. Each was checked against how the package is called here, not only deferred:
+
+| Package | Findings | Bucket | Fixed in | Why it is not reachable here |
+|---------|----------|--------|----------|------------------------------|
+| `minimatch` 9.0.9, 10.2.6 | 1 | build-time (`eslint`, `electron-builder`) and through `glob` | 11.0.1 only | Needs an attacker-controlled pattern. Every pattern is project-authored; the one server caller of `glob` passes the constant `'**/**'`. |
+| `glob` 10.5.0, 11.1.0 | 1 | server image (`@fastify/static` 7) and build-time (`workbox-build`) | 14.0.2 only | An aborted walk keeps reading. Neither caller passes an `AbortSignal`: `@fastify/static` walks the built web client once at startup (`wildcard: false`). Leaves with the `@fastify/static` 10 upgrade. |
+| `deepmerge` 4.3.1 | 1 | build-time (`workbox-build` to `@rollup/plugin-node-resolve`) | no fixed release | Merges the project's own build options. |
+
+A route that hands a request-supplied pattern to `minimatch` or `glob`, or code that bounds a `glob` walk with a signal, makes the matching finding reachable and removes the reason for its entry.
+
 The five fastify findings published on 2026-09-30 were each checked against the
 server rather than only deferred. Each needs a feature the server does not use:
 HTTP/2 with `reply.trailer()`, an `$async` request schema, a header schema with
