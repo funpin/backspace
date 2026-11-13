@@ -387,7 +387,7 @@
   "desktopDownload": {
     "title": "Desktop",
     "intro": "Globale Tastenkürzel, Start beim Anmelden und ein Symbol im Infobereich.",
-    "unsupported": "Die Desktop-App läuft unter Windows, Linux und macOS.",
+    "unsupported": "Die Desktop-App läuft unter Windows (x64) und macOS (Apple Silicon).",
     "name": {
       "windows": "Windows",
       "mac": "macOS",
@@ -399,8 +399,8 @@
       "linux": "Dieser Rechner"
     },
     "covers": {
-      "windows": "x64 oder arm64",
-      "mac": "Läuft auf Macs mit Apple Silicon und Intel",
+      "windows": "Windows 10 und 11, x64",
+      "mac": "Macs mit Apple Silicon, macOS 12 oder neuer",
       "linux": "AppImage oder deb-Paket, x64 oder arm64"
     },
     "download": {

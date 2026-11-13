@@ -2,7 +2,9 @@ appId: com.backspace.desktop
 productName: Backspace
 # Every release asset names its platform, so the GitHub asset list (which is
 # sorted by name and nothing else) groups by platform and reads on its own:
-# Backspace-1.4.0-win-x64.exe, -mac-arm64.dmg, -linux-x86_64.AppImage. The
+# Backspace-1.4.0-win-x64.exe, -mac-arm64.dmg, -linux-x86_64.AppImage. (This
+# fork's release workflow builds only the first two; the linux section below is
+# kept as upstream has it so merges stay clean.) The
 # architecture keeps electron-builder's per-format spelling: builder-util maps
 # x64 to `x86_64` for AppImage and `amd64` for deb, which are what those
 # formats' users expect, and leaves it `x64` elsewhere. Three other places
@@ -37,7 +39,7 @@ npmRebuild: false
 afterPack: ./scripts/afterPack.js
 publish:
   - provider: github
-    owner: TheZwiss
+    owner: funpin
     repo: backspace
 protocols:
   - name: Backspace

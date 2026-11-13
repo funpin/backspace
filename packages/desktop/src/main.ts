@@ -93,9 +93,10 @@ let pendingDeepLink: string | null = null;
 const knownInstanceOrigins = new Set<string>();
 
 // ─── AGPL-3.0 § 13 source offer ─────────────────────────────────────────────
-// Upstream fallback for the "Source code" menu items and the About panel.
+// Fallback for the "Source code" menu items and the About panel: the
+// repository this desktop build is made from (the funpin fork).
 // Used when the connected instance can't be reached or advertises no source URL.
-const UPSTREAM_SOURCE_URL = 'https://github.com/TheZwiss/backspace';
+const PROJECT_SOURCE_URL = 'https://github.com/funpin/backspace';
 
 /**
  * Resolve the Corresponding Source URL for the instance the desktop app is
@@ -108,12 +109,12 @@ async function resolveSourceUrl(): Promise<string> {
     const current = mainWindow.webContents.getURL();
     if (current.startsWith('http://') || current.startsWith('https://')) base = current;
   }
-  if (!base) return UPSTREAM_SOURCE_URL;
+  if (!base) return PROJECT_SOURCE_URL;
 
   try {
     const origin = new URL(base).origin;
     const res = await fetch(`${origin}/api/instance/info`, { signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return UPSTREAM_SOURCE_URL;
+    if (!res.ok) return PROJECT_SOURCE_URL;
     const info = (await res.json()) as { sourceCodeUrl?: unknown };
     if (typeof info.sourceCodeUrl === 'string' && /^https?:\/\//i.test(info.sourceCodeUrl)) {
       return info.sourceCodeUrl;
@@ -121,14 +122,14 @@ async function resolveSourceUrl(): Promise<string> {
   } catch {
     // Unreachable / malformed — fall back to upstream.
   }
-  return UPSTREAM_SOURCE_URL;
+  return PROJECT_SOURCE_URL;
 }
 
 /** Open the resolved source URL externally; upstream fallback on any failure. */
 function openSourceCode(): void {
   resolveSourceUrl()
     .then((url) => shell.openExternal(url))
-    .catch(() => { void shell.openExternal(UPSTREAM_SOURCE_URL); });
+    .catch(() => { void shell.openExternal(PROJECT_SOURCE_URL); });
 }
 
 // ─── Window State Persistence ───────────────────────────────────────────────
@@ -1423,8 +1424,8 @@ if (!gotTheLock) {
     app.setAboutPanelOptions({
       applicationName: 'Backspace',
       applicationVersion: app.getVersion(),
-      copyright: `AGPL-3.0-only · Source: ${UPSTREAM_SOURCE_URL}`,
-      website: UPSTREAM_SOURCE_URL,
+      copyright: `AGPL-3.0-only · Source: ${PROJECT_SOURCE_URL}`,
+      website: PROJECT_SOURCE_URL,
     });
 
     // Tray + macOS app-menu actions. Defined once so the subscriber and the

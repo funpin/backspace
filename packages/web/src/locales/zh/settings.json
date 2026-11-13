@@ -386,7 +386,7 @@
   "desktopDownload": {
     "title": "桌面端",
     "intro": "支持全局快捷键、开机启动和系统托盘图标。",
-    "unsupported": "桌面端应用支持 Windows、Linux 和 macOS。",
+    "unsupported": "桌面应用可在 Windows (x64) 和 macOS (Apple Silicon) 上运行。",
     "name": {
       "windows": "Windows",
       "mac": "macOS",
@@ -398,8 +398,8 @@
       "linux": "当前设备"
     },
     "covers": {
-      "windows": "x64 或 arm64",
-      "mac": "支持 Apple Silicon 和 Intel 处理器的 Mac",
+      "windows": "Windows 10 和 11，x64",
+      "mac": "搭载 Apple Silicon 的 Mac，macOS 12 或更高版本",
       "linux": "AppImage 或 deb 软件包，x64 或 arm64"
     },
     "download": {

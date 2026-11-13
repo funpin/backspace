@@ -8,7 +8,7 @@
     "name": "Jannis Braun",
     "email": "backspace@backspace.chat"
   },
-  "homepage": "https://github.com/TheZwiss/backspace",
+  "homepage": "https://github.com/funpin/backspace",
   "main": "dist/main.js",
   "desktopName": "io.github.TheZwiss.backspace.desktop",
   "scripts": {
