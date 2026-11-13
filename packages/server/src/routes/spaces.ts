@@ -231,6 +231,21 @@ export async function spaceRoutes(app: FastifyInstance): Promise<void> {
   }, async (request, reply) => {
     const { name, icon, banner, avatarColor, visibility, description } = request.body;
 
+    // Instance policy (SPACE_CREATION_ADMIN_ONLY): the operator decides which
+    // spaces exist. `request.userId` is the caller's row on this instance, and a
+    // replicated federated user is never an admin here, so this needs no
+    // identity resolution.
+    if (config.spaceCreationAdminOnly) {
+      const caller = getDb()
+        .select({ isAdmin: schema.users.isAdmin })
+        .from(schema.users)
+        .where(eq(schema.users.id, request.userId))
+        .get();
+      if (caller?.isAdmin !== 1) {
+        return sendError(reply, 403, 'forbidden');
+      }
+    }
+
     if (!name || typeof name !== 'string') {
       return sendError(reply, 400, 'space_name_required');
     }

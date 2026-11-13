@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import { config } from '../config.js';
 import { execFile as execFileCb } from 'child_process';
 import { promisify } from 'util';
 
@@ -76,6 +77,9 @@ export async function generateThumbnail(
   mimetype: string,
   uploadDir: string,
 ): Promise<string | null> {
+  // Instance policy (THUMBNAILS_DISABLED): no resized copy is written, and the
+  // attachment row carries no thumbnail, so clients load the original.
+  if (config.thumbnailsDisabled) return null;
   if (!isResizableImage(mimetype)) return null;
 
   try {

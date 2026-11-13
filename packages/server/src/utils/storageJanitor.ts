@@ -426,6 +426,22 @@ export function cleanupOldMedia(maxAgeDays: number, dryRun: boolean): CleanupRes
 }
 
 /**
+ * Instance policy (CHAT_MEDIA_RETENTION_DAYS): deletes message attachments
+ * past the retention window. Called on every janitor sweep rather than once a
+ * day, so disk use follows the window closely on a small host. Returns null
+ * when the policy is off (0 or unset), which is the default.
+ */
+export function applyChatMediaRetention(): CleanupResult | null {
+  const retentionDays = config.chatMediaRetentionDays;
+  if (!(retentionDays > 0)) return null;
+  const expired = cleanupOldMedia(retentionDays, false);
+  if (expired.deletedFiles > 0 || expired.deletedAttachmentRecords > 0 || expired.errors.length > 0) {
+    console.log(`[storage-janitor] ${retentionDays}-day media retention: deletedFiles=${expired.deletedFiles} freedBytes=${expired.freedBytes} deletedAttachmentRecords=${expired.deletedAttachmentRecords} errors=${expired.errors.length}`);
+  }
+  return expired;
+}
+
+/**
  * Delete federation outbox rows past their relay TTL, by queue: see
  * `expireOutboxQueues`. Returns the number of rows deleted.
  */
@@ -964,6 +980,8 @@ export async function runFederationJanitor(): Promise<void> {
     const subjectClocks = sweepSubjectClocks();
     const fileQ = cleanupFederationFileQueue();
     const dmGc = cleanupSoftDeletedDmChannels();
+
+    applyChatMediaRetention();
 
     // After the outbox expiry above, so a row whose last real entry just hit
     // its TTL goes in the same sweep.

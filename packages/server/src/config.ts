@@ -287,6 +287,19 @@ export const config = {
   maxUploadSize: envInt('MAX_UPLOAD_SIZE', 104857600),
   registrationOpen: envBool('REGISTRATION_OPEN', true),
 
+  // Instance policy switches. Each defaults to what an instance does without
+  // it, so an operator who sets none of them runs the stock behaviour.
+  /** Only instance admins may create spaces. Everyone else gets 403 `forbidden`. */
+  spaceCreationAdminOnly: envBool('SPACE_CREATION_ADMIN_ONLY', false),
+  /**
+   * Message attachments older than this many days are deleted by the hourly
+   * janitor (the same sweep as the admin panel's "clean up old media").
+   * 0 keeps them forever.
+   */
+  chatMediaRetentionDays: envCount('CHAT_MEDIA_RETENTION_DAYS', 0),
+  /** Skip generating resized image thumbnails; clients are served the originals. */
+  thumbnailsDisabled: envBool('THUMBNAILS_DISABLED', false),
+
   updates: {
     /**
      * Whether the admin Updates panel may look up the newest release.
