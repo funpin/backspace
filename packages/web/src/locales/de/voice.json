@@ -33,11 +33,15 @@
   },
   "grid": {
     "waitingForOthers": "Warten auf weitere Teilnehmer…",
-    "returnToGridHint": "Klicken, um zur Rasteransicht zurückzukehren",
     "backToGrid": "Zurück zur Rasteransicht",
     "gridButton": "Raster",
     "showMembers": "Mitglieder anzeigen",
-    "hideMembers": "Mitglieder ausblenden"
+    "hideMembers": "Mitglieder ausblenden",
+    "hideTile": "Ausblenden",
+    "showHiddenTile": "{{name}} anzeigen",
+    "swapSources": "Bildschirm und Kamera tauschen",
+    "splitCamera": "Kamera separat anzeigen",
+    "mergeCamera": "Kamera zurück in die Ecke"
   },
   "connectionInfo": {
     "title": "Verbindungsinfo",

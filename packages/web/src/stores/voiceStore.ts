@@ -78,7 +78,10 @@ export interface OutgoingDmCall {
 export type ActiveDmCall = DmCallRef & {
   livekit: DmCallCredentials | null;
 };
-export type VoiceConnectionQuality = 'excellent' | 'good' | 'poor' | 'lost' | 'unknown';
+/** The corner of a voice tile its inset (camera over screen, or the reverse) sits in. */
+export type TileInsetCorner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+
+export type VoiceConnectionQuality ='excellent' | 'good' | 'poor' | 'lost' | 'unknown';
 
 export interface VoiceChannelElapsed {
   /** Whole seconds reported by the server when this snapshot was received. */
@@ -141,6 +144,12 @@ export interface VoiceState {
   streamMutes: Map<string, boolean>;        // userId → muted?
   watchingStreams: Set<string>;             // userIds we're watching
   unwatchedCameras: Set<string>;           // userIds whose cameras we've opted out of
+  // Voice grid layout preferences, read by `deriveVoiceGridLayout`. All keyed
+  // by userId, the id `participants` lists people under.
+  hiddenTileUserIds: Set<string>;          // tiles the viewer moved to the ribbon; per call
+  swappedTileUserIds: Set<string>;         // camera shown large with the screen in the corner; per call
+  tileInsetCorners: Map<string, TileInsetCorner>; // where a tile's corner inset sits; per call
+  splitCameraUserIds: Set<string>;         // camera kept as its own tile next to the screen; persisted
   // Sharer's LiveKit identity → watcher LiveKit identities (in-memory only).
   // Identities, not user ids: a user id differs per instance, the identity is
   // the one string every client in the room knows a participant by.
@@ -164,6 +173,11 @@ export interface VoiceState {
   unwatchStream: (userId: string) => void;
   unwatchCamera: (userId: string) => void;
   rewatchCamera: (userId: string) => void;
+  hideTile: (userId: string) => void;
+  showTile: (userId: string) => void;
+  toggleTileSwap: (userId: string) => void;
+  setTileInsetCorner: (userId: string, corner: TileInsetCorner) => void;
+  setCameraSplit: (userId: string, split: boolean) => void;
   clearStreamVolume: (userId: string) => void;
   clearStreamMute: (userId: string) => void;
   setStreamAttenuationEnabled: (enabled: boolean) => void;
@@ -341,6 +355,10 @@ export const useVoiceStore = create<VoiceState>()(
       streamMutes: new Map(),
       watchingStreams: new Set(),
       unwatchedCameras: new Set(),
+      hiddenTileUserIds: new Set(),
+      swappedTileUserIds: new Set(),
+      tileInsetCorners: new Map(),
+      splitCameraUserIds: new Set(),
       streamWatchers: new Map(),
       recordStreamWatch: (sharerIdentity, watcherIdentity, watching) => {
         set((state) => {
@@ -433,6 +451,42 @@ export const useVoiceStore = create<VoiceState>()(
           const newSet = new Set(state.unwatchedCameras);
           newSet.delete(userId);
           return { unwatchedCameras: newSet };
+        });
+      },
+      hideTile: (userId) => {
+        set((state) => {
+          const newSet = new Set(state.hiddenTileUserIds);
+          newSet.add(userId);
+          return { hiddenTileUserIds: newSet };
+        });
+      },
+      showTile: (userId) => {
+        set((state) => {
+          const newSet = new Set(state.hiddenTileUserIds);
+          newSet.delete(userId);
+          return { hiddenTileUserIds: newSet };
+        });
+      },
+      toggleTileSwap: (userId) => {
+        set((state) => {
+          const newSet = new Set(state.swappedTileUserIds);
+          if (!newSet.delete(userId)) newSet.add(userId);
+          return { swappedTileUserIds: newSet };
+        });
+      },
+      setTileInsetCorner: (userId, corner) => {
+        set((state) => {
+          const newMap = new Map(state.tileInsetCorners);
+          newMap.set(userId, corner);
+          return { tileInsetCorners: newMap };
+        });
+      },
+      setCameraSplit: (userId, split) => {
+        set((state) => {
+          const newSet = new Set(state.splitCameraUserIds);
+          if (split) newSet.add(userId);
+          else newSet.delete(userId);
+          return { splitCameraUserIds: newSet };
         });
       },
       clearStreamVolume: (userId) => {
@@ -704,6 +758,9 @@ export const useVoiceStore = create<VoiceState>()(
         streamMutes: new Map(),
         watchingStreams: new Set(),
         unwatchedCameras: new Set(),
+        hiddenTileUserIds: new Set(),
+        swappedTileUserIds: new Set(),
+        tileInsetCorners: new Map(),
         streamWatchers: new Map(),
         // Space-enforced restrictions
         spaceMutedUserIds: new Set(),
@@ -768,6 +825,9 @@ export const useVoiceStore = create<VoiceState>()(
             streamMutes: new Map(),
             watchingStreams: new Set(),
             unwatchedCameras: new Set(),
+            hiddenTileUserIds: new Set(),
+            swappedTileUserIds: new Set(),
+            tileInsetCorners: new Map(),
             streamWatchers: new Map(),
             voiceUsers,
             voiceChannelElapsedSeconds,
@@ -813,6 +873,9 @@ export const useVoiceStore = create<VoiceState>()(
           streamMutes: new Map(),
           watchingStreams: new Set(),
           unwatchedCameras: new Set(),
+          hiddenTileUserIds: new Set(),
+          swappedTileUserIds: new Set(),
+          tileInsetCorners: new Map(),
           streamWatchers: new Map(),
           micPermissionDenied: false,
         });
@@ -851,6 +914,9 @@ export const useVoiceStore = create<VoiceState>()(
         streamMutes: new Map(),
         watchingStreams: new Set(),
         unwatchedCameras: new Set(),
+        hiddenTileUserIds: new Set(),
+        swappedTileUserIds: new Set(),
+        tileInsetCorners: new Map(),
         streamWatchers: new Map(),
         spaceMutedUserIds: new Set(),
         spaceDeafenedUserIds: new Set(),
@@ -956,6 +1022,8 @@ export const useVoiceStore = create<VoiceState>()(
         // Per-user preferences (Map → plain object for JSON)
         participantVolumes: Object.fromEntries(state.participantVolumes),
         participantMutes: Object.fromEntries(state.participantMutes),
+        // Set → array for JSON
+        splitCameraUserIds: Array.from(state.splitCameraUserIds),
       }),
       merge: (persistedState: any, currentState: VoiceState) => {
         const merged = { ...currentState, ...persistedState };
@@ -981,6 +1049,12 @@ export const useVoiceStore = create<VoiceState>()(
         merged.streamMutes = currentState.streamMutes;
         merged.watchingStreams = currentState.watchingStreams;
         merged.unwatchedCameras = currentState.unwatchedCameras;
+        merged.hiddenTileUserIds = currentState.hiddenTileUserIds;
+        merged.swappedTileUserIds = currentState.swappedTileUserIds;
+        merged.tileInsetCorners = currentState.tileInsetCorners;
+        merged.splitCameraUserIds = Array.isArray(persistedState?.splitCameraUserIds)
+          ? new Set(persistedState.splitCameraUserIds.filter((id: unknown) => typeof id === 'string'))
+          : currentState.splitCameraUserIds;
         return merged;
       },
     }

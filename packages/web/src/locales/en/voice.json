@@ -33,11 +33,15 @@
   },
   "grid": {
     "waitingForOthers": "Waiting for others to join...",
-    "returnToGridHint": "Click to return to grid view",
     "backToGrid": "Back to grid view",
     "gridButton": "Grid",
     "showMembers": "Show Members",
-    "hideMembers": "Hide Members"
+    "hideMembers": "Hide Members",
+    "hideTile": "Hide",
+    "showHiddenTile": "Show {{name}}",
+    "swapSources": "Swap Screen and Camera",
+    "splitCamera": "Show Camera Separately",
+    "mergeCamera": "Return Camera to Corner"
   },
   "connectionInfo": {
     "title": "Connection Info",
