@@ -7,6 +7,8 @@ import { VoiceRibbon } from './VoiceRibbon';
 import { useVoiceStore } from '../../stores/voiceStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useGridLayout } from '../../hooks/useGridLayout';
+import { useStageZoom } from '../../hooks/useStageZoom';
+import { useFormatters } from '../../i18n/formatters';
 import type { ParticipantInfo, GridTile } from '../../hooks/useLiveKit';
 import { useTrackStats } from '../../hooks/useTrackStats';
 import {
@@ -58,6 +60,12 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
   const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
   const [stripHidden, setStripHidden] = useState(false);
+  const f = useFormatters();
+  const voiceFullscreen = useUIStore((s) => s.voiceFullscreen);
+  // Wheel zoom and drag pan on the focused picture. Keyed by the focus target,
+  // so every picture opens unzoomed.
+  const stageZoom = useStageZoom(focusedParticipantId);
+  const { isZoomed, reset: resetZoom } = stageZoom;
 
   const layout = useMemo(
     () => deriveVoiceGridLayout(participants, {
@@ -109,8 +117,8 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
     }
   }, [focusable, focusedParticipantId, setFocusedParticipant]);
 
-  // Escape leaves focus mode. In voice fullscreen the same key leaves
-  // fullscreen (VoiceControlBar), and one press should do one thing.
+  // Escape undoes one thing at a time: a zoom first, then focus mode. In voice
+  // fullscreen the same key leaves fullscreen (VoiceControlBar) instead.
   useEffect(() => {
     if (!focusedParticipantId) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -118,11 +126,12 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
       if (useUIStore.getState().voiceFullscreen) return;
       const target = e.target;
       if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
-      setFocusedParticipant(null);
+      if (isZoomed) resetZoom();
+      else setFocusedParticipant(null);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedParticipantId, setFocusedParticipant]);
+  }, [focusedParticipantId, setFocusedParticipant, isZoomed, resetZoom]);
 
   if (participants.length === 0) {
     return (
@@ -208,7 +217,10 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
       && (variant === 'focused' || (variant === 'grid' && tileWidth >= MIN_TILE_WIDTH_FOR_INSET));
     const actions = variant === 'grid' ? cellActions(cell) : [];
     return (
-      <div className="relative h-full w-full group/cell">
+      <div
+        className="relative h-full w-full group/cell"
+        {...(variant === 'focused' ? stageZoom.stageProps : {})}
+      >
         {renderTile(cell.main, variant === 'focused', compact)}
         {showInset && <TileInset cell={cell} />}
         {cell.inset !== null && !showInset && (
@@ -251,7 +263,8 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
     const hasStrip = otherCells.length > 0 || layout.ribbon.some((entry) => entry.kind !== 'self');
     return (
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        {/* Main focused view. A click anywhere on it returns to the grid. */}
+        {/* Main focused view. A click anywhere on it returns to the grid,
+            unless the picture is zoomed: then the click belongs to the pan. */}
         <div
           className="flex-1 p-2 min-h-0 cursor-pointer relative"
           onClick={() => setFocusedParticipant(null)}
@@ -259,7 +272,41 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
           {renderCell(focusedCell, 'focused')}
           {/* Tile actions and the Grid button — top-right */}
           <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+            {isZoomed && (
+              <button
+                type="button"
+                data-testid="zoom-reset"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetZoom();
+                }}
+                className={`${OVERLAY_BUTTON} px-2.5 gap-1.5`}
+                aria-label={t('voice:grid.resetZoom')}
+                title={t('voice:grid.resetZoom')}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z" />
+                </svg>
+                <span className="text-xs font-medium tabular-nums">{f.formatPercent(Math.round(stageZoom.zoom.scale * 100))}</span>
+              </button>
+            )}
             {cellActions(focusedCell)}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                useUIStore.getState().toggleVoiceFullscreen();
+              }}
+              className={`${OVERLAY_BUTTON} w-7`}
+              aria-label={voiceFullscreen ? t('voice:controls.exitFullscreen') : t('voice:controls.fullscreen')}
+              title={voiceFullscreen ? t('voice:controls.exitFullscreen') : t('voice:controls.fullscreen')}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                {voiceFullscreen
+                  ? <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
+                  : <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />}
+              </svg>
+            </button>
             <button
               type="button"
               onClick={(e) => {

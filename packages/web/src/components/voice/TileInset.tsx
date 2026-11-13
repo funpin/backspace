@@ -128,6 +128,7 @@ export function TileInset({ cell }: TileInsetProps) {
     <div
       ref={rootRef}
       data-testid="tile-inset"
+      data-no-pan
       className={`absolute z-10 w-[22%] min-w-[96px] max-w-[280px] aspect-video rounded-lg overflow-hidden bg-surface-channel ring-1 ring-white/15 shadow-lg group/inset touch-none ${CORNER_CLASSES[corner]} ${dragOffset ? 'cursor-grabbing' : ''}`}
       style={dragOffset ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` } : undefined}
       onPointerDown={handlePointerDown}

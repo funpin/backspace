@@ -42,7 +42,8 @@
     "showHiddenTile": "显示 {{name}}",
     "swapSources": "交换屏幕和摄像头",
     "splitCamera": "单独显示摄像头",
-    "mergeCamera": "将摄像头放回角落"
+    "mergeCamera": "将摄像头放回角落",
+    "resetZoom": "重置缩放"
   },
   "connectionInfo": {
     "title": "连接信息",
