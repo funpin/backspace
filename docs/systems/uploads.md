@@ -132,6 +132,7 @@ Processing occurs inline during upload, before the response is sent. All process
 **Condition:** `isResizableImage(mimetype)` returns true
 
 1. **Thumbnail generation** (`thumbnail.ts:generateThumbnail`)
+   - Skipped entirely when `THUMBNAILS_DISABLED=true` (instance policy; see `docs/systems/deployment.md`): the function returns null and the client loads the original.
    - Skip if width <= 800px (`THUMBNAIL_MAX_WIDTH`)
    - Skip if animated (GIF with `metadata.pages > 1` -- Sharp would flatten to single frame)
    - Resize to max 800px width, `withoutEnlargement: true`
@@ -773,3 +774,7 @@ This spec covers **local** file storage and serving. The boundary:
 | `attachments` record creation | `sourceUrl`, `federationStatus`, `federationMeta` fields |
 
 The `attachments` table contains federation-specific columns (`sourceUrl`, `federationStatus`, `federationMeta`) that are populated by the federation file download worker, not by the upload pipeline.
+
+## Retention of message attachments (instance policy)
+
+`CHAT_MEDIA_RETENTION_DAYS=<n>` makes the hourly janitor delete attachments linked to a message once they are older than `n` days (`storageJanitor.ts:applyChatMediaRetention`, which calls the same `cleanupOldMedia` the admin storage panel uses). `0` or unset keeps attachments forever, which is the default. See `docs/systems/deployment.md` → "Instance policy switches".

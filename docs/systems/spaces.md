@@ -30,6 +30,8 @@ Cross-references: [database.md](database.md) (table schemas), [permissions.md](p
 ### Creation
 
 **Endpoint:** `POST /api/spaces` (`spaces.ts:spaceRoutes`)
+
+**Instance policy.** With `SPACE_CREATION_ADMIN_ONLY=true` the route answers 403 `forbidden` unless the caller's row on this instance has `isAdmin = 1` (a replicated federated user never does). Off by default. See `docs/systems/deployment.md` → "Instance policy switches".
 **Auth:** Required
 **Permission:** Any authenticated user
 
