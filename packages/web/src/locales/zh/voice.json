@@ -171,7 +171,7 @@
     "mute": "静音直播",
     "isStreaming": "{{name}} 正在直播",
     "viewers": "观众",
-    "viewersLabel": "观众：{{count}}",
+    "viewersLabel_other": "{{count}} 位观众",
     "noViewers": "暂时无人观看"
   },
   "streamDiagnostics": {

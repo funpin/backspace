@@ -171,7 +171,9 @@
     "mute": "Silenciar transmissão",
     "isStreaming": "{{name}} está transmitindo",
     "viewers": "Espectadores",
-    "viewersLabel": "Espectadores: {{count}}",
+    "viewersLabel_one": "{{count}} espectador",
+    "viewersLabel_many": "{{count}} espectadores",
+    "viewersLabel_other": "{{count}} espectadores",
     "noViewers": "Ninguém está assistindo ainda"
   },
   "streamDiagnostics": {

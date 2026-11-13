@@ -32,7 +32,7 @@ function participant(identity: string, extra: Partial<ParticipantInfo> = {}): Pa
 }
 
 function fakeRoom() {
-  const publishData = vi.fn(async (_payload: Uint8Array, _options: { reliable?: boolean; destinationIdentities?: string[] }) => undefined);
+  const publishData = vi.fn<(payload: Uint8Array, options: { reliable?: boolean; destinationIdentities?: string[] }) => Promise<void>>(async () => undefined);
   return { room: { localParticipant: { publishData } } as unknown as Room, publishData };
 }
 

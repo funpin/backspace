@@ -171,7 +171,8 @@
     "mute": "Mute Stream",
     "isStreaming": "{{name}} is streaming",
     "viewers": "Viewers",
-    "viewersLabel": "Viewers: {{count}}",
+    "viewersLabel_one": "{{count}} viewer",
+    "viewersLabel_other": "{{count}} viewers",
     "noViewers": "Nobody is watching yet"
   },
   "streamDiagnostics": {

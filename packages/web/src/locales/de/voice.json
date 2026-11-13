@@ -171,7 +171,8 @@
     "mute": "Stream stummschalten",
     "isStreaming": "{{name}} streamt",
     "viewers": "Zuschauer",
-    "viewersLabel": "Zuschauer: {{count}}",
+    "viewersLabel_one": "{{count}} Zuschauer",
+    "viewersLabel_other": "{{count}} Zuschauer",
     "noViewers": "Noch schaut niemand zu"
   },
   "streamDiagnostics": {
