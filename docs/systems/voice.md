@@ -597,8 +597,11 @@ Viewers: `TrackPublished` subscribes a `ScreenShareAudio` publication when the v
 | `swappedTileUserIds` | Camera large, screen in the corner | Per call |
 | `tileInsetCorners` | Which corner the inset sits in (`TileInsetCorner`) | Per call |
 | `splitCameraUserIds` | Camera kept as its own cell beside the screen | Persisted (`partialize` writes an array, `merge` rebuilds the `Set`) |
+| `tileOrder` | The viewer's own order of grid cells, as cell keys (at most 200) | Persisted |
 
 Split wins over swapped. A split camera cell carries a "return to corner" action. The local participant cannot be hidden.
+
+**The viewer's own order.** In grid mode a cell can be dragged onto another (HTML5 drag and drop on the cell wrapper; `reorderCells` computes the new list): it takes the target's place and the cells between shift by one. `deriveVoiceGridLayout` sorts cells by `tileOrder` and leaves cells it does not name in the call's order after the named ones, so a newcomer never jumps into the middle of an arrangement. Keys not on screen stay remembered behind the visible ones. The order applies to the avatar grid and to media cells alike; the ribbon and the focus strip are not reorderable. A drag that starts on a `TileInset` moves the inset, not the cell. Touch devices do not fire HTML5 drags, so there is no reordering on phones.
 
 **Hiding is unsubscribing.** `hideParticipantTile` / `showParticipantTile` (`utils/voiceTileActions.ts`) are the only writers of `hiddenTileUserIds`. Hiding stops the share (picture and sound, through `unwatchStream` + `setStreamSubscription`, with the same viewer cue and streamer notification as "Stop Watching") and the camera (`unwatchCamera` + `setCameraSubscription`); the person's voice is untouched. Showing a tile again resumes both, and resumes the share as watched rather than as a placeholder: asking to see the tile is asking to watch it. `handleViewerWatchToggle` lives in the same module and is shared with `StreamTile`.
 

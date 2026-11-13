@@ -78,6 +78,9 @@ export interface OutgoingDmCall {
 export type ActiveDmCall = DmCallRef & {
   livekit: DmCallCredentials | null;
 };
+/** How many cell keys the viewer's own grid order remembers. */
+const MAX_TILE_ORDER_KEYS = 200;
+
 /** The corner of a voice tile its inset (camera over screen, or the reverse) sits in. */
 export type TileInsetCorner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
@@ -150,6 +153,8 @@ export interface VoiceState {
   swappedTileUserIds: Set<string>;         // camera shown large with the screen in the corner; per call
   tileInsetCorners: Map<string, TileInsetCorner>; // where a tile's corner inset sits; per call
   splitCameraUserIds: Set<string>;         // camera kept as its own tile next to the screen; persisted
+  /** The viewer's own order of grid cells, as cell keys (see `GridCell.key`); persisted. */
+  tileOrder: string[];
   // Sharer's LiveKit identity → watcher LiveKit identities (in-memory only).
   // Identities, not user ids: a user id differs per instance, the identity is
   // the one string every client in the room knows a participant by.
@@ -178,6 +183,7 @@ export interface VoiceState {
   toggleTileSwap: (userId: string) => void;
   setTileInsetCorner: (userId: string, corner: TileInsetCorner) => void;
   setCameraSplit: (userId: string, split: boolean) => void;
+  setTileOrder: (order: string[]) => void;
   clearStreamVolume: (userId: string) => void;
   clearStreamMute: (userId: string) => void;
   setStreamAttenuationEnabled: (enabled: boolean) => void;
@@ -359,6 +365,7 @@ export const useVoiceStore = create<VoiceState>()(
       swappedTileUserIds: new Set(),
       tileInsetCorners: new Map(),
       splitCameraUserIds: new Set(),
+      tileOrder: [],
       streamWatchers: new Map(),
       recordStreamWatch: (sharerIdentity, watcherIdentity, watching) => {
         set((state) => {
@@ -481,6 +488,8 @@ export const useVoiceStore = create<VoiceState>()(
           return { tileInsetCorners: newMap };
         });
       },
+      // Capped so years of calls with different people cannot grow it without bound.
+      setTileOrder: (order) => set({ tileOrder: order.slice(0, MAX_TILE_ORDER_KEYS) }),
       setCameraSplit: (userId, split) => {
         set((state) => {
           const newSet = new Set(state.splitCameraUserIds);
@@ -1024,6 +1033,7 @@ export const useVoiceStore = create<VoiceState>()(
         participantMutes: Object.fromEntries(state.participantMutes),
         // Set → array for JSON
         splitCameraUserIds: Array.from(state.splitCameraUserIds),
+        tileOrder: state.tileOrder,
       }),
       merge: (persistedState: any, currentState: VoiceState) => {
         const merged = { ...currentState, ...persistedState };
@@ -1055,6 +1065,9 @@ export const useVoiceStore = create<VoiceState>()(
         merged.splitCameraUserIds = Array.isArray(persistedState?.splitCameraUserIds)
           ? new Set(persistedState.splitCameraUserIds.filter((id: unknown) => typeof id === 'string'))
           : currentState.splitCameraUserIds;
+        merged.tileOrder = Array.isArray(persistedState?.tileOrder)
+          ? persistedState.tileOrder.filter((key: unknown) => typeof key === 'string').slice(0, MAX_TILE_ORDER_KEYS)
+          : currentState.tileOrder;
         return merged;
       },
     }

@@ -10,6 +10,7 @@ import {
   deriveVoiceGridLayout,
   findFocusedCell,
   focusableCells,
+  reorderCells,
   type VoiceGridPrefs,
 } from './voiceGridLayout';
 
@@ -45,6 +46,7 @@ function prefs(overrides: Partial<Record<keyof VoiceGridPrefs, string[]>> = {}):
     hidden: new Set(overrides.hidden ?? []),
     swapped: new Set(overrides.swapped ?? []),
     split: new Set(overrides.split ?? []),
+    order: overrides.order ?? [],
   };
 }
 
@@ -191,5 +193,39 @@ describe('findFocusedCell', () => {
   it('returns null for no key and for a key nobody has', () => {
     expect(findFocusedCell(cells, null)).toBeNull();
     expect(findFocusedCell(cells, 'gone')).toBeNull();
+  });
+});
+
+describe('the viewer\'s own order', () => {
+  it('orders the avatar grid by the stored keys and leaves unnamed people after them', () => {
+    const layout = deriveVoiceGridLayout(
+      [participant('me', { local: true }), participant('bob'), participant('eve'), participant('dan')],
+      prefs({ order: ['eve', 'me'] }),
+    );
+
+    expect(layout.cells.map((c) => c.key)).toEqual(['eve', 'me', 'bob', 'dan']);
+  });
+
+  it('orders media cells by the stored keys', () => {
+    const layout = deriveVoiceGridLayout(
+      [participant('bob', { screen: true }), participant('eve', { camera: true }), participant('dan', { screen: true })],
+      prefs({ order: ['dan:stream', 'eve'] }),
+    );
+
+    expect(layout.cells.map((c) => c.key)).toEqual(['dan:stream', 'eve', 'bob:stream']);
+  });
+
+  it('moves a dragged cell to the place of the one it is dropped on', () => {
+    expect(reorderCells(['a', 'b', 'c', 'd'], [], 'a', 'c')).toEqual(['b', 'c', 'a', 'd']);
+    expect(reorderCells(['a', 'b', 'c', 'd'], [], 'd', 'a')).toEqual(['d', 'a', 'b', 'c']);
+  });
+
+  it('keeps remembering keys that are not on screen right now', () => {
+    expect(reorderCells(['a', 'b'], ['zed', 'b', 'a'], 'b', 'a')).toEqual(['b', 'a', 'zed']);
+  });
+
+  it('leaves the stored order alone for a drop on itself or on an unknown cell', () => {
+    expect(reorderCells(['a', 'b'], ['b'], 'a', 'a')).toEqual(['b']);
+    expect(reorderCells(['a', 'b'], ['b'], 'a', 'gone')).toEqual(['b']);
   });
 });

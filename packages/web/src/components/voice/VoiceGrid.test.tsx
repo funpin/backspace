@@ -54,6 +54,7 @@ beforeEach(() => {
     swappedTileUserIds: new Set(),
     splitCameraUserIds: new Set(),
     tileInsetCorners: new Map(),
+    tileOrder: [],
     participantMutes: new Map(),
   });
 });
@@ -187,5 +188,21 @@ describe('VoiceGrid one tile per participant', () => {
     expect(state.tileInsetCorners.get('bob')).toBe('top-left');
     expect(state.focusedParticipantId).toBe('bob:stream');
     expect(state.swappedTileUserIds.has('bob')).toBe(false);
+  });
+
+  it('reorders grid cells by dragging one onto another, without focusing either', () => {
+    render(<VoiceGrid participants={[participant('ada', true), participant('bob', false), participant('eve', false)]} />);
+    const cells = screen.getAllByTestId('voice-grid-cell');
+
+    fireEvent.dragStart(cells[0]!);
+    fireEvent.dragOver(cells[2]!);
+    fireEvent.drop(cells[2]!);
+
+    expect(useVoiceStore.getState().tileOrder).toEqual(['bob', 'eve', 'ada']);
+    expect(useVoiceStore.getState().focusedParticipantId).toBeNull();
+    // Each cell's text is the avatar's initial followed by the name.
+    expect(
+      screen.getAllByTestId('voice-grid-cell').map((cell) => cell.textContent?.replace('(you)', '').trim()),
+    ).toEqual(['Bbob', 'Eeve', 'Aada']);
   });
 });

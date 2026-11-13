@@ -30,6 +30,8 @@ export interface VoiceGridPrefs {
   hidden: ReadonlySet<string>;
   swapped: ReadonlySet<string>;
   split: ReadonlySet<string>;
+  /** The viewer's own cell order, as cell keys; cells it does not name keep the call's order after the ones it does. */
+  order?: readonly string[];
 }
 
 export interface VoiceGridLayout {
@@ -60,6 +62,37 @@ function cellsFor(
     : [{ key: stream.key, participant, main: stream, inset: user }];
 }
 
+/** Sorts cells by the viewer's order. Stable: unnamed cells keep their relative order, after the named ones. */
+function applyOrder(cells: GridCell[], order: readonly string[] | undefined): GridCell[] {
+  if (!order || order.length === 0) return cells;
+  const rank = new Map(order.map((key, index) => [key, index]));
+  return cells
+    .map((cell, index) => ({ cell, index, rank: rank.get(cell.key) ?? Number.POSITIVE_INFINITY }))
+    .sort((a, b) => (a.rank === b.rank ? a.index - b.index : a.rank - b.rank))
+    .map((entry) => entry.cell);
+}
+
+/**
+ * The order to store after the viewer drops `draggedKey` onto `targetKey`: the
+ * dragged cell takes the target's place and the cells between shift by one.
+ * Keys the grid is not showing right now stay remembered behind the visible ones.
+ */
+export function reorderCells(
+  visibleKeys: readonly string[],
+  storedOrder: readonly string[],
+  draggedKey: string,
+  targetKey: string,
+): string[] {
+  const from = visibleKeys.indexOf(draggedKey);
+  const to = visibleKeys.indexOf(targetKey);
+  if (from < 0 || to < 0 || from === to) return [...storedOrder];
+  const next = [...visibleKeys];
+  next.splice(from, 1);
+  next.splice(to, 0, draggedKey);
+  const visible = new Set(next);
+  return [...next, ...storedOrder.filter((key) => !visible.has(key))];
+}
+
 /**
  * Decides where every participant appears. Each person has exactly one place:
  * a cell if they show something, a ribbon entry if they do not (or the viewer
@@ -88,7 +121,7 @@ export function deriveVoiceGridLayout(
       const user = users.get(p.identity);
       if (user) cells.push({ key: user.key, participant: p, main: user, inset: null });
     }
-    return { mediaMode, cells, ribbon: [] };
+    return { mediaMode, cells: applyOrder(cells, prefs.order), ribbon: [] };
   }
 
   const remoteCells: GridCell[] = [];
@@ -114,7 +147,7 @@ export function deriveVoiceGridLayout(
   // Your own picture is for checking, not for watching: it steps aside as soon
   // as there is anyone else's to look at, and fills the grid when there is not.
   if (remoteCells.length === 0) {
-    return { mediaMode, cells: selfCells, ribbon: [...idle, ...hidden] };
+    return { mediaMode, cells: applyOrder(selfCells, prefs.order), ribbon: [...idle, ...hidden] };
   }
   const self: RibbonEntry[] = selfCells.map((cell) => ({
     kind: 'self',
@@ -122,7 +155,7 @@ export function deriveVoiceGridLayout(
     participant: cell.participant,
     cell,
   }));
-  return { mediaMode, cells: remoteCells, ribbon: [...self, ...idle, ...hidden] };
+  return { mediaMode, cells: applyOrder(remoteCells, prefs.order), ribbon: [...self, ...idle, ...hidden] };
 }
 
 /** Every cell the viewer can put in focus: the grid's and their own in the ribbon. */

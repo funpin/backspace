@@ -13,6 +13,7 @@ import {
   deriveVoiceGridLayout,
   findFocusedCell,
   focusableCells,
+  reorderCells,
   type GridCell,
 } from '../../utils/voiceGridLayout';
 import { hideParticipantTile } from '../../utils/voiceTileActions';
@@ -52,6 +53,10 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
   const swappedTileUserIds = useVoiceStore((s) => s.swappedTileUserIds);
   const splitCameraUserIds = useVoiceStore((s) => s.splitCameraUserIds);
   const setCameraSplit = useVoiceStore((s) => s.setCameraSplit);
+  const tileOrder = useVoiceStore((s) => s.tileOrder);
+  // Drag-to-reorder in grid mode: the cell being dragged and the one under it.
+  const [draggedKey, setDraggedKey] = useState<string | null>(null);
+  const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
   const [stripHidden, setStripHidden] = useState(false);
 
   const layout = useMemo(
@@ -59,8 +64,9 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
       hidden: hiddenTileUserIds,
       swapped: swappedTileUserIds,
       split: splitCameraUserIds,
+      order: tileOrder,
     }),
-    [participants, hiddenTileUserIds, swappedTileUserIds, splitCameraUserIds],
+    [participants, hiddenTileUserIds, swappedTileUserIds, splitCameraUserIds, tileOrder],
   );
   const focusable = useMemo(() => focusableCells(layout), [layout]);
   const selfRibbonCells = useMemo(
@@ -334,8 +340,44 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
           {layout.cells.map((cell) => (
             <div
               key={cell.key}
+              data-testid="voice-grid-cell"
               onClick={() => setFocusedParticipant(cell.key)}
-              className="cursor-pointer hover:opacity-90 transition-opacity"
+              // Drag a cell onto another to take its place. The order is the
+              // viewer's own and is remembered; a drag never counts as a click.
+              draggable={layout.cells.length > 1}
+              onDragStart={(e) => {
+                setDraggedKey(cell.key);
+                if (e.dataTransfer) {
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', cell.key);
+                }
+              }}
+              onDragOver={(e) => {
+                if (!draggedKey || draggedKey === cell.key) return;
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                if (dropTargetKey !== cell.key) setDropTargetKey(cell.key);
+              }}
+              onDragLeave={() => {
+                if (dropTargetKey === cell.key) setDropTargetKey(null);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (draggedKey && draggedKey !== cell.key) {
+                  useVoiceStore.getState().setTileOrder(
+                    reorderCells(layout.cells.map((c) => c.key), tileOrder, draggedKey, cell.key),
+                  );
+                }
+                setDraggedKey(null);
+                setDropTargetKey(null);
+              }}
+              onDragEnd={() => {
+                setDraggedKey(null);
+                setDropTargetKey(null);
+              }}
+              className={`cursor-pointer rounded-xl transition-opacity ${
+                draggedKey === cell.key ? 'opacity-40' : 'hover:opacity-90'
+              } ${dropTargetKey === cell.key ? 'ring-2 ring-accent-primary ring-offset-2 ring-offset-surface-chat' : ''}`}
             >
               {renderCell(cell, 'grid')}
             </div>

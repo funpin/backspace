@@ -134,6 +134,13 @@ export function TileInset({ cell }: TileInsetProps) {
       onPointerMove={handlePointerMove}
       onPointerUp={(e) => endPress(e, true)}
       onPointerCancel={(e) => endPress(e, false)}
+      // The cell underneath is draggable for reordering; a drag that starts
+      // on the inset moves the inset, not the cell.
+      draggable
+      onDragStart={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
       onClickCapture={swallowDragClick}
       onClick={stopClick}
     >
