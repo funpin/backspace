@@ -708,11 +708,23 @@ When neither native API is available the effect returns without throwing; the `v
 ```
 
 Capture was already unprocessed stereo. LiveKit infers stereo from
-`channelCount: 2` and disables DTX and RED for stereo tracks; the explicit
-`forceStereo: true`, `dtx: false`, and `red: false` publication options preserve
-that behavior visibly. The functional change is the preset upgrade from
-`AudioPresets.music` (48 kbps) to `AudioPresets.musicHighQualityStereo`
-(128 kbps), approximately 80 kbps more for a screen share carrying audio.
+`channelCount: 2` and disables DTX and RED for stereo tracks unless asked; the
+publication sets `forceStereo: true` and `dtx: false` explicitly and turns RED
+back on with `red: true`. The preset is `AudioPresets.musicHighQualityStereo`
+(128 kbps).
+
+**Loss protection (`red: true`).** A screen share's audio had none. Opus at
+this bitrate encodes music in CELT mode, which has no in-band FEC
+(`useinbandfec=1` is negotiated but `fecPacketsReceived` stays 0), and audio is
+not retransmitted (no `nack` feedback is negotiated for it). Measured in a live
+call: 0.7 to 0.9 % of the track's packets lost, in runs of two or three, each
+run an audible gap (183 concealment events and 7.5 s of concealed audio in
+about twenty minutes). With RED each packet also carries the previous one, so
+the SFU rebuilds a single lost packet on the sharer's uplink before forwarding.
+It costs up to about 128 kbps more on that uplink. It does not cover a run of
+two or more lost packets, and it does not protect the SFU-to-viewer leg:
+LiveKit 1.9 forwards the track to subscribers as plain Opus. Which leg lost
+the packets in that call was not established.
 
 **Persistence:** `voiceStore` with Zustand localStorage. Keys: `echoCancellation`, `autoGainControl`, `rnnoiseEnabled`, `screenShareConfig`.
 

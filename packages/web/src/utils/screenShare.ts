@@ -38,7 +38,7 @@ export interface ScreenShareBuildResult {
     backupCodecPolicy?: BackupCodecPolicy;
     audioPreset: typeof AudioPresets.musicHighQualityStereo;
     dtx: false;
-    red: false;
+    red: true;
     forceStereo: true;
   };
   overdrive: OverdriveOptions;
@@ -205,7 +205,11 @@ export function buildScreenShareOptions(savedConfig: ScreenShareConfig): ScreenS
       backupCodecPolicy: BackupCodecPolicy.SIMULCAST,
       audioPreset: AudioPresets.musicHighQualityStereo,
       dtx: false,
-      red: false,
+      // Redundant audio (each packet also carries the one before it). Music has
+      // no in-band FEC at this bitrate (CELT) and audio is not retransmitted,
+      // so without it every lost packet is an audible gap. livekit-client turns
+      // RED off for stereo unless asked.
+      red: true,
       forceStereo: true,
     },
     overdrive: {
