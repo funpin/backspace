@@ -146,8 +146,10 @@ export function ActivityPanel() {
 
   return (
     <div className="w-60 bg-surface-channel flex-shrink-0 overflow-y-auto select-none no-scrollbar hidden desktop:block border-l border-border-hard">
+      <div className="sticky top-0 z-raised h-12 px-4 flex items-center border-b border-border-hard bg-surface-channel">
+        <h3 className="text-lg font-semibold text-txt-primary truncate">{t('social:activity.title')}</h3>
+      </div>
       <div className="p-3">
-        <h3 className="text-xl font-semibold text-txt-primary mb-4 px-2">{t('social:activity.title')}</h3>
 
         {activeFriends.length === 0 && onlineFriends.length === 0 && offlineFriends.length === 0 ? (
           <div className="text-center py-8">
