@@ -1,6 +1,6 @@
 {
   "name": "@backspace/telemetry-receiver",
-  "version": "1.11.0-f.1.1",
+  "version": "2.0.0",
   "private": true,
   "license": "AGPL-3.0-only",
   "author": "Jannis Braun",
