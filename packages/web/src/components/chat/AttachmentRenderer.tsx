@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Attachment } from '@backspace/shared';
 import { useUIStore } from '../../stores/uiStore';
@@ -7,6 +7,9 @@ import { Tooltip } from '../ui/Tooltip';
 import { useFormatters } from '../../i18n/formatters';
 import { Icon } from '../ui/Icon';
 import { Tag } from '../ui/Tag';
+import { Button } from '../ui/Button';
+import { CodeBlock } from './CodeBlock';
+import { isPreviewableTextFile, languageOfFilename } from './codeLanguage';
 
 /** A 1px edge drawn over a media box, so the box keeps the dimensions it reserved. */
 const MEDIA_EDGE = 'after:pointer-events-none after:absolute after:inset-0 after:rounded-xl after:shadow-[inset_0_0_0_1px_var(--glass-border)]';
@@ -316,7 +319,9 @@ export function AttachmentRenderer({ attachment }: AttachmentRendererProps) {
   // The whole card is the download control, as before; the glyph at its right
   // edge is the card's own affordance and not a second button inside it.
   const fileType = fileTypeOf(originalName);
+  const previewable = isPreviewableTextFile(originalName, mimetype, size);
   return (
+    <div className="mt-1 max-w-full min-w-0">
     <button
       type="button"
       onClick={() => {
@@ -327,7 +332,7 @@ export function AttachmentRenderer({ attachment }: AttachmentRendererProps) {
           tray: true,
         });
       }}
-      className="mt-1 max-w-full desktop:max-w-[400px] flex items-center gap-2.5 p-2.5 bg-surface-elevated rounded-xl hover:bg-border-soft transition-colors duration-fast group/att text-left w-full min-w-0"
+      className="max-w-full desktop:max-w-[400px] flex items-center gap-2.5 p-2.5 bg-surface-elevated rounded-xl hover:bg-border-soft transition-colors duration-fast group/att text-left w-full min-w-0"
     >
       <div className={ICON_TILE}>
         <Icon name="file-text" />
@@ -344,5 +349,70 @@ export function AttachmentRenderer({ attachment }: AttachmentRendererProps) {
         <Icon name="download" />
       </span>
     </button>
+    {previewable && <TextFilePreview url={attUrl} name={originalName} />}
+    </div>
+  );
+}
+
+/** How much of a text file the preview reads; the rest stays in the download. */
+const PREVIEW_MAX_CHARS = 64 * 1024;
+
+type PreviewState =
+  | { status: 'closed' }
+  | { status: 'loading' }
+  | { status: 'failed' }
+  | { status: 'open'; text: string; truncated: boolean };
+
+/**
+ * The "show contents" control under a text file's card. The file is fetched
+ * only when the reader asks, so a message's height changes by their action
+ * and never while the list is settling (docs/systems/message-list.md).
+ */
+function TextFilePreview({ url, name }: { url: string; name: string }) {
+  const { t } = useTranslation(['chat']);
+  const [state, setState] = useState<PreviewState>({ status: 'closed' });
+  const requestRef = useRef(0);
+
+  useEffect(() => () => {
+    requestRef.current += 1;
+  }, []);
+
+  const toggle = (): void => {
+    if (state.status !== 'closed' && state.status !== 'failed') {
+      requestRef.current += 1;
+      setState({ status: 'closed' });
+      return;
+    }
+    const request = ++requestRef.current;
+    setState({ status: 'loading' });
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      })
+      .then((text) => {
+        if (requestRef.current !== request) return;
+        const truncated = text.length > PREVIEW_MAX_CHARS;
+        setState({ status: 'open', text: truncated ? text.slice(0, PREVIEW_MAX_CHARS) : text, truncated });
+      })
+      .catch(() => {
+        if (requestRef.current === request) setState({ status: 'failed' });
+      });
+  };
+
+  const open = state.status === 'open' || state.status === 'loading';
+  return (
+    <div className="mt-1">
+      <Button variant="ghost" size="sm" icon={open ? 'chevron-up' : 'chevron-down'} loading={state.status === 'loading'} aria-expanded={open} onClick={toggle}>
+        {open ? t('chat:attachment.preview.hide') : t('chat:attachment.preview.show')}
+      </Button>
+      {state.status === 'failed' && <p role="alert" className="mt-1 text-xs text-status-danger">{t('chat:attachment.preview.failed')}</p>}
+      {state.status === 'open' && (
+        <>
+          <CodeBlock language={languageOfFilename(name)} code={state.text} title={name} />
+          {state.truncated && <p className="mt-1 text-xs text-txt-tertiary">{t('chat:attachment.preview.truncated')}</p>}
+        </>
+      )}
+    </div>
   );
 }

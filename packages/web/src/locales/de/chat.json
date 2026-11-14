@@ -129,6 +129,12 @@
       "partialInstance": "der Instanz von {{username}} (Limit: {{limit}})",
       "partialList": "Die Datei konnte auf {{instances}} nicht zwischengespeichert werden. Die Empfänger können sie weiterhin über deine Instanz ansehen.",
       "listPair": "{{first}} und {{second}}"
+    },
+    "preview": {
+      "show": "Inhalt anzeigen",
+      "hide": "Inhalt ausblenden",
+      "failed": "Die Datei konnte nicht geladen werden. Lade sie stattdessen herunter.",
+      "truncated": "Der Anfang der Datei wird angezeigt. Lade sie herunter, um den Rest zu sehen."
     }
   },
   "gif": {
@@ -221,5 +227,10 @@
     "action": "Anstupsen",
     "received": "{{actor}} hat {{target}} angestupst",
     "disconnected": "Verbindung getrennt. Anstupsen wurde nicht gesendet."
+  },
+  "code": {
+    "showAll_one": "Alles anzeigen, {{count}} Zeile",
+    "showAll_other": "Alles anzeigen, {{count}} Zeilen",
+    "collapse": "Einklappen"
   }
 }

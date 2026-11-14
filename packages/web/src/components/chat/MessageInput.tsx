@@ -13,6 +13,7 @@ import { InputPopover, type InputPopoverTab } from './InputPopover';
 import { StagedTransferTiles } from './StagedTransferTiles';
 import { hasPermissionBit, PermissionBits } from '../../utils/permissions';
 import { MAX_MESSAGE_LENGTH } from '@backspace/shared';
+import { PASTED_FILE_NAME, shouldPasteAsFile } from './pasteAsFile';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useComposerStore } from '../../stores/composerStore';
@@ -424,12 +425,25 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
 
   const handlePaste = (e: React.ClipboardEvent): void => {
     const items = e.clipboardData.items;
+    let pastedImage = false;
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item && item.type.startsWith('image/')) {
         const file = item.getAsFile();
-        if (file) void enqueueFile({ file });
+        if (file) {
+          pastedImage = true;
+          void enqueueFile({ file });
+        }
       }
+    }
+    if (pastedImage) return;
+
+    // Text too long for a message becomes a file instead of being cut off or
+    // flooding the chat: the reader gets a card they can open.
+    const text = e.clipboardData.getData('text/plain');
+    if (shouldPasteAsFile(text, draftText.length)) {
+      e.preventDefault();
+      void enqueueFile({ file: new File([text], PASTED_FILE_NAME, { type: 'text/plain' }) });
     }
   };
 
