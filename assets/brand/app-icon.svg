@@ -25,12 +25,12 @@
 <feBlend mode="normal" in2="shape" result="effect2_innerShadow_262_215"/>
 </filter>
 <linearGradient id="paint0_linear_262_215" x1="128" y1="0" x2="128" y2="256" gradientUnits="userSpaceOnUse">
-<stop stop-color="#2a2740"/>
-<stop offset="1" stop-color="#12101d"/>
+<stop stop-color="#232327"/>
+<stop offset="1" stop-color="#0c0c0e"/>
 </linearGradient>
 <linearGradient id="paint1_linear_262_215" x1="62" y1="38" x2="195.275" y2="234.914" gradientUnits="userSpaceOnUse">
 <stop stop-color="white"/>
-<stop offset="1" stop-color="#7c6cf6"/>
+<stop offset="1" stop-color="#6e5bef"/>
 </linearGradient>
 <linearGradient id="badgeSheen" x1="128" y1="0" x2="128" y2="256" gradientUnits="userSpaceOnUse">
 <stop offset="0%" stop-color="white" stop-opacity="0.1"/>

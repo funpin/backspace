@@ -23,9 +23,9 @@
  * taskbar, Start menu, Alt-Tab, PWA install, iOS home screen), is the
  * contributor's original dimensional composition recoloured to the
  * lavender system: a badge (a rounded rectangle at Apple's own 22.37%
- * template corner radius) on a `#2a2740`-to-`#12101d` plum gradient,
+ * template corner radius) on a `#232327`-to-`#0c0c0e` graphite gradient,
  * drop shadow, inner shadow and a soft-light stroke overlay, with the
- * glyph itself a white-to-`#7c6cf6` gradient. See
+ * glyph itself a white-to-`#6e5bef` gradient. See
  * `docs/systems/design-system.md`'s Brand section for the full rule.
  *
  * APP-ICON RENDERING: every app-icon output renders straight from vector.
@@ -77,8 +77,8 @@ const BRAND          = join(ROOT, 'assets/brand');
 // app-icon.svg's gradient stops: the two files sharing these literal
 // values is the intended coupling; if the badge gradient ever changes,
 // both need editing together regardless.
-const PLUM_GRADIENT_TOP = '#2a2740';
-const PLUM_GRADIENT_BOTTOM = '#12101d';
+const GROUND_GRADIENT_TOP = '#232327';
+const GROUND_GRADIENT_BOTTOM = '#0c0c0e';
 
 // SVG render density. app-icon(-small).svg's viewBox is 256; mark(-small)
 // is 133x180. At density 1200, the 256 box pre-renders to ~3200px and the
@@ -197,7 +197,7 @@ function plumGradientSvg(size) {
   return Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">` +
       `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="${size}" gradientUnits="userSpaceOnUse">` +
-      `<stop stop-color="${PLUM_GRADIENT_TOP}"/><stop offset="1" stop-color="${PLUM_GRADIENT_BOTTOM}"/>` +
+      `<stop stop-color="${GROUND_GRADIENT_TOP}"/><stop offset="1" stop-color="${GROUND_GRADIENT_BOTTOM}"/>` +
       `</linearGradient></defs><rect width="${size}" height="${size}" fill="url(#g)"/></svg>`,
   );
 }
@@ -336,7 +336,7 @@ async function writeAppleTouchIcon(path, icons, size) {
 }
 
 async function writeMaskableIcon(path, markSvg, canvas, heightScale) {
-  // PWA maskable icon: the badge's plum gradient fills the full canvas
+  // PWA maskable icon: the badge's graphite gradient fills the full canvas
   // (Android launcher masks, such as circle, squircle or rounded-square,
   // crop arbitrarily past the icon's own bounding box, so the ground must
   // extend to every edge), with the gradient mark centred at
