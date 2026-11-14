@@ -1,0 +1,910 @@
+<title>Backspace: направления редизайна</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Manrope:wght@400..700&family=Onest:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working app mock at a time, switched by a sticky bar; notes and a comparison below it. Single dark look by choice: the product is dark-first. */
+:root{
+  color-scheme:dark;
+  --pg:#0a0a0c; --pg-2:#131316; --pg-3:#1b1b20; --pg-line:rgba(255,255,255,.09);
+  --ink:#ececf0; --ink-2:#a3a3ad; --ink-3:#6c6c77; --pg-accent:#9d90fa;
+  --f-page:'Geist','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--pg);color:var(--ink);font-family:var(--f-page);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font-size:30px;line-height:1.15;letter-spacing:-.02em;margin:0;font-weight:600;text-wrap:balance}
+h2{font-size:19px;letter-spacing:-.01em;margin:0;font-weight:600}
+p{margin:0;color:var(--ink-2);max-width:68ch}
+.lead{display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,select:focus-visible{outline:2px solid var(--pg-accent);outline-offset:2px}
+
+/* ── page controls ── */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;
+  background:color-mix(in srgb,var(--pg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  padding-block:10px;border-bottom:1px solid var(--pg-line)}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--pg-2);border:1px solid var(--pg-line);border-radius:10px;padding:3px;gap:2px}
+.seg button{padding:6px 11px;border-radius:7px;color:var(--ink-2);font-size:13.5px;font-weight:500;transition:background .15s,color .15s;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--pg-3);color:var(--ink);box-shadow:inset 0 0 0 1px var(--pg-line)}
+.lbl{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-3)}
+select{font:500 13.5px var(--f-page);color:var(--ink);background:var(--pg-2);border:1px solid var(--pg-line);border-radius:10px;padding:8px 10px}
+.pals{display:flex;gap:6px;align-items:center}
+.pal{width:26px;height:26px;border-radius:50%;position:relative;border:2px solid transparent;transition:transform .15s}
+.pal i{position:absolute;inset:2px;border-radius:50%;background:linear-gradient(135deg,var(--a) 0 50%,var(--b) 50% 100%)}
+.pal:hover{transform:scale(1.1)}
+.pal[aria-pressed="true"]{border-color:var(--ink)}
+.scroller{overflow-x:auto;border-radius:16px;border:1px solid var(--pg-line)}
+.hint{font-size:13px;color:var(--ink-3)}
+
+/* ══ the app mock ══ */
+.app{
+  /* palette group (switchable in settings): accent + secondary. Service colours are fixed. */
+  --acc:#a99dff; --acc-f:#6e5bef; --acc2:#7fb0ff; --on-acc:#fff; --ok:#6fdc9a; --warn:#e8b65a; --danger:#f2777a;
+  --acc-soft:color-mix(in srgb,var(--acc) 16%,transparent);
+  position:relative;display:grid;grid-template-columns:60px 244px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;min-width:1000px;height:680px;
+  background:var(--s0);color:var(--t1);font-family:var(--font);font-size:var(--fs);line-height:1.45;
+  gap:var(--gap);padding:var(--gap);overflow:hidden;
+}
+.app *{transition-timing-function:var(--ease)}
+/* A — Графит: graphite neutrals, hairlines, tight radii, dense */
+.app[data-dir="a"]{
+  --s0:#0c0c0e; --s1:#101012; --s2:#0c0c0e; --s3:#18181b; --s-in:#151518; --line:rgba(255,255,255,.075);
+  --t1:#ededf0; --t2:#a0a0a8; --t3:#7e7e89;
+  --font:'Geist','Inter',system-ui,sans-serif; --fs:13px; --row:30px; --ctl:30px;
+  --r-sm:4px; --r-md:6px; --r-lg:10px; --r-ctl:6px; --r-panel:0px; --av-r:30%;
+  --gap:0px; --panel-line:1px solid var(--line); --iw:1.5;
+  --glass:#18181b; --blur:0px; --shadow:0 0 0 1px var(--line),0 12px 32px rgba(0,0,0,.5);
+  --dur:140ms; --ease:cubic-bezier(.2,0,0,1); --pop:cubic-bezier(.2,0,0,1);
+  --mark:rgba(255,255,255,.065); --w-head:600;
+}
+/* B — Острова: floating rounded panels, soft glass, pill controls, springy */
+.app[data-dir="b"]{
+  --s0:#07060b; --s1:#13121a; --s2:#13121a; --s3:#1e1d29; --s-in:#0d0c13; --line:rgba(255,255,255,.06);
+  --t1:#f2f1f7; --t2:#a9a7b8; --t3:#6a6879;
+  --font:'Manrope','Inter',system-ui,sans-serif; --fs:14px; --row:36px; --ctl:36px;
+  --r-sm:8px; --r-md:12px; --r-lg:20px; --r-ctl:999px; --r-panel:18px; --av-r:50%;
+  --gap:8px; --panel-line:0; --iw:1.9;
+  --glass:rgba(30,29,41,.6); --blur:24px; --shadow:0 0 0 1px var(--line),0 16px 48px rgba(0,0,0,.55);
+  --dur:320ms; --ease:cubic-bezier(.3,1.3,.6,1); --pop:cubic-bezier(.3,1.5,.55,1);
+  --mark:var(--acc-soft); --w-head:700;
+}
+/* C — Камень: graphite neutrals (same as A), medium radii, comfortable density */
+.app[data-dir="c"]{
+  --s0:#0c0c0e; --s1:#121214; --s2:#0c0c0e; --s3:#1b1b1f; --s-in:#151518; --line:rgba(255,255,255,.075);
+  --t1:#ededf0; --t2:#a0a0a8; --t3:#7e7e89;
+  --font:'Onest','Inter',system-ui,sans-serif; --fs:14px; --row:34px; --ctl:34px;
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-ctl:10px; --r-panel:0px; --av-r:50%;
+  --gap:0px; --panel-line:0; --iw:1.75;
+  --glass:rgba(27,27,31,.78); --blur:16px; --shadow:0 0 0 1px var(--line),0 14px 40px rgba(0,0,0,.5);
+  --dur:220ms; --ease:cubic-bezier(.22,1,.36,1); --pop:cubic-bezier(.22,1,.36,1);
+  --mark:var(--s3); --w-head:600;
+}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:var(--iw);stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.f{fill:currentColor;stroke:none}
+.ic.s{width:15px;height:15px}
+.ic.xs{width:13px;height:13px}
+.av{width:32px;height:32px;border-radius:var(--av-r);display:grid;place-items:center;font-weight:600;font-size:13px;color:#14131a;flex:none;position:relative}
+.av.sm{width:20px;height:20px;font-size:9.5px}
+.av.md{width:38px;height:38px;font-size:15px}
+.av.lg{width:64px;height:64px;font-size:24px}
+.dot{position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2.5px var(--s3)}
+.dot.idle{background:var(--warn)}.dot.off{background:var(--t3)}
+
+/* strip */
+.strip{grid-column:1;grid-row:1 / 3;background:var(--s1);border-radius:var(--r-panel);border-right:var(--panel-line);display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 0 10px}
+/* one rule runs the full width at the header height: strip, sidebar and main share it */
+.strip-h{width:100%;height:48px;display:grid;place-items:center;border-bottom:1px solid var(--line);flex:none;margin-bottom:2px}
+.strip .gapv{height:8px}
+.sp{width:40px;height:40px;border-radius:var(--r-lg);display:grid;place-items:center;background:var(--s3);color:var(--t2);font-weight:600;transition:background var(--dur),transform var(--dur),color var(--dur);position:relative}
+.sp:hover{color:var(--t1);transform:translateY(-1px)}
+/* home button: placement and style variants to choose from (data-logo on .app) */
+.sp.home{width:40px;height:40px}
+.sp.home svg{width:17px;height:23px}
+.sp.home:hover{transform:none}
+/* row*: the logo is the first tile of the column, 10px from the top (same as its side margins); the header rule starts at the sidebar */
+.app[data-logo^="row"] .strip-h{border-bottom:0;margin-bottom:0;height:auto;padding-top:10px}
+.app[data-logo$="tile"] .sp.home{background:var(--s3);color:var(--acc);box-shadow:inset 0 0 0 1px var(--line)}
+.app[data-logo$="tile"] .sp.home:hover{background:var(--acc-soft)}
+.app[data-logo="rowfill"] .sp.home{background:var(--acc-f);color:var(--on-acc)}
+.app[data-logo="rowfill"] .sp.home:hover{filter:brightness(1.08)}
+/* cellfull: the whole header cell is the button, so there is no inner tile and no inner padding to get wrong */
+.app[data-logo="cellfull"] .strip-h{overflow:hidden;border-radius:var(--r-panel) var(--r-panel) 0 0}
+.app[data-logo="cellfull"] .sp.home{width:100%;height:100%;border-radius:0;background:var(--acc-soft);color:var(--acc)}
+.app[data-logo="cellfull"] .sp.home:hover{background:color-mix(in srgb,var(--acc) 26%,transparent)}
+.app[data-logo="cellfull"] .sp.home svg{width:19px;height:26px}
+.app[data-logo="cellmark"] .sp.home{background:transparent;color:var(--acc)}
+.app[data-logo="cellmark"] .sp.home svg{width:20px;height:27px}
+.app[data-logo="cellmark"] .sp.home:hover{background:var(--acc-soft)}
+.sp.on::before{content:"";position:absolute;left:-10px;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--t1)}
+.app[data-dir="b"] .sp.on::before{left:auto;top:auto;bottom:-5px;width:14px;height:3px;border-radius:3px;background:var(--acc)}
+.sp .badge{position:absolute;right:-3px;top:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--acc2);color:#0c0c10;font-size:10px;font-weight:700;display:grid;place-items:center;box-shadow:0 0 0 2.5px var(--s1)}
+
+/* sidebar */
+.side{grid-column:2;grid-row:1 / 3;background:var(--s1);border-radius:var(--r-panel);border-right:var(--panel-line);display:flex;flex-direction:column;min-height:0}
+.side-h{height:48px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;font-weight:var(--w-head);font-size:calc(var(--fs) + 1px);border-bottom:1px solid var(--line);flex:none}
+.chans{flex:1;overflow:hidden;padding:8px;position:relative}
+.cat{font-size:12px;font-weight:500;color:var(--t3);padding:12px 8px 5px}
+.ch{position:relative;z-index:1;width:100%;height:var(--row);display:flex;align-items:center;gap:8px;padding:0 8px;border-radius:var(--r-ctl);color:var(--t2);text-align:left;transition:color var(--dur),background var(--dur)}
+.app[data-dir="a"] .ch,.app[data-dir="c"] .ch{border-radius:var(--r-md)}
+.ch:hover{color:var(--t1);background:rgba(255,255,255,.035)}
+.ch.on{color:var(--t1);font-weight:500}
+.ch .un{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--acc2)}
+.marker{position:absolute;top:0;left:8px;right:8px;height:var(--row);border-radius:var(--r-md);background:var(--mark);transition:transform var(--dur) var(--ease);pointer-events:none}
+.app[data-dir="b"] .marker{border-radius:999px}
+.vu{display:flex;align-items:center;gap:8px;height:27px;padding:0 8px 0 32px;color:var(--t2);font-size:calc(var(--fs) - 1px)}
+.vu .ic{margin-left:auto;color:var(--t3)}
+.vu .ic+.ic,.vu .live+.ic{margin-left:0}
+.live{font-size:9.5px;font-weight:700;letter-spacing:.05em;height:16px;padding:0 5px;border-radius:var(--r-sm);background:var(--danger);color:#16090a;display:inline-flex;align-items:center}
+.vu .live{margin-left:auto}
+
+/* user card: floating, spans strip + sidebar */
+.me{grid-column:1 / 3;grid-row:2;z-index:2;margin:8px;border-radius:var(--r-lg);background:var(--glass);backdrop-filter:blur(var(--blur));-webkit-backdrop-filter:blur(var(--blur));box-shadow:inset 0 0 0 1px var(--line),0 8px 24px rgba(0,0,0,.35);display:flex;flex-direction:column}
+.me-v{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px;border-bottom:1px solid var(--line)}
+.me-v .sig{color:var(--ok);display:flex}
+.me-v button.conn{text-align:left;flex:1;min-width:0}
+.me-v b{display:block;font-weight:600;font-size:calc(var(--fs) - .5px);color:var(--ok);line-height:1.25}
+.me-v small{color:var(--t3);font-size:11.5px;font-variant-numeric:tabular-nums}
+.me-u{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 10px}
+.me-u b{display:block;font-weight:600;line-height:1.2}
+.me-u small{color:var(--t3);font-size:11.5px}
+.tools{margin-left:auto;display:flex;gap:2px}
+.ib{width:var(--ctl);height:var(--ctl);border-radius:var(--r-ctl);display:grid;place-items:center;color:var(--t2);transition:background var(--dur),color var(--dur),transform var(--dur);flex:none}
+.ib:hover{background:rgba(255,255,255,.07);color:var(--t1)}
+.ib:active{transform:scale(.92)}
+.ib.sm{width:28px;height:28px}
+.ib.dng{color:var(--danger)}
+
+/* main */
+.main{grid-column:3;grid-row:1 / 3;background:var(--s2);border-radius:var(--r-panel);display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;overflow:hidden}
+.main-h{height:48px;padding:0 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);flex:none}
+.main-h b{font-weight:var(--w-head);font-size:calc(var(--fs) + 1px);white-space:nowrap}
+.main-h .topic{color:var(--t3);font-size:calc(var(--fs) - 1px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.main-h .sp8{flex:1}
+.pane{flex:1;min-height:0;position:relative;animation:pane var(--dur) var(--ease) both}
+@keyframes pane{from{opacity:.5;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* chat */
+.msgs{padding:14px 16px 92px;display:flex;flex-direction:column;gap:calc(var(--row) / 2.6)}
+.day{display:flex;align-items:center;gap:12px;color:var(--t3);font-size:11.5px;font-weight:500}
+.day::before,.day::after{content:"";flex:1;border-top:1px solid var(--line)}
+.msg{display:flex;gap:12px;animation:msg calc(var(--dur) * 1.4) var(--ease) both}
+.msg:nth-child(3){animation-delay:50ms}.msg:nth-child(4){animation-delay:100ms}.msg:nth-child(5){animation-delay:150ms}
+@keyframes msg{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg .body{min-width:0}
+.msg .who{display:flex;align-items:baseline;gap:8px}
+.msg .who b{font-weight:600}
+.msg .who time{color:var(--t3);font-size:11.5px}
+.msg p{color:color-mix(in srgb,var(--t1) 88%,var(--t2));max-width:none;font-size:inherit;line-height:1.5}
+.reply{display:flex;align-items:center;gap:6px;color:var(--t3);font-size:calc(var(--fs) - 1.5px);margin-bottom:2px}
+.reply::before{content:"";width:18px;height:8px;border:1.5px solid var(--t3);border-right:0;border-bottom:0;border-radius:5px 0 0 0;margin-top:6px;opacity:.6}
+.mention{color:var(--acc2);background:color-mix(in srgb,var(--acc2) 15%,transparent);padding:0 4px;border-radius:var(--r-sm);font-weight:500}
+.rx{display:flex;gap:6px;margin-top:6px}
+.pill{height:26px;padding:0 9px;border-radius:var(--r-ctl);display:inline-flex;align-items:center;gap:6px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;color:var(--t2);font-variant-numeric:tabular-nums;transition:transform var(--dur) var(--pop),background var(--dur),box-shadow var(--dur),color var(--dur)}
+.pill:hover{transform:translateY(-1px)}
+.pill.mine{background:var(--acc-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent);color:var(--t1)}
+.pill.bump{animation:bump calc(var(--dur) * 1.6) var(--pop)}
+@keyframes bump{40%{transform:scale(1.18)}}
+.typing{position:absolute;left:60px;bottom:70px;display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px}
+.typing i{width:5px;height:5px;border-radius:50%;background:var(--t2);animation:ty 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes ty{0%,60%,100%{opacity:.25;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.composer{position:absolute;left:16px;right:16px;bottom:14px;min-height:46px;border-radius:var(--r-lg);background:var(--glass);backdrop-filter:blur(var(--blur));-webkit-backdrop-filter:blur(var(--blur));box-shadow:var(--shadow);display:flex;align-items:center;gap:4px;padding:0 6px}
+.app[data-dir="b"] .composer{border-radius:999px;padding:0 8px}
+.composer span{flex:1;color:var(--t3);padding:0 6px}
+.send{width:var(--ctl);height:var(--ctl);border-radius:var(--r-ctl);background:var(--acc-f);color:var(--on-acc);display:grid;place-items:center;transition:transform var(--dur) var(--pop)}
+.send:hover{transform:scale(1.06)}.send:active{transform:scale(.94)}
+
+/* chat attachments: image, video, GIF, sticker, file, code */
+.msgs.scroll{position:absolute;inset:0;overflow-y:auto;padding-bottom:84px;scrollbar-width:thin;scrollbar-color:var(--s3) transparent}
+.att{margin-top:6px;border-radius:var(--r-lg);overflow:hidden;position:relative;width:340px;max-width:100%;box-shadow:inset 0 0 0 1px var(--line);display:block}
+.att.two{display:grid;grid-template-columns:1fr 1fr;gap:3px;box-shadow:none}
+.att.two .ph{border-radius:0}
+.ph{aspect-ratio:16/10;background:var(--g);display:block;position:relative}
+.ph.sq{aspect-ratio:1}
+.badge-m{position:absolute;left:8px;top:8px;height:20px;padding:0 7px;border-radius:var(--r-sm);background:rgba(0,0,0,.6);color:#f0f0f3;font-size:10.5px;font-weight:700;letter-spacing:.04em;display:inline-flex;align-items:center}
+.gif{background-size:220% 220%;animation:gif 3.2s ease-in-out infinite alternate}
+@keyframes gif{from{background-position:0 0}to{background-position:100% 100%}}
+.play{position:absolute;inset:0;margin:auto;width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:grid;place-items:center;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);transition:transform var(--dur) var(--pop)}
+.att:hover .play{transform:scale(1.08)}
+.vbar{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 9px;background:linear-gradient(transparent,rgba(0,0,0,.72));display:flex;align-items:center;gap:9px;font-size:11.5px;color:#eeeef2;font-variant-numeric:tabular-nums}
+.vbar u{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.25);position:relative;text-decoration:none}
+.vbar u::after{content:"";position:absolute;left:0;top:0;bottom:0;width:32%;border-radius:2px;background:var(--acc)}
+.sticker{margin-top:6px;width:112px;height:112px;display:block;transition:transform var(--dur) var(--pop)}
+.sticker:hover{transform:rotate(-5deg) scale(1.06)}
+.file{margin-top:6px;display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--r-lg);background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);width:340px;max-width:100%}
+.app[data-dir="a"] .file{background:var(--s1)}
+.file .fi{width:38px;height:38px;border-radius:var(--r-md);background:var(--acc-soft);color:var(--acc);display:grid;place-items:center;flex:none}
+.file>div{min-width:0;flex:1}
+.file b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file small{color:var(--t3);font-size:calc(var(--fs) - 1.5px);font-variant-numeric:tabular-nums}
+.prog{height:3px;border-radius:2px;background:var(--line);margin-top:6px;overflow:hidden}
+.prog i{display:block;height:100%;width:62%;border-radius:2px;background:var(--acc)}
+.code{margin-top:6px;border-radius:var(--r-lg);background:var(--s-in);box-shadow:inset 0 0 0 1px var(--line);width:520px;max-width:100%;overflow:hidden}
+.code-h{display:flex;align-items:center;gap:8px;min-height:34px;padding:3px 4px 3px 12px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--t3)}
+.code-h b{color:var(--t1);font-weight:500;font-size:calc(var(--fs) - 1px)}
+.code-h small{font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.code-t{margin-left:auto;display:flex;gap:2px}
+/* language tag: colour belongs to the language, not to the theme */
+.lang{height:20px;padding:0 8px;border-radius:var(--r-ctl);font-size:11px;font-weight:600;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.lang::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
+.code.clip pre{max-height:118px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+.code.clip.open pre{max-height:none;-webkit-mask-image:none;mask-image:none}
+.more{width:100%;height:32px;border-top:1px solid var(--line);font-size:12px;font-weight:500;color:var(--t2);transition:background var(--dur),color var(--dur)}
+.more:hover{background:rgba(255,255,255,.05);color:var(--t1)}
+.code pre{margin:0;padding:10px 12px;overflow-x:auto;font:12.5px/1.65 var(--f-mono);color:var(--t1)}
+.code .k{color:var(--acc)}.code .s{color:var(--acc2)}.code .c{color:var(--t3)}
+.ci{font:12.5px var(--f-mono);background:var(--s3);padding:1px 5px;border-radius:var(--r-sm)}
+
+/* transfers: header button with a count, and the panel that drops under it */
+.tr-btn{position:relative;color:var(--acc)}
+.tr-btn i{position:absolute;right:-2px;top:-2px;min-width:14px;height:14px;padding:0 3px;border-radius:7px;background:var(--acc-f);color:var(--on-acc);font:700 9.5px/14px var(--font);text-align:center;box-shadow:0 0 0 2px var(--s2)}
+.dl{width:340px;right:12px;top:54px;padding:0;gap:0;overflow:hidden}
+.dl-b{padding:6px;display:flex;flex-direction:column;gap:2px}
+.dl .sec{margin:6px 6px 2px;padding-top:8px}
+.dl .sec:first-child{border-top:0;margin-top:0;padding-top:4px}
+.xf{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:var(--r-md);transition:background var(--dur)}
+.xf:hover{background:rgba(255,255,255,.05)}
+.xf .fi{width:32px;height:32px;border-radius:var(--r-md);background:var(--s3);color:var(--t2);display:grid;place-items:center;flex:none}
+.xf .fi.act{background:var(--acc-soft);color:var(--acc)}
+.xf>div{flex:1;min-width:0}
+.xf b{display:block;font-weight:500;font-size:calc(var(--fs) - .5px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xf small{color:var(--t3);font-size:11.5px;font-variant-numeric:tabular-nums}
+.xf .prog{margin-top:5px}
+
+/* voice: grid of tiles, ribbon of idle people, control bar — same parts as the app today */
+.vgrid{position:absolute;inset:12px 16px 140px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px}
+.tile{border-radius:var(--r-lg);background:var(--s3);position:relative;overflow:hidden;display:grid;place-items:center}
+.app[data-dir="a"] .tile{background:var(--s1);box-shadow:inset 0 0 0 1px var(--line)}
+.tile.scr{background:#0a0a0c;place-items:stretch}
+.tile.speak{box-shadow:0 0 0 2px var(--ok);animation:speak 1.6s ease-in-out infinite}
+@keyframes speak{50%{box-shadow:0 0 0 2px var(--ok),0 0 0 6px color-mix(in srgb,var(--ok) 18%,transparent)}}
+.fake{position:absolute;inset:0;padding:38px 9% 46px;display:flex;flex-direction:column;justify-content:space-between;background:var(--tint,#141210)}
+.fake i{height:9%;border-radius:2px;background:rgba(255,255,255,.1)}
+.cam{position:absolute;inset:0;background:var(--tint,#2f5b3c);display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.cam::before{content:"";width:26%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.34);margin-bottom:4%}
+.cam::after{content:"";width:44%;height:34%;background:rgba(255,255,255,.34);border-radius:4px 4px 0 0}
+.tl,.tr{position:absolute;top:8px;display:flex;gap:6px;align-items:center}.tl{left:8px}.tr{right:8px}
+.q{height:20px;padding:0 7px;border-radius:var(--r-sm);background:rgba(0,0,0,.6);color:#d6d6dc;font-size:10.5px;font-weight:600;letter-spacing:.03em;display:inline-flex;align-items:center;font-variant-numeric:tabular-nums}
+.tr .ib{width:26px;height:26px;background:rgba(0,0,0,.6);color:#e4e4e8;opacity:0;transition:opacity var(--dur)}
+.tile:hover .tr .ib{opacity:1}
+.tb{position:absolute;left:0;right:0;bottom:0;padding:20px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.66));display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:#f2f2f4}
+.tb .ic{color:#c9c9d0}
+.tb .r{margin-left:auto;display:flex;gap:5px}
+.chip{width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.6);display:grid;place-items:center;color:#e4e4e8}
+.chip.bad{background:color-mix(in srgb,var(--danger) 85%,#000);color:#16090a}
+.faces{display:flex}
+.faces .av{margin-left:-6px;box-shadow:0 0 0 2px #0b0b0d;transition:margin var(--dur) var(--pop)}
+.faces .av:first-child{margin-left:0}
+.faces:hover .av{margin-left:2px}
+.inset{position:absolute;right:8px;bottom:36px;width:23%;aspect-ratio:16/10;border-radius:var(--r-md);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.14),0 6px 18px rgba(0,0,0,.5)}
+.watch{display:flex;align-items:center;gap:12px}
+.watch>div{display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:var(--t2)}
+.ribbon{position:absolute;left:0;right:0;bottom:74px;display:flex;justify-content:center;gap:20px}
+.rp{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--t3);position:relative}
+.rp .chip{position:absolute;right:-6px;top:22px;width:17px;height:17px;box-shadow:0 0 0 2px var(--s2)}
+.cursor{position:absolute;left:54%;top:46%;animation:cur 5s var(--ease) infinite alternate;z-index:1}
+.cursor svg{width:16px;height:16px;fill:var(--c,var(--acc));stroke:#0c0c10;stroke-width:1.2;display:block}
+.cursor span{position:absolute;left:12px;top:14px;background:var(--c,var(--acc));color:#0c0c10;font-size:11px;font-weight:600;padding:2px 7px;border-radius:var(--r-ctl);white-space:nowrap}
+.app[data-dir="a"] .cursor span,.app[data-dir="c"] .cursor span{border-radius:var(--r-sm)}
+.cursor.two{left:30%;top:60%;animation-duration:7s;animation-direction:alternate-reverse}
+@keyframes cur{0%{transform:translate(-90px,-40px)}50%{transform:translate(30px,26px)}100%{transform:translate(-20px,70px)}}
+.ctrl{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:6px;border-radius:calc(var(--r-ctl) + 6px);background:var(--glass);backdrop-filter:blur(var(--blur));-webkit-backdrop-filter:blur(var(--blur));box-shadow:var(--shadow);display:flex;gap:4px;align-items:center}
+.ctrl .ib{width:40px;height:40px;background:rgba(255,255,255,.05)}
+.ctrl .ib.off{color:var(--danger);background:color-mix(in srgb,var(--danger) 14%,transparent)}
+.ctrl .ib.on{color:var(--on-acc);background:var(--acc-f)}
+.ctrl .ib.end{background:var(--danger);color:#16090a;width:52px}
+.ctrl hr{height:22px;border:0;border-left:1px solid var(--line);margin:0 4px}
+/* voice: focused stream with zoom tools and minimap */
+.stage{position:absolute;inset:12px 16px 140px;border-radius:var(--r-lg);background:#0a0a0c;overflow:hidden}
+.stage .fake{padding:9% 6% 12% 10%;transform-origin:30% 40%;transition:transform var(--dur) var(--ease)}
+.zt{position:absolute;right:8px;top:8px;display:flex;gap:6px;align-items:center;z-index:2}
+.zt>*{height:30px;border-radius:var(--r-md);background:rgba(0,0,0,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#e9e9ee;display:inline-flex;align-items:center}
+.app[data-dir="b"] .zt>*{border-radius:999px}
+.zt .zoom{padding:0 4px;gap:2px}
+.zt .zoom button{width:24px;height:24px;display:grid;place-items:center;border-radius:var(--r-sm)}
+.zt .zoom button:hover{background:rgba(255,255,255,.12)}
+.zt input[type=range]{width:96px;accent-color:var(--acc);height:4px;margin:0 4px}
+.zt output{min-width:44px;text-align:center;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.zt .zb{width:30px;justify-content:center;transition:background var(--dur)}
+.zt .zg{padding:0 10px 0 8px;gap:6px;font-size:12.5px;font-weight:500}
+.zt .zb:hover,.zt .zg:hover{background:rgba(0,0,0,.85)}
+.mini{position:absolute;right:8px;top:46px;width:150px;aspect-ratio:16/10;border-radius:var(--r-md);background:#000;box-shadow:0 0 0 1px rgba(255,255,255,.2),0 8px 24px rgba(0,0,0,.5);overflow:hidden;z-index:2}
+.mini .fake{padding:14% 6% 14% 10%;transform:none}
+.mini u{position:absolute;left:10%;top:14%;width:66.6%;height:66.6%;border:2px solid var(--acc);border-radius:3px;transition:width var(--dur) var(--ease),height var(--dur) var(--ease)}
+
+/* explore */
+.scrolly{position:absolute;inset:0;overflow:hidden;padding:18px 20px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card-s{border-radius:var(--r-lg);background:var(--s3);overflow:hidden;display:flex;flex-direction:column;transition:transform var(--dur) var(--pop),box-shadow var(--dur)}
+.app[data-dir="a"] .card-s{background:var(--s1);box-shadow:inset 0 0 0 1px var(--line)}
+.card-s:hover{transform:translateY(-3px)}
+.ban{height:74px;background:var(--g);position:relative}
+.ban .q{position:absolute;right:8px;top:8px}
+.card-s .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card-s .av{width:44px;height:44px;border-radius:var(--r-md);margin-top:-22px;box-shadow:0 0 0 3px var(--s3);font-size:17px}
+.app[data-dir="a"] .card-s .av{box-shadow:0 0 0 3px var(--s1)}
+.card-s b{font-weight:600;font-size:calc(var(--fs) + 1px)}
+.card-s small{color:var(--t3);font-size:calc(var(--fs) - 1.5px);display:flex;align-items:center;gap:5px}
+.card-s p{font-size:calc(var(--fs) - 1px);color:var(--t2);flex:1}
+.card-s .btn{justify-content:center;margin-top:6px}
+.sub-h{font-size:12px;font-weight:500;color:var(--t3);margin:16px 0 8px}
+.sub-h:first-child{margin-top:0}
+/* friends */
+.fr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.tabs{display:inline-flex;gap:2px;padding:3px;border-radius:calc(var(--r-ctl) + 3px);background:var(--s-in);box-shadow:inset 0 0 0 1px var(--line)}
+.tabs button{height:calc(var(--ctl) - 6px);padding:0 12px;border-radius:var(--r-ctl);color:var(--t2);font-weight:500;font-size:calc(var(--fs) - .5px);transition:background var(--dur),color var(--dur)}
+.tabs button[aria-pressed="true"]{background:var(--s3);color:var(--t1)}
+.tabs button span{color:var(--t3);margin-left:4px;font-variant-numeric:tabular-nums}
+.fr{display:flex;align-items:center;gap:12px;padding:0 8px;height:calc(var(--row) + 20px);border-radius:var(--r-md);border-top:1px solid var(--line);transition:background var(--dur)}
+.fr:hover{background:rgba(255,255,255,.035)}
+.fr b{font-weight:600;display:block;line-height:1.25}
+.fr small{color:var(--t3);font-size:calc(var(--fs) - 1.5px)}
+.fr .tools .ib{background:var(--s3)}
+
+/* settings */
+.set{position:absolute;inset:0;display:grid;grid-template-columns:190px minmax(0,1fr)}
+.set nav{padding:14px 8px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.set nav .ch.on{background:var(--mark)}
+.set-b{padding:20px 24px;overflow:hidden;display:flex;flex-direction:column;gap:20px}
+.set-b h3{margin:0;font-size:calc(var(--fs) + 6px);font-weight:var(--w-head);letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:8px}
+.field>label,.field>span{font-size:calc(var(--fs) - 1px);color:var(--t2);font-weight:500}
+.themes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.th{border-radius:var(--r-md);background:var(--s3);padding:10px;display:flex;flex-direction:column;gap:8px;text-align:left;box-shadow:inset 0 0 0 1px var(--line);transition:transform var(--dur) var(--pop),box-shadow var(--dur)}
+.th:hover{transform:translateY(-2px)}
+.th[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.th em{display:flex;gap:4px;font-style:normal}
+.th em i{width:18px;height:18px;border-radius:var(--av-r)}
+.th span{font-size:12px;color:var(--t2)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--line)}
+.row b{font-weight:500;display:block}
+.row small{color:var(--t3);font-size:calc(var(--fs) - 1.5px)}
+.scale{display:flex;align-items:center;gap:10px}
+.scale input{width:150px;accent-color:var(--acc)}
+.scale output{min-width:44px;text-align:right;font-variant-numeric:tabular-nums;color:var(--t2)}
+.tg{width:38px;height:22px;border-radius:999px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);position:relative;flex:none;transition:background var(--dur)}
+.tg::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--t2);transition:transform var(--dur) var(--pop),background var(--dur)}
+.tg[aria-pressed="true"]{background:var(--acc-f)}
+.tg[aria-pressed="true"]::after{transform:translateX(16px);background:var(--on-acc)}
+.app[data-dir="a"] .tg{border-radius:6px}
+.app[data-dir="a"] .tg::after{border-radius:4px}
+.inp{height:calc(var(--ctl) + 4px);border-radius:var(--r-md);background:var(--s-in);box-shadow:inset 0 0 0 1px var(--line);padding:0 12px;display:flex;align-items:center;gap:8px;color:var(--t1);max-width:340px}
+.inp.ph{color:var(--t3)}
+.inp.focus{box-shadow:inset 0 0 0 1.5px var(--acc),0 0 0 3px var(--acc-soft)}
+.app[data-dir="b"] .inp{border-radius:14px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{height:var(--ctl);padding:0 14px;border-radius:var(--r-ctl);font-weight:500;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:transform var(--dur) var(--pop),background var(--dur),filter var(--dur)}
+.btn:active{transform:scale(.96)}
+.btn.pri{background:var(--acc-f);color:var(--on-acc);font-weight:600}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.sec{background:var(--s3);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.sec:hover{background:color-mix(in srgb,var(--s3) 80%,#fff 6%)}
+.btn.gh{color:var(--t2)}.btn.gh:hover{background:rgba(255,255,255,.06);color:var(--t1)}
+.btn.dng{color:var(--danger)}.btn.dng:hover{background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.btn.ok{background:var(--ok);color:#0c0c10;font-weight:600}
+.btn.bad{background:var(--danger);color:#16090a;font-weight:600}
+
+/* overlays */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:5;animation:fade var(--dur) ease both}
+.scrim.clear{background:transparent;place-items:start}
+@keyframes fade{from{opacity:.3}}
+.sheet{border-radius:calc(var(--r-lg) + 2px);background:var(--glass);backdrop-filter:blur(calc(var(--blur) + 8px));-webkit-backdrop-filter:blur(calc(var(--blur) + 8px));box-shadow:var(--shadow);animation:pop calc(var(--dur) * 1.3) var(--pop) both}
+.app[data-dir="a"] .sheet{background:#141417}
+@keyframes pop{from{opacity:.4;transform:translateY(10px) scale(.96)}}
+.modal{width:400px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.modal h3,.pop h3{margin:0;font-size:calc(var(--fs) + 4px);font-weight:var(--w-head)}
+.modal p{font-size:calc(var(--fs) - .5px);color:var(--t2)}
+.modal .sub{color:var(--t3);font-size:calc(var(--fs) - 1.5px);margin-top:-12px}
+.kinds{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kind{height:calc(var(--ctl) + 10px);border-radius:var(--r-md);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;gap:8px;padding:0 12px;color:var(--t2);transition:box-shadow var(--dur),background var(--dur),color var(--dur)}
+.kind[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--acc);background:var(--acc-soft);color:var(--t1)}
+.modal .btns{justify-content:flex-end}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{height:calc(var(--ctl) - 2px);padding:0 14px;border-radius:var(--r-ctl);background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);color:var(--t2);font-weight:500;font-size:calc(var(--fs) - .5px);transition:background var(--dur),color var(--dur),transform var(--dur) var(--pop)}
+.opt:active{transform:scale(.95)}
+.opt[aria-pressed="true"]{background:var(--acc-f);color:var(--on-acc);box-shadow:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+.warn{color:var(--warn);font-size:calc(var(--fs) - 1.5px);max-width:none}
+.pop{position:absolute;padding:14px;display:flex;flex-direction:column;gap:10px}
+.prof{width:300px;left:calc(50% - 150px);top:54px;padding:0;overflow:hidden}
+.prof .ban{height:70px}
+.prof .in{padding:0 16px 16px;display:flex;flex-direction:column;gap:10px}
+.prof .av{margin-top:-30px;box-shadow:0 0 0 4px var(--s3)}
+.app[data-dir="a"] .prof .av{box-shadow:0 0 0 4px #141417}
+.prof b.n{font-size:calc(var(--fs) + 4px);font-weight:var(--w-head);line-height:1.2}
+.prof small{color:var(--t3)}
+.roles{display:flex;gap:6px;flex-wrap:wrap}
+.role{height:22px;padding:0 8px;border-radius:var(--r-ctl);box-shadow:inset 0 0 0 1px var(--line);font-size:11.5px;color:var(--t2);display:inline-flex;align-items:center;gap:6px}
+.role i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.prof p{font-size:calc(var(--fs) - .5px);color:var(--t2)}
+.prof .btn{flex:1;justify-content:center}
+.menu{width:232px;left:300px;top:150px;padding:6px;gap:1px}
+.mi{height:calc(var(--row) + 0px);padding:0 10px;border-radius:var(--r-md);display:flex;align-items:center;gap:10px;color:var(--t2);text-align:left;transition:background var(--dur),color var(--dur)}
+.mi:hover{background:rgba(255,255,255,.07);color:var(--t1)}
+.mi kbd{margin-left:auto;font:500 11px var(--font);color:var(--t3)}
+.mi.dng{color:var(--danger)}.mi.dng:hover{background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--danger)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
+/* connection details: opens in the sidebar, directly above the voice block it belongs to */
+.conn-p{position:relative;grid-column:1 / 3;grid-row:1;align-self:end;z-index:3;margin:0 8px;max-height:calc(100% - 16px);padding:0;gap:0;overflow:hidden}
+.conn-h{display:flex;align-items:center;justify-content:space-between;padding:8px 6px 8px 12px;border-bottom:1px solid var(--line)}
+.conn-h h3{font-size:calc(var(--fs) + 1px)}
+.conn-b{padding:10px 12px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;scrollbar-width:thin;scrollbar-color:var(--s3) transparent}
+.conn-b>*{flex:none}
+.pg{position:relative;height:60px;margin:4px 0;border-radius:var(--r-md);background:var(--s-in);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.pg svg{width:100%;height:100%;display:block}
+.pg span{position:absolute;left:5px;top:3px;font-size:9.5px;color:var(--t3);font-variant-numeric:tabular-nums}
+.pg-h{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(var(--fs) - 1px);font-weight:600}
+.pg-h small,.pg-f{color:var(--t3);font-size:11.5px;font-weight:400}
+.pg-f{display:flex;gap:14px;font-variant-numeric:tabular-nums}
+.pg-f b{color:var(--ok);font-weight:500}.pg-f b.w{color:var(--warn)}
+.sec{font-size:11.5px;font-weight:500;color:var(--t3);margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.conn-b .kv{font-size:calc(var(--fs) - 1.5px);line-height:1.5}
+.kv b.g{color:var(--ok)}
+.trk{display:flex;flex-direction:column;font-size:calc(var(--fs) - 1.5px);line-height:1.5}
+.trk span{color:var(--t1)}.trk small{color:var(--t3);font-size:11.5px;font-variant-numeric:tabular-nums}
+.kv{display:flex;justify-content:space-between;font-size:calc(var(--fs) - 1px);color:var(--t2);font-variant-numeric:tabular-nums}
+.kv b{color:var(--t1);font-weight:500}
+.call{width:300px;padding:26px 20px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.ring{border-radius:var(--av-r);animation:ring 1.8s ease-out infinite;margin-bottom:10px}
+@keyframes ring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 55%,transparent)}100%{box-shadow:0 0 0 22px transparent}}
+.call b{font-size:calc(var(--fs) + 4px);font-weight:var(--w-head)}
+.call small{color:var(--t3)}
+.call .btns{margin-top:16px;width:100%}
+.call .btn{flex:1;justify-content:center;height:calc(var(--ctl) + 6px)}
+
+/* ── notes under the mock ── */
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px 28px}
+.note h3{margin:0 0 4px;font-size:13px;font-weight:600;color:var(--ink)}
+.note p{font-size:14px}
+.card{background:var(--pg-2);border:1px solid var(--pg-line);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{text-align:left;padding:10px 14px 10px 0;border-top:1px solid var(--pg-line);vertical-align:top}
+thead th{border-top:0;color:var(--ink-3);font-weight:500;font-size:12.5px}
+td:first-child{color:var(--ink-3);white-space:nowrap}
+td{color:var(--ink-2)} td b{color:var(--ink);font-weight:600}
+code{font:500 12.5px var(--f-mono);color:var(--ink)}
+ul{margin:0;padding-left:18px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px;max-width:72ch}
+ul b{color:var(--ink);font-weight:600}
+.rec{border-color:color-mix(in srgb,var(--pg-accent) 40%,transparent)}
+@media (prefers-reduced-motion:reduce){.app *,.app *::before,.app *::after{animation:none!important;transition:none!important}}
+@media (max-width:640px){h1{font-size:24px}}
+</style>
+
+<div class="wrap">
+  <header class="lead">
+    <h1>Три направления для нового Backspace</h1>
+    <p>Один и тот же интерфейс в трёх характерах. Макет живой: переключайте направление, экран, окно, набор иконок и цветовую тему; нажимайте на каналы, реакции, переключатели, двигайте ползунок увеличения. Задача шага — выбрать характер и иконки; точные значения доведём в брендбуке.</p>
+  </header>
+
+  <div class="bar" role="toolbar" aria-label="Управление макетом">
+    <div class="seg" id="dirs">
+      <button data-dir="a" aria-pressed="true">А · Графит</button>
+      <button data-dir="b" aria-pressed="false">Б · Острова</button>
+      <button data-dir="c" aria-pressed="false">В · Камень</button>
+    </div>
+    <div class="seg" id="views">
+      <button data-view="chat" aria-pressed="true">Чат</button>
+      <button data-view="media" aria-pressed="false">Чат: вложения</button>
+      <button data-view="voice" aria-pressed="false">Голос: сетка</button>
+      <button data-view="focus" aria-pressed="false">Голос: фокус</button>
+      <button data-view="explore" aria-pressed="false">Обзор</button>
+      <button data-view="friends" aria-pressed="false">Друзья</button>
+      <button data-view="set" aria-pressed="false">Настройки</button>
+    </div>
+    <label class="lbl">Окно
+      <select id="ov">
+        <option value="">нет</option>
+        <option value="create">Создать канал</option>
+        <option value="stream">Настройки трансляции</option>
+        <option value="prof">Карточка профиля</option>
+        <option value="menu">Меню сообщения</option>
+        <option value="conn">Сведения о соединении</option>
+        <option value="dl">Загрузки</option>
+        <option value="call">Входящий звонок</option>
+      </select>
+    </label>
+    <label class="lbl">Иконки
+      <select id="icons">
+        <option value="l">Lucide</option>
+        <option value="t">Tabler</option>
+        <option value="p">Phosphor</option>
+        <option value="pf">Phosphor, залитые</option>
+      </select>
+    </label>
+    <label class="lbl">Логотип
+      <select id="logo">
+        <option value="rowtile">В ряду плиток, без линии под ним</option>
+        <option value="rowfill">В ряду плиток, цветной</option>
+        <option value="cellfull">Вся ячейка шапки — кнопка</option>
+        <option value="celltile">Плитка в ячейке шапки</option>
+        <option value="cellmark">Знак в ячейке шапки</option>
+      </select>
+    </label>
+    <label class="lbl">Цвета
+      <select id="scheme">
+        <option value="kin">Родственная пара</option>
+        <option value="one">Один акцент</option>
+        <option value="contrast">Контрастная пара</option>
+      </select>
+    </label>
+    <div class="pals" id="pals"></div>
+  </div>
+
+  <div class="scroller"><div class="app" id="app" data-dir="a"></div></div>
+  <span class="hint">На узком экране макет прокручивается вбок. Шрифты здесь подгружаются из сети только для показа; в приложении они будут лежать внутри сборки.</span>
+
+  <section class="card" id="about"></section>
+
+  <section class="card">
+    <h2>Иконки: четыре варианта</h2>
+    <p>На макете теперь настоящие наборы, а не мои наброски из первой версии. Это не нынешние иконки проекта: сейчас в Backspace 427 иконок нарисованы по месту, в 20 толщинах, часть залитые, часть контурные. Переключатель «Иконки» вверху меняет набор сразу на всех экранах.</p>
+    <div class="tw"><table>
+      <thead><tr><th></th><th>Lucide</th><th>Tabler</th><th>Phosphor</th><th>Phosphor, залитые</th></tr></thead>
+      <tbody>
+        <tr><td>Характер</td><td>Контурные, строгие, геометричные</td><td>Контурные, чуть круглее и дружелюбнее</td><td>Контурные, мягкие, с живыми формами</td><td>Сплошные силуэты, ближе к нынешнему виду</td></tr>
+        <tr><td>Толщина линии</td><td>Настраивается, на макете берётся из направления</td><td>Настраивается так же</td><td>Фиксированная</td><td>Нет линии</td></tr>
+        <tr><td>Лицензия</td><td>ISC</td><td>MIT</td><td>MIT</td><td>MIT</td></tr>
+      </tbody>
+    </table></div>
+    <p>Все три лицензии совместимы с AGPL-3.0. В сборку попадают только используемые иконки, не весь набор. Набор Phosphor можно смешивать: контур по умолчанию, заливка для включённого состояния.</p>
+  </section>
+
+  <section class="card">
+    <h2>Сравнение направлений</h2>
+    <div class="tw"><table>
+      <thead><tr><th></th><th>А · Графит</th><th>Б · Острова</th><th>В · Камень</th></tr></thead>
+      <tbody>
+        <tr><td>Характер</td><td><b>Строгий инструмент.</b> Нейтральный графит, тонкие линии вместо заливок</td><td><b>Мягкий и воздушный.</b> Панели парят отдельными карточками, много стекла</td><td><b>Спокойный и мягкий.</b> Тот же графит, что в А, но без сетки линий и с более круглыми формами</td></tr>
+        <tr><td>Шрифт</td><td>Geist</td><td>Manrope</td><td>Onest</td></tr>
+        <tr><td>Радиусы</td><td><code>4 · 6 · 10</code>, кнопки 6</td><td><code>8 · 12 · 20</code>, кнопки-капсулы</td><td><code>6 · 10 · 14</code>, кнопки 10</td></tr>
+        <tr><td>Плотность</td><td>Плотная: текст 13, строка 30</td><td>Просторная: текст 14, строка 36</td><td>Средняя: текст 14, строка 34</td></tr>
+        <tr><td>Стекло</td><td>Почти нет, плотные поверхности</td><td>Главный материал</td><td>Сдержанное, только у плавающих панелей</td></tr>
+        <tr><td>Движение</td><td>Быстрое и точное, 140 мс</td><td>Пружинистое, 320 мс</td><td>Плавное с затуханием, 220 мс</td></tr>
+        <tr><td>Аватары</td><td>Скруглённый квадрат</td><td>Круг</td><td>Круг</td></tr>
+        <tr><td>Конфликты с оригиналом</td><td><b>Низкие.</b> Цвета, шрифт, радиусы и скорость меняются в двух файлах настроек</td><td><b>Выше.</b> Плюс перекройка каркаса окна и кнопок-капсул: это файлы, которые оригинал правит часто</td><td><b>Самые низкие.</b> Почти всё решается цветами и шрифтом</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h2>Что одинаково во всех трёх</h2>
+    <ul>
+      <li><b>Цветовая тема — это акцент и дополнительный цвет.</b> Акцент: кнопки, выбранное, переключатели, фокус. Дополнительный: непрочитанное, упоминания, ссылки. Тема переключается в настройках, на макете шесть готовых. Серые оттенки фона и текста тема не трогает.</li>
+      <li><b>Служебные цвета не входят в тему.</b> Красный: ошибки, «В ЭФИРЕ», выключенный микрофон, «завершить звонок». Жёлтый: предупреждения, «отошёл». Зелёный: «в сети», кто говорит, «принять звонок». Качество связи всегда показывается светофором: зелёный — хорошо, жёлтый — со сбоями, красный — сильные задержки; это касается надписи «Голосовая связь», значка сигнала, чисел пинга и линии графика. Смысл этих цветов не меняется при смене темы.</li>
+      <li><b>Голосовой экран сохраняет все нынешние детали:</b> метка «В ЭФИРЕ», качество трансляции, имя с иконкой экрана, стопка лиц зрителей, кнопка «скрыть», камера-вставка поверх экрана, плитка «Смотреть» для трансляции, которую вы не открыли, лента молчащих участников, указатели с именами, панель увеличения с мини-картой, кнопка «Сетка».</li>
+      <li><b>Один шрифт на все языки</b> вместо нынешних трёх. Китайский остаётся на системном шрифте: китайский шрифт весит несколько мегабайт.</li>
+      <li><b>Одна линия шапки.</b> Список каналов и основная область делят одну горизонтальную линию на высоте шапки; коротких разделителей между группами значков в полосе пространств больше нет, группы разделяет отступ. Доходит ли линия до левого края, зависит от варианта логотипа (список «Логотип» вверху).</li>
+      <li><b>Шкалы вместо значений на глаз:</b> размеры текста, отступы, радиусы, слои, длительности анимаций.</li>
+      <li><b>Движение без новой библиотеки</b> там, где хватает CSS. Всё на макете сделано без библиотек анимаций.</li>
+    </ul>
+  </section>
+
+  <section class="card rec">
+    <h2>Решено: «Камень» и иконки Lucide</h2>
+    <p>Макет открывается в «Камне» с Lucide. Остальные направления и наборы оставлены в переключателях для сравнения. Открытый вопрос один: схема акцентных цветов, список «Цвета» вверху.</p>
+  </section>
+
+  <section class="card">
+    <h2>Акцентные цвета: что было не так и три схемы</h2>
+    <ul>
+      <li><b>Кнопки были пастельными с тёмным текстом.</b> Светлая заливка на тёмном фоне выглядит выцветшей. Теперь у акцента два тона: глубокий для заливок (кнопки, переключатели, выбранные варианты) с белым текстом и светлый для всего, что лежит прямо на тёмном фоне (ссылки, рамка фокуса, полосы прогресса, знак логотипа). Цвет текста на заливке подбирается по контрасту: у «Янтаря» и «Моно» он остаётся тёмным.</li>
+      <li><b>Состояния красились темой.</b> «В сети» в теме «Моно» было серым, как «не в сети», а в «Розе» жёлтым, как «отошёл». Теперь «в сети», рамка говорящего и «принять звонок» всегда зелёные, как и качество связи.</li>
+      <li><b>Второй цвет был случайным.</b> Лаванда с мятным, роза с жёлтым: два ярких несвязанных цвета спорили друг с другом, а дела у второго цвета почти не было. Теперь у него своя работа: непрочитанное, упоминания и ссылки, строки в коде.</li>
+    </ul>
+    <div class="tw"><table>
+      <thead><tr><th></th><th>Родственная пара</th><th>Один акцент</th><th>Контрастная пара</th></tr></thead>
+      <tbody>
+        <tr><td>Второй цвет</td><td>Сосед акцента по цветовому кругу: к лаванде голубой, к розе сиреневый</td><td>Его нет, всё делает один цвет</td><td>Далёкий от акцента, как было раньше</td></tr>
+        <tr><td>Ощущение</td><td>Цельно, но непрочитанное и упоминания отличимы от кнопок</td><td>Самое строгое и минималистичное</td><td>Ярче и пестрее</td></tr>
+        <tr><td>Риск</td><td>Пару для каждой темы надо подбирать вручную</td><td>Упоминание и кнопка одного цвета</td><td>Снова может выглядеть странно</td></tr>
+      </tbody>
+    </table></div>
+    <p>Рекомендую «Родственную пару»: она сохраняет вашу идею группы из двух цветов, но цвета больше не спорят. Если хочется максимальной строгости, берите «Один акцент».</p>
+  </section>
+</div>
+
+<script>
+const SETS={"l":{"bell":"<path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\" /><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\" />","brush":"<circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /><circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /><circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" /><circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /><path d=\"M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z\" />","chat":"<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\" />","check":"<path d=\"M20 6 9 17l-5-5\" />","chev":"<path d=\"m6 9 6 6 6-6\" />","clip":"<path d=\"m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48\" />","compass":"<path d=\"m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z\" /><circle cx=\"12\" cy=\"12\" r=\"10\" />","copy":"<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\" /><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\" />","dots":"<circle cx=\"12\" cy=\"12\" r=\"1\" /><circle cx=\"19\" cy=\"12\" r=\"1\" /><circle cx=\"5\" cy=\"12\" r=\"1\" />","download":"<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" /><polyline points=\"7 10 12 15 17 10\" /><line x1=\"12\" x2=\"12\" y1=\"15\" y2=\"3\" />","end":"<path d=\"M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91\" /><line x1=\"22\" x2=\"2\" y1=\"2\" y2=\"22\" />","eye":"<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /><circle cx=\"12\" cy=\"12\" r=\"3\" />","eyeoff":"<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\" /><path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\" /><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\" /><path d=\"m2 2 20 20\" />","file":"<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\" /><path d=\"M14 2v4a2 2 0 0 0 2 2h4\" /><path d=\"M10 9H8\" /><path d=\"M16 13H8\" /><path d=\"M16 17H8\" />","grid":"<rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /><rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /><rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /><rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />","hash":"<line x1=\"4\" x2=\"20\" y1=\"9\" y2=\"9\" /><line x1=\"4\" x2=\"20\" y1=\"15\" y2=\"15\" /><line x1=\"10\" x2=\"8\" y1=\"3\" y2=\"21\" /><line x1=\"16\" x2=\"14\" y1=\"3\" y2=\"21\" />","head":"<path d=\"M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3\" />","image":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /><circle cx=\"9\" cy=\"9\" r=\"2\" /><path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\" />","max":"<path d=\"M8 3H5a2 2 0 0 0-2 2v3\" /><path d=\"M21 8V5a2 2 0 0 0-2-2h-3\" /><path d=\"M3 16v3a2 2 0 0 0 2 2h3\" /><path d=\"M16 21h3a2 2 0 0 0 2-2v-3\" />","mic":"<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\" /><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />","micoff":"<line x1=\"2\" x2=\"22\" y1=\"2\" y2=\"22\" /><path d=\"M18.89 13.23A7.12 7.12 0 0 0 19 12v-2\" /><path d=\"M5 10v2a7 7 0 0 0 12 5\" /><path d=\"M15 9.34V5a3 3 0 0 0-5.68-1.33\" /><path d=\"M9 9v3a3 3 0 0 0 5.12 2.12\" /><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />","minus":"<path d=\"M5 12h14\" />","pencil":"<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /><path d=\"m15 5 4 4\" />","phone":"<path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\" />","pin":"<path d=\"M12 17v5\" /><path d=\"M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z\" />","play":"<polygon points=\"6 3 20 12 6 21 6 3\" />","plus":"<path d=\"M5 12h14\" /><path d=\"M12 5v14\" />","reply":"<polyline points=\"9 17 4 12 9 7\" /><path d=\"M20 18v-2a4 4 0 0 0-4-4H4\" />","screen":"<path d=\"M13 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3\" /><path d=\"M8 21h8\" /><path d=\"M12 17v4\" /><path d=\"m17 8 5-5\" /><path d=\"M17 3h5v5\" />","search":"<circle cx=\"11\" cy=\"11\" r=\"8\" /><path d=\"m21 21-4.3-4.3\" />","send":"<path d=\"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z\" /><path d=\"m21.854 2.147-10.94 10.939\" />","set":"<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" /><circle cx=\"12\" cy=\"12\" r=\"3\" />","signal":"<path d=\"M12 20h.01\" /><path d=\"M2 8.82a15 15 0 0 1 20 0\" /><path d=\"M5 12.859a10 10 0 0 1 14 0\" /><path d=\"M8.5 16.429a5 5 0 0 1 7 0\" />","smile":"<circle cx=\"12\" cy=\"12\" r=\"10\" /><path d=\"M8 14s1.5 2 4 2 4-2 4-2\" /><line x1=\"9\" x2=\"9.01\" y1=\"9\" y2=\"9\" /><line x1=\"15\" x2=\"15.01\" y1=\"9\" y2=\"9\" />","trash":"<path d=\"M3 6h18\" /><path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\" /><path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\" /><line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\" /><line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\" />","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /><circle cx=\"12\" cy=\"7\" r=\"4\" />","userplus":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /><circle cx=\"9\" cy=\"7\" r=\"4\" /><line x1=\"19\" x2=\"19\" y1=\"8\" y2=\"14\" /><line x1=\"22\" x2=\"16\" y1=\"11\" y2=\"11\" />","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /><circle cx=\"9\" cy=\"7\" r=\"4\" /><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /><path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />","video":"<path d=\"m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5\" /><rect x=\"2\" y=\"6\" width=\"14\" height=\"12\" rx=\"2\" />","vol":"<path d=\"M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z\" /><path d=\"M16 9a5 5 0 0 1 0 6\" /><path d=\"M19.364 18.364a9 9 0 0 0 0-12.728\" />","x":"<path d=\"M18 6 6 18\" /><path d=\"m6 6 12 12\" />"},"t":{"bell":"<path d=\"M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6\" /><path d=\"M9 17v1a3 3 0 0 0 6 0v-1\" />","brush":"<path d=\"M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25\" /><path d=\"M8.5 10.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0\" /><path d=\"M12.5 7.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0\" /><path d=\"M16.5 10.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0\" />","chat":"<path d=\"M8 9h8\" /><path d=\"M8 13h6\" /><path d=\"M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z\" />","check":"<path d=\"M5 12l5 5l10 -10\" />","chev":"<path d=\"M6 9l6 6l6 -6\" />","clip":"<path d=\"M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5\" />","compass":"<path d=\"M8 16l2 -6l6 -2l-2 6l-6 2\" /><path d=\"M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0\" /><path d=\"M12 3l0 2\" /><path d=\"M12 19l0 2\" /><path d=\"M3 12l2 0\" /><path d=\"M19 12l2 0\" />","copy":"<path d=\"M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z\" /><path d=\"M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1\" />","dots":"<path d=\"M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0\" /><path d=\"M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0\" /><path d=\"M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0\" />","download":"<path d=\"M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2\" /><path d=\"M7 11l5 5l5 -5\" /><path d=\"M12 4l0 12\" />","end":"<path d=\"M3 21l18 -18\" /><path d=\"M5.831 14.161a15.946 15.946 0 0 1 -2.831 -8.161a2 2 0 0 1 2 -2h4l2 5l-2.5 1.5c.108 .22 .223 .435 .345 .645m1.751 2.277c.843 .84 1.822 1.544 2.904 2.078l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a15.963 15.963 0 0 1 -10.344 -4.657\" />","eye":"<path d=\"M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0\" /><path d=\"M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6\" />","eyeoff":"<path d=\"M10.585 10.587a2 2 0 0 0 2.829 2.828\" /><path d=\"M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87\" /><path d=\"M3 3l18 18\" />","file":"<path d=\"M14 3v4a1 1 0 0 0 1 1h4\" /><path d=\"M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z\" /><path d=\"M9 9l1 0\" /><path d=\"M9 13l6 0\" /><path d=\"M9 17l6 0\" />","grid":"<path d=\"M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z\" /><path d=\"M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z\" /><path d=\"M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z\" /><path d=\"M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z\" />","hash":"<path d=\"M5 9l14 0\" /><path d=\"M5 15l14 0\" /><path d=\"M11 4l-4 16\" /><path d=\"M17 4l-4 16\" />","head":"<path d=\"M4 13m0 2a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2z\" /><path d=\"M15 13m0 2a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2z\" /><path d=\"M4 15v-3a8 8 0 0 1 16 0v3\" />","image":"<path d=\"M15 8h.01\" /><path d=\"M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z\" /><path d=\"M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5\" /><path d=\"M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3\" />","max":"<path d=\"M4 8v-2a2 2 0 0 1 2 -2h2\" /><path d=\"M4 16v2a2 2 0 0 0 2 2h2\" /><path d=\"M16 4h2a2 2 0 0 1 2 2v2\" /><path d=\"M16 20h2a2 2 0 0 0 2 -2v-2\" />","mic":"<path d=\"M9 2m0 3a3 3 0 0 1 3 -3h0a3 3 0 0 1 3 3v5a3 3 0 0 1 -3 3h0a3 3 0 0 1 -3 -3z\" /><path d=\"M5 10a7 7 0 0 0 14 0\" /><path d=\"M8 21l8 0\" /><path d=\"M12 17l0 4\" />","micoff":"<path d=\"M3 3l18 18\" /><path d=\"M9 5a3 3 0 0 1 6 0v5a3 3 0 0 1 -.13 .874m-2 2a3 3 0 0 1 -3.87 -2.872v-1\" /><path d=\"M5 10a7 7 0 0 0 10.846 5.85m2 -2a6.967 6.967 0 0 0 1.152 -3.85\" /><path d=\"M8 21l8 0\" /><path d=\"M12 17l0 4\" />","minus":"<path d=\"M5 12l14 0\" />","pencil":"<path d=\"M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4\" /><path d=\"M13.5 6.5l4 4\" />","phone":"<path d=\"M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2\" />","pin":"<path d=\"M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4\" /><path d=\"M9 15l-4.5 4.5\" /><path d=\"M14.5 4l5.5 5.5\" />","play":"<path d=\"M7 4v16l13 -8z\" />","plus":"<path d=\"M12 5l0 14\" /><path d=\"M5 12l14 0\" />","reply":"<path d=\"M9 14l-4 -4l4 -4\" /><path d=\"M5 10h11a4 4 0 1 1 0 8h-1\" />","screen":"<path d=\"M21 12v3a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h9\" /><path d=\"M7 20l10 0\" /><path d=\"M9 16l0 4\" /><path d=\"M15 16l0 4\" /><path d=\"M17 4h4v4\" /><path d=\"M16 9l5 -5\" />","search":"<path d=\"M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0\" /><path d=\"M21 21l-6 -6\" />","send":"<path d=\"M10 14l11 -11\" /><path d=\"M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5\" />","set":"<path d=\"M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z\" /><path d=\"M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0\" />","signal":"<path d=\"M12 18l.01 0\" /><path d=\"M9.172 15.172a4 4 0 0 1 5.656 0\" /><path d=\"M6.343 12.343a8 8 0 0 1 11.314 0\" /><path d=\"M3.515 9.515c4.686 -4.687 12.284 -4.687 17 0\" />","smile":"<path d=\"M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0\" /><path d=\"M9 10l.01 0\" /><path d=\"M15 10l.01 0\" /><path d=\"M9.5 15a3.5 3.5 0 0 0 5 0\" />","trash":"<path d=\"M4 7l16 0\" /><path d=\"M10 11l0 6\" /><path d=\"M14 11l0 6\" /><path d=\"M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12\" /><path d=\"M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3\" />","user":"<path d=\"M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0\" /><path d=\"M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2\" />","userplus":"<path d=\"M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0\" /><path d=\"M16 19h6\" /><path d=\"M19 16v6\" /><path d=\"M6 21v-2a4 4 0 0 1 4 -4h4\" />","users":"<path d=\"M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0\" /><path d=\"M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2\" /><path d=\"M16 3.13a4 4 0 0 1 0 7.75\" /><path d=\"M21 21v-2a4 4 0 0 0 -3 -3.85\" />","video":"<path d=\"M15 10l4.553 -2.276a1 1 0 0 1 1.447 .894v6.764a1 1 0 0 1 -1.447 .894l-4.553 -2.276v-4z\" /><path d=\"M3 6m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z\" />","vol":"<path d=\"M15 8a5 5 0 0 1 0 8\" /><path d=\"M17.7 5a9 9 0 0 1 0 14\" /><path d=\"M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5\" />","x":"<path d=\"M18 6l-12 12\" /><path d=\"M6 6l12 12\" />"},"p":{"bell":"<path d=\"M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z\"/>","brush":"<path d=\"M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89Zm13,93.71A15.89,15.89,0,0,1,198.21,160H152a32,32,0,0,0-32,32,16,16,0,0,1-21.31,15.07C62.49,194.3,40,164,40,128a88,88,0,0,1,87.09-88h.9a88.35,88.35,0,0,1,88,87.25A88.86,88.86,0,0,1,213.81,147.6ZM140,76a12,12,0,1,1-12-12A12,12,0,0,1,140,76ZM96,100A12,12,0,1,1,84,88,12,12,0,0,1,96,100Zm0,56a12,12,0,1,1-12-12A12,12,0,0,1,96,156Zm88-56a12,12,0,1,1-12-12A12,12,0,0,1,184,100Z\"/>","chat":"<path d=\"M216,48H40A16,16,0,0,0,24,64V224a15.84,15.84,0,0,0,9.25,14.5A16.05,16.05,0,0,0,40,240a15.89,15.89,0,0,0,10.25-3.78l.09-.07L83,208H216a16,16,0,0,0,16-16V64A16,16,0,0,0,216,48ZM40,224h0ZM216,192H80a8,8,0,0,0-5.23,1.95L40,224V64H216Z\"/>","check":"<path d=\"M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z\"/>","chev":"<path d=\"M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z\"/>","clip":"<path d=\"M209.66,122.34a8,8,0,0,1,0,11.32l-82.05,82a56,56,0,0,1-79.2-79.21L147.67,35.73a40,40,0,1,1,56.61,56.55L105,193A24,24,0,1,1,71,159L154.3,74.38A8,8,0,1,1,165.7,85.6L82.39,170.31a8,8,0,1,0,11.27,11.36L192.93,81A24,24,0,1,0,159,47L59.76,147.68a40,40,0,1,0,56.53,56.62l82.06-82A8,8,0,0,1,209.66,122.34Z\"/>","compass":"<path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM172.42,72.84l-64,32a8.05,8.05,0,0,0-3.58,3.58l-32,64A8,8,0,0,0,80,184a8.1,8.1,0,0,0,3.58-.84l64-32a8.05,8.05,0,0,0,3.58-3.58l32-64a8,8,0,0,0-10.74-10.74ZM138,138,97.89,158.11,118,118l40.15-20.07Z\"/>","copy":"<path d=\"M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z\"/>","dots":"<path d=\"M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z\"/>","download":"<path d=\"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z\"/>","end":"<path d=\"M231.59,90.13h0C175.44,34,80.56,34,24.41,90.13c-20,20-21.92,49.49-4.69,71.71A16,16,0,0,0,32.35,168a15.8,15.8,0,0,0,5.75-1.08l49-17.37.29-.11a16,16,0,0,0,9.75-11.73l5.9-29.52a76.52,76.52,0,0,1,49.68-.11h0l6.21,29.75a16,16,0,0,0,9.72,11.59l.29.11,49,17.39a16,16,0,0,0,18.38-5.06C253.51,139.62,251.58,110.13,231.59,90.13ZM223.67,152l-.3-.12-48.82-17.33-6.21-29.74A16,16,0,0,0,158,93a92.56,92.56,0,0,0-60.34.13,16,16,0,0,0-10.32,12l-5.9,29.51L32.63,151.86c-.1,0-.17.13-.27.17-12.33-15.91-11-36.23,3.36-50.58,25-25,58.65-37.53,92.28-37.53s67.27,12.51,92.28,37.53C234.61,115.8,236,136.12,223.67,152Zm.32,48a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,200Z\"/>","eye":"<path d=\"M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z\"/>","eyeoff":"<path d=\"M53.92,34.62A8,8,0,1,0,42.08,45.38L61.32,66.55C25,88.84,9.38,123.2,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208a127.11,127.11,0,0,0,52.07-10.83l22,24.21a8,8,0,1,0,11.84-10.76Zm47.33,75.84,41.67,45.85a32,32,0,0,1-41.67-45.85ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.16,133.16,0,0,1,25,128c4.69-8.79,19.66-33.39,47.35-49.38l18,19.75a48,48,0,0,0,63.66,70l14.73,16.2A112,112,0,0,1,128,192Zm6-95.43a8,8,0,0,1,3-15.72,48.16,48.16,0,0,1,38.77,42.64,8,8,0,0,1-7.22,8.71,6.39,6.39,0,0,1-.75,0,8,8,0,0,1-8-7.26A32.09,32.09,0,0,0,134,96.57Zm113.28,34.69c-.42.94-10.55,23.37-33.36,43.8a8,8,0,1,1-10.67-11.92A132.77,132.77,0,0,0,231.05,128a133.15,133.15,0,0,0-23.12-30.77C185.67,75.19,158.78,64,128,64a118.37,118.37,0,0,0-19.36,1.57A8,8,0,1,1,106,49.79,134,134,0,0,1,128,48c34.88,0,66.57,13.26,91.66,38.35,18.83,18.83,27.3,37.62,27.65,38.41A8,8,0,0,1,247.31,131.26Z\"/>","file":"<path d=\"M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-32-80a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,136Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,168Z\"/>","grid":"<path d=\"M104,40H56A16,16,0,0,0,40,56v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,104,40Zm0,64H56V56h48v48Zm96-64H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,64H152V56h48v48Zm-96,32H56a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,104,136Zm0,64H56V152h48v48Zm96-64H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,200,136Zm0,64H152V152h48v48Z\"/>","hash":"<path d=\"M224,88H175.4l8.47-46.57a8,8,0,0,0-15.74-2.86l-9,49.43H111.4l8.47-46.57a8,8,0,0,0-15.74-2.86L95.14,88H48a8,8,0,0,0,0,16H92.23L83.5,152H32a8,8,0,0,0,0,16H80.6l-8.47,46.57a8,8,0,0,0,6.44,9.3A7.79,7.79,0,0,0,80,224a8,8,0,0,0,7.86-6.57l9-49.43H144.6l-8.47,46.57a8,8,0,0,0,6.44,9.3A7.79,7.79,0,0,0,144,224a8,8,0,0,0,7.86-6.57l9-49.43H208a8,8,0,0,0,0-16H163.77l8.73-48H224a8,8,0,0,0,0-16Zm-76.5,64H99.77l8.73-48h47.73Z\"/>","head":"<path d=\"M201.89,54.66A103.43,103.43,0,0,0,128.79,24H128A104,104,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V144a24,24,0,0,0-24-24H40.36A88,88,0,0,1,128,40h.67a87.71,87.71,0,0,1,87,80H192a24,24,0,0,0-24,24v40a24,24,0,0,0,24,24h16a24,24,0,0,0,24-24V128A103.41,103.41,0,0,0,201.89,54.66ZM64,136a8,8,0,0,1,8,8v40a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V136Zm152,48a8,8,0,0,1-8,8H192a8,8,0,0,1-8-8V144a8,8,0,0,1,8-8h24Z\"/>","image":"<path d=\"M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z\"/>","max":"<path d=\"M216,48V88a8,8,0,0,1-16,0V56H168a8,8,0,0,1,0-16h40A8,8,0,0,1,216,48ZM88,200H56V168a8,8,0,0,0-16,0v40a8,8,0,0,0,8,8H88a8,8,0,0,0,0-16Zm120-40a8,8,0,0,0-8,8v32H168a8,8,0,0,0,0,16h40a8,8,0,0,0,8-8V168A8,8,0,0,0,208,160ZM88,40H48a8,8,0,0,0-8,8V88a8,8,0,0,0,16,0V56H88a8,8,0,0,0,0-16Z\"/>","mic":"<path d=\"M128,176a48.05,48.05,0,0,0,48-48V64a48,48,0,0,0-96,0v64A48.05,48.05,0,0,0,128,176ZM96,64a32,32,0,0,1,64,0v64a32,32,0,0,1-64,0Zm40,143.6V240a8,8,0,0,1-16,0V207.6A80.11,80.11,0,0,1,48,128a8,8,0,0,1,16,0,64,64,0,0,0,128,0,8,8,0,0,1,16,0A80.11,80.11,0,0,1,136,207.6Z\"/>","micoff":"<path d=\"M213.92,218.62l-160-176A8,8,0,0,0,42.08,53.38L80,95.09V128a48,48,0,0,0,69.11,43.12l11.1,12.2A63.41,63.41,0,0,1,128,192a64.07,64.07,0,0,1-64-64,8,8,0,0,0-16,0,80.11,80.11,0,0,0,72,79.6V240a8,8,0,0,0,16,0V207.59a78.83,78.83,0,0,0,35.16-12.22l30.92,34a8,8,0,1,0,11.84-10.76ZM128,160a32,32,0,0,1-32-32V112.69l41.66,45.82A32,32,0,0,1,128,160Zm57.52-3.91A63.32,63.32,0,0,0,192,128a8,8,0,0,1,16,0,79.16,79.16,0,0,1-8.11,35.12,8,8,0,0,1-7.19,4.49,7.88,7.88,0,0,1-3.51-.82A8,8,0,0,1,185.52,156.09ZM84,44.87A48,48,0,0,1,176,64v64a49.19,49.19,0,0,1-.26,5,8,8,0,0,1-8,7.17,8.13,8.13,0,0,1-.84,0,8,8,0,0,1-7.12-8.79c.11-1.1.17-2.24.17-3.36V64A32,32,0,0,0,98.64,51.25,8,8,0,1,1,84,44.87Z\"/>","minus":"<path d=\"M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z\"/>","pencil":"<path d=\"M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z\"/>","phone":"<path d=\"M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.64a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.88-48.92A16,16,0,0,0,222.37,158.46ZM176,208A128.14,128.14,0,0,1,48,80,40.2,40.2,0,0,1,82.87,40a.61.61,0,0,0,0,.12l21,47L83.2,111.86a6.13,6.13,0,0,0-.57.77,16,16,0,0,0-1,15.7c9.06,18.53,27.73,37.06,46.46,46.11a16,16,0,0,0,15.75-1.14,8.44,8.44,0,0,0,.74-.56L168.89,152l47,21.05h0s.08,0,.11,0A40.21,40.21,0,0,1,176,208Z\"/>","pin":"<path d=\"M235.32,81.37,174.63,20.69a16,16,0,0,0-22.63,0L98.37,74.49c-10.66-3.34-35-7.37-60.4,13.14a16,16,0,0,0-1.29,23.78L85,159.71,42.34,202.34a8,8,0,0,0,11.32,11.32L96.29,171l48.29,48.29A16,16,0,0,0,155.9,224c.38,0,.75,0,1.13,0a15.93,15.93,0,0,0,11.64-6.33c19.64-26.1,17.75-47.32,13.19-60L235.33,104A16,16,0,0,0,235.32,81.37ZM224,92.69h0l-57.27,57.46a8,8,0,0,0-1.49,9.22c9.46,18.93-1.8,38.59-9.34,48.62L48,100.08c12.08-9.74,23.64-12.31,32.48-12.31A40.13,40.13,0,0,1,96.81,91a8,8,0,0,0,9.25-1.51L163.32,32,224,92.68Z\"/>","play":"<path d=\"M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z\"/>","plus":"<path d=\"M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z\"/>","reply":"<path d=\"M232,200a8,8,0,0,1-16,0,88.1,88.1,0,0,0-88-88H51.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,85.66,61.66L51.31,96H128A104.11,104.11,0,0,1,232,200Z\"/>","screen":"<path d=\"M232,56V200a16,16,0,0,1-16,16H144a8,8,0,0,1,0-16h72V56H40V96a8,8,0,0,1-16,0V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM32,184a8,8,0,0,0,0,16,8,8,0,0,1,8,8,8,8,0,0,0,16,0A24,24,0,0,0,32,184Zm0-32a8,8,0,0,0,0,16,40,40,0,0,1,40,40,8,8,0,0,0,16,0A56.06,56.06,0,0,0,32,152Zm0-32a8,8,0,0,0,0,16,72.08,72.08,0,0,1,72,72,8,8,0,0,0,16,0A88.1,88.1,0,0,0,32,120Z\"/>","search":"<path d=\"M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"/>","send":"<path d=\"M231.87,114l-168-95.89A16,16,0,0,0,40.92,37.34L71.55,128,40.92,218.67A16,16,0,0,0,56,240a16.15,16.15,0,0,0,7.93-2.1l167.92-96.05a16,16,0,0,0,.05-27.89ZM56,224a.56.56,0,0,0,0-.12L85.74,136H144a8,8,0,0,0,0-16H85.74L56.06,32.16A.46.46,0,0,0,56,32l168,95.83Z\"/>","set":"<path d=\"M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z\"/>","signal":"<path d=\"M140,204a12,12,0,1,1-12-12A12,12,0,0,1,140,204ZM237.08,87A172,172,0,0,0,18.92,87,8,8,0,0,0,29.08,99.37a156,156,0,0,1,197.84,0A8,8,0,0,0,237.08,87ZM205,122.77a124,124,0,0,0-153.94,0A8,8,0,0,0,61,135.31a108,108,0,0,1,134.06,0,8,8,0,0,0,11.24-1.3A8,8,0,0,0,205,122.77Zm-32.26,35.76a76.05,76.05,0,0,0-89.42,0,8,8,0,0,0,9.42,12.94,60,60,0,0,1,70.58,0,8,8,0,1,0,9.42-12.94Z\"/>","smile":"<path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM80,108a12,12,0,1,1,12,12A12,12,0,0,1,80,108Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,176,108Zm-1.07,48c-10.29,17.79-27.4,28-46.93,28s-36.63-10.2-46.92-28a8,8,0,1,1,13.84-8c7.47,12.91,19.21,20,33.08,20s25.61-7.1,33.07-20a8,8,0,0,1,13.86,8Z\"/>","trash":"<path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/>","user":"<path d=\"M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z\"/>","userplus":"<path d=\"M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136Zm-57.87,58.85a8,8,0,0,1-12.26,10.3C165.75,181.19,138.09,168,108,168s-57.75,13.19-77.87,37.15a8,8,0,0,1-12.25-10.3c14.94-17.78,33.52-30.41,54.17-37.17a68,68,0,1,1,71.9,0C164.6,164.44,183.18,177.07,198.13,194.85ZM108,152a52,52,0,1,0-52-52A52.06,52.06,0,0,0,108,152Z\"/>","users":"<path d=\"M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,168a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,55.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z\"/>","video":"<path d=\"M251.77,73a8,8,0,0,0-8.21.39L208,97.05V72a16,16,0,0,0-16-16H32A16,16,0,0,0,16,72V184a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V159l35.56,23.71A8,8,0,0,0,248,184a8,8,0,0,0,8-8V80A8,8,0,0,0,251.77,73ZM192,184H32V72H192V184Zm48-22.95-32-21.33V116.28L240,95Z\"/>","vol":"<path d=\"M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z\"/>","x":"<path d=\"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z\"/>"},"pf":{"bell":"<path d=\"M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216Z\"/>","brush":"<path d=\"M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89ZM84,168a12,12,0,1,1,12-12A12,12,0,0,1,84,168Zm0-56a12,12,0,1,1,12-12A12,12,0,0,1,84,112Zm44-24a12,12,0,1,1,12-12A12,12,0,0,1,128,88Zm44,24a12,12,0,1,1,12-12A12,12,0,0,1,172,112Z\"/>","chat":"<path d=\"M232,64V192a16,16,0,0,1-16,16H83l-32.6,28.16-.09.07A15.89,15.89,0,0,1,40,240a16.05,16.05,0,0,1-6.79-1.52A15.84,15.84,0,0,1,24,224V64A16,16,0,0,1,40,48H216A16,16,0,0,1,232,64Z\"/>","check":"<path d=\"M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM205.66,85.66l-96,96a8,8,0,0,1-11.32,0l-40-40a8,8,0,0,1,11.32-11.32L104,164.69l90.34-90.35a8,8,0,0,1,11.32,11.32Z\"/>","chev":"<path d=\"M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,48,88H208a8,8,0,0,1,5.66,13.66Z\"/>","clip":"<path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,50.34a8,8,0,0,0-11.32,0L87.09,143A24,24,0,1,0,121,177l49.32-50.32a8,8,0,1,1,11.42,11.2l-49.37,50.38a40,40,0,1,1-56.62-56.51L143,63.09A24,24,0,1,1,177,97L109.71,165.6a8,8,0,1,1-11.42-11.2L165.6,85.71a8,8,0,0,0,.06-11.37Z\"/>","compass":"<path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm51.58,57.79-32,64a4.08,4.08,0,0,1-1.79,1.79l-64,32a4,4,0,0,1-5.37-5.37l32-64a4.08,4.08,0,0,1,1.79-1.79l64-32A4,4,0,0,1,179.58,81.79Z\"/>","copy":"<path d=\"M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32Zm-8,128H176V88a8,8,0,0,0-8-8H96V48H208Z\"/>","dots":"<path d=\"M224,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V96A16,16,0,0,0,224,80ZM60,140a12,12,0,1,1,12-12A12,12,0,0,1,60,140Zm68,0a12,12,0,1,1,12-12A12,12,0,0,1,128,140Zm68,0a12,12,0,1,1,12-12A12,12,0,0,1,196,140Z\"/>","download":"<path d=\"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40A8,8,0,0,0,168,96H136V32a8,8,0,0,0-16,0V96H88a8,8,0,0,0-5.66,13.66Z\"/>","end":"<path d=\"M236.28,161.84a16,16,0,0,1-18.38,5.06l-49-17.39-.29-.11a16,16,0,0,1-9.72-11.59l-6.21-29.75h0a76.52,76.52,0,0,0-49.68.11l-5.9,29.52a16,16,0,0,1-9.75,11.73l-.29.11-49,17.37A15.8,15.8,0,0,1,32.35,168a16,16,0,0,1-12.63-6.14c-17.23-22.22-15.3-51.71,4.69-71.71,56.15-56.17,151-56.17,207.18,0h0C251.58,110.13,253.51,139.62,236.28,161.84ZM216,192H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z\"/>","eye":"<path d=\"M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,168a40,40,0,1,1,40-40A40,40,0,0,1,128,168Z\"/>","eyeoff":"<path d=\"M96.68,57.87a4,4,0,0,1,2.08-6.6A130.13,130.13,0,0,1,128,48c34.88,0,66.57,13.26,91.66,38.35,18.83,18.83,27.3,37.62,27.65,38.41a8,8,0,0,1,0,6.5c-.35.79-8.82,19.57-27.65,38.4q-4.28,4.26-8.79,8.07a4,4,0,0,1-5.55-.36ZM213.92,210.62a8,8,0,1,1-11.84,10.76L180,197.13A127.21,127.21,0,0,1,128,208c-34.88,0-66.57-13.26-91.66-38.34C17.51,150.83,9,132.05,8.69,131.26a8,8,0,0,1,0-6.5C9,124,17.51,105.18,36.34,86.35a135,135,0,0,1,25-19.78L42.08,45.38A8,8,0,1,1,53.92,34.62Zm-65.49-48.25-52.69-58a40,40,0,0,0,52.69,58Z\"/>","file":"<path d=\"M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,176H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm-8-56V44l44,44Z\"/>","grid":"<path d=\"M120,56v48a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V56A16,16,0,0,1,56,40h48A16,16,0,0,1,120,56Zm80-16H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm-96,96H56a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,104,136Zm96,0H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,200,136Z\"/>","hash":"<path d=\"M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z\"/>","head":"<path d=\"M232,128v56a24,24,0,0,1-24,24H192a24,24,0,0,1-24-24V144a24,24,0,0,1,24-24h23.65a87.71,87.71,0,0,0-87-80H128a88,88,0,0,0-87.64,80H64a24,24,0,0,1,24,24v40a24,24,0,0,1-24,24H48a24,24,0,0,1-24-24V128A104.11,104.11,0,0,1,201.89,54.66,103.41,103.41,0,0,1,232,128Z\"/>","image":"<path d=\"M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM156,88a12,12,0,1,1-12,12A12,12,0,0,1,156,88Zm60,112H40V160.69l46.34-46.35a8,8,0,0,1,11.32,0h0L165,181.66a8,8,0,0,0,11.32-11.32l-17.66-17.65L173,138.34a8,8,0,0,1,11.31,0L216,170.07V200Z\"/>","max":"<path d=\"M93.66,202.34A8,8,0,0,1,88,216H48a8,8,0,0,1-8-8V168a8,8,0,0,1,13.66-5.66ZM88,40H48a8,8,0,0,0-8,8V88a8,8,0,0,0,13.66,5.66l40-40A8,8,0,0,0,88,40ZM211.06,160.61a8,8,0,0,0-8.72,1.73l-40,40A8,8,0,0,0,168,216h40a8,8,0,0,0,8-8V168A8,8,0,0,0,211.06,160.61ZM208,40H168a8,8,0,0,0-5.66,13.66l40,40A8,8,0,0,0,216,88V48A8,8,0,0,0,208,40Z\"/>","mic":"<path d=\"M80,128V64a48,48,0,0,1,96,0v64a48,48,0,0,1-96,0Zm128,0a8,8,0,0,0-16,0,64,64,0,0,1-128,0,8,8,0,0,0-16,0,80.11,80.11,0,0,0,72,79.6V240a8,8,0,0,0,16,0V207.6A80.11,80.11,0,0,0,208,128Z\"/>","micoff":"<path d=\"M213.38,229.92a8,8,0,0,1-11.3-.54l-30.92-34A78.83,78.83,0,0,1,136,207.59V240a8,8,0,0,1-16,0V207.6A80.11,80.11,0,0,1,48,128a8,8,0,0,1,16,0,64.07,64.07,0,0,0,64,64,63.41,63.41,0,0,0,32.21-8.68l-11.1-12.2A48,48,0,0,1,80,128V95.09L42.08,53.38A8,8,0,0,1,53.92,42.62l160,176A8,8,0,0,1,213.38,229.92Zm-24.19-63.13a7.88,7.88,0,0,0,3.51.82,8,8,0,0,0,7.19-4.49A79.16,79.16,0,0,0,208,128a8,8,0,0,0-16,0,63.32,63.32,0,0,1-6.48,28.09A8,8,0,0,0,189.19,166.79Zm-27.33-29.22A8,8,0,0,0,175.74,133a49.49,49.49,0,0,0,.26-5V64A48,48,0,0,0,84,44.87a8,8,0,0,0,1.41,8.57Z\"/>","minus":"<path d=\"M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM184,136H72a8,8,0,0,1,0-16H184a8,8,0,0,1,0,16Z\"/>","pencil":"<path d=\"M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM192,108.68,147.31,64l24-24L216,84.68Z\"/>","phone":"<path d=\"M231.88,175.08A56.26,56.26,0,0,1,176,224C96.6,224,32,159.4,32,80A56.26,56.26,0,0,1,80.92,24.12a16,16,0,0,1,16.62,9.52l21.12,47.15,0,.12A16,16,0,0,1,117.39,96c-.18.27-.37.52-.57.77L96,121.45c7.49,15.22,23.41,31,38.83,38.51l24.34-20.71a8.12,8.12,0,0,1,.75-.56,16,16,0,0,1,15.17-1.4l.13.06,47.11,21.11A16,16,0,0,1,231.88,175.08Z\"/>","pin":"<path d=\"M235.33,104l-53.47,53.65c4.56,12.67,6.45,33.89-13.19,60A15.93,15.93,0,0,1,157,224c-.38,0-.75,0-1.13,0a16,16,0,0,1-11.32-4.69L96.29,171,53.66,213.66a8,8,0,0,1-11.32-11.32L85,159.71l-48.3-48.3A16,16,0,0,1,38,87.63c25.42-20.51,49.75-16.48,60.4-13.14L152,20.7a16,16,0,0,1,22.63,0l60.69,60.68A16,16,0,0,1,235.33,104Z\"/>","play":"<path d=\"M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z\"/>","plus":"<path d=\"M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM184,136H136v48a8,8,0,0,1-16,0V136H72a8,8,0,0,1,0-16h48V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z\"/>","reply":"<path d=\"M232,200a8,8,0,0,1-16,0,88.1,88.1,0,0,0-88-88H88v40a8,8,0,0,1-13.66,5.66l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,88,56V96h40A104.11,104.11,0,0,1,232,200Z\"/>","screen":"<path d=\"M56,208a8,8,0,0,1-8.24,8A8.28,8.28,0,0,1,40,207.76,8,8,0,0,0,32.24,200,8.28,8.28,0,0,1,24,192.24,8,8,0,0,1,32,184,24,24,0,0,1,56,208ZM32,152a8,8,0,0,0-8,8.65A8.17,8.17,0,0,0,32.24,168,40,40,0,0,1,72,207.76,8.17,8.17,0,0,0,79.36,216,8,8,0,0,0,88,208,56.06,56.06,0,0,0,32,152Zm0-32a8,8,0,0,0-8,8.6,8.22,8.22,0,0,0,8.3,7.4A72.08,72.08,0,0,1,104,207.68a8.22,8.22,0,0,0,7.4,8.3,8,8,0,0,0,8.6-8A88.1,88.1,0,0,0,32,120ZM216,40H40A16,16,0,0,0,24,56v44.08a4,4,0,0,0,4.15,4A104.11,104.11,0,0,1,135.93,211.85a4,4,0,0,0,4,4.15H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Z\"/>","search":"<path d=\"M168,112a56,56,0,1,1-56-56A56,56,0,0,1,168,112Zm61.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88,88,0,1,1,11.32-11.31l50.06,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z\"/>","send":"<path d=\"M240,127.89a16,16,0,0,1-8.18,14L63.9,237.9A16.15,16.15,0,0,1,56,240a16,16,0,0,1-15-21.33l27-79.95A4,4,0,0,1,71.72,136H144a8,8,0,0,0,8-8.53,8.19,8.19,0,0,0-8.26-7.47h-72a4,4,0,0,1-3.79-2.72l-27-79.94A16,16,0,0,1,63.84,18.07l168,95.89A16,16,0,0,1,240,127.89Z\"/>","set":"<path d=\"M216,130.16q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.6,107.6,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.29,107.29,0,0,0-26.25-10.86,8,8,0,0,0-7.06,1.48L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.6,107.6,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06ZM128,168a40,40,0,1,1,40-40A40,40,0,0,1,128,168Z\"/>","signal":"<path d=\"M244.35,92.8l-104,125.43A15.93,15.93,0,0,1,128,224h0a15.93,15.93,0,0,1-12.31-5.77L11.65,92.8A15.65,15.65,0,0,1,8.11,80.91,15.93,15.93,0,0,1,14.28,70.1,186.67,186.67,0,0,1,128,32,186.67,186.67,0,0,1,241.72,70.1a15.93,15.93,0,0,1,6.17,10.81A15.65,15.65,0,0,1,244.35,92.8Z\"/>","smile":"<path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM92,96a12,12,0,1,1-12,12A12,12,0,0,1,92,96Zm82.92,60c-10.29,17.79-27.39,28-46.92,28s-36.63-10.2-46.92-28a8,8,0,1,1,13.84-8c7.47,12.91,19.21,20,33.08,20s25.61-7.1,33.08-20a8,8,0,1,1,13.84,8ZM164,120a12,12,0,1,1,12-12A12,12,0,0,1,164,120Z\"/>","trash":"<path d=\"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm0-120H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z\"/>","user":"<path d=\"M230.93,220a8,8,0,0,1-6.93,4H32a8,8,0,0,1-6.92-12c15.23-26.33,38.7-45.21,66.09-54.16a72,72,0,1,1,73.66,0c27.39,8.95,50.86,27.83,66.09,54.16A8,8,0,0,1,230.93,220Z\"/>","userplus":"<path d=\"M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136ZM144,157.68a68,68,0,1,0-71.9,0c-20.65,6.76-39.23,19.39-54.17,37.17A8,8,0,0,0,24,208H192a8,8,0,0,0,6.13-13.15C183.18,177.07,164.6,164.44,144,157.68Z\"/>","users":"<path d=\"M164.47,195.63a8,8,0,0,1-6.7,12.37H10.23a8,8,0,0,1-6.7-12.37,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,164.47,195.63Zm87.91-.15a95.87,95.87,0,0,0-47.13-37.56A60,60,0,0,0,144.7,54.59a4,4,0,0,0-1.33,6A75.83,75.83,0,0,1,147,150.53a4,4,0,0,0,1.07,5.53,112.32,112.32,0,0,1,29.85,30.83,23.92,23.92,0,0,1,3.65,16.47,4,4,0,0,0,3.95,4.64h60.3a8,8,0,0,0,7.73-5.93A8.22,8.22,0,0,0,252.38,195.48Z\"/>","video":"<path d=\"M192,72V184a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V72A16,16,0,0,1,32,56H176A16,16,0,0,1,192,72Zm58,.25a8.23,8.23,0,0,0-6.63,1.22L209.78,95.86A4,4,0,0,0,208,99.19v57.62a4,4,0,0,0,1.78,3.33l33.78,22.52a8,8,0,0,0,8.58.19,8.33,8.33,0,0,0,3.86-7.17V80A8,8,0,0,0,250,72.25Z\"/>","vol":"<path d=\"M160,32.25V223.69a8.29,8.29,0,0,1-3.91,7.18,8,8,0,0,1-9-.56l-65.57-51A4,4,0,0,1,80,176.16V79.84a4,4,0,0,1,1.55-3.15l65.57-51a8,8,0,0,1,10,.16A8.27,8.27,0,0,1,160,32.25ZM60,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H60a4,4,0,0,0,4-4V84A4,4,0,0,0,60,80Zm126.77,20.84a8,8,0,0,0-.72,11.3,24,24,0,0,1,0,31.72,8,8,0,1,0,12,10.58,40,40,0,0,0,0-52.88A8,8,0,0,0,186.74,100.84Zm40.89-26.17a8,8,0,1,0-11.92,10.66,64,64,0,0,1,0,85.34,8,8,0,1,0,11.92,10.66,80,80,0,0,0,0-106.66Z\"/>","x":"<path d=\"M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM181.66,170.34a8,8,0,0,1-11.32,11.32L128,139.31,85.66,181.66a8,8,0,0,1-11.32-11.32L116.69,128,74.34,85.66A8,8,0,0,1,85.66,74.34L128,116.69l42.34-42.35a8,8,0,0,1,11.32,11.32L139.31,128Z\"/>"}};
+const MARK='<svg viewBox="62 38 133 180" aria-hidden="true"><path fill="currentColor" d="M151.191 38C175.386 38 195 57.5367 195 81.6364C195 103.651 177.153 121.498 155.138 121.498H121.104C119.429 121.498 118.269 120.983 117.625 119.953C116.981 118.795 117.432 117.443 118.978 115.899L149.516 85.5845C151.32 83.7826 151.32 81.9809 149.516 80.179L144.684 75.3519C142.88 73.5498 141.076 73.5498 139.272 75.3519L89.0206 125.553C87.2168 127.355 87.2168 129.222 89.0206 131.152L139.659 181.739C141.463 183.541 143.267 183.541 145.071 181.739L149.516 177.106C151.32 175.304 151.32 173.501 149.516 171.699L118.978 141.192C117.432 139.648 116.981 138.36 117.625 137.33C118.269 136.172 119.429 135.593 121.104 135.593H156.229C177.642 135.593 195 152.951 195 174.364C195 198.463 175.386 218 151.191 218H105.809C81.614 218 62 198.463 62 174.364V81.6364C62 57.5367 81.614 38 105.809 38L151.191 38Z"/></svg>';
+const U={m:['М','#e9b58a'],a:['A','#9fc5e8'],l:['Л','#d9a6c9'],t:['Т','#a9d1ae'],v:['В','#b9a4e6'],n:['Н','#e79a86'],e:['Л','#8fb8a6']};
+const PALS=[['Лаванда','#6e5bef','#a99dff','#7fb0ff','#86efac'],['Изумруд','#14805a','#5fd6a6','#6fd3d9','#8ccbff'],['Янтарь','#e9a53c','#f3bd63','#f0906c','#8ccbff'],['Лёд','#2f6fe6','#8ab6ff','#7fdcf0','#c8b8ff'],['Роза','#cf3f7c','#ff9cc2','#c79bff','#ffd27a'],['Моно','#ececf0','#ececf0','#b4b4bd','#9c9ca6']];
+const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.substr(i,2),16)/255).map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*c[0]+.7152*c[1]+.0722*c[2]};
+const second=p=>S.scheme==='one'?p[2]:S.scheme==='kin'?p[3]:p[4];
+function applyPal(){const p=PALS[S.pal],L=lum(p[1]);app.style.setProperty('--acc-f',p[1]);app.style.setProperty('--acc',p[2]);app.style.setProperty('--acc2',second(p));app.style.setProperty('--on-acc',(1.05/(L+.05))>=4.5?'#fff':'#0c0c10')}
+const S={dir:'c',view:'chat',pal:0,icons:'l',ov:'',zoom:150,logo:'rowtile',scheme:'kin'};
+const app=document.getElementById('app');
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const ic=(n,c='')=>{const ph=S.icons[0]==='p';return `<svg class="ic ${ph?'f':''} ${c}" viewBox="0 0 ${ph?256:24} ${ph?256:24}" aria-hidden="true">${SETS[S.icons][n]||''}</svg>`};
+const av=(k,c='',dot)=>`<span class="av ${c}" style="background:${U[k][1]}">${U[k][0]}${dot?`<i class="dot ${dot===1?'':dot}"></i>`:''}</span>`;
+const fake=(tint,n=6)=>`<div class="fake" style="--tint:${tint}">${[82,64,74,48,69,38,58].slice(0,n).map(w=>`<i style="width:${w}%"></i>`).join('')}</div>`;
+const cursor=(name,c,two)=>`<div class="cursor ${two?'two':''}" style="--c:${c}"><svg viewBox="0 0 16 16"><path d="M2 1.5l11 5-4.6 1.6L6.8 13z"/></svg><span>${name}</span></div>`;
+const faces=(ks)=>`${ic('eye','xs')}<span class="faces">${ks.map(k=>av(k,'sm')).join('')}</span>`;
+
+const HEADS={
+ chat:()=>`${ic('hash')}<b>разработка</b><span class="topic">Сборки, баги, планы на релиз</span><span class="sp8"></span><button class="ib sm tr-btn" data-ovt="dl" title="Загрузки">${ic('download','s')}<i>2</i></button><button class="ib sm">${ic('search','s')}</button><button class="ib sm">${ic('pin','s')}</button><button class="ib sm">${ic('bell','s')}</button><button class="ib sm">${ic('users','s')}</button>`,
+ voice:()=>`${ic('vol')}<b>Гостиная</b><span class="topic">Подключено, 7 участников</span><span class="sp8"></span><button class="ib sm tr-btn" data-ovt="dl" title="Загрузки">${ic('download','s')}<i>2</i></button><button class="ib sm">${ic('chat','s')}</button><button class="ib sm">${ic('users','s')}</button>`,
+ explore:()=>`${ic('compass')}<b>Обзор</b><div class="inp ph" style="height:30px;flex:1;max-width:320px;margin-left:8px">${ic('search','s')}Найти пространство</div><span class="sp8"></span>`,
+ friends:()=>`${ic('users')}<b>Друзья</b><span class="sp8"></span><button class="btn pri" style="height:30px">${ic('userplus','s')}Добавить друга</button>`,
+ set:()=>`${ic('set')}<b>Настройки</b><span class="sp8"></span><button class="ib sm">${ic('x','s')}</button>`};
+HEADS.focus=HEADS.voice;HEADS.media=HEADS.chat;
+
+const ctrl=()=>`<div class="ctrl"><button class="ib off" title="Микрофон выключен">${ic('micoff')}</button><button class="ib" title="Звук">${ic('head')}</button><button class="ib" title="Камера">${ic('video')}</button><button class="ib on" title="Идёт трансляция">${ic('screen')}</button><hr><button class="ib" title="Чат канала">${ic('chat')}</button><button class="ib" title="На весь экран">${ic('max')}</button><hr><button class="ib end" title="Отключиться">${ic('end')}</button></div>`;
+const ribbon=()=>`<div class="ribbon"><div class="rp">${av('t','md')}Вы</div><div class="rp">${av('n','md')}<span class="chip bad">${ic('micoff','xs')}</span>Ника</div><div class="rp">${av('e','md')}<span class="chip">${ic('eyeoff','xs')}</span>Лео</div></div>`;
+
+const PANES={
+chat:()=>`<div class="msgs">
+  <div class="day">Сегодня</div>
+  <div class="msg">${av('m')}<div class="body"><div class="who"><b>Марсель</b><time>14:02</time></div><p>Залил сборку 1.11.0-f.1.2 на сервер. Указатель на трансляции теперь видят все зрители.</p></div></div>
+  <div class="msg">${av('a')}<div class="body"><div class="who"><b>akk0</b><time>14:03</time></div><p>Проверил на Windows: пинг 38 мс, звук больше не двоится.</p>
+    <div class="rx"><button class="pill mine" data-n="3">🔥 <span>3</span></button><button class="pill" data-n="2">👍 <span>2</span></button><button class="pill" title="Добавить реакцию">${ic('smile','s')}</button></div></div></div>
+  <div class="msg">${av('l')}<div class="body"><div class="reply">Марсель: Залил сборку 1.11.0-f.1.2…</div><div class="who"><b>Лена</b><time>14:05</time></div><p>Мини-карту при увеличении оставляем справа сверху?</p></div></div>
+  <div class="msg">${av('m')}<div class="body"><div class="who"><b>Марсель</b><time>14:06</time></div><p>Да. <span class="mention">@Тимур</span>, заходи в «Гостиную», покажу на экране.</p></div></div>
+</div>
+<div class="typing"><i></i><i></i><i></i>akk0 печатает</div>
+<div class="composer"><button class="ib" title="Прикрепить">${ic('clip')}</button><span>Написать в #разработка</span><button class="ib" title="Картинка">${ic('image')}</button><button class="ib" title="Эмодзи">${ic('smile')}</button><button class="send" title="Отправить">${ic('send','s')}</button></div>`,
+
+media:()=>`<div class="msgs scroll">
+  <div class="day">Сегодня</div>
+  <div class="msg">${av('l')}<div class="body"><div class="who"><b>Лена</b><time>15:10</time></div><p>Два варианта шапки, какой берём?</p>
+    <div class="att two"><span class="ph sq" style="--g:linear-gradient(160deg,#27324f,#6b5bd6 60%,#c9a6f0)"></span><span class="ph sq" style="--g:linear-gradient(200deg,#1d3a36,#3fa98a 55%,#d8e9a8)"></span></div></div></div>
+  <div class="msg">${av('a')}<div class="body"><div class="who"><b>akk0</b><time>15:12</time></div><p>Записал, как работает указатель на трансляции.</p>
+    <div class="att"><span class="ph" style="--g:linear-gradient(135deg,#15151c,#2c2b45 55%,#4a3f7d)"></span><span class="play">${ic('play')}</span><div class="vbar">0:42<u></u>2:15${ic('max','s')}</div></div></div></div>
+  <div class="msg">${av('m')}<div class="body"><div class="who"><b>Марсель</b><time>15:13</time></div>
+    <div class="att" style="width:240px"><span class="ph gif" style="--g:linear-gradient(120deg,#f08a6c,#f3b352,#8ccbff,#b9a4e6)"></span><span class="badge-m">GIF</span></div></div></div>
+  <div class="msg">${av('l')}<div class="body"><div class="who"><b>Лена</b><time>15:13</time></div>
+    <svg class="sticker" viewBox="0 0 112 112" role="img" aria-label="Стикер «одобряю»"><path d="M56 6c9 0 13 8 21 11s17 1 22 8-1 15 1 23 9 14 6 22-12 9-18 15-7 15-15 18-14-4-22-4-15 6-22 2-7-13-12-19-14-9-14-18 8-12 10-20-2-17 4-23 14-3 21-7S47 6 56 6z" fill="#f3d36b" stroke="#fff" stroke-width="5" stroke-linejoin="round"/><circle cx="42" cy="48" r="5" fill="#2a2320"/><circle cx="70" cy="48" r="5" fill="#2a2320"/><path d="M38 64c5 10 31 10 36 0" fill="none" stroke="#2a2320" stroke-width="5" stroke-linecap="round"/></svg></div></div>
+  <div class="msg">${av('m')}<div class="body"><div class="who"><b>Марсель</b><time>15:15</time></div><p>Заметки к релизу и сборка для macOS. Проверьте <span class="ci">pnpm dev</span> перед слиянием.</p>
+    <div class="file"><span class="fi">${ic('file')}</span><div><b>release-notes-1.11.0.pdf</b><small>248 КБ · PDF</small></div><button class="ib" title="Скачать">${ic('download')}</button></div>
+    <div class="file"><span class="fi">${ic('file')}</span><div><b>Backspace-1.11.0-arm64.dmg</b><small>Загружается, 62 % из 148 МБ</small><div class="prog"><i></i></div></div><button class="ib" title="Отменить">${ic('x')}</button></div></div></div>
+  <div class="msg">${av('a')}<div class="body"><div class="who"><b>akk0</b><time>15:18</time></div><p>Шкалу радиусов можно задать одним местом:</p>
+    <div class="code"><div class="code-h"><span class="lang" style="--c:#e8c44a">JavaScript</span><span class="code-t"><button class="ib sm" title="Копировать">${ic('copy','s')}</button></span></div><pre><span class="c">// одна шкала на весь интерфейс</span>
+<span class="k">export default</span> {
+  theme: { borderRadius: { sm: <span class="s">'4px'</span>, md: <span class="s">'6px'</span>, lg: <span class="s">'10px'</span> } },
+}</pre></div>
+    <p style="margin-top:8px">А это ответ сервера, вставил как есть:</p>
+    <div class="code"><div class="code-h"><span class="lang" style="--c:#7fd6a0">JSON</span><small>язык определён автоматически</small><span class="code-t"><button class="ib sm" title="Копировать">${ic('copy','s')}</button></span></div><pre>{ <span class="k">"ping"</span>: <span class="s">38</span>, <span class="k">"loss"</span>: <span class="s">0.002</span>, <span class="k">"protocol"</span>: <span class="s">"udp"</span> }</pre></div></div></div>
+  <div class="msg">${av('m')}<div class="body"><div class="who"><b>Марсель</b><time>15:21</time></div><p>Лог сборки целиком, он длинный:</p>
+    <div class="code clip"><div class="code-h">${ic('file','s')}<b>pasted.txt</b><small>214 строк · 6,2 КБ</small><span class="code-t"><button class="ib sm" title="Копировать">${ic('copy','s')}</button><button class="ib sm" title="Скачать">${ic('download','s')}</button></span></div><pre>vite v8.0.2 building for production...
+transforming (1842) src/components/voice/VoiceGrid.tsx
+2114 modules transformed.
+dist/index.html                    1.92 kB | gzip:   0.84 kB
+dist/assets/index-C4kQ1x9a.css    96.40 kB | gzip:  15.71 kB
+dist/assets/index-BqT7n2Lw.js  1,512.33 kB | gzip: 455.10 kB
+built in 9.84s
+electron-builder  version=26.0.12 os=25.2.0
+  packaging       platform=darwin arch=arm64</pre><button class="more" data-n="214">Показать всё, 214 строк</button></div></div></div>
+  <div class="msg">${av('l')}<div class="body"><div class="who"><b>Лена</b><time>15:24</time></div><p>Пороги для цвета пинга лежат тут:</p>
+    <div class="code clip"><div class="code-h">${ic('file','s')}<b>voiceHealth.ts</b><span class="lang" style="--c:#6fb5ff">TypeScript</span><small>48 строк · 1,4 КБ</small><span class="code-t"><button class="ib sm" title="Копировать">${ic('copy','s')}</button><button class="ib sm" title="Скачать">${ic('download','s')}</button></span></div><pre><span class="c">/** Thresholds shared by the ping graph and the connection rows. */</span>
+<span class="k">export const</span> VOICE_HEALTH = {
+  pingWarnMs: <span class="s">120</span>,
+  pingBadMs: <span class="s">250</span>,
+  lossWarn: <span class="s">0.02</span>,
+  lossBad: <span class="s">0.08</span>,
+} <span class="k">as const</span>;
+
+<span class="k">export type</span> HealthBand = <span class="s">'good'</span> | <span class="s">'warn'</span> | <span class="s">'bad'</span>;</pre><button class="more" data-n="48">Показать всё, 48 строк</button></div></div></div>
+</div>
+<div class="composer"><button class="ib" title="Прикрепить">${ic('clip')}</button><span>Написать в #разработка</span><button class="ib" title="Картинка">${ic('image')}</button><button class="ib" title="Эмодзи">${ic('smile')}</button><button class="send" title="Отправить">${ic('send','s')}</button></div>`,
+
+voice:()=>`<div class="vgrid">
+  <div class="tile scr">${fake('#16130f')}${cursor('Марсель','var(--acc)')}
+    <div class="tl"><span class="live">В ЭФИРЕ</span></div><div class="tr"><button class="ib" title="Скрыть плитку">${ic('eyeoff','s')}</button><span class="q">1080p · 60 к/с</span></div>
+    <div class="tb">${ic('screen','s')}akk0 ${faces(['m','l','t','n'])}</div></div>
+  <div class="tile speak"><div class="cam" style="--tint:#2c5a3a"></div><div class="tb">Марсель<span class="r"><span class="chip">${ic('video','xs')}</span></span></div></div>
+  <div class="tile scr">${fake('#1a1422')}
+    <div class="tl"><span class="live">В ЭФИРЕ</span></div><div class="tr"><button class="ib" title="Скрыть плитку">${ic('eyeoff','s')}</button><span class="q">720p · 30 к/с</span></div>
+    <div class="inset"><div class="cam" style="--tint:#5a2f7a"></div></div>
+    <div class="tb">${ic('screen','s')}Лена ${faces(['t','n'])}</div></div>
+  <div class="tile"><div class="tl"><span class="live">В ЭФИРЕ</span></div><div class="tr"><span class="q">720p · 30 к/с</span></div>
+    <div class="watch">${av('v','lg')}<div>Вера ведёт трансляцию<button class="btn pri">Смотреть</button></div></div></div>
+</div>${ribbon()}${ctrl()}`,
+
+focus:()=>`<div class="stage">${fake('#16130f',7)}${cursor('Марсель','var(--acc)')}${cursor('Лена','#d9a6c9',1)}
+  <div class="tl"><span class="live">В ЭФИРЕ</span><span class="q">1080p · 60 к/с</span></div>
+  <div class="zt">
+    <span class="zoom"><button data-z="-25" title="Уменьшить">${ic('minus','s')}</button><input type="range" id="zoom" min="100" max="400" step="25" value="${S.zoom}" aria-label="Увеличение"><button data-z="25" title="Увеличить">${ic('plus','s')}</button><output id="zout">${S.zoom}%</output></span>
+    <button class="zb" title="Скрыть плитку">${ic('eyeoff','s')}</button><button class="zb" title="На весь экран">${ic('max','s')}</button><button class="zg" data-view="voice">${ic('grid','s')}Сетка</button>
+  </div>
+  <div class="mini" title="Мини-карта">${fake('#16130f',7)}<u id="vp"></u></div>
+  <div class="tb">${ic('screen','s')}akk0 ${faces(['m','l','t','n'])}</div>
+</div>${ribbon()}${ctrl()}`,
+
+explore:()=>`<div class="scrolly">
+  <div class="sub-h">Открытые пространства</div>
+  <div class="cards">
+    ${[['О','#8ea2f7','linear-gradient(135deg,#3b4fd0,#7a5cf0)','Орбита','Сборки Backspace и всё вокруг','21 участник','Открыть','sec','Открытое'],
+       ['К','#f0b27a','linear-gradient(135deg,#b4572b,#e2a04f)','Киноклуб','Смотрим кино вместе по пятницам','8 участников','Присоединиться','pri','Открытое'],
+       ['C','#8fd6b0','linear-gradient(135deg,#1f7a5a,#58c493)','Code&Context','Разработка, ревью, вопросы','12 участников','Подать заявку','pri','По заявке']]
+      .map(([l,c,g,n,d,m,b,k,tag])=>`<div class="card-s"><div class="ban" style="--g:${g}"><span class="q">${tag}</span></div><div class="in"><span class="av" style="background:${c}">${l}</span><b>${n}</b><p>${d}</p><small>${ic('users','xs')}${m}</small><button class="btn ${k}">${b}</button></div></div>`).join('')}
+  </div>
+  <div class="sub-h">С других серверов</div>
+  <div class="cards">
+    ${[['M','#c9a6f0','linear-gradient(135deg,#6a3fb8,#b36ad8)','Metaverse','nova.ddns.net','34 участника'],
+       ['D','#9ec3f2','linear-gradient(135deg,#27508f,#4f8fd8)','Düren City','orbit.ddns.net','5 участников'],
+       ['Р','#f29eb0','linear-gradient(135deg,#9c2f52,#e0667f)','Ретро-игры','nova.ddns.net','17 участников']]
+      .map(([l,c,g,n,d,m])=>`<div class="card-s"><div class="ban" style="--g:${g};height:52px"></div><div class="in"><span class="av" style="background:${c}">${l}</span><b>${n}</b><small>${d}</small><small>${ic('users','xs')}${m}</small><button class="btn sec">Подключиться</button></div></div>`).join('')}
+  </div>
+</div>`,
+
+friends:()=>`<div class="scrolly">
+  <div class="fr-top"><div class="tabs"><button aria-pressed="true">В сети<span>3</span></button><button aria-pressed="false">Все<span>12</span></button><button aria-pressed="false">Запросы<span>1</span></button></div></div>
+  <div class="fr">${av('l','md',1)}<div><b>Лена</b><small>В голосовом канале «Гостиная»</small></div><div class="tools"><button class="ib" title="Написать">${ic('chat')}</button><button class="ib" title="Позвонить">${ic('phone')}</button><button class="ib" title="Ещё">${ic('dots')}</button></div></div>
+  <div class="fr">${av('a','md',1)}<div><b>akk0</b><small>Ведёт трансляцию</small></div><div class="tools"><button class="ib" title="Написать">${ic('chat')}</button><button class="ib" title="Позвонить">${ic('phone')}</button><button class="ib" title="Ещё">${ic('dots')}</button></div></div>
+  <div class="fr">${av('m','md','idle')}<div><b>Марсель</b><small>Отошёл</small></div><div class="tools"><button class="ib" title="Написать">${ic('chat')}</button><button class="ib" title="Позвонить">${ic('phone')}</button><button class="ib" title="Ещё">${ic('dots')}</button></div></div>
+  <div class="sub-h">Запрос в друзья</div>
+  <div class="fr">${av('v','md','off')}<div><b>Вера</b><small>vera@nova.ddns.net, 2 общих друга</small></div><div class="tools" style="gap:8px"><button class="btn gh">Отклонить</button><button class="btn pri">${ic('check','s')}Принять</button></div></div>
+</div>`,
+
+set:()=>`<div class="set">
+  <nav><button class="ch">${ic('user')}Аккаунт</button><button class="ch on">${ic('brush')}Внешний вид</button><button class="ch">${ic('mic')}Голос и видео</button><button class="ch">${ic('bell')}Уведомления</button></nav>
+  <div class="set-b">
+    <h3>Внешний вид</h3>
+    <div class="field"><span>Цветовая тема</span><div class="themes">${PALS.map((p,i)=>`<button class="th" data-i="${i}" aria-pressed="${i===S.pal}"><em><i style="background:${p[1]}"></i>${S.scheme==='one'?'':`<i style="background:${second(p)}"></i>`}</em><span>${p[0]}</span></button>`).join('')}</div></div>
+    <div>
+      <div class="row"><div><b>Анимации интерфейса</b><small>Плавные переходы и отклик на нажатия</small></div><button class="tg" aria-pressed="true" aria-label="Анимации интерфейса"></button></div>
+      <div class="row"><div><b>Компактные сообщения</b><small>Меньше отступы между сообщениями</small></div><button class="tg" aria-pressed="false" aria-label="Компактные сообщения"></button></div>
+      <div class="row"><div><b>Язык</b><small>Язык интерфейса на этом устройстве</small></div><button class="btn sec">Русский${ic('chev','s')}</button></div>
+      <div class="row"><div><b>Масштаб интерфейса</b><small>От 50 до 250 %, по умолчанию 100 %</small></div><div class="scale"><input type="range" id="scale" min="50" max="250" step="25" value="100" aria-label="Масштаб интерфейса"><output id="scale-out">100%</output><button class="btn gh" id="scale-reset">Сбросить</button></div></div>
+    </div>
+  </div>
+</div>`};
+
+const opts=(arr,sel)=>`<div class="opts">${arr.map(o=>`<button class="opt" aria-pressed="${o===sel}">${o}</button>`).join('')}</div>`;
+const OVS={
+create:()=>`<div class="scrim"><div class="sheet modal" role="dialog" aria-label="Создать канал">
+  <h3>Создать канал</h3>
+  <div class="kinds"><button class="kind" aria-pressed="true">${ic('hash')}Текстовый</button><button class="kind" aria-pressed="false">${ic('vol')}Голосовой</button></div>
+  <div class="field"><span>Название</span><div class="inp focus" style="max-width:none">планы-на-релиз</div></div>
+  <p>Канал увидят все участники пространства «Орбита».</p>
+  <div class="btns"><button class="btn gh" data-close>Отмена</button><button class="btn pri" data-close>Создать</button></div></div></div>`,
+stream:()=>`<div class="scrim"><div class="sheet modal" role="dialog" aria-label="Настройки трансляции" style="width:440px">
+  <h3>Настройки трансляции</h3><span class="sub">Ограничения задаёт orbit.ddns.net</span>
+  <div class="two">
+    <div class="field"><span>Разрешение</span>${opts(['720p','1080p','1440p'],'1080p')}</div>
+    <div class="field"><span>Частота кадров</span>${opts(['30','60'],'60')}</div>
+    <div class="field"><span>Тип контента</span>${opts(['Игры','Текст'],'Игры')}</div>
+    <div class="field"><span>Кодек</span>${opts(['VP9','H264'],'VP9')}</div>
+  </div>
+  <div class="kv"><span>Битрейт</span><b>8 Мбит/с, сбалансировано</b></div>
+  <div class="row" style="padding-bottom:0"><div><b>Системный звук</b><p class="warn">Chrome может исключить звук Backspace, если это поддерживает выбранный тип захвата.</p></div><button class="tg" aria-pressed="true" aria-label="Системный звук"></button></div>
+  <div class="btns"><button class="btn gh" data-close>Отмена</button><button class="btn pri" data-close>${ic('screen','s')}Начать трансляцию</button></div></div></div>`,
+prof:()=>`<div class="scrim clear"><div class="sheet pop prof" role="dialog" aria-label="Профиль">
+  <div class="ban" style="--g:linear-gradient(135deg,#7a4a8c,#d9a6c9)"></div>
+  <div class="in">${av('l','lg',1)}<div><b class="n">Лена</b><br><small>lena@orbit.ddns.net</small></div>
+    <div class="roles"><span class="role"><i style="--c:#f3b352"></i>Модератор</span><span class="role"><i style="--c:#6fb5ff"></i>Дизайн</span></div>
+    <p>Рисую интерфейсы, тестирую сборки под Windows.</p>
+    <small>В голосовом канале «Гостиная»</small>
+    <div class="btns"><button class="btn pri">${ic('chat','s')}Написать</button><button class="btn sec">${ic('phone','s')}Позвонить</button></div></div></div></div>`,
+menu:()=>`<div class="scrim clear"><div class="sheet pop menu" role="menu">
+  <button class="mi">${ic('reply','s')}Ответить<kbd>R</kbd></button><button class="mi">${ic('smile','s')}Реакция</button><button class="mi">${ic('pencil','s')}Изменить<kbd>E</kbd></button>
+  <button class="mi">${ic('copy','s')}Копировать текст</button><button class="mi">${ic('pin','s')}Закрепить</button><hr><button class="mi dng">${ic('trash','s')}Удалить<kbd>Del</kbd></button></div></div>`,
+conn:()=>`<div class="sheet pop conn-p" role="dialog" aria-label="Сведения о соединении">
+  <div class="conn-h"><h3>Сведения о соединении</h3><button class="ib sm" data-close title="Закрыть">${ic('x','s')}</button></div>
+  <div class="conn-b">
+    <div class="pg-h">Пинг<small>последние 2 мин</small></div>
+    <div class="pg"><svg viewBox="0 0 276 56" preserveAspectRatio="none" role="img" aria-label="Пинг: минимум 31 мс, в среднем 38 мс, максимум 74 мс"><line x1="0" x2="276" y1="22" y2="22" style="stroke:var(--warn);stroke-opacity:.4;stroke-dasharray:3 3" vector-effect="non-scaling-stroke"/><polygon points="0,56 0,40 12,39 24,41 36,38 48,40 60,37 72,39 84,40 96,36 108,38 120,14 132,33 144,37 156,39 168,36 180,38 192,40 204,37 216,39 228,38 240,39 252,36 264,38 276,37 276,56" style="fill:var(--ok);fill-opacity:.14"/><polyline points="0,40 12,39 24,41 36,38 48,40 60,37 72,39 84,40 96,36 108,38 120,14 132,33 144,37 156,39 168,36 180,38 192,40 204,37 216,39 228,38 240,39 252,36 264,38 276,37" style="fill:none;stroke:var(--ok);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round" vector-effect="non-scaling-stroke"/></svg><span>100 мс</span></div>
+    <div class="pg-f"><span>мин <b>31 мс</b></span><span>сред <b>38 мс</b></span><span>макс <b class="w">74 мс</b></span></div>
+    <div class="sec">Сеть</div>
+    <div class="kv"><span>Пинг</span><b class="g">38 мс</b></div><div class="kv"><span>Потеря пакетов</span><b class="g">0,2 %</b></div><div class="kv"><span>Джиттер</span><b class="g">4 мс</b></div><div class="kv"><span>Сервер</span><b>orbit.ddns.net</b></div><div class="kv"><span>Протокол</span><b>UDP (srflx)</b></div>
+    <div class="sec">Аудио</div>
+    <div class="trk"><span>Микрофон</span><small>↑ opus · 48 кбит/с · потери 0 %</small></div>
+    <div class="trk"><span>Звук экрана</span><small>↑ opus + red · 128 кбит/с · потери 0 %</small></div>
+    <div class="trk"><span>Удалённый · Марсель</span><small>↓ opus · 46 кбит/с · джиттер 3 мс</small></div>
+    <div class="sec">Видео</div>
+    <div class="kv"><span>Запрошенный кодек</span><b>VP9</b></div><div class="kv"><span>Согласованный кодек</span><b>video/VP9</b></div><div class="kv"><span>Кодировщик</span><b>libvpx</b></div><div class="kv"><span>Изменение суммы QP</span><b>412</b></div><div class="kv"><span>Изменение NACK</span><b>0</b></div><div class="kv"><span>Изменение PLI</span><b>0</b></div>
+    <div class="trk"><span>Экран</span><small>↑ 1920×1080 · 60 к/с · 7,8 Мбит/с</small></div>
+    <div class="trk"><span>Удалённый · akk0, экран</span><small>↓ 1920×1080 · 58 к/с · 6,1 Мбит/с</small></div>
+  </div></div>`,
+dl:()=>`<div class="scrim clear"><div class="sheet pop dl" role="dialog" aria-label="Загрузки">
+  <div class="conn-h"><h3>Загрузки</h3><button class="btn gh" style="height:26px;padding:0 8px;font-size:12px">Очистить завершённые</button></div>
+  <div class="dl-b">
+    <div class="sec">Сейчас</div>
+    <div class="xf"><span class="fi act">${ic('file','s')}</span><div><b>Backspace-1.11.0-arm64.dmg</b><small>Отправка в #разработка · 92 из 148 МБ · 4,1 МБ/с</small><div class="prog"><i></i></div></div><button class="ib sm" title="Отменить">${ic('x','s')}</button></div>
+    <div class="xf"><span class="fi act">${ic('download','s')}</span><div><b>запись-указателя.mp4</b><small>Скачивание · 11 из 62 МБ · осталось 14 с</small><div class="prog"><i style="width:18%"></i></div></div><button class="ib sm" title="Отменить">${ic('x','s')}</button></div>
+    <div class="sec">Завершённые</div>
+    <div class="xf"><span class="fi">${ic('file','s')}</span><div><b>release-notes-1.11.0.pdf</b><small>Скачан · 248 КБ · 15:16</small></div><span class="ib sm" style="color:var(--ok)">${ic('check','s')}</span></div>
+    <div class="xf"><span class="fi">${ic('file','s')}</span><div><b>pasted.txt</b><small>Скачан · 6,2 КБ · 15:22</small></div><span class="ib sm" style="color:var(--ok)">${ic('check','s')}</span></div>
+    <div class="xf"><span class="fi">${ic('image','s')}</span><div><b>шапка-вариант-2.png</b><small>Отправлен в #разработка · 1,8 МБ · 15:10</small></div><span class="ib sm" style="color:var(--ok)">${ic('check','s')}</span></div>
+    <div class="xf"><span class="fi">${ic('file','s')}</span><div><b>build.log</b><small style="color:var(--danger)">Не отправлен: файл больше 100 МБ</small></div><button class="ib sm" title="Убрать из списка">${ic('x','s')}</button></div>
+  </div></div></div>`,
+call:()=>`<div class="scrim"><div class="sheet call" role="dialog" aria-label="Входящий звонок">
+  <div class="ring">${av('l','lg')}</div><b>Лена</b><small>Входящий звонок</small>
+  <div class="btns"><button class="btn bad" data-close>${ic('end','s')}Отклонить</button><button class="btn ok" data-close>${ic('phone','s')}Принять</button></div></div></div>`};
+
+const ABOUT={
+ a:['А · Графит','Интерфейс как точный инструмент. Фон нейтральный, без оттенка, поэтому единственный цвет на экране — пара из темы. Области разделены тонкими линиями, а не разными заливками.',
+   [['Формы','Малые радиусы, аватары — скруглённые квадраты. Кнопки прямоугольные, высотой 30.'],['Материалы','Плотные поверхности. Стекло остаётся только как лёгкая подложка у всплывающих окон.'],['Движение','Короткое и точное: 140 мс, без отскока. В рекомендации предлагаю заменить на пружинистое.'],['Риск','Может показаться суховатым и «офисным», если не добавить живого движения.']]],
+ b:['Б · Острова','Каждая область — отдельная скруглённая карточка на тёмной подложке. Много стекла и воздуха, кнопки-капсулы, всё слегка пружинит.',
+   [['Формы','Крупные радиусы, круглые аватары, поле ввода и кнопки в виде капсул.'],['Материалы','Стекло — главный материал: поле ввода, панель звонка, окна, карточка пользователя.'],['Движение','Пружина с небольшим отскоком, 320 мс. Самое заметное из трёх.'],['Риск','На экране помещается меньше. Дороже всех в поддержке: каркас окна придётся держать отдельно от оригинала.']]],
+ c:['В · Камень','Цвета Графита, формы мягче: средние радиусы, круглые аватары, области разделены оттенком фона, а линии появляются только там, где без них не обойтись.',
+   [['Формы','Средние радиусы, круглые аватары, кнопки со скруглением 10.'],['Материалы','Матовые нейтральные поверхности, сдержанное стекло у плавающих панелей.'],['Движение','Плавное с мягким затуханием, 220 мс.'],['Риск','Отличие от Графита тоньше: оно в формах, плотности и скорости движения, а не в цвете.']]]};
+
+function press(group,btn){group.forEach(b=>b.setAttribute('aria-pressed',b===btn))}
+function moveMarker(snap){const on=$('#chans .ch.on'),m=$('#marker');if(!m)return;m.hidden=!on;if(!on)return;if(snap)m.style.transition='none';m.style.transform=`translateY(${on.offsetTop}px)`;if(snap){void m.offsetWidth;m.style.transition=''}}
+function applyZoom(){const z=S.zoom,o=$('#zout'),vp=$('#vp'),st=$('.stage>.fake'),r=$('#zoom');if(!o)return;o.textContent=z+'%';r.value=z;
+  vp.style.width=vp.style.height=(100/(z/100))*.8+'%';st.style.transform=`scale(${z/150})`}
+function inVoice(){return S.view==='voice'||S.view==='focus'}
+function render(){
+  const want=inVoice()?'Гостиная':(S.view==='chat'||S.view==='media')?'разработка':'';
+  const chan=(icn,name,un)=>`<button class="ch ${name===want?'on':''}">${ic(icn)}${name}${un?'<i class="un"></i>':''}</button>`;
+  app.innerHTML=`
+<aside class="strip">
+  <div class="strip-h"><button class="sp home" title="Главная">${MARK}</button></div>
+  <button class="sp on" title="Орбита">О</button>
+  <button class="sp" title="Code&Context">C<span class="badge">3</span></button>
+  <button class="sp" title="Киноклуб">К</button>
+  <span class="gapv"></span><button class="sp" title="Добавить">${ic('plus')}</button><button class="sp" title="Обзор" data-view="explore">${ic('compass')}</button>
+</aside>
+<aside class="side">
+  <div class="side-h"><span>Орбита</span>${ic('chev','s')}</div>
+  <div class="chans" id="chans">
+    <div class="marker" id="marker"></div>
+    <div class="cat">Текстовые</div>
+    ${chan('hash','общий')}${chan('hash','разработка')}${chan('hash','мемы',1)}
+    <div class="cat">Голосовые</div>
+    ${chan('vol','Гостиная')}
+    <div class="vu">${av('m','sm')}Марсель${ic('video','xs')}</div>
+    <div class="vu">${av('a','sm')}akk0<span class="live">В ЭФИРЕ</span></div>
+    <div class="vu">${av('l','sm')}Лена<span class="live">В ЭФИРЕ</span></div>
+    <div class="vu">${av('n','sm')}Ника${ic('micoff','xs')}</div>
+    ${chan('vol','Игровая')}
+  </div>
+</aside>
+<div class="me">
+  <div class="me-v"><span class="sig">${ic('signal')}</span><button class="conn" data-ovt="conn" title="Сведения о подключении"><b>Голосовая связь</b><small>Гостиная · 38 мс</small></button><button class="ib sm dng" title="Отключиться">${ic('end','s')}</button></div>
+  <div class="me-u">${av('t','',1)}<div><b>Тимур</b><small>в сети</small></div>
+    <div class="tools"><button class="ib sm" title="Микрофон">${ic('mic','s')}</button><button class="ib sm" title="Звук">${ic('head','s')}</button><button class="ib sm" title="Настройки" data-view="set">${ic('set','s')}</button></div></div>
+</div>
+<main class="main">
+  <div class="main-h">${HEADS[S.view]()}</div>
+  <div class="pane">${PANES[S.view]()}</div>
+  ${S.ov&&S.ov!=='conn'?OVS[S.ov]():''}
+</main>${S.ov==='conn'?OVS.conn():''}`;
+  app.dataset.dir=S.dir;app.dataset.logo=S.logo;$('#logo').value=S.logo;
+  applyPal();$('#scheme').value=S.scheme;renderPals();
+  press($$('#dirs button'),$(`#dirs [data-dir="${S.dir}"]`));
+  press($$('#views button'),$(`#views [data-view="${S.view}"]`));
+  $('#ov').value=S.ov;$('#icons').value=S.icons;
+  const [t,lead,items]=ABOUT[S.dir];
+  $('#about').innerHTML=`<h2>${t}</h2><p>${lead}</p><div class="notes">${items.map(([h,p])=>`<div class="note"><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>`;
+  moveMarker(true);applyZoom();
+  try{localStorage.setItem('bs-state',JSON.stringify({v:2,icons:S.icons,pal:S.pal,logo:S.logo,scheme:S.scheme}))}catch(e){}
+}
+
+function renderPals(){$('#pals').innerHTML=PALS.map((p,i)=>`<button class="pal" style="--a:${p[1]};--b:${S.scheme==='one'?p[1]:second(p)}" title="Тема: ${p[0]}" aria-label="Тема ${p[0]}" data-i="${i}" aria-pressed="${i===S.pal}"><i></i></button>`).join('')}
+$('#scheme').addEventListener('change',e=>{S.scheme=e.target.value;render()});
+$('#ov').addEventListener('change',e=>{S.ov=e.target.value;if(S.ov==='menu'&&S.view!=='chat'&&S.view!=='media')S.view='chat';render()});
+$('#icons').addEventListener('change',e=>{S.icons=e.target.value;render()});
+$('#logo').addEventListener('change',e=>{S.logo=e.target.value;render()});
+document.addEventListener('input',e=>{if(e.target.id==='zoom'){S.zoom=+e.target.value;applyZoom()}else if(e.target.id==='scale'){$('#scale-out').textContent=e.target.value+'%'}});
+document.addEventListener('click',e=>{
+  if(e.target.classList&&e.target.classList.contains('scrim')){S.ov='';render();return}
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.dir){S.dir=t.dataset.dir;render()}
+  else if(t.dataset.view){S.view=t.dataset.view;S.ov='';render()}
+  else if(t.dataset.ovt){S.ov=S.ov===t.dataset.ovt?'':t.dataset.ovt;render()}
+  else if(t.dataset.i!==undefined){S.pal=+t.dataset.i;applyPal();press($$('#pals .pal'),$$('#pals .pal')[S.pal]);press($$('.themes .th'),$$('.themes .th')[S.pal])}
+  else if(t.id==='scale-reset'){$('#scale').value=100;$('#scale-out').textContent='100%'}
+  else if(t.dataset.z){S.zoom=Math.max(100,Math.min(400,S.zoom+ +t.dataset.z));applyZoom()}
+  else if(t.hasAttribute('data-close')){S.ov='';render()}
+  else if(t.classList.contains('more')){const o=t.parentElement.classList.toggle('open');t.textContent=o?'Свернуть':`Показать всё, ${t.dataset.n} строк`}
+  else if(t.classList.contains('kind'))press($$('.kind'),t);
+  else if(t.classList.contains('opt'))press([...t.parentElement.children],t);
+  else if(t.parentElement&&t.parentElement.classList.contains('tabs'))press([...t.parentElement.children],t);
+  else if(t.classList.contains('tg'))t.setAttribute('aria-pressed',t.getAttribute('aria-pressed')!=='true');
+  else if(t.classList.contains('pill')&&t.dataset.n){const base=+t.dataset.n,was=t.classList.contains('mine')?1:0;if(t.dataset.own===undefined)t.dataset.own=was;const mine=t.classList.toggle('mine');
+    t.querySelector('span').textContent=base-(+t.dataset.own)+(mine?1:0);t.classList.remove('bump');void t.offsetWidth;t.classList.add('bump')}
+  else if(t.closest('#chans')&&t.classList.contains('ch')){const name=t.textContent.trim();
+    if(name==='Гостиная'&&!inVoice()){S.view='voice';render()}
+    else if(name!=='Гостиная'&&S.view!=='chat'&&S.view!=='media'){S.view='chat';render();$$('#chans .ch').forEach(c=>c.classList.toggle('on',c.textContent.trim()===name));moveMarker()}
+    else{$$('#chans .ch').forEach(c=>c.classList.remove('on'));t.classList.add('on');moveMarker()}}
+});
+try{const o=JSON.parse(localStorage.getItem('bs-state')||'{}');if(['one','kin','contrast'].includes(o.scheme))S.scheme=o.scheme;if(SETS[o.icons])S.icons=o.icons;if(PALS[o.pal])S.pal=o.pal;if(['rowtile','rowfill','cellfull','celltile','cellmark'].includes(o.logo))S.logo=o.logo}catch(e){}
+render();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>moveMarker(true));
+</script>
