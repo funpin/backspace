@@ -271,9 +271,11 @@ select{font:500 13.5px var(--f-page);color:var(--ink);background:var(--pg-2);bor
 .q{height:20px;padding:0 7px;border-radius:var(--r-sm);background:rgba(0,0,0,.6);color:#d6d6dc;font-size:10.5px;font-weight:600;letter-spacing:.03em;display:inline-flex;align-items:center;font-variant-numeric:tabular-nums}
 .tr .ib{width:26px;height:26px;background:rgba(0,0,0,.6);color:#e4e4e8;opacity:0;transition:opacity var(--dur)}
 .tile:hover .tr .ib{opacity:1}
-.tb{position:absolute;left:0;right:0;bottom:0;padding:20px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.66));display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:#f2f2f4}
+/* caption: a chip the size of its text; the picture's bottom edge stays clear */
+.tb{position:absolute;left:8px;bottom:8px;height:26px;padding:0 9px;border-radius:var(--r-md);background:rgba(0,0,0,.58);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:#f2f2f4;z-index:1}
 .tb .ic{color:#c9c9d0}
-.tb .r{margin-left:auto;display:flex;gap:5px}
+.tb .r{display:flex;gap:5px}
+.tb .chip{width:auto;height:auto;background:none}
 .chip{width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.6);display:grid;place-items:center;color:#e4e4e8}
 .chip.bad{background:color-mix(in srgb,var(--danger) 85%,#000);color:#16090a}
 .faces{display:flex}
@@ -296,8 +298,24 @@ select{font:500 13.5px var(--f-page);color:var(--ink);background:var(--pg-2);bor
 .ctrl .ib{width:40px;height:40px;background:rgba(255,255,255,.05)}
 .ctrl .ib.off{color:var(--danger);background:color-mix(in srgb,var(--danger) 14%,transparent)}
 .ctrl .ib.on{color:var(--on-acc);background:var(--acc-f)}
+.ctrl .ib.sel{color:var(--t1);background:rgba(255,255,255,.14)}
+.noribbon .vgrid,.noribbon .stage{bottom:76px}
+.vgrid,.stage{transition:bottom var(--dur) var(--ease)}
 .ctrl .ib.end{background:var(--danger);color:#16090a;width:52px}
 .ctrl hr{height:22px;border:0;border-left:1px solid var(--line);margin:0 4px}
+/* a message from the voice channel's text chat: bottom-right, in one stack with the camera inset and above it */
+.dock{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:2;pointer-events:none}
+.dock>*{pointer-events:auto}
+.dock.grid{right:24px;bottom:148px;transition:bottom var(--dur) var(--ease)}
+.noribbon .dock.grid{bottom:84px}
+.dock .inset{position:relative;right:auto;bottom:auto;width:176px}
+.vmsg{width:264px;padding:9px 11px 10px;border-radius:var(--r-lg);background:var(--glass);backdrop-filter:blur(var(--blur));-webkit-backdrop-filter:blur(var(--blur));box-shadow:var(--shadow);display:flex;gap:9px;align-items:flex-start;text-align:left;animation:msg calc(var(--dur) * 1.4) var(--ease) both;position:relative;overflow:hidden}
+.vmsg b{font-weight:600;font-size:12.5px;color:var(--t1)}
+.vmsg small{color:var(--t3);font-size:11px;margin-left:6px}
+.vmsg p{font-size:12.5px;line-height:1.4;color:var(--t1);max-width:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vmsg::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--acc);transform-origin:left;animation:vmsg-life 6s linear both}
+@keyframes vmsg-life{to{transform:scaleX(0)}}
+
 /* voice: focused stream with zoom tools and minimap */
 .stage{position:absolute;inset:12px 16px 140px;border-radius:var(--r-lg);background:#0a0a0c;overflow:hidden}
 .stage .fake{padding:9% 6% 12% 10%;transform-origin:30% 40%;transition:transform var(--dur) var(--ease)}
@@ -477,7 +495,7 @@ ul b{color:var(--ink);font-weight:600}
 
 <div class="wrap">
   <header class="lead">
-    <h1>Три направления для нового Backspace</h1>
+    <h1>Три направления для нового B:SPACE</h1>
     <p>Один и тот же интерфейс в трёх характерах. Макет живой: переключайте направление, экран, окно, набор иконок и цветовую тему; нажимайте на каналы, реакции, переключатели, двигайте ползунок увеличения. Задача шага — выбрать характер и иконки; точные значения доведём в брендбуке.</p>
   </header>
 
@@ -576,6 +594,7 @@ ul b{color:var(--ink);font-weight:600}
     <ul>
       <li><b>Цветовая тема — это акцент и дополнительный цвет.</b> Акцент: кнопки, выбранное, переключатели, фокус. Дополнительный: непрочитанное, упоминания, ссылки. Тема переключается в настройках, на макете шесть готовых. Серые оттенки фона и текста тема не трогает.</li>
       <li><b>Служебные цвета не входят в тему.</b> Красный: ошибки, «В ЭФИРЕ», выключенный микрофон, «завершить звонок». Жёлтый: предупреждения, «отошёл». Зелёный: «в сети», кто говорит, «принять звонок». Качество связи всегда показывается светофором: зелёный — хорошо, жёлтый — со сбоями, красный — сильные задержки; это касается надписи «Голосовая связь», значка сигнала, чисел пинга и линии графика. Смысл этих цветов не меняется при смене темы.</li>
+      <li><b>Голосовой экран: что изменено по замечаниям.</b> Подпись с именем — компактная плашка, без затемнения по всей нижней кромке картинки. Кнопка «показать участников» стоит в нижней панели звонка, а не плавает над ней. Сообщение из чата канала всплывает справа снизу, в одной стопке с камерой-врезкой и над ней, выше панели и ленты; гаснет само через шесть секунд. Значок качества бывает двух ширин: с частотой кадров и без.</li>
       <li><b>Голосовой экран сохраняет все нынешние детали:</b> метка «В ЭФИРЕ», качество трансляции, имя с иконкой экрана, стопка лиц зрителей, кнопка «скрыть», камера-вставка поверх экрана, плитка «Смотреть» для трансляции, которую вы не открыли, лента молчащих участников, указатели с именами, панель увеличения с мини-картой, кнопка «Сетка».</li>
       <li><b>Один шрифт на все языки</b> вместо нынешних трёх. Китайский остаётся на системном шрифте: китайский шрифт весит несколько мегабайт.</li>
       <li><b>Одна линия шапки.</b> Список каналов и основная область делят одну горизонтальную линию на высоте шапки; коротких разделителей между группами значков в полосе пространств больше нет, группы разделяет отступ. Доходит ли линия до левого края, зависит от варианта логотипа (список «Логотип» вверху).</li>
@@ -616,7 +635,7 @@ const PALS=[['Лаванда','#6e5bef','#a99dff','#7fb0ff','#86efac'],['Изу�
 const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.substr(i,2),16)/255).map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*c[0]+.7152*c[1]+.0722*c[2]};
 const second=p=>S.scheme==='one'?p[2]:S.scheme==='kin'?p[3]:p[4];
 function applyPal(){const p=PALS[S.pal],L=lum(p[1]);app.style.setProperty('--acc-f',p[1]);app.style.setProperty('--acc',p[2]);app.style.setProperty('--acc2',second(p));app.style.setProperty('--on-acc',(1.05/(L+.05))>=4.5?'#fff':'#0c0c10')}
-const S={dir:'c',view:'chat',pal:0,icons:'l',ov:'',zoom:150,logo:'rowtile',scheme:'kin'};
+const S={dir:'c',view:'chat',pal:0,icons:'l',ov:'',zoom:150,logo:'rowtile',scheme:'kin',ribbon:true};
 const app=document.getElementById('app');
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const ic=(n,c='')=>{const ph=S.icons[0]==='p';return `<svg class="ic ${ph?'f':''} ${c}" viewBox="0 0 ${ph?256:24} ${ph?256:24}" aria-hidden="true">${SETS[S.icons][n]||''}</svg>`};
@@ -633,8 +652,8 @@ const HEADS={
  set:()=>`${ic('set')}<b>Настройки</b><span class="sp8"></span><button class="ib sm">${ic('x','s')}</button>`};
 HEADS.focus=HEADS.voice;HEADS.media=HEADS.chat;
 
-const ctrl=()=>`<div class="ctrl"><button class="ib off" title="Микрофон выключен">${ic('micoff')}</button><button class="ib" title="Звук">${ic('head')}</button><button class="ib" title="Камера">${ic('video')}</button><button class="ib on" title="Идёт трансляция">${ic('screen')}</button><hr><button class="ib" title="Чат канала">${ic('chat')}</button><button class="ib" title="На весь экран">${ic('max')}</button><hr><button class="ib end" title="Отключиться">${ic('end')}</button></div>`;
-const ribbon=()=>`<div class="ribbon"><div class="rp">${av('t','md')}Вы</div><div class="rp">${av('n','md')}<span class="chip bad">${ic('micoff','xs')}</span>Ника</div><div class="rp">${av('e','md')}<span class="chip">${ic('eyeoff','xs')}</span>Лео</div></div>`;
+const ctrl=()=>`<div class="ctrl"><button class="ib off" title="Микрофон выключен">${ic('micoff')}</button><button class="ib" title="Звук">${ic('head')}</button><button class="ib" title="Камера">${ic('video')}</button><button class="ib on" title="Идёт трансляция">${ic('screen')}</button><hr><button class="ib ${S.ribbon?'sel':''}" data-ribbon title="${S.ribbon?'Скрыть участников':'Показать участников'}" aria-pressed="${S.ribbon}">${ic('users')}</button><button class="ib" title="Чат канала">${ic('chat')}</button><button class="ib" title="На весь экран">${ic('max')}</button><hr><button class="ib end" title="Отключиться">${ic('end')}</button></div>`;
+const ribbon=()=>!S.ribbon?'':`<div class="ribbon"><div class="rp">${av('t','md')}Вы</div><div class="rp">${av('n','md')}<span class="chip bad">${ic('micoff','xs')}</span>Ника</div><div class="rp">${av('e','md')}<span class="chip">${ic('eyeoff','xs')}</span>Лео</div></div>`;
 
 const PANES={
 chat:()=>`<div class="msgs">
@@ -700,9 +719,9 @@ voice:()=>`<div class="vgrid">
     <div class="tl"><span class="live">В ЭФИРЕ</span></div><div class="tr"><button class="ib" title="Скрыть плитку">${ic('eyeoff','s')}</button><span class="q">720p · 30 к/с</span></div>
     <div class="inset"><div class="cam" style="--tint:#5a2f7a"></div></div>
     <div class="tb">${ic('screen','s')}Лена ${faces(['t','n'])}</div></div>
-  <div class="tile"><div class="tl"><span class="live">В ЭФИРЕ</span></div><div class="tr"><span class="q">720p · 30 к/с</span></div>
+  <div class="tile"><div class="tl"><span class="live">В ЭФИРЕ</span></div><div class="tr"><span class="q">1438p</span></div>
     <div class="watch">${av('v','lg')}<div>Вера ведёт трансляцию<button class="btn pri">Смотреть</button></div></div></div>
-</div>${ribbon()}${ctrl()}`,
+</div><div class="dock grid"><button class="vmsg" title="Открыть чат канала">${av('l','sm')}<span><b>Лена</b><small>чат канала</small><p>Сделай покрупнее, цифры в правой колонке не видно</p></span></button></div>${ribbon()}${ctrl()}`,
 
 focus:()=>`<div class="stage">${fake('#16130f',7)}${cursor('Марсель','var(--acc)')}${cursor('Лена','#d9a6c9',1)}
   <div class="tl"><span class="live">В ЭФИРЕ</span><span class="q">1080p · 60 к/с</span></div>
@@ -712,6 +731,7 @@ focus:()=>`<div class="stage">${fake('#16130f',7)}${cursor('Марсель','var
   </div>
   <div class="mini" title="Мини-карта">${fake('#16130f',7)}<u id="vp"></u></div>
   <div class="tb">${ic('screen','s')}akk0 ${faces(['m','l','t','n'])}</div>
+  <div class="dock"><button class="vmsg" title="Открыть чат канала">${av('l','sm')}<span><b>Лена</b><small>чат канала</small><p>Сделай покрупнее, цифры в правой колонке не видно</p></span></button><div class="inset"><div class="cam" style="--tint:#3a4f7a"></div></div></div>
 </div>${ribbon()}${ctrl()}`,
 
 explore:()=>`<div class="scrolly">
@@ -862,7 +882,7 @@ function render(){
 </div>
 <main class="main">
   <div class="main-h">${HEADS[S.view]()}</div>
-  <div class="pane">${PANES[S.view]()}</div>
+  <div class="pane ${inVoice()&&!S.ribbon?'noribbon':''}">${PANES[S.view]()}</div>
   ${S.ov&&S.ov!=='conn'?OVS[S.ov]():''}
 </main>${S.ov==='conn'?OVS.conn():''}`;
   app.dataset.dir=S.dir;app.dataset.logo=S.logo;$('#logo').value=S.logo;
@@ -887,6 +907,7 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
   if(t.dataset.dir){S.dir=t.dataset.dir;render()}
   else if(t.dataset.view){S.view=t.dataset.view;S.ov='';render()}
+  else if(t.hasAttribute('data-ribbon')){S.ribbon=!S.ribbon;render()}
   else if(t.dataset.ovt){S.ov=S.ov===t.dataset.ovt?'':t.dataset.ovt;render()}
   else if(t.dataset.i!==undefined){S.pal=+t.dataset.i;applyPal();press($$('#pals .pal'),$$('#pals .pal')[S.pal]);press($$('.themes .th'),$$('.themes .th')[S.pal])}
   else if(t.id==='scale-reset'){$('#scale').value=100;$('#scale-out').textContent='100%'}
