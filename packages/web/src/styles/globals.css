@@ -533,7 +533,9 @@
    per state; the motion-off rules below stop each on its last keyframe,
    which is the state's resting pose. Times match docs/brand/b-space-logo.html. ── */
 .mascot * { transform-box: fill-box; transform-origin: center; }
+.mascot-eyes { transition: transform 0.18s ease-out; }
 .mascot--idle .mascot-eye { animation: mascot-blink 3.2s infinite; }
+.mascot--peek .mascot-eye { animation: mascot-peek 0.35s ease-out; }
 .mascot--look .mascot-eyes { animation: mascot-look 4.5s ease-in-out infinite; }
 .mascot--notify .mascot-all { animation: mascot-hop 2.4s infinite; }
 .mascot--notify .mascot-eye { animation: mascot-wide 2.4s infinite; }
@@ -551,6 +553,7 @@
 .mascot--dnd .mascot-all { opacity: 0.6; }
 .mascot--dnd .mascot-z { animation: mascot-z 3s infinite; }
 .mascot--offline .mascot-all { opacity: 0.8; }
+@keyframes mascot-peek { from { transform: scaleY(0.1); } to { transform: scaleY(1); } }
 @keyframes mascot-blink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.08); } }
 @keyframes mascot-look { 0%, 15%, 85%, 100% { transform: translate(0, 0); } 25%, 45% { transform: translate(-4.5px, 1px); } 55%, 75% { transform: translate(4px, 0); } }
 @keyframes mascot-hop { 0%, 55%, 70%, 82%, 100% { transform: translateY(0); } 62% { transform: translateY(-9px); } 76% { transform: translateY(-4px); } }

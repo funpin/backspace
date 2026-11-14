@@ -7,6 +7,8 @@ import type { InstanceInfoResponse } from '@backspace/shared';
 import { SourceCodeLink } from '../ui/SourceCodeLink';
 import { Button } from '../ui/Button';
 import { Mascot } from '../ui/Mascot';
+import { PasswordInput } from './PasswordInput';
+import { useAuthMascot } from './authMascot';
 import { describeError } from '../../i18n/errors';
 
 export function LoginPage() {
@@ -77,13 +79,14 @@ export function LoginPage() {
   };
 
   const isDisabled = isLoading || retryAfter > 0;
+  const mascot = useAuthMascot(isLoading ? 'look' : retryAfter > 0 ? 'dnd' : 'idle');
 
   return (
     <div className="h-full overflow-y-auto flex flex-col items-center bg-surface-base relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--accent-primary)/0.06)_0%,transparent_50%)]" />
       <div className="my-auto flex-shrink-0 w-full max-w-[480px] bg-surface-channel border border-border-hard rounded-2xl p-8 relative z-raised">
         <div className="text-center mb-6">
-          <Mascot state={isLoading ? 'look' : retryAfter > 0 ? 'dnd' : 'idle'} className="w-16 h-16 mx-auto mb-3" />
+          <Mascot state={mascot.pose.state} gaze={mascot.pose.gaze} className="w-16 h-16 mx-auto mb-3" />
           <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:login.title')}</h1>
           <p className="text-txt-tertiary mt-1">{t('auth:login.subtitle')}</p>
         </div>
@@ -113,6 +116,7 @@ export function LoginPage() {
               className="input-standard w-full py-2.5"
               autoFocus
               autoComplete="username"
+              {...mascot.textField()}
             />
           </div>
 
@@ -120,12 +124,13 @@ export function LoginPage() {
             <label className="block text-xs font-medium text-txt-secondary mb-1.5">
               {t('common:labels.password')} <span className="text-status-danger">*</span>
             </label>
-            <input
-              type="password"
+            <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input-standard w-full py-2.5"
               autoComplete="current-password"
+              onRevealChange={mascot.onRevealChange}
+              {...mascot.passwordField()}
             />
           </div>
 

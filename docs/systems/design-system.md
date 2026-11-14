@@ -215,10 +215,13 @@ In the app the mark is inline SVG, never a file:
   row in the DM list, the project page header.
 - `components/ui/Mascot.tsx`: the two-tone character with a state
   (`idle`, `look`, `notify`, `typing`, `voice`, `screen`, `joy`, `dnd`,
-  `offline`), head `fill-txt-primary`, body `fill-accent-primary`. Each
+  `offline`, `shy`, `peek`) and an optional `gaze` (eye offset), head `fill-txt-primary`, body `fill-accent-primary`. Each
   state's motion is CSS (`.mascot--<state>` in `styles/globals.css`) and
   stops with the other animations under reduced motion or
-  `html[data-motion="off"]`. Used on empty screens and the auth/join pages.
+  `html[data-motion="off"]`. Used on empty screens and the auth/join pages. On sign-in and sign-up
+  (`components/auth/authMascot.ts`) it follows the caret in the name field,
+  shuts its eyes (`shy`) while a password is typed and peeks with one eye
+  (`peek`) when "Show password" (`PasswordInput`) is on.
 - `components/brand/markGeometry.ts`: the shared paths; a test checks them
   against the kit's files.
 

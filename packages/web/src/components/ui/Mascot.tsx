@@ -11,12 +11,23 @@ import { EYES_STANDARD, MARK_BODY, MARK_HEAD, MARK_SCREEN } from '../brand/markG
  * The eyes are cut out of the head through a mask, so the surface behind
  * shows through them on any background and they can still move.
  */
-export const MASCOT_STATES = ['idle', 'look', 'notify', 'typing', 'voice', 'screen', 'joy', 'dnd', 'offline'] as const;
+export const MASCOT_STATES = ['idle', 'look', 'notify', 'typing', 'voice', 'screen', 'joy', 'dnd', 'offline', 'shy', 'peek'] as const;
 
 export type MascotState = (typeof MASCOT_STATES)[number];
 
+/**
+ * Where the eyes look, as an offset in the mark's grid units (the head is 37
+ * wide): x from about -4.5 (left) to 4.5 (right), y positive is down. The eyes
+ * glide there; used by the sign-in form to watch the caret.
+ */
+export interface MascotGaze {
+  x: number;
+  y: number;
+}
+
 interface MascotProps {
   state: MascotState;
+  gaze?: MascotGaze;
   className?: string;
 }
 
@@ -41,12 +52,17 @@ function Eyes({ state }: { state: MascotState }): JSX.Element {
       </>
     );
   }
-  if (state === 'dnd') {
+  const closed = (e: typeof LEFT) => (
+    <rect key={e.cx} x={e.cx - e.rx - 0.4} y={e.cy} width={2 * e.rx + 0.8} height={2.6} rx={1.3} fill="black" />
+  );
+  // dnd: asleep; shy: eyes shut while a password is typed.
+  if (state === 'dnd' || state === 'shy') return <>{[LEFT, RIGHT].map(closed)}</>;
+  // peek: the password is shown, one eye opens to look.
+  if (state === 'peek') {
     return (
       <>
-        {[LEFT, RIGHT].map((e) => (
-          <rect key={e.cx} x={e.cx - e.rx - 0.4} y={e.cy} width={2 * e.rx + 0.8} height={2.6} rx={1.3} fill="black" />
-        ))}
+        {closed(LEFT)}
+        <ellipse className="mascot-eye" cx={RIGHT.cx} cy={RIGHT.cy} rx={RIGHT.rx} ry={RIGHT.ry} fill="black" />
       </>
     );
   }
@@ -59,7 +75,7 @@ function Eyes({ state }: { state: MascotState }): JSX.Element {
   );
 }
 
-export function Mascot({ state, className }: MascotProps): JSX.Element {
+export function Mascot({ state, gaze, className }: MascotProps): JSX.Element {
   const uid = useId().replace(/:/g, '');
   const faceMask = `mascot-face-${uid}`;
   const ringMask = `mascot-ring-${uid}`;
@@ -72,7 +88,7 @@ export function Mascot({ state, className }: MascotProps): JSX.Element {
           {/* White keeps the head, black cuts it: the eyes, and room around the unread dot. */}
           <mask id={faceMask} maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
             <rect width="100" height="100" fill="white" />
-            <g className="mascot-eyes">
+            <g className="mascot-eyes" style={gaze ? { transform: `translate(${gaze.x}px, ${gaze.y}px)` } : undefined}>
               <Eyes state={state} />
             </g>
             {state === 'notify' && <circle className="mascot-badge" cx="77" cy="13" r="11" fill="black" />}
