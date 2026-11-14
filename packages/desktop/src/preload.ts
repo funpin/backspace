@@ -107,6 +107,8 @@ contextBridge.exposeInMainWorld('backspace', {
   // itself; an older client passes nothing and gets the loopback's answer.
   getSystemAudioCapability: (usesAppSource?: boolean) =>
     ipcRenderer.invoke('get-system-audio-capability', usesAppSource === true),
+  // Names of audio routers running now that double the sound of a System Audio share.
+  getAudioRouters: () => ipcRenderer.invoke('get-audio-routers'),
   startSystemAudio: () => ipcRenderer.invoke('system-audio-start'),
   stopSystemAudio: () => ipcRenderer.invoke('system-audio-stop'),
   setScreenShareAudioPreference: (shareAudio: boolean) => {

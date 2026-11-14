@@ -26,6 +26,7 @@ import {
 } from './instanceUrl';
 import { getUpdateCapability, isSandboxed } from './updateCapability';
 import { ownAudioInSystemAudio } from './systemAudioCapability';
+import { listProcessCommands, runningAudioRouters } from './audioRouters';
 import { createSystemAudioController, withSystemAudioSource, type PatchBayModule } from './systemAudio';
 import { loadDismissedVersion, setDismissedVersion } from './updateDismissal';
 import { purgeUpdaterCache } from './updaterCache';
@@ -826,6 +827,13 @@ function registerIpcHandlers(): void {
       clientUsesSource,
       () => systemAudio.isAvailable(),
     );
+  });
+  // Audio routers running now that would make a System Audio share carry every
+  // sound twice (audioRouters.ts). Asked each time the stream settings open:
+  // the user can quit or start one between two shares.
+  ipcMain.handle('get-audio-routers', (event) => {
+    if (event.sender !== mainWindow?.webContents) return [];
+    return runningAudioRouters(process.platform, listProcessCommands);
   });
   // The virtual source that carries every other app's playback (Linux). The
   // renderer opens it like a microphone and calls stop when the share, or its
