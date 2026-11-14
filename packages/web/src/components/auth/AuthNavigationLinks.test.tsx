@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import type { InstanceInfoResponse } from '@backspace/shared';
+import { api } from '../../api/client';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { setLanguage } from '../../i18n';
@@ -95,5 +97,29 @@ describe('authentication navigation prompts', () => {
 
     await user.click(link);
     expect(screen.getByText('Login destination')).toBeInTheDocument();
+  });
+
+  it.each([true, false])('offers registration on the login page only while it is open (open: %s)', async (registrationOpen) => {
+    await setLanguage('en');
+    vi.mocked(api.instance.info).mockResolvedValueOnce({ registrationOpen } as unknown as InstanceInfoResponse);
+
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(api.instance.info).toHaveBeenCalled());
+    // Let the resolved info land before asserting on the link.
+    await waitFor(() => {
+      if (registrationOpen) expect(screen.getByRole('link', { name: 'Register' })).toBeInTheDocument();
+      else expect(screen.queryByRole('link', { name: 'Register' })).toBeNull();
+    });
+    if (!registrationOpen) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(screen.queryByRole('link', { name: 'Register' })).toBeNull();
+    }
   });
 });

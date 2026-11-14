@@ -142,6 +142,10 @@ export function LoginPage() {
                 : t('common:actions.logIn')}
           </Button>
 
+          {/* Closed registration means accounts come only from an admin's invite link,
+              which opens /register itself; the login page offers no way in. Shown while
+              the instance info loads, so an open instance never loses the link. */}
+          {instanceInfo?.registrationOpen !== false && (
           <p className="mt-3 text-sm text-txt-tertiary">
             <Trans
               t={t}
@@ -151,6 +155,7 @@ export function LoginPage() {
               }}
             />
           </p>
+          )}
         </form>
 
         {instanceInfo && (

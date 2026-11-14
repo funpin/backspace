@@ -199,6 +199,8 @@ If any step throws (concurrent revoke, last-slot race, username collision agains
 
 - **The federated registration path does NOT enter `redeemInvite`.** It is gated only by `federatedRegistrationOpen` and never consumes tokens, even if a token is provided in the request body. This is the structural enforcement of the spec §1.3 invariant "tokens never unlock federated creation".
 
+While `registrationOpen` is false the login page drops its "Don't have an account? Register" link (it stays while the instance info is loading or failed): new local accounts come only from an admin's invite link, which opens `/register?invite=…` itself.
+
 The `/api/auth/check-invite` debounced UX endpoint pre-validates a token from the register page; the in-txn re-derive inside `redeemInvite()` is the authoritative enforcement point.
 
 ### First-User Admin Promotion
