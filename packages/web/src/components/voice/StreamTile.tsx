@@ -29,6 +29,11 @@ interface StreamTileProps {
    * preview): no LIVE badge, no quality or health row, a bare-name caption.
    */
   compact?: boolean;
+  /**
+   * A strip thumbnail: full chrome, but too narrow for a row of viewer faces
+   * beside the name, so the viewers are an eye and a number.
+   */
+  dense?: boolean;
   stats: TrackStatsSnapshot | null;
 }
 
@@ -180,7 +185,7 @@ function StreamAttenuationItem() {
   );
 }
 
-export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
+export function StreamTile({ tile, large, compact, dense, stats }: StreamTileProps) {
   const { t } = useTranslation(['voice', 'common']);
   const videoRef = useRef<HTMLVideoElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -227,6 +232,10 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
     freezeCountDelta: screenStat?.freezeCountDelta ?? null,
   });
   const healthWarning = useStreamHealthWarning(healthCandidate, stats);
+  // A received track often reports no frame rate in its settings, which left
+  // the badge at the bare height while the connection popover showed one. The
+  // rate measured from the track's own stats fills in.
+  const badgeFps = qualityBadge?.fps ?? finitePositiveRounded(screenStat?.fps ?? undefined);
 
   // --- VIDEO --- use LiveKit's track.attach() to register the element
   // with the adaptive stream observer (enables SFU layer switching by viewport size)
@@ -490,8 +499,8 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
           )}
           {qualityBadge && hasVideo && (
             <div data-testid="stream-quality-badge" className={`${large ? 'h-7 px-3 rounded-lg' : 'px-1.5 py-0.5 rounded'} flex-shrink-0 bg-black/60 flex items-center text-[10px] font-bold text-white/70 uppercase tracking-wide`}>
-              {qualityBadge.fps !== null
-                ? t('voice:stream.qualityValue', { height: qualityBadge.height, fps: qualityBadge.fps })
+              {badgeFps !== null
+                ? t('voice:stream.qualityValue', { height: qualityBadge.height, fps: badgeFps })
                 // i18n-check: allow-literal "720p" is the format's name and reads the same in every language
                 : <>{qualityBadge.height}p</>}
             </div>
@@ -500,8 +509,14 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
       )}
 
       {/* Bottom overlay */}
-      {hasVideo && isWatching && <div data-testid="stream-tile-caption" className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-        <div className="flex items-center gap-1.5 min-w-0">
+      {hasVideo && isWatching && <div
+        data-testid="stream-tile-caption"
+        // A chip in the corner, not a band: a gradient across the whole
+        // bottom edge dimmed the last lines of whatever was being shared.
+        // Short of the right edge on a thumbnail: that corner holds the badge of a second source.
+        className={`absolute flex ${compact ? 'bottom-1 left-1 right-1' : dense ? 'bottom-2 left-2 right-9' : 'bottom-2 left-2 right-2'} pointer-events-none`}
+      >
+        <div className={`pointer-events-auto flex items-center gap-1.5 min-w-0 max-w-full rounded-lg bg-black/55 backdrop-blur-sm ${compact ? 'px-1.5 py-0.5' : 'px-2 py-1'}`}>
           {/* Screen icon */}
           <svg
             width="14"
@@ -522,7 +537,7 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
           )}
           {/* After the name rather than at the right edge: that corner
               belongs to the inset and its badge. */}
-          <span className="ml-1 flex"><StreamViewerCount sharer={participant} compact={compact} large={large} /></span>
+          <span className="ml-1 flex"><StreamViewerCount sharer={participant} compact={compact} dense={dense} large={large} /></span>
         </div>
       </div>}
     </div>

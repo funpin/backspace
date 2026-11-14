@@ -8,6 +8,7 @@ import { MessageList } from '../chat/MessageList';
 import { MessageInput } from '../chat/MessageInput';
 import { VoiceGrid } from '../voice/VoiceGrid';
 import { VoiceControlBar } from '../voice/VoiceControlBar';
+import { VoiceChatToasts } from '../voice/VoiceChatToasts';
 import { VoiceChatPanel } from '../voice/VoiceChatPanel';
 import { FriendsPage } from '../chat/FriendsPage';
 import { ExplorePage } from '../chat/ExplorePage';
@@ -41,8 +42,9 @@ import { usePointerReveal, VOICE_CHROME_ATTR } from '../../hooks/usePointerRevea
  * must not swallow clicks: the band is `pointer-events-none` and only the
  * action buttons inside it opt back in. Visibility is driven by `revealed`
  * rather than `group-hover`, because the group fills the viewport in
- * fullscreen and would hold hover forever. `focus-within` keeps it reachable
- * by keyboard, and pointers that cannot hover keep it up permanently.
+ * fullscreen and would hold hover forever. `:focus-visible` inside it keeps it
+ * reachable by keyboard (not `focus-within`: a button keeps focus after a
+ * mouse click, and the band would then never fade), and pointers that cannot hover keep it up permanently.
  */
 function voiceHeaderClassName(fullscreen: boolean, revealed: boolean): string {
   const base = 'h-12 px-5 flex items-center justify-between bg-surface-base transition-opacity duration-300';
@@ -53,7 +55,7 @@ function voiceHeaderClassName(fullscreen: boolean, revealed: boolean): string {
     'pointer-events-none absolute inset-x-0 top-0 z-30 border-b border-white/5 bg-gradient-to-b from-black/90 via-black/70 to-transparent';
   const visibility = revealed
     ? 'opacity-100'
-    : 'opacity-0 focus-within:opacity-100 [@media(hover:none)]:opacity-100 [@media(any-pointer:coarse)]:opacity-100';
+    : 'opacity-0 has-[:focus-visible]:opacity-100 [@media(hover:none)]:opacity-100 [@media(any-pointer:coarse)]:opacity-100';
   return `${base} ${overlay} ${visibility}`;
 }
 
@@ -280,6 +282,7 @@ export function MainContent() {
             <div className={`flex-1 min-w-0 flex relative ${voiceFullscreen ? '' : 'pb-20'}`}>
               <VoiceGrid participants={participants} chromeRevealed={chromeRevealed} />
               <VoiceControlBar revealed={chromeRevealed} />
+              <VoiceChatToasts channelId={currentChannelId} />
             </div>
             {voiceChatOpen && !voiceFullscreen && (
               <VoiceChatPanel channelId={currentChannelId} channelName={`@${dmName}`} />
@@ -524,6 +527,7 @@ export function MainContent() {
           <div className={`flex-1 min-w-0 flex relative ${voiceFullscreen ? '' : 'pb-20'}`}>
             <VoiceGrid participants={participants} chromeRevealed={chromeRevealed} />
             <VoiceControlBar revealed={chromeRevealed} />
+            <VoiceChatToasts channelId={currentChannelId} />
           </div>
           {voiceChatOpen && !voiceFullscreen && (
             <VoiceChatPanel channelId={currentChannelId} channelName={channel.name} />
