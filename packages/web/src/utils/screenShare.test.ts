@@ -193,7 +193,7 @@ describe('screen-share media options', () => {
         source: Track.Source.ScreenShareAudio,
         audioPreset: AudioPresets.musicHighQualityStereo,
         dtx: false,
-        red: false,
+        red: true,
         forceStereo: true,
       }),
     );
