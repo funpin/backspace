@@ -300,5 +300,11 @@
     "stillDenied": "Microphone access is still denied. Allow it for this site in your browser or device settings.",
     "notFound": "No microphone detected.",
     "failed": "Could not access the microphone."
+  },
+  "chatToast": {
+    "open": "Open the chat",
+    "dismiss": "Dismiss",
+    "attachment_one": "Sent an attachment",
+    "attachment_other": "Sent {{count}} attachments"
   }
 }

@@ -300,5 +300,11 @@
     "stillDenied": "Der Mikrofonzugriff ist weiterhin verweigert. Erlaube ihn für diese Seite in den Browser- oder Geräteeinstellungen.",
     "notFound": "Kein Mikrofon gefunden.",
     "failed": "Auf das Mikrofon konnte nicht zugegriffen werden."
+  },
+  "chatToast": {
+    "open": "Chat öffnen",
+    "dismiss": "Ausblenden",
+    "attachment_one": "Anhang gesendet",
+    "attachment_other": "{{count}} Anhänge gesendet"
   }
 }

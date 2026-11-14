@@ -80,9 +80,10 @@ function ViewerFace({ participant, size, quiet }: { participant: ParticipantInfo
  * - A press anywhere on the group pins the list open until the next press,
  *   Escape or a press elsewhere, which is the only way to reach it without a
  *   hover. Keyboard focus opens it too.
- * - A `compact` thumbnail has no room for faces and keeps the plain number.
+ * - A `compact` or `dense` thumbnail has no room for faces and keeps the
+ *   plain number; the list is still one press away.
  */
-export function StreamViewerCount({ sharer, compact, large }: { sharer: ParticipantInfo; compact?: boolean; large?: boolean }) {
+export function StreamViewerCount({ sharer, compact, dense, large }: { sharer: ParticipantInfo; compact?: boolean; dense?: boolean; large?: boolean }) {
   const { t } = useTranslation(['voice', 'common']);
   const viewers = useStreamViewers(sharer);
   const count = viewers.length;
@@ -163,10 +164,10 @@ export function StreamViewerCount({ sharer, compact, large }: { sharer: Particip
         // leave the list open behind the pin it just toggled.
         onFocus={(e) => { if (e.currentTarget.matches(':focus-visible')) enter(); }}
         onBlur={leave}
-        className={`flex items-center flex-shrink-0 rounded-full text-white/80 hover:text-white transition-colors ${compact ? 'gap-1 text-[10px] font-semibold tabular-nums' : 'gap-1.5'}`}
+        className={`flex items-center flex-shrink-0 rounded-full text-white/80 hover:text-white transition-colors ${compact ? 'gap-1 text-[10px] font-semibold tabular-nums' : dense ? 'gap-1 text-xs font-semibold tabular-nums' : 'gap-1.5'}`}
       >
         <EyeIcon size={compact ? 11 : 13} />
-        {compact ? count : (
+        {compact || dense ? count : (
           <span className="flex items-center pl-0.5">
             {faces.map((viewer, index) => (
               <span key={viewer.identity} className={index === 0 ? 'flex' : 'flex -ml-2'}>

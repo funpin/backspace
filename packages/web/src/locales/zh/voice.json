@@ -296,5 +296,10 @@
     "stillDenied": "麦克风访问仍被拒绝。请在浏览器或设备设置中允许此网站使用麦克风。",
     "notFound": "未检测到麦克风。",
     "failed": "无法访问麦克风。"
+  },
+  "chatToast": {
+    "open": "打开聊天",
+    "dismiss": "关闭",
+    "attachment_other": "发送了 {{count}} 个附件"
   }
 }

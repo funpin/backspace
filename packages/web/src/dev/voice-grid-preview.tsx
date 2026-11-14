@@ -9,6 +9,8 @@ import type { Track } from 'livekit-client';
 import { VoiceGrid } from '../components/voice/VoiceGrid';
 import { ContextMenuRenderer } from '../components/ui/ContextMenuRenderer';
 import { useVoiceStore } from '../stores/voiceStore';
+import { useChatStore } from '../stores/chatStore';
+import { VoiceChatToasts } from '../components/voice/VoiceChatToasts';
 import { PingGraph } from '../components/voice/PingGraph';
 import { pushPing } from '../utils/pingHistory';
 import { useUIStore } from '../stores/uiStore';
@@ -201,7 +203,7 @@ function Workbench({ scene, participants }: { scene: Scene; participants: Partic
   const params = new URLSearchParams(window.location.search);
   const chromeRevealed = params.get('chrome') === '1';
   return (
-    <div style={{ height: 'calc(100 * var(--app-vh))', background: 'rgb(var(--bg-chat))', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: 'calc(100 * var(--app-vh))', background: 'rgb(var(--bg-chat))', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       <span style={{ fontSize: 12, color: 'rgb(var(--text-tertiary))', padding: '8px 16px' }}>{scene.caption}</span>
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <VoiceGrid participants={participants} chromeRevealed={chromeRevealed} />
@@ -212,6 +214,7 @@ function Workbench({ scene, participants }: { scene: Scene; participants: Partic
           <PingGraph />
         </div>
       )}
+      <VoiceChatToasts channelId="voice-1" />
       <ContextMenuRenderer />
     </div>
   );
@@ -242,6 +245,20 @@ async function main(): Promise<void> {
     for (let i = 0; i < 90; i++) pushPing(sample(i));
     let next = 90;
     window.setInterval(() => pushPing(sample(next++)), 1000);
+  }
+  if (params.get('chat') === '1') {
+    // `?chat=1`: someone writes in the call's chat every few seconds.
+    const lines = ['глянь строку 42, там опечатка', 'ок, вижу', 'а это точно тот коммит? у меня по-другому выглядит, пришли ссылку на PR'];
+    let n = 0;
+    window.setInterval(() => {
+      const author = ['akk0', 'fox', 'marsel'][n % 3]!;
+      useChatStore.getState().addMessage('voice-1', {
+        id: `demo-${n}`, channelId: 'voice-1', userId: author, replyToId: null, content: lines[n % lines.length]!,
+        editedAt: null, createdAt: Date.now(), attachments: [], embeds: [], reactions: [],
+        user: { id: author, username: author, displayName: null, avatar: null },
+      } as never);
+      n++;
+    }, 2500);
   }
   createRoot(host).render(<Workbench scene={scene} participants={participants} />);
 }
