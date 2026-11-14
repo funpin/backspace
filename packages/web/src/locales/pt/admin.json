@@ -59,7 +59,7 @@
     "supportCard": {
       "label": "Página do Backspace",
       "toggleLabel": "Mostrar o cartão de suporte",
-      "toggleDescription": "Mostra na página do Backspace um cartão com um link para a página do projeto no Ko-fi. Desativá-lo oculta apenas esse cartão."
+      "toggleDescription": "Mostra na página do Backspace um cartão com um link para a página de apoio ao projeto. Desativá-lo oculta apenas esse cartão."
     },
     "gif": {
       "label": "Pesquisa de GIFs",

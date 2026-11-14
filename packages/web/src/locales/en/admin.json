@@ -58,7 +58,7 @@
     "supportCard": {
       "label": "Backspace page",
       "toggleLabel": "Show the Support card",
-      "toggleDescription": "Shows a card on the Backspace page that links to the project's Ko-fi page. Turning it off hides only that card."
+      "toggleDescription": "Shows a card on the Backspace page that links to the project's support page. Turning it off hides only that card."
     },
     "gif": {
       "label": "GIF Search",
