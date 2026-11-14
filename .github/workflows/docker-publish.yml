@@ -103,7 +103,7 @@ jobs:
           build-args: |
             BACKSPACE_COMMIT=${{ steps.meta_commit.outputs.commit }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
 
       # Deliberately still report-only, and this is the one scanner that is.
       # Measured 2026-09-03 against an image built from main, after the runtime
@@ -150,4 +150,4 @@ jobs:
           # Cache multi-arch layers across runs via the GitHub Actions cache to
           # keep the ~1.6 GB build from re-running cold every release.
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min

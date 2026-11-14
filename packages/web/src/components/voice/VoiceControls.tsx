@@ -5,6 +5,7 @@ import { useSpaceStore } from '../../stores/spaceStore';
 import { ScreenShareSettingsPopover } from './ScreenShareSettingsPopover';
 import { ConnectionInfoPopover } from './ConnectionInfoPopover';
 import { hasPermissionBit, PermissionBits } from '../../utils/permissions';
+import { usePingSampler } from '../../utils/pingHistory';
 import { handleCameraAction, handleDisconnectAction, handleScreenShareAction, reconnectVoice } from '../../utils/voiceActions';
 
 /**
@@ -22,6 +23,8 @@ export function VoiceControls() {
   const isLiveKitConnected = useVoiceStore((s) => s.isLiveKitConnected);
   const voiceConnectionStatus = useVoiceStore((s) => s.voiceConnectionStatus);
   const connectionQuality = useVoiceStore((s) => s.connectionQuality);
+  // The ping graph in the connection popover needs history from before it was opened.
+  usePingSampler(isLiveKitConnected);
   const channels = useSpaceStore((s) => s.channels);
   // Screen-share button: idle → source picker; live → settings + stop menu.
   const [showShareMenu, setShowShareMenu] = useState(false);

@@ -12,6 +12,8 @@ import { RESOLUTION_LABELS } from '@backspace/shared/src/constants';
 import i18n from '../../i18n';
 import { formatters } from '../../i18n/formatters';
 import { SYSTEM_AUDIO_NOTE_I18N_KEYS, systemAudioNote, useOwnAudioInSystemAudio } from '../../utils/systemAudioNote';
+import { useRunningAudioRouters } from '../../utils/audioRouters';
+import { useFormatters } from '../../i18n/formatters';
 
 /**
  * The stream quality controls (resolution, frame rate, content mode, codec,
@@ -130,6 +132,10 @@ export function StreamQualityControls() {
   const audioSwitch = systemAudioSwitch(isScreenSharing, liveAudio, config.shareAudio);
   const ownAudio = useOwnAudioInSystemAudio();
   const audioNote = systemAudioNote(electronPlatform ?? null, ownAudio, audioSwitch.checked);
+  // Shown whether the switch is on or off, like the other warnings: it has to
+  // be read before System Audio is turned on.
+  const audioRouters = useRunningAudioRouters();
+  const fmt = useFormatters();
 
   // Unknown limits (not yet fetched, or a host that cannot be asked) show the
   // same defaults the stream itself falls back to.
@@ -314,6 +320,14 @@ export function StreamQualityControls() {
                 className={`text-[10px] mt-0.5 ${audioNote.tone === 'warning' ? 'text-accent-amber/80' : 'text-txt-tertiary'}`}
               >
                 {t(SYSTEM_AUDIO_NOTE_I18N_KEYS[audioNote.key])}
+              </div>
+            )}
+            {audioRouters.length > 0 && (
+              <div className="text-[10px] mt-0.5 text-accent-amber/80" role="note">
+                {t('voice:streamSettings.audioRouterWarning', {
+                  count: audioRouters.length,
+                  apps: fmt.formatList(audioRouters),
+                })}
               </div>
             )}
           </div>

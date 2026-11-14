@@ -84,7 +84,16 @@
       "screenAudio": "Screen Audio",
       "unknown": "Unknown"
     },
-    "remoteParticipant": "Remote"
+    "remoteParticipant": "Remote",
+    "pingGraph": {
+      "title": "Ping",
+      "window": "last {{minutes}} min",
+      "min": "min",
+      "avg": "avg",
+      "max": "max",
+      "empty": "No measurements yet",
+      "summaryLabel": "Ping: lowest {{min}}, average {{avg}}, highest {{max}}"
+    }
   },
   "screenPicker": {
     "title": "Share Your Screen",
@@ -153,6 +162,8 @@
       "includedLinux": "Linux shares all sound, the voice chat included: viewers will hear their own voices. Needs PulseAudio, or PipeWire with pipewire-pulse.",
       "unavailableMac": "System audio needs macOS 13 or later."
     },
+    "audioRouterWarning_one": "{{apps}} is running. It replays the sound of other apps, so viewers hear system audio twice. Quit it while you share system audio.",
+    "audioRouterWarning_other": "{{apps}} are running. They replay the sound of other apps, so viewers hear system audio twice. Quit them while you share system audio.",
     "systemAudioStartFailed": "Could not start the stream with system audio. Disable Share system audio if this platform does not support it.",
     "systemAudioAddFailed": "Could not add system audio to the stream.",
     "systemAudioAdding": "Adding system audio…",

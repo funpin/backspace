@@ -514,7 +514,7 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
           )}
           {/* After the name rather than at the right edge: that corner
               belongs to the inset and its badge. */}
-          <span className="ml-1 flex"><StreamViewerCount sharer={participant} compact={compact} /></span>
+          <span className="ml-1 flex"><StreamViewerCount sharer={participant} compact={compact} large={large} /></span>
         </div>
       </div>}
     </div>

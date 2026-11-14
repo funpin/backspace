@@ -258,10 +258,12 @@ describe('VoiceGrid one tile per participant', () => {
     });
     render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
 
-    expect(screen.getByTestId('stream-viewer-count')).toHaveTextContent('2');
+    const faces = () => screen.getAllByTestId('stream-viewer-face').map((face) => face.getAttribute('data-viewer-identity'));
+    expect(faces()).toEqual(['ada', 'eve']);
+    expect(screen.getByTestId('stream-viewer-count')).toHaveAccessibleName(/2/);
 
     act(() => useVoiceStore.getState().recordStreamWatch('bob', 'eve', false));
-    expect(screen.getByTestId('stream-viewer-count')).toHaveTextContent('1');
+    expect(faces()).toEqual(['ada']);
   });
 });
 
@@ -290,19 +292,63 @@ describe('VoiceGrid viewer list', () => {
     expect(screen.queryByTestId('stream-viewers-popover')).toBeNull();
   });
 
-  it('opens the list on hover and closes it after the pointer leaves', () => {
+  it('names a viewer when their face is hovered', () => {
+    render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
+    const eve = screen.getAllByTestId('stream-viewer-face').find((face) => face.getAttribute('data-viewer-identity') === 'eve') as HTMLElement;
+
+    fireEvent.mouseEnter(eve);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('eve');
+    expect(screen.queryByTestId('stream-viewers-popover')).toBeNull();
+
+    fireEvent.mouseLeave(eve);
+    expect(screen.queryByRole('tooltip')).toBeNull();
+  });
+
+  it('folds a crowd into a "+N" chip that opens the full list on hover', () => {
+    const crowd = ['eve', 'dan', 'kim', 'lee', 'max', 'noa', 'oli', 'pat'];
+    useVoiceStore.setState({
+      participants: [participant('ada', true), sharing('bob', { screen: true }), ...crowd.map((name) => participant(name, false))],
+      streamWatchers: new Map([['bob', new Set(crowd)]]),
+    });
     vi.useFakeTimers();
     try {
       render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
-      fireEvent.mouseEnter(screen.getByTestId('stream-viewer-count'));
-      expect(screen.getByTestId('stream-viewers-popover')).toBeInTheDocument();
 
-      fireEvent.mouseLeave(screen.getByTestId('stream-viewer-count'));
+      // Nine viewers on a grid tile: three faces and the other six behind the chip.
+      expect(screen.getAllByTestId('stream-viewer-face')).toHaveLength(3);
+      expect(screen.getByTestId('stream-viewer-overflow')).toHaveTextContent('+6');
+
+      fireEvent.mouseEnter(screen.getByTestId('stream-viewer-overflow'));
+      const popover = screen.getByTestId('stream-viewers-popover');
+      for (const name of ['ada', ...crowd]) expect(popover).toHaveTextContent(name);
+
+      fireEvent.mouseLeave(screen.getByTestId('stream-viewer-overflow'));
       act(() => { vi.advanceTimersByTime(500); });
       expect(screen.queryByTestId('stream-viewers-popover')).toBeNull();
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('shows one viewer past the limit as a face rather than as "+1", and more faces on the focused tile', () => {
+    useVoiceStore.setState({
+      participants: [participant('ada', true), sharing('bob', { screen: true }), ...['eve', 'dan', 'kim'].map((name) => participant(name, false))],
+      streamWatchers: new Map([['bob', new Set(['eve', 'dan', 'kim'])]]),
+    });
+    const { unmount } = render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
+    expect(screen.getAllByTestId('stream-viewer-face')).toHaveLength(4);
+    expect(screen.queryByTestId('stream-viewer-overflow')).toBeNull();
+    unmount();
+
+    const crowd = ['eve', 'dan', 'kim', 'lee', 'max', 'noa', 'oli', 'pat'];
+    useVoiceStore.setState({
+      focusedParticipantId: 'bob:stream',
+      participants: [participant('ada', true), sharing('bob', { screen: true }), ...crowd.map((name) => participant(name, false))],
+      streamWatchers: new Map([['bob', new Set(crowd)]]),
+    });
+    render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
+    expect(screen.getAllByTestId('stream-viewer-face')).toHaveLength(6);
+    expect(screen.getByTestId('stream-viewer-overflow')).toHaveTextContent('+3');
   });
 });
 

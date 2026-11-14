@@ -84,7 +84,16 @@
       "screenAudio": "Bildschirmaudio",
       "unknown": "Unbekannt"
     },
-    "remoteParticipant": "Gegenstelle"
+    "remoteParticipant": "Gegenstelle",
+    "pingGraph": {
+      "title": "Ping",
+      "window": "letzte {{minutes}} Min.",
+      "min": "Min.",
+      "avg": "Mittel",
+      "max": "Max.",
+      "empty": "Noch keine Messungen",
+      "summaryLabel": "Ping: niedrigster {{min}}, Mittel {{avg}}, höchster {{max}}"
+    }
   },
   "screenPicker": {
     "title": "Bildschirm teilen",
@@ -153,6 +162,8 @@
       "includedLinux": "Linux teilt den gesamten Ton, auch den Sprachchat: Zuschauer hören ihre eigene Stimme. Benötigt PulseAudio oder PipeWire mit pipewire-pulse.",
       "unavailableMac": "Systemaudio benötigt macOS 13 oder neuer."
     },
+    "audioRouterWarning_one": "{{apps}} läuft. Die App gibt den Ton anderer Apps erneut wieder, sodass Zuschauer das Systemaudio doppelt hören. Beende sie, solange du Systemaudio teilst.",
+    "audioRouterWarning_other": "{{apps}} laufen. Diese Apps geben den Ton anderer Apps erneut wieder, sodass Zuschauer das Systemaudio doppelt hören. Beende sie, solange du Systemaudio teilst.",
     "systemAudioStartFailed": "Der Stream konnte nicht mit Systemaudio gestartet werden. Deaktiviere Systemaudio, wenn die Plattform es nicht unterstützt.",
     "systemAudioAddFailed": "Systemaudio konnte dem Stream nicht hinzugefügt werden.",
     "systemAudioAdding": "Systemaudio wird hinzugefügt…",

@@ -192,3 +192,60 @@ describe('the System Audio note in the desktop app', () => {
     expect(await screen.findByText(/Windows loopback may capture call audio/)).toBeInTheDocument();
   });
 });
+
+describe('the audio router warning in the desktop app', () => {
+  // SoundSource replays every application's sound from its own process, and a
+  // System Audio share then carries it twice: viewers heard the music doubled
+  // until the sharer quit it.
+  function asDesktop(routers?: unknown) {
+    const api: Partial<BackspaceElectronAPI> = { platform: 'darwin' };
+    if (routers !== undefined) api.getAudioRouters = () => Promise.resolve(routers as string[]);
+    window.backspace = api as BackspaceElectronAPI;
+  }
+
+  beforeEach(() => { resetSystemAudioCapabilityForTests(); });
+  afterEach(() => {
+    delete (window as { backspace?: BackspaceElectronAPI }).backspace;
+    resetSystemAudioCapabilityForTests();
+  });
+
+  it('names the running router before System Audio is turned on', async () => {
+    asDesktop(['SoundSource']);
+    render(<StreamQualityControls />);
+    expect(await screen.findByText(/SoundSource is running.*viewers hear system audio twice/)).toBeInTheDocument();
+    expect(screen.getByRole('switch', { name: 'System Audio' })).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('shows nothing when no router is running', async () => {
+    asDesktop([]);
+    render(<StreamQualityControls />);
+    await Promise.resolve();
+    expect(screen.queryByText(/system audio twice/)).not.toBeInTheDocument();
+  });
+
+  it('shows nothing with a desktop app that cannot tell, or one that answers nonsense', async () => {
+    asDesktop();
+    const { unmount } = render(<StreamQualityControls />);
+    await Promise.resolve();
+    expect(screen.queryByText(/system audio twice/)).not.toBeInTheDocument();
+    unmount();
+
+    asDesktop({ not: 'a list' });
+    render(<StreamQualityControls />);
+    await Promise.resolve();
+    expect(screen.queryByText(/system audio twice/)).not.toBeInTheDocument();
+  });
+
+  it('asks again each time the settings open, so quitting the router clears it', async () => {
+    let running = ['SoundSource'];
+    window.backspace = { platform: 'darwin', getAudioRouters: () => Promise.resolve(running) } as BackspaceElectronAPI;
+    const first = render(<StreamQualityControls />);
+    expect(await screen.findByText(/SoundSource is running/)).toBeInTheDocument();
+    first.unmount();
+
+    running = [];
+    render(<StreamQualityControls />);
+    await Promise.resolve();
+    expect(screen.queryByText(/SoundSource is running/)).not.toBeInTheDocument();
+  });
+});

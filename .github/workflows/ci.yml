@@ -30,7 +30,13 @@ jobs:
       matrix:
         # 22 is the support floor (`engines.node` in package.json), 24 is what
         # `.nvmrc` selects and what the Docker image runs.
-        node-version: [22, 24]
+        #
+        # Fork: a pull request runs Node 24 only, the version every build this
+        # fork ships actually runs on. The floor is checked once per change,
+        # on the push to main that the merge produces. GitHub pauses workflows
+        # on forks that use Actions heavily, and the second leg on every PR
+        # push was the largest single cost here.
+        node-version: ${{ fromJSON(github.event_name == 'pull_request' && '[24]' || '[22, 24]') }}
 
     steps:
       - name: Harden the runner
@@ -146,9 +152,15 @@ jobs:
   # is how 1.1.0 shipped without an image: the web build gained the
   # localization check under scripts/, and nothing built the Dockerfile until
   # the tag did. Building the amd64 image here (never pushed) closes that gap
-  # on every PR. The buildx cache makes an unchanged image a few seconds.
+  # on every push to main. The buildx cache makes an unchanged image a few seconds.
+  #
+  # Fork: not on pull requests. The image is built on the push to main that a
+  # merge produces, which is still before any tag, so a release cannot ship
+  # without one. `mode=min` caches the final image's layers only: `mode=max`
+  # kept every intermediate layer and filled most of the 10 GB cache quota.
   build-image:
     name: Build container image
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Harden the runner
@@ -169,7 +181,7 @@ jobs:
           platforms: linux/amd64
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
 
   # Aggregate gate reporting a single, matrix-independent "Build & test" status.
   # Branch protection on main requires the "Build & test" context, but the matrix
@@ -189,7 +201,9 @@ jobs:
             echo "Matrix build-and-test did not succeed: ${{ needs.build-and-test.result }}"
             exit 1
           fi
-          if [ "${{ needs.build-image.result }}" != "success" ]; then
+          # Skipped on pull requests by design (see build-image); anything
+          # else that is not a success fails the gate.
+          if [ "${{ needs.build-image.result }}" != "success" ] && [ "${{ needs.build-image.result }}" != "skipped" ]; then
             echo "Container image build did not succeed: ${{ needs.build-image.result }}"
             exit 1
           fi
@@ -197,4 +211,4 @@ jobs:
             echo "Lint did not succeed: ${{ needs.lint.result }}"
             exit 1
           fi
-          echo "All matrix legs passed, lint is clean and the image builds."
+          echo "All matrix legs passed, lint is clean and the image build is ${{ needs.build-image.result }}."

@@ -852,6 +852,8 @@ The prompted flow stays because the desktop app loads whatever web client its in
 
 On Linux with PipeWire the main process builds the system-audio capture itself so that Backspace is not in it (`systemAudio.ts`, `startSystemAudio()` / `stopSystemAudio()`; mechanism in `voice.md`, "Linux system-audio source"). `get-system-audio-capability` returns `excluded` while that source is available, but only to a web client that passes `true` (`getSystemAudioCapability(true)`, sent by a client that has the `startSystemAudio` / `stopSystemAudio` bridge and opens the source itself). A web client from before the source passes nothing, keeps Chromium's loopback, and gets the OS answer (`included` on Linux); main does not load the module for it. A new web client on a desktop build without the argument gets the OS answer as well, which is right because that build has no source. `@vencord/venmic` is an `optionalDependency` of this package (Linux only; its prebuilt `.node` files are covered by `asarUnpack: **/*.node`; its build tool `cmake-js` is removed by a `pnpm.overrides` entry, see `security-scanning.md`).
 
+Audio routers: `audioRouters.ts` answers `get-audio-routers` with the names of known routers among running processes (`/bin/ps -axo comm=`, matched by executable basename; macOS only, an empty list elsewhere and when `ps` fails). The renderer asks through the optional `getAudioRouters()` each time the stream settings open and warns that a System Audio share would carry every sound twice; why, and what is listed, is in `voice.md` ("External audio routing").
+
 No sources (0 results) typically means Screen Recording permission not granted on macOS.
 
 For full screen share configuration (resolution, bitrate, codec), see `voice.md`.
@@ -969,6 +971,7 @@ Detection: `typeof window.backspace !== 'undefined'` (see `platform.ts:isElectro
 | `onScreenShareSources(cb)` | listen | M->R | |
 | `selectScreenSource(id, audio?)` | fire | R->M | |
 | `getSystemAudioCapability(usesAppSource?)` | invoke | R->M | Optional (older builds lack it, and builds before the Linux source ignore the argument). `usesAppSource` is `true` from a web client that opens the Linux system-audio source itself. Returns `Promise<'excluded' \| 'included' \| 'unavailable' \| 'unknown'>`; see "System audio and Backspace's own playback" |
+| `getAudioRouters()` | invoke | R->M | Optional (older builds lack it). Returns `Promise<string[]>`: display names of running audio routers that double the sound of a System Audio share; see "Audio routers" above |
 | `startSystemAudio()` | invoke | R->M | Optional. Linux: routes every other app's playback into a virtual source. Returns `Promise<{ ok: true, label } \| { ok: false, reason }>`; the renderer opens the device named `label` as a microphone |
 | `stopSystemAudio()` | invoke | R->M | Optional. Unlinks the virtual source; idempotent |
 | `getInstanceUrl()` | invoke | R->M | Returns `Promise<string \| null>` |
