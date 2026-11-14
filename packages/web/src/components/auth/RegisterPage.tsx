@@ -14,6 +14,7 @@ import { waitForTransferAttachment } from '../../utils/waitForTransfer';
 import { SourceCodeLink } from '../ui/SourceCodeLink';
 import { describeError } from '../../i18n/errors';
 import { Button } from '../ui/Button';
+import { Mascot } from '../ui/Mascot';
 import { Icon } from '../ui/Icon';
 
 // Single-source regex for extracting a bare invite token from a pasted full URL.
@@ -431,6 +432,7 @@ export function RegisterPage() {
         {step === 1 ? (
           <div key="step1" className={`w-full${direction === 'back' ? ' animate-step-back' : ''}`}>
             <div className="text-center mb-6">
+              <Mascot state="idle" className="w-16 h-16 mx-auto mb-3" />
               <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:register.title')}</h1>
             </div>
 
@@ -605,6 +607,7 @@ export function RegisterPage() {
         ) : (
           <div key="step2" className={`w-full${direction === 'forward' ? ' animate-step-forward' : ''}`}>
             <div className="text-center mb-6">
+              <Mascot state="joy" className="w-16 h-16 mx-auto mb-3" />
               <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:register.personalize.title')}</h1>
               <p className="text-txt-tertiary text-sm mt-1">{t('auth:register.personalize.subtitle')}</p>
             </div>

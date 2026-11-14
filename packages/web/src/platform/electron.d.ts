@@ -90,6 +90,8 @@ interface BackspaceElectronAPI {
   showNotification: (title: string, body: string, options?: import('./notifications').NotificationOptions) => void;
   onNotificationClick?: (callback: (options: import('./notifications').NotificationOptions) => void) => () => void;
   setBadgeCount: (count: number) => void;
+  /** Absent on desktop builds older than the tray states. */
+  setTrayState?: (state: import('../utils/trayState').TrayState) => void;
 
   // Auto-update, legacy per-event channels.
   //

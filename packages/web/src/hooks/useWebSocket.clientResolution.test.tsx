@@ -12,7 +12,6 @@ vi.mock('../audio/AudioManager', () => ({
     }),
   },
 }));
-vi.mock('../hooks/useMascotAnimation', () => ({ useMascotAnimation: vi.fn() }));
 
 /**
  * A socket the real handler talks to. The test plays each server by feeding

@@ -6,6 +6,7 @@ import { api, RateLimitError } from '../../api/client';
 import type { InstanceInfoResponse } from '@backspace/shared';
 import { SourceCodeLink } from '../ui/SourceCodeLink';
 import { Button } from '../ui/Button';
+import { Mascot } from '../ui/Mascot';
 import { describeError } from '../../i18n/errors';
 
 export function LoginPage() {
@@ -82,6 +83,7 @@ export function LoginPage() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--accent-primary)/0.06)_0%,transparent_50%)]" />
       <div className="my-auto flex-shrink-0 w-full max-w-[480px] bg-surface-channel border border-border-hard rounded-2xl p-8 relative z-raised">
         <div className="text-center mb-6">
+          <Mascot state={isLoading ? 'look' : retryAfter > 0 ? 'dnd' : 'idle'} className="w-16 h-16 mx-auto mb-3" />
           <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:login.title')}</h1>
           <p className="text-txt-tertiary mt-1">{t('auth:login.subtitle')}</p>
         </div>

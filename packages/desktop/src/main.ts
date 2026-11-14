@@ -54,6 +54,7 @@ import {
 import { migrateUserData } from './userDataMigration';
 import { isNavigationAllowed } from './navigationPolicy';
 import { NotificationRetainer } from './notificationRetention';
+import { isTrayState, trayIconFile, type TrayState } from './trayState';
 import {
   screenSharePickerMode,
   isPendingSelectionFresh,
@@ -319,38 +320,36 @@ function generateFallbackTrayIcon(): Electron.NativeImage {
   return nativeImage.createFromBuffer(canvas, { width: size, height: size });
 }
 
-function loadTrayIcon(): Electron.NativeImage {
+/** Loaded tray images, one per state; a state whose file is missing falls back to idle. */
+const trayIcons = new Map<TrayState, Electron.NativeImage>();
+let currentTrayState: TrayState = 'idle';
+
+function loadTrayIcon(state: TrayState): Electron.NativeImage {
+  const cached = trayIcons.get(state);
+  if (cached) return cached;
   const resourcesDir = path.join(__dirname, '..', 'resources');
   try {
-    if (process.platform === 'darwin') {
-      // macOS template image: Electron auto-resolves @2x from the base path.
-      // Template images adapt to light/dark menu bar automatically.
-      const templatePath = path.join(resourcesDir, 'tray-iconTemplate.png');
-      const icon = nativeImage.createFromPath(templatePath);
-      if (!icon.isEmpty()) {
-        icon.setTemplateImage(true);
-        return icon;
-      }
-    } else if (process.platform === 'win32') {
-      // Windows: multi-size .ico — Windows + Electron auto-pick best size for current DPI.
-      const icoPath = path.join(resourcesDir, 'tray-icon.ico');
-      const icon = nativeImage.createFromPath(icoPath);
-      if (!icon.isEmpty()) {
-        return icon;
-      }
-    } else {
-      // Linux: single 22x22 PNG (AppIndicator / StatusNotifier convention).
-      // No runtime resize — the source is already at correct tray size.
-      const iconPath = path.join(resourcesDir, 'tray-icon.png');
-      const icon = nativeImage.createFromPath(iconPath);
-      if (!icon.isEmpty()) {
-        return icon;
-      }
+    // macOS: template image, Electron resolves the @2x by suffix and the
+    // menu bar tints it for light/dark. Windows: multi-size .ico, the
+    // system picks the frame for the DPI. Linux: one 22x22 PNG.
+    const icon = nativeImage.createFromPath(path.join(resourcesDir, trayIconFile(state, process.platform)));
+    if (!icon.isEmpty()) {
+      if (process.platform === 'darwin') icon.setTemplateImage(true);
+      trayIcons.set(state, icon);
+      return icon;
     }
   } catch {
-    // Fall through to generated icon
+    // Fall through to the idle image, then to the generated icon
   }
+  if (state !== 'idle') return loadTrayIcon('idle');
   return generateFallbackTrayIcon();
+}
+
+/** Shows the character in the tray in the given state (unread, screen sharing, DND, offline). */
+function setTrayState(state: TrayState): void {
+  if (state === currentTrayState) return;
+  currentTrayState = state;
+  tray?.setImage(loadTrayIcon(state));
 }
 
 // ─── Window & Tray Creation ─────────────────────────────────────────────────
@@ -527,8 +526,7 @@ function createWindow(): void {
 }
 
 function createTray(): void {
-  const icon = loadTrayIcon();
-  tray = new Tray(icon);
+  tray = new Tray(loadTrayIcon(currentTrayState));
 
   tray.setToolTip('Backspace');
   // Context menu is set by the recoveryStore subscriber in app.whenReady,
@@ -656,6 +654,12 @@ function registerIpcHandlers(): void {
     if (app.setBadgeCount) {
       app.setBadgeCount(count);
     }
+  });
+
+  // The renderer decides the tray state (see packages/web/src/hooks/useTrayState.ts);
+  // anything that is not a known state is ignored.
+  ipcMain.on('set-tray-state', (_event, state: unknown) => {
+    if (isTrayState(state)) setTrayState(state);
   });
 
   ipcMain.on('minimize-window', () => {

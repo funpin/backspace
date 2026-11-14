@@ -180,62 +180,51 @@ through the input tiers.
 
 ## Brand
 
-The mark is the backspace-key glyph. Vector masters live in `assets/brand/`;
-every app icon, favicon, tray icon and social preview is generated from
-them, never hand-edited.
+The mark is the B:SPACE character: the letter B made of two chat replies
+(the upper one, the head, speaks; the lower one, the body, answers), with
+eyes on the head. It is both the logo and the app's mascot. The rules
+(clear space, minimum size, colours, states, don'ts) are in
+`assets/brand/b-space/README.md` and `docs/brand/brandbook.md` §2; the
+visual reference is `docs/brand/b-space-logo.html`.
 
-The brand splits by surface, not by file type. UI surfaces (the site
-header, the in-app sidebar tile, favicons, and all tray icons) stay
-flat: a single flat fill, `#6e5bef` on dark grounds or `#ffffff` on a
-lavender tile or badge shape, no gradient, stroke, glow, shadow, blur or
-blend anywhere the mark appears. The app-icon family, meaning every
-output where the OS shows this app as one launchable icon (dock,
-taskbar, Start menu, Alt-Tab, PWA install, iOS home screen, the
-maskable Android icon), is dimensional: the contributor's original
-badge composition, recoloured to the lavender system. The badge is a
-rounded rectangle with a corner radius of 22.37% of its side (Apple's
-own template radius, not the contributor's original ~36% squircle) on
-a vertical gradient from `#232327` (top) to `#0c0c0e` (bottom), called
-"graphite", carrying a drop shadow, an inner shadow and a soft-light stroke
-overlay; the glyph inside it is a white-to-`#6e5bef` gradient, not a
-flat fill.
+Every logo file is generated, never hand-edited: `node scripts/b-space-kit.mjs`
+draws the masters from the mark's geometry (also into `assets/brand/` and
+`site/assets/`), then `pnpm gen-icons` renders every app icon, favicon and
+tray icon from `assets/brand/`.
 
-On macOS specifically, the badge also sits on Apple's icon grid: the
-visible artwork occupies an 824px square centred on a 1024 canvas (a
-transparent margin of 100px each side), matching how every other Dock
-icon is framed. `packages/desktop/build/icon.icns` and
-`packages/desktop/build/icon.png` (the dev-mode Dock icon) are the only
-two outputs that carry this margin; every other app-icon output
-(Windows `.ico`, Linux `build/icons/*`, PWA `icon-192`/`icon-512`, the
-in-app `logo.png`, `apple-touch-icon.png`, the maskable icon,
-`app-icon-1024.png`) renders full-bleed to the badge's own edge, because
-those platforms apply their own icon framing. See `macIconPng` in
-`scripts/gen-icons.mjs`.
-
-| Master | Feeds |
+| Master (`assets/brand/`) | Feeds |
 |--------|-------|
-| `app-icon.svg` | App icon outputs above 32px: the dimensional badge (graphite gradient, filters, stroke overlay, 22.37%-radius corners) plus the white-to-`#6e5bef` gradient glyph |
-| `app-icon-small.svg` | App icon outputs at 16/32px (bolder, simplified mark, same dimensional badge geometry) |
-| `mark-icon.svg` | The bare gradient glyph alone, transparent, no badge: the PWA maskable icon's inner mark and the social preview |
-| `mark.svg` | Standalone flat-lavender renders on dark UI-surface grounds |
-| `mark-small.svg` | Favicons, the colour tray icons (Windows `.ico`, Linux PNG; glyph inset in the tray cell and centred by alpha centroid), and any standalone render at 32px or smaller (flat) |
-| `mark-mono-light.svg` | `packages/web/public/icons/logo-mark.svg` (byte copy): the flat white glyph, for the in-app sidebar's lavender home tile |
-| `mark-tray.svg` | The macOS menu-bar template tray icon: a 16px silhouette on an 18x22 canvas (36x44 @2x), centred by alpha centroid so it sits and spaces like the system's own menu-bar glyphs |
-| `mark-mono-dark.svg` | Mono silhouette master; no pipeline output today |
+| `app-icon.svg` | App icon outputs above 32px: the two-tone mark (head `#ededf0`, body `#6e5bef`) on a flat `#1b1b1f` badge with 22.37%-radius corners |
+| `app-icon-small.svg` | App icon outputs at 16/32px: the mark larger in the same badge, with larger eyes |
+| `mark-icon.svg` | The two-tone mark alone, transparent: the PWA maskable icon's inner mark and the social preview |
+| `mark-small.svg` | Favicons: the one-colour lavender mark with larger eyes |
+| `mark-mono-light.svg` | `packages/web/public/icons/logo-mark.svg` (byte copy) |
+| `tray/<state>-template.svg`, `tray/<state>.svg` | The tray character per state (`idle`, `notify`, `screen`, `dnd`, `offline`): macOS templates, Windows `.ico`, Linux PNG |
+| `mark.svg`, `mark-mono-dark.svg` | Standalone one-colour renders; no pipeline output |
 
-Regenerate icons with `pnpm gen-icons`; regenerate the social preview with
-`pnpm gen-social-preview`. Icon generation reads only from `assets/brand/`.
-The social preview also reads `scripts/social-preview.html` and the two
-webfonts in `site/assets/` (`fabio-xm-variable.ttf`, `dm-sans.woff2`)
-alongside the mark; its output is stable per Chrome build and font
-rasteriser, not per lockfile, so a Chrome or font upgrade can shift it
-even with no dependency change. See `scripts/gen-icons.README.md` and
-`docs/systems/desktop.md` for the full matrix.
+On macOS the badge sits on Apple's icon grid: `build/icon.icns` and
+`build/icon.png` carry the 824/1024 artwork with a 100px margin; every
+other app-icon output renders full-bleed (see `macIconPng` in
+`scripts/gen-icons.mjs`).
 
+In the app the mark is inline SVG, never a file:
+
+- `components/brand/BrandMark.tsx`: the one-colour mark (takes the text
+  colour, eyes cut out), used like a navigation icon: the home tile in the
+  space rail (`text-accent-tone` on `bg-surface-elevated`), the Backspace
+  row in the DM list, the project page header.
+- `components/ui/Mascot.tsx`: the two-tone character with a state
+  (`idle`, `look`, `notify`, `typing`, `voice`, `screen`, `joy`, `dnd`,
+  `offline`), head `fill-txt-primary`, body `fill-accent-primary`. Each
+  state's motion is CSS (`.mascot--<state>` in `styles/globals.css`) and
+  stops with the other animations under reduced motion or
+  `html[data-motion="off"]`. Used on empty screens and the auth/join pages.
+- `components/brand/markGeometry.ts`: the shared paths; a test checks them
+  against the kit's files.
+
+Regenerate the social preview with `pnpm gen-social-preview` (needs Chrome).
 The brand primary is `#6e5bef`, the fill of the default accent theme
-(`--accent-primary`, see Color Palette above). The graphite gradient
-(`#232327`/`#0c0c0e`) exists only as the app-icon family's ground; it is not a UI surface colour and has no CSS
-variable.
+(`--accent-primary`); the badge ground `#1b1b1f` is `--bg-elevated`.
 
 ---
 

@@ -323,7 +323,7 @@ export function ExplorePage() {
             ) : !hasAnySpaces ? (
               /* True empty state: no discoverable Inner spaces at all. Outer Space still renders below. */
               <div className="flex flex-col items-center justify-center h-64 opacity-80">
-                <Mascot state="lonely" className="w-32 h-32 mb-3" />
+                <Mascot state="look" className="w-32 h-32 mb-3" />
                 <p className="text-txt-tertiary text-sm">
                   {resultsQuery
                     ? t('spaces:explore.noMatches')

@@ -22,7 +22,7 @@ Source files:
 - `packages/web/src/hooks/useHubUpdateState.ts` - the hook every dot and the What's new card read
 - `packages/web/src/hooks/useHomeInstanceInfo.ts` - the shared reader of `GET /api/instance/info` (version, `supportCardEnabled`); `invalidateHomeInstanceInfo` after an admin save marks the value stale and rereads it, keeping the old value on screen until the answer replaces it (and keeping it if the reread fails)
 - `packages/web/src/utils/homeNav.ts` - `activeHomeNavItem`, which of Friends, Explore and Backspace is selected
-- `packages/web/src/components/projectHub/` - `ProjectHubPage`, `HubCard`, `WhatsNewCard`, `CommunityCard`, `ReportCard`, `InstanceSection`, `BackspaceMark`, `HubUpdateDot`
+- `packages/web/src/components/projectHub/` - `ProjectHubPage`, `HubCard`, `WhatsNewCard`, `CommunityCard`, `ReportCard`, `InstanceSection`, `HubUpdateDot` (the mark in the header is `components/brand/BrandMark.tsx`)
 - `packages/web/src/components/layout/ChannelSidebar.tsx` - the sidebar item; `MobileYouScreen.tsx` - the row; `MobileShell.tsx` - `MobileBackspaceScreen`; `MobileBottomNav.tsx` - the You tab dot
 - `packages/web/src/locales/*/project.json` - the `project` namespace
 - `packages/web/dev-project-hub.html`, `packages/web/src/dev/project-hub-preview.tsx` - the design workbench

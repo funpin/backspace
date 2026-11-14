@@ -8,7 +8,7 @@ import { parseFederatedUsername } from '../../utils/identity';
 import { replaceEmojiShortcodes, useEmojiShortcodeNames } from '../../utils/emojiShortcodes';
 import { useInstanceUpdateBadge } from '../../hooks/useInstanceUpdateBadge';
 import { useHubUpdateState } from '../../hooks/useHubUpdateState';
-import { BackspaceMark } from '../projectHub/BackspaceMark';
+import { BrandMark } from '../brand/BrandMark';
 import { HubUpdateDot } from '../projectHub/HubUpdateDot';
 import { Icon } from '../ui/Icon';
 
@@ -62,7 +62,7 @@ export function MobileYouScreen() {
     },
     {
       label: t('project:nav.label'),
-      icon: <BackspaceMark size={20} className="w-5 h-5" />,
+      icon: <BrandMark size={20} className="w-5 h-5" />,
       action: () => pushMobileScreen('backspace'),
       badge: hubUpdate.state === 'updated' ? <HubUpdateDot /> : null,
     },

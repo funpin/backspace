@@ -1,134 +1,64 @@
-// packages/web/src/components/ui/__tests__/Mascot.test.tsx
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { Mascot } from '../Mascot';
+import { Mascot, MASCOT_STATES } from '../Mascot';
+import { MARK_BODY, MARK_HEAD, MARK_SCREEN } from '../../brand/markGeometry';
 
 describe('Mascot', () => {
-  it('renders an SVG with aria-hidden and presentation role', () => {
+  it('is decorative: a presentation wrapper around a hidden SVG', () => {
     const { container } = render(<Mascot state="idle" />);
     const wrapper = container.firstElementChild as HTMLElement;
     expect(wrapper.getAttribute('role')).toBe('presentation');
-    const svg = wrapper.querySelector('svg');
-    expect(svg).toBeTruthy();
-    expect(svg!.getAttribute('aria-hidden')).toBe('true');
+    expect(wrapper.querySelector('svg')!.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it('applies idle palette gradient stops', () => {
+  it('draws the logo: the head and body of the mark', () => {
     const { container } = render(<Mascot state="idle" />);
-    const stops = container.querySelectorAll('stop');
-    const colors = Array.from(stops).map(s => s.getAttribute('stop-color'));
-    expect(colors).toContain('#c8f0de');
-    expect(colors).toContain('#6dbf96');
+    const paths = Array.from(container.querySelectorAll('path')).map((p) => p.getAttribute('d'));
+    expect(paths).toContain(MARK_HEAD);
+    expect(paths).toContain(MARK_BODY);
   });
 
-  it('applies sleeping palette gradient stops', () => {
-    const { container } = render(<Mascot state="sleeping" />);
-    const stops = container.querySelectorAll('stop');
-    const colors = Array.from(stops).map(s => s.getAttribute('stop-color'));
-    expect(colors).toContain('#ddd4f0');
-    expect(colors).toContain('#a898cc');
+  it('cuts the eyes out of the head through its own mask', () => {
+    const { container } = render(
+      <>
+        <Mascot state="idle" />
+        <Mascot state="idle" />
+      </>,
+    );
+    const masks = Array.from(container.querySelectorAll('mask')).map((m) => m.id);
+    expect(new Set(masks).size).toBe(2);
+    const heads = Array.from(container.querySelectorAll('path')).filter((p) => p.getAttribute('d') === MARK_HEAD);
+    expect(heads.map((h) => h.getAttribute('mask'))).toEqual(masks.map((id) => `url(#${id})`));
+    expect(container.querySelectorAll('mask .mascot-eye')).toHaveLength(4);
   });
 
-  it('applies excited palette gradient stops', () => {
-    const { container } = render(<Mascot state="excited" />);
-    const stops = container.querySelectorAll('stop');
-    const colors = Array.from(stops).map(s => s.getAttribute('stop-color'));
-    expect(colors).toContain('#fde0c8');
-    expect(colors).toContain('#e8a870');
+  it('names its state for the CSS motion of that state', () => {
+    for (const state of MASCOT_STATES) {
+      const { container, unmount } = render(<Mascot state={state} />);
+      expect(container.querySelector('svg')!.getAttribute('class')).toBe(`mascot mascot--${state}`);
+      expect(container.firstElementChild!.getAttribute('data-mascot-state')).toBe(state);
+      unmount();
+    }
   });
 
-  it('applies lonely palette gradient stops', () => {
-    const { container } = render(<Mascot state="lonely" />);
-    const stops = container.querySelectorAll('stop');
-    const colors = Array.from(stops).map(s => s.getAttribute('stop-color'));
-    expect(colors).toContain('#c0dced');
-    expect(colors).toContain('#78aec8');
+  it('shows the unread dot only when notifying', () => {
+    expect(render(<Mascot state="notify" />).container.querySelector('circle.fill-status-danger')).not.toBeNull();
+    expect(render(<Mascot state="idle" />).container.querySelector('circle.fill-status-danger')).toBeNull();
   });
 
-  it('renders upright viewBox for idle state', () => {
-    const { container } = render(<Mascot state="idle" />);
-    const svg = container.querySelector('svg');
-    expect(svg!.getAttribute('viewBox')).toBe('0 0 200 200');
+  it('turns the body into a screen while sharing', () => {
+    const { container } = render(<Mascot state="screen" />);
+    expect(container.querySelector('.mascot-body')!.getAttribute('d')).toBe(`${MARK_BODY}${MARK_SCREEN}`);
+    expect(container.querySelector('.mascot-live')).not.toBeNull();
   });
 
-  it('renders wide viewBox for sleeping state', () => {
-    const { container } = render(<Mascot state="sleeping" />);
-    const svg = container.querySelector('svg');
-    expect(svg!.getAttribute('viewBox')).toBe('0 0 220 130');
+  it('greys out when offline', () => {
+    const { container } = render(<Mascot state="offline" />);
+    expect(container.querySelector('.mascot-body')!.getAttribute('class')).toContain('fill-status-offline');
   });
 
-  it('renders closed-eye arcs (path elements) for sleeping state', () => {
-    const { container } = render(<Mascot state="sleeping" />);
-    const eyeWhites = container.querySelectorAll('[data-eye="white"]');
-    expect(eyeWhites.length).toBe(0);
-    const closedEyes = container.querySelectorAll('[data-eye="closed"]');
-    expect(closedEyes.length).toBe(2);
-  });
-
-  it('renders open eyes (ellipses) for non-sleeping states', () => {
-    const { container } = render(<Mascot state="idle" />);
-    const eyeWhites = container.querySelectorAll('[data-eye="white"]');
-    expect(eyeWhites.length).toBe(2);
-  });
-
-  it('renders a z-particle container for sleeping state', () => {
-    const { container } = render(<Mascot state="sleeping" />);
-    const zBox = container.querySelector('[data-mascot="z-container"]');
-    expect(zBox).toBeTruthy();
-  });
-
-  it('does not render z-particle container for non-sleeping states', () => {
-    const { container } = render(<Mascot state="idle" />);
-    const zBox = container.querySelector('[data-mascot="z-container"]');
-    expect(zBox).toBeFalsy();
-  });
-
-  it('renders a ground shadow', () => {
-    const { container } = render(<Mascot state="idle" />);
-    const shadow = container.querySelector('[data-mascot="shadow"]');
-    expect(shadow).toBeTruthy();
-  });
-
-  it('applies custom className replacing default size', () => {
-    const { container } = render(<Mascot state="idle" className="w-48 h-48" />);
-    const wrapper = container.firstElementChild as HTMLElement;
-    expect(wrapper.className).toContain('w-48');
-    expect(wrapper.className).toContain('h-48');
-    // Custom className replaces default w-32 h-32 to avoid Tailwind conflicts
-    expect(wrapper.className).not.toContain('w-32');
-  });
-
-  it('uses default w-32 h-32 when no className provided', () => {
-    const { container } = render(<Mascot state="idle" />);
-    const wrapper = container.firstElementChild as HTMLElement;
-    expect(wrapper.className).toContain('w-32');
-    expect(wrapper.className).toContain('h-32');
-  });
-
-  it('renders the sleeping mouth ellipse', () => {
-    const { container } = render(<Mascot state="sleeping" />);
-    const mouth = container.querySelector('[data-mascot="mouth"]');
-    expect(mouth).toBeTruthy();
-    expect(mouth!.tagName.toLowerCase()).toBe('ellipse');
-  });
-
-  it('renders the upright mouth as a path for idle', () => {
-    const { container } = render(<Mascot state="idle" />);
-    const mouth = container.querySelector('[data-mascot="mouth"]');
-    expect(mouth).toBeTruthy();
-    expect(mouth!.tagName.toLowerCase()).toBe('path');
-  });
-
-  describe('Mascot animation lifecycle', () => {
-    it('renders without crashing when element.animate is unavailable (jsdom)', () => {
-      expect(() => render(<Mascot state="idle" />)).not.toThrow();
-    });
-
-    it('renders without crashing for each state', () => {
-      for (const state of ['idle', 'sleeping', 'excited', 'lonely'] as const) {
-        const { unmount } = render(<Mascot state={state} />);
-        unmount();
-      }
-    });
+  it('applies the size classes it is given', () => {
+    const { container } = render(<Mascot state="idle" className="w-20 h-20" />);
+    expect((container.firstElementChild as HTMLElement).className).toContain('w-20 h-20');
   });
 });

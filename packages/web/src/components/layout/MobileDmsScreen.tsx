@@ -291,7 +291,7 @@ export function MobileDmsScreen() {
 
         {sortedDms.length === 0 && (
           <div className="flex flex-col items-center justify-center h-40 opacity-80">
-            <Mascot state="sleeping" className="w-20 h-20 mb-2" />
+            <Mascot state="dnd" className="w-20 h-20 mb-2" />
             <p className="text-txt-tertiary text-sm">{t('dm:list.empty')}</p>
           </div>
         )}

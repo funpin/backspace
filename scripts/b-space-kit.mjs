@@ -8,22 +8,22 @@
  *   - the small mark (larger eyes, for 24 px and below)
  *   - the horizontal lockup (mark + B:SPACE)
  *   - the app icon (badge) and its small variant
- *   - drop-in masters for scripts/gen-icons.mjs (gen-icons/)
+ *   - the masters that scripts/gen-icons.mjs renders the app's icons from
+ *     (assets/brand/*.svg, and assets/brand/tray/ for the tray states)
+ *   - the landing page's favicon and logo glyph (site/assets/)
  *   - the character's states as static SVG frames (states/)
- *   - tray icons per state: macOS template PNGs, Windows .ico (tray/)
  *   - PNG previews of the mark, app icon and lockup (png/)
  *   - animated SVGs of the character's states for the GitHub README (animated/)
  *
  * The geometry is the source of truth; the SVG files are outputs. Run
- * `node scripts/b-space-kit.mjs` after changing anything here and commit
- * the diff. See assets/brand/b-space/README.md for the usage rules.
+ * `node scripts/b-space-kit.mjs`, then `pnpm gen-icons`, after changing
+ * anything here and commit the diff. See assets/brand/b-space/README.md for the usage rules.
  */
 
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import sharp from 'sharp';
-import pngToIco from 'png-to-ico';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const KIT = join(ROOT, 'assets/brand/b-space');
@@ -237,9 +237,11 @@ function animatedSvg(states, { cell = 120, gap = 12 } = {}) {
 }
 
 // ---- output ----
+// The tray states the desktop app switches between (see packages/desktop/src/trayState.ts).
+const TRAY_STATES = ['idle', 'notify', 'screen', 'dnd', 'offline'];
 const files = [];
-function write(rel, data) {
-  const p = join(KIT, rel);
+function write(rel, data, base = KIT) {
+  const p = join(base, rel);
   mkdirSync(dirname(p), { recursive: true });
   writeFileSync(p, data);
   files.push(rel);
@@ -247,7 +249,7 @@ function write(rel, data) {
 const png = (svg, w, h = w) => sharp(Buffer.from(svg), { density: DENSITY }).resize(w, h, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png({ compressionLevel: 9 }).toBuffer();
 
 async function main() {
-  for (const d of ['gen-icons', 'states', 'tray', 'png', 'animated']) rmSync(join(KIT, d), { recursive: true, force: true });
+  for (const d of ['states', 'png', 'animated']) rmSync(join(KIT, d), { recursive: true, force: true });
 
   // Mark
   write('mark.svg', header('mark, two-tone, for dark grounds') + markSvg({ ...palette.dark }, { tight: true }));
@@ -269,41 +271,34 @@ async function main() {
   write('app-icon.svg', header('app icon') + app);
   write('app-icon-small.svg', header('app icon, 16 and 32 px') + appSmall);
 
-  // Drop-in masters for scripts/gen-icons.mjs (same file names as assets/brand/)
-  write('gen-icons/app-icon.svg', app);
-  write('gen-icons/app-icon-small.svg', appSmall);
-  write('gen-icons/mark-icon.svg', markSvg({ ...palette.dark }, { tight: true }));
-  write('gen-icons/mark.svg', markSvg({ ...palette.lavender }, { tight: true }));
-  write('gen-icons/mark-small.svg', markSvg({ ...palette.lavender, eyes: 'small' }, { tight: true }));
-  write('gen-icons/mark-mono-light.svg', markSvg({ ...palette.white }, { tight: true }));
-  write('gen-icons/mark-mono-dark.svg', markSvg({ ...palette.black }, { tight: true }));
-  write('gen-icons/mark-tray.svg', trayTemplateSvg('idle'));
+  // Masters for scripts/gen-icons.mjs, which renders every app icon, tray
+  // icon, favicon and PWA icon from them.
+  const BRAND = join(ROOT, 'assets/brand');
+  write('app-icon.svg', app, BRAND);
+  write('app-icon-small.svg', appSmall, BRAND);
+  write('mark-icon.svg', markSvg({ ...palette.dark }, { tight: true }), BRAND);
+  write('mark.svg', markSvg({ ...palette.lavender }, { tight: true }), BRAND);
+  write('mark-small.svg', markSvg({ ...palette.lavender, eyes: 'small' }, { tight: true }), BRAND);
+  write('mark-mono-light.svg', markSvg({ ...palette.white }, { tight: true }), BRAND);
+  write('mark-mono-dark.svg', markSvg({ ...palette.black }, { tight: true }), BRAND);
+  // Tray states: a black template per state for the macOS menu bar, and a
+  // colour glyph per state for the Windows and Linux trays.
+  for (const state of TRAY_STATES) {
+    write(`tray/${state}-template.svg`, trayTemplateSvg(state), BRAND);
+    const colours = STATES[state].off ? { head: C.offHead, body: C.offHead } : palette.lavender;
+    write(`tray/${state}.svg`, markSvg({ ...colours, state, eyes: 'small', idp: `tray-${state}` }, { tight: true }), BRAND);
+  }
+
+  // Landing page: favicon (the small mark, readable on light and dark tabs)
+  // and the one-colour glyph logo.css uses as a mask.
+  const SITE = join(ROOT, 'site/assets');
+  write('logo.svg', markSvg({ ...palette.lavender, eyes: 'small' }, { tight: true }), SITE);
+  write('logo-glyph.svg', markSvg({ ...palette.black }, { tight: true }), SITE);
 
   // States: static frames of the character
   for (const state of Object.keys(STATES)) {
     write(`states/${state}.svg`, header(`character, state "${state}", for dark grounds`) + markSvg({ ...stateColours(state, palette.dark), state, idp: state }, { size: 200 }));
     write(`states/${state}-on-light.svg`, header(`character, state "${state}", for light grounds`) + markSvg({ ...stateColours(state, palette.light), state, idp: state }, { size: 200 }));
-  }
-
-  // Tray: macOS template PNGs and Windows .ico per state
-  const TRAY = ['idle', 'notify', 'screen', 'dnd', 'offline'];
-  const ICO_SIZES = [16, 20, 24, 32, 40, 48];
-  for (const state of TRAY) {
-    const tpl = trayTemplateSvg(state);
-    write(`tray/mac/tray-${state}Template.svg`, tpl);
-    write(`tray/mac/tray-${state}Template.png`, await sharp(Buffer.from(tpl), { density: DENSITY }).resize({ height: 22 }).png({ compressionLevel: 9 }).toBuffer());
-    write(`tray/mac/tray-${state}Template@2x.png`, await sharp(Buffer.from(tpl), { density: DENSITY }).resize({ height: 44 }).png({ compressionLevel: 9 }).toBuffer());
-    const colours = state === 'offline' ? { head: C.offHead, body: C.offHead } : palette.lavender;
-    const winSvg = markSvg({ ...colours, state, eyes: 'small', idp: `win-${state}` }, { tight: true });
-    write(`tray/win/tray-${state}.svg`, winSvg);
-    const frames = [];
-    for (const size of ICO_SIZES) {
-      // Glyph inset like the platform's own tray glyphs: margin floor(size/8).
-      const glyphH = size - Math.floor(size / 8);
-      const glyph = await sharp(Buffer.from(winSvg), { density: DENSITY }).resize({ height: glyphH }).png().toBuffer();
-      frames.push(await sharp({ create: { width: size, height: size, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite([{ input: glyph, gravity: 'center' }]).png({ compressionLevel: 9 }).toBuffer());
-    }
-    write(`tray/win/tray-${state}.ico`, await pngToIco(frames));
   }
 
   // Animated states: one file per state and one row with all of them
@@ -320,7 +315,7 @@ async function main() {
     for (const h of [64, 128]) write(`png/${name}-${h}.png`, await png(svg, Math.round(h * ratio), h));
   }
 
-  console.log(`${files.length} files written to assets/brand/b-space/`);
+  console.log(`${files.length} files written (assets/brand/b-space/, assets/brand/, site/assets/)`);
 }
 
 main().catch((e) => {
