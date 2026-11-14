@@ -181,9 +181,41 @@
   /* Stage zoom (hooks/useStageZoom.ts). The stage carries the numbers; only
      the tile's own picture takes them, so the badges, the caption and the
      corner inset drawn over it stay put. */
-  [data-zoom-stage] > [data-context-menu] > video {
+  [data-zoom-stage] > [data-context-menu] > video,
+  [data-zoom-stage] > [data-context-menu] > [data-zoom-follow] {
     transform-origin: 0 0;
     transform: translate(var(--stage-zoom-x, 0px), var(--stage-zoom-y, 0px)) scale(var(--stage-zoom-scale, 1));
+  }
+  /* Stream pointers (components/voice/StreamPointers.tsx). The layer zooms
+     with the picture; each mark is scaled back so it keeps its size. */
+  .stream-pointer-glide {
+    transition-duration: 90ms, 90ms, 300ms;
+    transition-timing-function: linear;
+  }
+  .stream-pointer-mark {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    transform: scale(calc(1 / var(--stage-zoom-scale, 1)));
+  }
+  .stream-pointer-ping {
+    position: absolute;
+    left: -18px;
+    top: -18px;
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    border: 2px solid;
+    opacity: 0;
+    animation: stream-pointer-ping 700ms ease-out;
+  }
+  @keyframes stream-pointer-ping {
+    0% { transform: scale(0.2); opacity: 0.9; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stream-pointer-glide { transition-duration: 0ms, 0ms, 0ms; }
   }
   [data-zoom-stage][data-zoomed] {
     cursor: grab;

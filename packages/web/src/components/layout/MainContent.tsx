@@ -278,7 +278,7 @@ export function MainContent() {
 
           <div className="flex-1 flex overflow-hidden min-h-0">
             <div className={`flex-1 min-w-0 flex relative ${voiceFullscreen ? '' : 'pb-20'}`}>
-              <VoiceGrid participants={participants} />
+              <VoiceGrid participants={participants} chromeRevealed={chromeRevealed} />
               <VoiceControlBar revealed={chromeRevealed} />
             </div>
             {voiceChatOpen && !voiceFullscreen && (
@@ -522,7 +522,7 @@ export function MainContent() {
 
         <div className="flex-1 flex overflow-hidden min-h-0">
           <div className={`flex-1 min-w-0 flex relative ${voiceFullscreen ? '' : 'pb-20'}`}>
-            <VoiceGrid participants={participants} />
+            <VoiceGrid participants={participants} chromeRevealed={chromeRevealed} />
             <VoiceControlBar revealed={chromeRevealed} />
           </div>
           {voiceChatOpen && !voiceFullscreen && (

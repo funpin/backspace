@@ -4,7 +4,8 @@ import type { GridTile, ParticipantInfo, StreamTile, UserTile } from '../hooks/u
 /**
  * One slot of the voice grid: what a participant shows large (`main`) and what,
  * if anything, sits in its corner (`inset`). A participant who shares a screen
- * and a camera gets one cell with both, unless the viewer split them.
+ * and a camera gets one cell with both, unless the viewer split them. The
+ * viewer's own screen and camera are always two cells.
  */
 export interface GridCell {
   /**
@@ -51,7 +52,9 @@ function cellsFor(
   // Only a camera that is actually arriving can share a tile with the screen:
   // an unwatched one has no picture to put in the corner.
   if (user.videoTrack === null) return [{ key: stream.key, participant, main: stream, inset: null }];
-  if (prefs.split.has(participant.userId)) {
+  // The viewer's own camera never hides in the corner of their own share: the
+  // corner is where they would stop seeing what the others see of them.
+  if (participant.isLocal || prefs.split.has(participant.userId)) {
     return [
       { key: stream.key, participant, main: stream, inset: null },
       { key: user.key, participant, main: user, inset: null },

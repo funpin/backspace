@@ -43,7 +43,10 @@
     "swapSources": "Trocar tela e câmera",
     "splitCamera": "Mostrar câmera separadamente",
     "mergeCamera": "Devolver a câmera ao canto",
-    "resetZoom": "Redefinir zoom"
+    "resetZoom": "Redefinir zoom",
+    "pointerOn": "Apontar na tela (P)",
+    "pointerOff": "Parar de apontar (P)",
+    "pointerActive": "Ponteiro"
   },
   "connectionInfo": {
     "title": "Informações da conexão",
@@ -174,7 +177,8 @@
     "viewersLabel_one": "{{count}} espectador",
     "viewersLabel_many": "{{count}} espectadores",
     "viewersLabel_other": "{{count}} espectadores",
-    "noViewers": "Ninguém está assistindo ainda"
+    "noViewers": "Ninguém está assistindo ainda",
+    "showPointers": "Mostrar ponteiros dos espectadores"
   },
   "streamDiagnostics": {
     "publisherNetwork": "A rede de quem transmite está instável",

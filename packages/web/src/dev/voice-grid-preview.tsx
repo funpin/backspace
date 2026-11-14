@@ -9,6 +9,8 @@ import type { Track } from 'livekit-client';
 import { VoiceGrid } from '../components/voice/VoiceGrid';
 import { ContextMenuRenderer } from '../components/ui/ContextMenuRenderer';
 import { useVoiceStore } from '../stores/voiceStore';
+import { useUIStore } from '../stores/uiStore';
+import { useStreamPointerStore } from '../stores/streamPointerStore';
 import type { ParticipantInfo } from '../hooks/useLiveKit';
 import { initI18n } from '../i18n';
 import { initializeInterfaceScale } from '../platform/interfaceScale';
@@ -32,6 +34,8 @@ interface Scene {
   unwatched?: string[];
   /** Sharer to the others who watch them, as their clients would have announced. */
   watchers?: Record<string, string[]>;
+  /** Sharer to the viewers whose pointers circle over their share. */
+  pointers?: Record<string, string[]>;
 }
 
 const SCENES: Record<string, Scene> = {
@@ -69,6 +73,18 @@ const SCENES: Record<string, Scene> = {
     ],
     focus: 'marsel:stream',
     watchers: { marsel: ['akk0', 'fox'], funpin: ['akk0', 'fox', 'nika'] },
+  },
+  pointer: {
+    caption: 'Two viewers point at the focused share; press P or the arrow button to point yourself',
+    people: [
+      { name: 'funpin', local: true, camera: true },
+      { name: 'akk0', screen: true },
+      { name: 'fox', speaking: true },
+      { name: 'marsel' },
+    ],
+    focus: 'akk0:stream',
+    watchers: { akk0: ['fox', 'marsel'] },
+    pointers: { akk0: ['fox', 'marsel'] },
   },
   self: {
     caption: 'Your own share steps into the ribbon once someone else shares',
@@ -143,12 +159,37 @@ function buildParticipant(person: Person): ParticipantInfo {
   };
 }
 
+/** Moves each seeded pointer along its own slow ellipse, with a click now and then. */
+function animatePointers(pointers: Record<string, string[]>): void {
+  const started = Date.now();
+  window.setInterval(() => {
+    const t = (Date.now() - started) / 1000;
+    for (const [sharer, viewers] of Object.entries(pointers)) {
+      viewers.forEach((viewer, index) => {
+        // The second pointer rests half of the time, to show the idle fade.
+        if (index === 1 && Math.floor(t / 5) % 2 === 1) return;
+        const angle = t * (0.9 - index * 0.35) + index * 2;
+        useStreamPointerStore.getState().record(
+          sharer,
+          viewer,
+          { x: 0.5 + Math.cos(angle) * (0.22 + index * 0.1), y: 0.45 + Math.sin(angle) * (0.2 + index * 0.08) },
+          index === 0 && Math.floor(t * 30) % 120 === 0,
+        );
+      });
+    }
+  }, 33);
+}
+
 function Workbench({ scene, participants }: { scene: Scene; participants: ParticipantInfo[] }) {
+  // `?fullscreen=1` lays the grid out as voice fullscreen does; `&chrome=1`
+  // as while its header band and control bar are showing.
+  const params = new URLSearchParams(window.location.search);
+  const chromeRevealed = params.get('chrome') === '1';
   return (
     <div style={{ height: 'calc(100 * var(--app-vh))', background: 'rgb(var(--bg-chat))', display: 'flex', flexDirection: 'column' }}>
       <span style={{ fontSize: 12, color: 'rgb(var(--text-tertiary))', padding: '8px 16px' }}>{scene.caption}</span>
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-        <VoiceGrid participants={participants} />
+        <VoiceGrid participants={participants} chromeRevealed={chromeRevealed} />
       </div>
       <ContextMenuRenderer />
     </div>
@@ -173,6 +214,8 @@ async function main(): Promise<void> {
     speakingParticipantIds: new Set(scene.people.filter((p) => p.speaking).map((p) => p.name)),
     streamWatchers: new Map(Object.entries(scene.watchers ?? {}).map(([sharer, viewers]) => [sharer, new Set(viewers)])),
   });
+  useUIStore.setState({ voiceFullscreen: params.get('fullscreen') === '1' });
+  if (scene.pointers) animatePointers(scene.pointers);
   createRoot(host).render(<Workbench scene={scene} participants={participants} />);
 }
 

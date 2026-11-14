@@ -3,6 +3,8 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VoiceGrid } from './VoiceGrid';
 import { useVoiceStore } from '../../stores/voiceStore';
+import { useUIStore } from '../../stores/uiStore';
+import { useStreamPointerStore } from '../../stores/streamPointerStore';
 
 vi.mock('../../audio/AudioManager', () => ({
   AudioManager: { getInstance: () => ({ playSound: vi.fn() }) },
@@ -56,7 +58,10 @@ beforeEach(() => {
     tileInsetCorners: new Map(),
     tileOrder: [],
     participantMutes: new Map(),
+    showStreamPointers: true,
   });
+  useUIStore.setState({ voiceFullscreen: false });
+  useStreamPointerStore.getState().reset();
 });
 
 const liveTrack = { readyState: 'live', addEventListener: () => {}, removeEventListener: () => {}, getSettings: () => ({}) };
@@ -258,3 +263,181 @@ describe('VoiceGrid one tile per participant', () => {
     expect(screen.getByTestId('stream-viewer-count')).toHaveTextContent('1');
   });
 });
+
+describe('VoiceGrid viewer list', () => {
+  beforeEach(() => {
+    useVoiceStore.setState({
+      focusedParticipantId: null,
+      participants: [participant('ada', true), sharing('bob', { screen: true }), participant('eve', false)],
+      watchingStreams: new Set(['bob']),
+      streamWatchers: new Map([['bob', new Set(['eve'])]]),
+    });
+  });
+
+  it('names the viewers when the count is pressed, without focusing the tile', async () => {
+    render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
+    expect(screen.queryByTestId('stream-viewers-popover')).toBeNull();
+
+    await userEvent.click(screen.getByTestId('stream-viewer-count'));
+
+    const popover = screen.getByTestId('stream-viewers-popover');
+    expect(popover).toHaveTextContent('eve');
+    expect(popover).toHaveTextContent('ada');
+    expect(useVoiceStore.getState().focusedParticipantId).toBeNull();
+
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByTestId('stream-viewers-popover')).toBeNull();
+  });
+
+  it('opens the list on hover and closes it after the pointer leaves', () => {
+    vi.useFakeTimers();
+    try {
+      render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
+      fireEvent.mouseEnter(screen.getByTestId('stream-viewer-count'));
+      expect(screen.getByTestId('stream-viewers-popover')).toBeInTheDocument();
+
+      fireEvent.mouseLeave(screen.getByTestId('stream-viewer-count'));
+      act(() => { vi.advanceTimersByTime(500); });
+      expect(screen.queryByTestId('stream-viewers-popover')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe('VoiceGrid own camera', () => {
+  it('keeps the viewer\'s own camera a tile of its own next to their share', () => {
+    useVoiceStore.setState({ focusedParticipantId: null, watchingStreams: new Set(['ada']) });
+    const { container } = render(
+      <VoiceGrid participants={[sharing('ada', { screen: true, camera: true }, true), participant('bob', false)]} />,
+    );
+
+    expect(screen.getAllByTestId('voice-grid-cell')).toHaveLength(2);
+    expect(container.querySelector('[data-testid="tile-inset"]')).toBeNull();
+    expect(screen.queryByLabelText(/camera/i, { selector: 'button' })).toBeNull();
+  });
+});
+
+describe('VoiceGrid stream pointer', () => {
+  const people = () => [participant('ada', true), sharing('bob', { screen: true }), participant('eve', false)];
+
+  beforeEach(() => {
+    useVoiceStore.setState({
+      focusedParticipantId: 'bob:stream',
+      participants: people(),
+      watchingStreams: new Set(['bob']),
+      streamWatchers: new Map(),
+    });
+    // jsdom lays nothing out: give the picture and its layer a size.
+    Object.defineProperty(HTMLVideoElement.prototype, 'videoWidth', { configurable: true, get: () => 1600 });
+    Object.defineProperty(HTMLVideoElement.prototype, 'videoHeight', { configurable: true, get: () => 900 });
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, get: () => 800 });
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', { configurable: true, get: () => 800 });
+  });
+
+  it('offers pointing only on someone else\'s focused share', () => {
+    const { unmount } = render(<VoiceGrid participants={people()} />);
+    expect(screen.getByTestId('pointer-toggle')).toHaveAttribute('aria-pressed', 'false');
+    unmount();
+
+    useVoiceStore.setState({ focusedParticipantId: 'ada:stream', watchingStreams: new Set(['ada']) });
+    render(<VoiceGrid participants={[sharing('ada', { screen: true }, true), participant('bob', false)]} />);
+    expect(screen.queryByTestId('pointer-toggle')).toBeNull();
+  });
+
+  it('turns a click on the picture into a ping instead of leaving focus while pointing', async () => {
+    render(<VoiceGrid participants={people()} />);
+
+    await userEvent.click(screen.getByTestId('pointer-toggle'));
+    expect(useStreamPointerStore.getState().pointing).toBe(true);
+
+    const video = document.querySelector('video') as HTMLVideoElement;
+    video.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 800, right: 800, bottom: 800, x: 0, y: 0, toJSON: () => ({}) });
+    // 1600x900 in an 800x800 box: the picture is 800x450, 175px down.
+    fireEvent.pointerMove(video, { clientX: 400, clientY: 400 });
+    const own = screen.getByTestId('stream-pointer');
+    expect(own).toHaveAttribute('data-pointer-identity', 'ada');
+    expect(own.style.left).toBe('50%');
+    expect(own.style.top).toBe('50%');
+
+    fireEvent.pointerDown(video, { clientX: 400, clientY: 400, button: 0 });
+    fireEvent.pointerUp(video, { clientX: 400, clientY: 400, button: 0 });
+    fireEvent.click(video);
+    expect(screen.getByTestId('stream-pointer-ping')).toBeInTheDocument();
+    expect(useVoiceStore.getState().focusedParticipantId).toBe('bob:stream');
+
+    // On a letterbox band there is nothing to point at.
+    fireEvent.pointerMove(video, { clientX: 400, clientY: 50 });
+    expect(screen.queryByTestId('stream-pointer')).toBeNull();
+  });
+
+  it('toggles pointing with the P key and switches it off when focus is left', async () => {
+    render(<VoiceGrid participants={people()} />);
+
+    fireEvent.keyDown(window, { code: 'KeyP', key: 'з' });
+    expect(useStreamPointerStore.getState().pointing).toBe(true);
+
+    act(() => useVoiceStore.setState({ focusedParticipantId: null }));
+    expect(useStreamPointerStore.getState().pointing).toBe(false);
+  });
+
+  it('draws another viewer\'s pointer, fades it once idle, and hides it when the viewer turned pointers off', () => {
+    vi.useFakeTimers();
+    try {
+      render(<VoiceGrid participants={people()} />);
+      act(() => useStreamPointerStore.getState().record('bob', 'eve', { x: 0.25, y: 0.75 }, false));
+
+      const mark = screen.getByTestId('stream-pointer');
+      expect(mark).toHaveAttribute('data-pointer-identity', 'eve');
+      expect(mark).toHaveTextContent('eve');
+      expect(mark.style.left).toBe('25%');
+      expect(mark.style.opacity).toBe('1');
+
+      act(() => { vi.advanceTimersByTime(3500); });
+      expect(screen.getByTestId('stream-pointer').style.opacity).toBe('0');
+
+      act(() => useVoiceStore.setState({ showStreamPointers: false }));
+      expect(screen.queryByTestId('stream-pointer')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe('VoiceGrid in voice fullscreen', () => {
+  const people = () => [participant('ada', true), sharing('bob', { screen: true }), participant('eve', false)];
+
+  beforeEach(() => {
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream', watchingStreams: new Set(['bob']) });
+    useUIStore.setState({ voiceFullscreen: true });
+  });
+
+  it('moves the focus buttons below the header band while it shows', () => {
+    const { rerender } = render(<VoiceGrid participants={people()} chromeRevealed={false} />);
+    expect(screen.getByTestId('focus-actions').className).toContain('top-4');
+
+    rerender(<VoiceGrid participants={people()} chromeRevealed />);
+    expect(screen.getByTestId('focus-actions').className).toContain('top-14');
+    expect(screen.getByTestId('focus-actions').className).not.toContain('top-4 ');
+  });
+
+  it('keeps the strip clear of the control bar, and floats its toggle above the bar once hidden', async () => {
+    render(<VoiceGrid participants={people()} chromeRevealed />);
+    const root = screen.getByTestId('voice-strip').parentElement as HTMLElement;
+    expect(root.className).toContain('pb-20');
+
+    await userEvent.click(screen.getByText(/hide members/i));
+
+    expect(root.className).not.toContain('pb-20');
+    const toggle = screen.getByText(/show members/i).closest('[data-voice-chrome]') as HTMLElement;
+    expect(toggle.className).toContain('bottom-24');
+  });
+
+  it('keeps the grid clear of both bands', () => {
+    useVoiceStore.setState({ focusedParticipantId: null });
+    render(<VoiceGrid participants={people()} />);
+
+    expect((screen.getByTestId('voice-grid-cell').closest('.pt-12') as HTMLElement).className).toContain('pb-20');
+  });
+});
+

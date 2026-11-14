@@ -43,7 +43,10 @@
     "swapSources": "交换屏幕和摄像头",
     "splitCamera": "单独显示摄像头",
     "mergeCamera": "将摄像头放回角落",
-    "resetZoom": "重置缩放"
+    "resetZoom": "重置缩放",
+    "pointerOn": "在屏幕上指示 (P)",
+    "pointerOff": "停止指示 (P)",
+    "pointerActive": "指示中"
   },
   "connectionInfo": {
     "title": "连接信息",
@@ -172,7 +175,8 @@
     "isStreaming": "{{name}} 正在直播",
     "viewers": "观众",
     "viewersLabel_other": "{{count}} 位观众",
-    "noViewers": "暂时无人观看"
+    "noViewers": "暂时无人观看",
+    "showPointers": "显示观众的指针"
   },
   "streamDiagnostics": {
     "publisherNetwork": "推流端网络不稳定",
