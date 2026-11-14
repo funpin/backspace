@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VoiceGrid } from './VoiceGrid';
+import { pictureView } from './StageZoomControls';
 import { useVoiceStore } from '../../stores/voiceStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useStreamPointerStore } from '../../stores/streamPointerStore';
@@ -446,8 +447,13 @@ describe('VoiceGrid zoom controls', () => {
   const size = { left: 0, top: 0, width: 1000, height: 500, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) };
 
   function renderFocused() {
-    useVoiceStore.setState({ focusedParticipantId: 'bob:stream' });
+    Object.defineProperty(HTMLVideoElement.prototype, 'videoWidth', { configurable: true, get: () => 1600 });
+    Object.defineProperty(HTMLVideoElement.prototype, 'videoHeight', { configurable: true, get: () => 900 });
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream', watchingStreams: new Set(['bob']) });
+    // jsdom lays nothing out, and the stage is measured as it mounts.
+    const measured = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(size as DOMRect);
     render(<VoiceGrid participants={people()} />);
+    measured.mockRestore();
     const stage = document.querySelector('[data-zoom-stage]') as HTMLElement;
     stage.getBoundingClientRect = () => size;
     return stage;
@@ -487,19 +493,32 @@ describe('VoiceGrid zoom controls', () => {
   it('frames the visible part in the minimap and moves the view where the minimap is pressed', async () => {
     const stage = renderFocused();
     await userEvent.click(screen.getByTestId('zoom-chip'));
-    // The stage is measured on mount, before the test could give it a size.
-    act(() => { window.dispatchEvent(new Event('resize')); });
     fireEvent.wheel(stage, { deltaY: -1, clientX: 500, clientY: 250 });
 
     const minimap = screen.getByTestId('zoom-minimap');
-    minimap.getBoundingClientRect = () => ({ ...size, width: 148, height: 74, right: 148, bottom: 74 });
-    fireEvent.pointerDown(minimap, { clientX: 148, clientY: 74, buttons: 1 });
+    // The picture is 1600x900 on a 1000x500 stage: the map takes the picture's
+    // 16:9 shape, not the stage's 2:1, so it has no letterbox bands of its own.
+    expect(minimap.style.width).toBe('148px');
+    expect(minimap.style.height).toBe('83px');
+    minimap.getBoundingClientRect = () => ({ ...size, width: 148, height: 83, right: 148, bottom: 83 });
+    fireEvent.pointerDown(minimap, { clientX: 148, clientY: 83, buttons: 1 });
 
     // Pressed in the bottom-right corner: the view goes as far there as it can.
     const scale = Number(stage.style.getPropertyValue('--stage-zoom-scale'));
     expect(parseFloat(stage.style.getPropertyValue('--stage-zoom-x'))).toBeCloseTo(1000 - 1000 * scale, 3);
     expect(parseFloat(stage.style.getPropertyValue('--stage-zoom-y'))).toBeCloseTo(500 - 500 * scale, 3);
     expect(useVoiceStore.getState().focusedParticipantId).toBe('bob:stream');
+  });
+
+  it('cuts the minimap frame to the picture when the view reaches into a letterbox band', () => {
+    // The picture fills the middle 80 % of the stage's width.
+    const picture = { left: 0.1, top: 0, width: 0.8, height: 1 };
+    // A view over the left half of the stage sees the picture's first 40 % of stage width.
+    expect(pictureView({ left: 0, top: 0, width: 0.5, height: 0.5 }, picture))
+      .toEqual({ left: 0, top: 0, width: 0.5, height: 0.5 });
+    const inside = pictureView({ left: 0.5, top: 0.25, width: 0.25, height: 0.5 }, picture);
+    expect(inside.left).toBeCloseTo(0.5);
+    expect(inside.width).toBeCloseTo(0.3125);
   });
 });
 
