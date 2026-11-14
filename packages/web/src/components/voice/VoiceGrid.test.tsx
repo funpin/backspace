@@ -441,3 +441,65 @@ describe('VoiceGrid in voice fullscreen', () => {
   });
 });
 
+describe('VoiceGrid zoom controls', () => {
+  const people = () => [participant('ada', true), sharing('bob', { screen: true })];
+  const size = { left: 0, top: 0, width: 1000, height: 500, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) };
+
+  function renderFocused() {
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream' });
+    render(<VoiceGrid participants={people()} />);
+    const stage = document.querySelector('[data-zoom-stage]') as HTMLElement;
+    stage.getBoundingClientRect = () => size;
+    return stage;
+  }
+
+  it('always shows the zoom level, and opens into a slider once zoomed', async () => {
+    const stage = renderFocused();
+    expect(screen.getByTestId('zoom-chip')).toHaveTextContent('100');
+    expect(screen.queryByTestId('zoom-slider')).toBeNull();
+    expect(screen.queryByTestId('zoom-minimap')).toBeNull();
+
+    await userEvent.click(screen.getByTestId('zoom-chip'));
+
+    expect(stage).toHaveAttribute('data-zoomed', 'true');
+    expect(screen.getByTestId('zoom-slider')).toHaveValue('200');
+    expect(screen.getByTestId('zoom-reset')).toHaveTextContent('200');
+    // Pressing a zoom control never leaves focus mode.
+    expect(useVoiceStore.getState().focusedParticipantId).toBe('bob:stream');
+  });
+
+  it('zooms with the slider around the middle of the view, and back to 100 % from the percentage', async () => {
+    const stage = renderFocused();
+    await userEvent.click(screen.getByTestId('zoom-chip'));
+
+    fireEvent.change(screen.getByTestId('zoom-slider'), { target: { value: '400' } });
+
+    expect(stage.style.getPropertyValue('--stage-zoom-scale')).toBe('4');
+    // The middle of the stage stays in the middle: 500 - 500 * 4, 250 - 250 * 4.
+    expect(stage.style.getPropertyValue('--stage-zoom-x')).toBe('-1500px');
+    expect(stage.style.getPropertyValue('--stage-zoom-y')).toBe('-750px');
+
+    await userEvent.click(screen.getByTestId('zoom-reset'));
+    expect(stage).not.toHaveAttribute('data-zoomed');
+    expect(screen.getByTestId('zoom-chip')).toBeInTheDocument();
+  });
+
+  it('frames the visible part in the minimap and moves the view where the minimap is pressed', async () => {
+    const stage = renderFocused();
+    await userEvent.click(screen.getByTestId('zoom-chip'));
+    // The stage is measured on mount, before the test could give it a size.
+    act(() => { window.dispatchEvent(new Event('resize')); });
+    fireEvent.wheel(stage, { deltaY: -1, clientX: 500, clientY: 250 });
+
+    const minimap = screen.getByTestId('zoom-minimap');
+    minimap.getBoundingClientRect = () => ({ ...size, width: 148, height: 74, right: 148, bottom: 74 });
+    fireEvent.pointerDown(minimap, { clientX: 148, clientY: 74, buttons: 1 });
+
+    // Pressed in the bottom-right corner: the view goes as far there as it can.
+    const scale = Number(stage.style.getPropertyValue('--stage-zoom-scale'));
+    expect(parseFloat(stage.style.getPropertyValue('--stage-zoom-x'))).toBeCloseTo(1000 - 1000 * scale, 3);
+    expect(parseFloat(stage.style.getPropertyValue('--stage-zoom-y'))).toBeCloseTo(500 - 500 * scale, 3);
+    expect(useVoiceStore.getState().focusedParticipantId).toBe('bob:stream');
+  });
+});
+

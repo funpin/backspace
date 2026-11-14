@@ -8,7 +8,6 @@ import { useVoiceStore } from '../../stores/voiceStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useGridLayout } from '../../hooks/useGridLayout';
 import { useStageZoom } from '../../hooks/useStageZoom';
-import { useFormatters } from '../../i18n/formatters';
 import type { ParticipantInfo, GridTile } from '../../hooks/useLiveKit';
 import { useTrackStats } from '../../hooks/useTrackStats';
 import {
@@ -19,6 +18,7 @@ import {
   type GridCell,
 } from '../../utils/voiceGridLayout';
 import { hideParticipantTile } from '../../utils/voiceTileActions';
+import { StageZoomBar, StageZoomMinimap } from './StageZoomControls';
 import { useStreamPointerStore } from '../../stores/streamPointerStore';
 import { VOICE_CHROME_ATTR } from '../../hooks/usePointerReveal';
 
@@ -79,12 +79,24 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
   const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
   const [stripHidden, setStripHidden] = useState(false);
-  const f = useFormatters();
   const voiceFullscreen = useUIStore((s) => s.voiceFullscreen);
   // Wheel zoom and drag pan on the focused picture. Keyed by the focus target,
   // so every picture opens unzoomed.
   const stageZoom = useStageZoom(focusedParticipantId);
   const { isZoomed, reset: resetZoom } = stageZoom;
+  // How wide the focus bar is right now. The focused tile's quality row ends
+  // where the bar begins, so it follows the bar as buttons come and go.
+  const [focusActions, setFocusActions] = useState<HTMLDivElement | null>(null);
+  const [focusActionsWidth, setFocusActionsWidth] = useState(0);
+  useEffect(() => {
+    if (!focusActions) return;
+    const measure = () => setFocusActionsWidth(focusActions.offsetWidth);
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(focusActions);
+    return () => observer.disconnect();
+  }, [focusActions]);
   const pointing = useStreamPointerStore((s) => s.pointing);
   const setPointing = useStreamPointerStore((s) => s.setPointing);
 
@@ -269,7 +281,12 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
     return (
       <div
         className="relative h-full w-full group/cell"
-        {...(variant === 'focused' ? stageZoom.stageProps : {})}
+        {...(variant === 'focused'
+          ? {
+            ...stageZoom.stageProps,
+            style: { ...stageZoom.stageProps.style, '--focus-actions-width': `${focusActionsWidth}px` } as React.CSSProperties,
+          }
+          : {})}
       >
         {renderTile(cell.main, variant === 'focused', compact)}
         {showInset && <TileInset cell={cell} />}
@@ -331,6 +348,7 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
           {/* Tile actions and the Grid button — top-right. In fullscreen
               they step down while the header band is over the top edge. */}
           <div
+            ref={setFocusActions}
             data-testid="focus-actions"
             className={`absolute right-4 z-10 flex items-center gap-2 transition-[top] duration-300 ease-out ${
               voiceFullscreen ? `${chromeRevealed ? 'top-14' : 'top-4'} ${WHEN_CHROME_IS_PERMANENT}` : 'top-4'
@@ -355,24 +373,7 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
                 {pointing && <span className="text-xs font-medium">{t('voice:grid.pointerActive')}</span>}
               </button>
             )}
-            {isZoomed && (
-              <button
-                type="button"
-                data-testid="zoom-reset"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetZoom();
-                }}
-                className={`${OVERLAY_BUTTON} px-2.5 gap-1.5`}
-                aria-label={t('voice:grid.resetZoom')}
-                title={t('voice:grid.resetZoom')}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z" />
-                </svg>
-                <span className="text-xs font-medium tabular-nums">{f.formatPercent(Math.round(stageZoom.zoom.scale * 100))}</span>
-              </button>
-            )}
+            <StageZoomBar zoom={stageZoom} />
             {cellActions(focusedCell)}
             <button
               type="button"
@@ -409,6 +410,14 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
               </svg>
               <span className="text-xs font-medium">{t('voice:grid.gridButton')}</span>
             </button>
+          </div>
+          {/* The map of what is zoomed in on, under the bar it belongs to. */}
+          <div
+            className={`absolute right-4 z-10 transition-[top] duration-300 ease-out ${
+              voiceFullscreen ? `${chromeRevealed ? 'top-24' : 'top-14'} [@media(hover:none)]:top-24 [@media(any-pointer:coarse)]:top-24` : 'top-14'
+            }`}
+          >
+            <StageZoomMinimap zoom={stageZoom} />
           </div>
         </div>
 

@@ -46,7 +46,12 @@
     "resetZoom": "重置缩放",
     "pointerOn": "在屏幕上指示 (P)",
     "pointerOff": "停止指示 (P)",
-    "pointerActive": "指示中"
+    "pointerActive": "指示中",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "zoomLevel": "缩放比例",
+    "zoomHint": "放大（或在画面上滚动滚轮）",
+    "zoomMinimap": "当前显示的画面区域；拖动可移动"
   },
   "connectionInfo": {
     "title": "连接信息",
