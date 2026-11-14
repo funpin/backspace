@@ -566,5 +566,25 @@ describe('VoiceGrid zoom controls', () => {
     expect(inside.left).toBeCloseTo(0.5);
     expect(inside.width).toBeCloseTo(0.3125);
   });
-});
 
+  it('moves the quality row under the LIVE badge when the focus bar leaves no room beside it', () => {
+    const narrow = { ...size, width: 420, right: 420 };
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, get: () => 300 });
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream', watchingStreams: new Set(['bob']) });
+    const measured = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(narrow as DOMRect);
+    const { unmount } = render(<VoiceGrid participants={people()} />);
+    measured.mockRestore();
+
+    const stage = () => document.querySelector('[data-zoom-stage]') as HTMLElement;
+    expect(stage()).toHaveAttribute('data-focus-tight');
+    expect(stage().style.getPropertyValue('--focus-quality-right')).toBe('0.5rem');
+    unmount();
+
+    // A wide stage keeps the row beside the bar, ending where the bar begins.
+    const wide = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(size as DOMRect);
+    render(<VoiceGrid participants={people()} />);
+    wide.mockRestore();
+    expect(stage()).not.toHaveAttribute('data-focus-tight');
+    expect(stage().style.getPropertyValue('--focus-quality-right')).toBe('316px');
+  });
+});

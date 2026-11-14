@@ -35,6 +35,11 @@ interface VoiceGridProps {
 /** Fullscreen: on a pointer that cannot hover the chrome never hides, so its room is always kept. */
 const WHEN_CHROME_IS_PERMANENT = '[@media(hover:none)]:top-14 [@media(any-pointer:coarse)]:top-14';
 
+/** Where the focused tile's quality row starts: past the LIVE badge (`left-20` in StreamTile). */
+const LIVE_BADGE_CLEARANCE = 80;
+/** The least room the quality row needs beside the focus bar: the quality badge itself, with air. */
+const MIN_QUALITY_ROW_WIDTH = 130;
+
 /** Below this tile width a corner inset is a smudge; the cell shows a badge instead. */
 const MIN_TILE_WIDTH_FOR_INSET = 280;
 
@@ -97,6 +102,11 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
     observer.observe(focusActions);
     return () => observer.disconnect();
   }, [focusActions]);
+  // In a narrow window the bar leaves no room beside it: between the LIVE
+  // badge and the bar the quality row would land on top of the badge. It then
+  // drops to a line of its own under the badge.
+  const focusBarCrowdsTop = stageZoom.stageSize.width > 0
+    && stageZoom.stageSize.width - focusActionsWidth - 16 - LIVE_BADGE_CLEARANCE < MIN_QUALITY_ROW_WIDTH;
   const pointing = useStreamPointerStore((s) => s.pointing);
   const setPointing = useStreamPointerStore((s) => s.setPointing);
 
@@ -284,7 +294,11 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
         {...(variant === 'focused'
           ? {
             ...stageZoom.stageProps,
-            style: { ...stageZoom.stageProps.style, '--focus-actions-width': `${focusActionsWidth}px` } as React.CSSProperties,
+            style: {
+              ...stageZoom.stageProps.style,
+              '--focus-quality-right': focusBarCrowdsTop ? '0.5rem' : `${focusActionsWidth + 16}px`,
+            } as React.CSSProperties,
+            'data-focus-tight': focusBarCrowdsTop ? '' : undefined,
           }
           : {})}
       >
