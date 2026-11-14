@@ -79,7 +79,16 @@
       "screenAudio": "Звук экрана",
       "unknown": "Неизвестно"
     },
-    "remoteParticipant": "Удалённый"
+    "remoteParticipant": "Удалённый",
+    "pingGraph": {
+      "title": "Пинг",
+      "window": "последние {{minutes}} мин",
+      "min": "мин",
+      "avg": "сред",
+      "max": "макс",
+      "empty": "Замеров пока нет",
+      "summaryLabel": "Пинг: минимум {{min}}, в среднем {{avg}}, максимум {{max}}"
+    }
   },
   "screenPicker": {
     "title": "Демонстрация экрана",

@@ -647,6 +647,15 @@ See `docs/systems/mobile-ui.md` → "MobileVoiceFullScreen" for the auto-focus s
 
 ---
 
+## Connection info: ping history
+
+`ConnectionInfoPopover` opens with a graph of the round-trip time to the voice server over the last two minutes (`PingGraph`), above the rows that show the last poll only.
+
+- **Sampling.** `usePingSampler` (`utils/pingHistory.ts`), mounted by `VoiceControls`, takes one sample a second for as long as the room is connected, not only while the popover is open: a graph that started empty on every open could not show the spike that made its owner open it. Each sample is one `getStats()` per peer connection, reading only the selected ICE candidate pair. The value is the mean of the connectivity checks answered since the previous sample (`totalRoundTripTime` over `responsesReceived`, see `roundTripSince`), falling back to `currentRoundTripTime` when none was: the ICE agent measures a few seconds apart and `currentRoundTripTime` keeps only the latest, so a spike a later check overwrote would otherwise be lost. Of the publisher and subscriber connections the worse value is kept.
+- **Storage.** A module-level ring of `PING_WINDOW` (120) samples with a `useSyncExternalStore` subscription, outside voiceStore, because it is written every second and only an open graph should re-render. A sample that could not be taken is `null` and breaks the line. The history is cleared when the room disconnects.
+- **Drawing.** Inline SVG, no chart library. Samples are right-aligned, so a point keeps its place on the time axis while the history fills. The scale is the highest sample plus 15 %, rounded up to 50 ms, never under 100 ms. The dashed rule is `VOICE_HEALTH.pingWarnMs`. The line takes the colour of the worst sample on screen; lowest, mean and highest are printed under it in their own bands.
+- **What it measures.** The whole path from this client to the voice server, the local link included. A spike that repeats every few seconds on a Wi-Fi client with a clean wired path is usually the radio leaving its channel (on macOS, AWDL for AirDrop and AirPlay), not the server.
+
 ## Voice Fullscreen
 
 The fullscreen toggle in `VoiceControlBar` flips the `voiceFullscreen` flag in `uiStore`; an effect in `MainContent.tsx` enters/exits the browser's Fullscreen API on `voiceContainerRef`. A second effect listens to `fullscreenchange` and reflects the actual document fullscreen element back into the store, so pressing Esc or system-level fullscreen-exit keeps state in sync. `voiceChatOpen && !voiceFullscreen` hides the side chat panel while fullscreen is active.
