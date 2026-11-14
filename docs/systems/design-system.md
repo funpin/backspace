@@ -1,18 +1,25 @@
-# Design System — "Aether Drift"
+# Design System — "Kamen"
 
-Prototype (source of truth): `Backspace-design-prototype.html` (open in browser)
+Source of truth: `docs/brand/brandbook.md` (rules and every token value),
+`docs/brand/brandbook.html` (the same, visual), `docs/brand/directions.html`
+(the screen mock the decisions were made on).
 Styles: `packages/web/src/styles/globals.css`
 Theme: `packages/web/tailwind.config.js`
-Fonts: DM Sans by default; Inter for the Russian UI; the platform CJK stack for Chinese; system fallbacks (see `docs/systems/localization.md`, "The landing page")
+Fonts: Onest for every Latin and Cyrillic locale; the platform CJK stack for Chinese (see `docs/systems/localization.md`, "The landing page")
+Rollout: `docs/brand/implementation-plan.md`. Stage 1 (tokens) is in; the
+markup still carries pre-Kamen arbitrary sizes, radii and inline icons until
+stages 2 and 3 reach each file.
 
 ---
 
 ## Principles
 
-- Calm over flashy. Warm over cool.
-- Quiet glass (felt, not seen). No decorative gradients. Minimal shadows.
-- Two-material system: solid matte panels for content (75%), frosted glass bubbles for persistent controls (25%)
-- `prefers-reduced-transparency` → fall back to solid surfaces
+- Neutral surfaces carry no hue. Colour belongs to meaning: what can be pressed, what is selected, what needs attention.
+- Areas are told apart by surface tone, not by a line. Lines stay at the header, settings rows and the edges of floating surfaces.
+- One scale per property: text size, spacing, radius, layer, duration. No values by eye.
+- Motion answers an action. Only live events move on their own (who is speaking, who is typing, an incoming call).
+- Two materials: matte panels for content, dense glass for what floats above it.
+- `prefers-reduced-transparency` → solid surfaces. `prefers-reduced-motion` or Appearance → "Interface animations" off → no transitions or animations.
 - NOT a Discord clone — Backspace has its own visual identity
 
 ## Settings organization
@@ -29,7 +36,8 @@ placed there would be unreachable outside the app).
 
 ## Interface scale
 
-Appearance settings include a device-local interface scale: 50–250% in 25% steps,
+Appearance settings include the colour theme and the motion switch (see Color
+Palette and Principles) and a device-local interface scale: 50–250% in 25% steps,
 default/reset 100%. `interfaceScaleStore` persists the percentage under
 `backspace-interface-scale`; unsupported stored values fall back to 100%.
 `main.tsx` applies it before mounting React, including auth pages and portals.
@@ -94,31 +102,78 @@ breakpoint. Native browser zoom and pinch gestures retain their normal behavior.
 
 ## Color Palette
 
-### Matte Surfaces (CSS vars, RGB channels)
+All values are RGB channels in `globals.css`, so Tailwind opacity modifiers
+work. The numbers are in `docs/brand/brandbook.md` §3.
+
+### Neutral surfaces (never themed)
 | Var | Role |
 |-----|------|
-| `--bg-base` | App background |
-| `--bg-channel` | Channel sidebar (#1a1a23) |
-| `--bg-chat` | Chat area (#13131a) |
-| `--bg-members` | Member list |
-| `--bg-elevated` | Static structural panels only |
-| `--bg-input` | Input backgrounds (sunken) |
-| `--bg-overlay` | Overlay backgrounds |
+| `--bg-base`, `--bg-chat` | Window ground, main area (#0c0c0e) |
+| `--bg-channel`, `--bg-members` | Space strip, channel list, member list (#121214) |
+| `--bg-elevated` | Tiles, cards, the selected row (#1b1b1f) |
+| `--bg-input` | Fields, code blocks (#151518) |
+| `--bg-overlay` | The one scrim under a dialog, `rgba(0,0,0,.55)` |
 
-### Pastel Accents
-`--accent-mint`, `--accent-peach`, `--accent-lavender`, `--accent-sky`, `--accent-amber`, `--accent-rose`, `--accent-coral`
+### Accent theme
+A theme is four values, chosen in Settings → Appearance and stored on the
+device (`stores/appearanceStore.ts`, key `backspace-appearance`).
+`platform/appearance.ts` mirrors the choice onto `<html data-accent>` before
+React mounts; the default theme (lavender) carries no attribute and its values
+sit on bare `:root`.
 
-### Primary Action
-`--accent-primary`, `--accent-primary-hover`, `--accent-primary-active`
+| Var | Tailwind | Paints |
+|-----|----------|--------|
+| `--accent-primary` (+ `-hover`, `-active`) | `accent-primary` | The fill: primary button, switch on, selected option, send |
+| `--on-accent` | `on-accent` | Text and icons on the fill (dark for amber and mono) |
+| `--accent-tone` | `accent-tone` | The accent on a dark surface: focus ring, sliders, progress, own reaction |
+| `--accent-secondary` | `accent-secondary` | Unread marks, mentions, links (`--notification`, `--text-link`) |
+
+Themes: `lavender` (default), `emerald`, `amber`, `ice`, `rose`, `mono`. A new
+theme is one `:root[data-accent="…"]` block in `globals.css` plus an entry in
+`ACCENT_THEMES`; its fill must reach 4.5:1 with its `--on-accent`.
+
+`text-white` next to `bg-accent-primary` is retinted to `--on-accent` by an
+attribute-pair rule in the utilities layer of `globals.css`, so the ~70
+existing buttons follow the theme without a markup change. New code writes
+`text-on-accent`.
+
+### Status (never themed)
+| Var | Tailwind | Meaning |
+|-----|----------|---------|
+| `--status-online` | `status-online`, `status-ok` | Online, speaking, accept a call, good connection |
+| `--status-idle` | `status-idle`, `status-warn` | Away, a warning, a connection with drops |
+| `--status-dnd` | `status-dnd`, `status-danger` | Error, live badge, muted microphone, disconnect, delete |
+| `--status-offline` | `status-offline` | Offline |
+
+The legacy names `--accent-mint`, `--accent-amber`, `--accent-rose` and
+`--accent-peach` resolve to the status colours, because the markup uses them as
+ok / warn / danger. `--accent-lavender`, `--accent-sky`, `--accent-coral` stay
+as content colours (roles, avatars).
 
 ### Text Hierarchy
-`--text-primary`, `--text-secondary`, `--text-tertiary`, `--text-category`, `--text-message`, `--text-link`, `--text-positive`, `--text-warning`, `--text-danger`
+`--text-primary`, `--text-message`, `--text-secondary`, `--text-tertiary`
+(contrast on `--bg-base`: 16.7 / 14.6 / 7.5 / 4.9), plus `--text-link`,
+`--text-positive`, `--text-warning`, `--text-danger` which follow the tokens above.
 
 ### Interactive States
-`--interactive-hover`, `--interactive-active`, `--interactive-selected`, `--interactive-muted`
+`--interactive-hover` (white 5%), `--interactive-active` (white 10%), `--interactive-selected` (= `--bg-elevated`), `--interactive-muted`
 
-### Status
-`--status-online`, `--status-idle`, `--status-dnd`, `--status-offline`
+### Focus
+Keyboard focus draws a 1.5px `--accent-tone` outline through `:focus-visible`;
+pointer focus draws nothing. Text fields are excluded and draw their own ring
+through the input tiers.
+
+---
+
+## Scales (tailwind.config.js)
+
+| Property | Steps |
+|----------|-------|
+| Radius | `rounded` 6 (tags) · `rounded-md` 8 · `rounded-lg` 10 (buttons, fields, rows) · `rounded-xl` 14 (tiles, cards, popovers) · `rounded-2xl` 16 (dialogs) · `rounded-full`. Tailwind's own steps are redefined, so existing classes follow. |
+| Text | `text-2xs` 11/16 · `text-xs` 12/16 · `text-compact` 13/18 · `text-sm` 14/20 (body) · `text-lg` 16/24 · `text-xl` 20/28 · `text-2xl` 24/32. Weights 400 / 500 / 600. |
+| Layer | `z-raised` 10 · `z-float` 20 · `z-popover` 200 · `z-modal` 300 · `z-toast` 400 · `z-confirm` 500 |
+| Duration | `duration-fast` 120ms · `duration-base` 220ms · `duration-slow` 320ms |
+| Easing | `ease-out` (.22, 1, .36, 1) · `ease-pop` (.3, 1.5, .55, 1) |
 
 ---
 
@@ -130,7 +185,7 @@ them, never hand-edited.
 
 The brand splits by surface, not by file type. UI surfaces (the site
 header, the in-app sidebar tile, favicons, and all tray icons) stay
-flat: a single flat fill, `#7c6cf6` on dark grounds or `#ffffff` on a
+flat: a single flat fill, `#6e5bef` on dark grounds or `#ffffff` on a
 lavender tile or badge shape, no gradient, stroke, glow, shadow, blur or
 blend anywhere the mark appears. The app-icon family, meaning every
 output where the OS shows this app as one launchable icon (dock,
@@ -139,9 +194,9 @@ maskable Android icon), is dimensional: the contributor's original
 badge composition, recoloured to the lavender system. The badge is a
 rounded rectangle with a corner radius of 22.37% of its side (Apple's
 own template radius, not the contributor's original ~36% squircle) on
-a vertical gradient from `#2a2740` (top) to `#12101d` (bottom), called
-"plum", carrying a drop shadow, an inner shadow and a soft-light stroke
-overlay; the glyph inside it is a white-to-`#7c6cf6` gradient, not a
+a vertical gradient from `#232327` (top) to `#0c0c0e` (bottom), called
+"graphite", carrying a drop shadow, an inner shadow and a soft-light stroke
+overlay; the glyph inside it is a white-to-`#6e5bef` gradient, not a
 flat fill.
 
 On macOS specifically, the badge also sits on Apple's icon grid: the
@@ -158,7 +213,7 @@ those platforms apply their own icon framing. See `macIconPng` in
 
 | Master | Feeds |
 |--------|-------|
-| `app-icon.svg` | App icon outputs above 32px: the dimensional badge (plum gradient, filters, stroke overlay, 22.37%-radius corners) plus the white-to-`#7c6cf6` gradient glyph |
+| `app-icon.svg` | App icon outputs above 32px: the dimensional badge (graphite gradient, filters, stroke overlay, 22.37%-radius corners) plus the white-to-`#6e5bef` gradient glyph |
 | `app-icon-small.svg` | App icon outputs at 16/32px (bolder, simplified mark, same dimensional badge geometry) |
 | `mark-icon.svg` | The bare gradient glyph alone, transparent, no badge: the PWA maskable icon's inner mark and the social preview |
 | `mark.svg` | Standalone flat-lavender renders on dark UI-surface grounds |
@@ -176,10 +231,9 @@ rasteriser, not per lockfile, so a Chrome or font upgrade can shift it
 even with no dependency change. See `scripts/gen-icons.README.md` and
 `docs/systems/desktop.md` for the full matrix.
 
-The brand primary is `#7c6cf6`. It is a web/app/desktop primary, not a
-pastel accent, and is exposed as `--accent-primary` (see Color Palette
-above). The plum gradient (`#2a2740`/`#12101d`) exists only as the
-app-icon family's ground; it is not a UI surface colour and has no CSS
+The brand primary is `#6e5bef`, the fill of the default accent theme
+(`--accent-primary`, see Color Palette above). The graphite gradient
+(`#232327`/`#0c0c0e`) exists only as the app-icon family's ground; it is not a UI surface colour and has no CSS
 variable.
 
 ---
@@ -207,18 +261,18 @@ The shared `Modal` (`components/ui/Modal.tsx`) portals itself through this hook,
 
 ### Glass Material Properties
 ```css
-.glass {
-  backdrop-filter: blur(20px) saturate(120%);
-  background: rgba(20, 20, 26, 0.52);    /* --glass-bg */
-  border: 1px solid rgba(255, 255, 255, 0.07);  /* --glass-border */
+.glass, .glass-bubble {
+  backdrop-filter: blur(16px) saturate(120%);
+  background: rgba(27, 27, 31, 0.78);     /* --glass-bg */
+  box-shadow: var(--glass-shadow);        /* 1px edge + one drop shadow */
 }
-.glass-modal {
-  /* Higher opacity: 82%, stronger shadow. Blur and tint on ::before (see Nested glass) */
-}
-.glass-pill {
-  backdrop-filter: blur(12px) saturate(110%);
-}
+.glass-modal { /* 86% tint, blur(24px) on ::before (see Nested glass) */ }
+.glass-pill  { /* matte chip: --bg-elevated and a 1px inset edge, no blur */ }
+.glass-strip { /* matte: --bg-channel, no blur, no border */ }
 ```
+
+The class names and the rule of use are unchanged from the previous system;
+only the values moved. `.glass-pill-mine` is tinted with `--accent-tone`.
 
 ### Nested glass
 
@@ -289,13 +343,11 @@ Any new card list uses this class rather than its own template.
 
 ## Shadows
 
-| Name | Use |
-|------|-----|
-| `header` | Top bars |
-| `elevation-low` | Subtle lift |
-| `elevation-high` | Dropdowns, popovers |
-| `glass` | Glass surfaces |
-| `input` | Input fields |
+One shadow, `--glass-shadow`, for everything that floats (`shadow-glass`,
+`shadow-elevation-high`). `shadow-header` and `shadow-elevation-low` are a 1px
+line in `--border-hard`. `shadow-input` is none: fields are told apart by their
+sunken ground and a 1px edge. Tailwind's default `shadow-md` / `shadow-lg` are
+not part of the system.
 
 ---
 

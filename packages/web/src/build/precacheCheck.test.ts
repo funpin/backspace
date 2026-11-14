@@ -60,7 +60,7 @@ describe('collectPrecacheCandidates', () => {
   it('leaves out an asset of a type the worker never precaches, however large (#330)', () => {
     // Only a file the glob would have precached can have been dropped for
     // size; a large font or image was never a candidate.
-    const dist = makeDist({ 'assets/index-a1.js': 300, 'assets/DMSans-x1.woff2': 5000, 'assets/banner-y2.png': 9000 });
+    const dist = makeDist({ 'assets/index-a1.js': 300, 'assets/Onest-x1.woff2': 5000, 'assets/banner-y2.png': 9000 });
     const files = collectPrecacheCandidates(dist, ['assets/index-a1.js'], EXTENSIONS);
     expect(files.map((f) => f.path)).toEqual(['assets/index-a1.js']);
   });

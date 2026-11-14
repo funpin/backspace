@@ -6,10 +6,12 @@ import { startPendingMessageOrchestrator } from './stores/pendingMessageRehydrat
 import i18n, { initI18n } from './i18n';
 import './styles/globals.css';
 import { initializeInterfaceScale } from './platform/interfaceScale';
+import { initializeAppearance } from './platform/appearance';
 import { waitForEmojiShortcodeNames } from './utils/emojiShortcodes';
 
 const stopInterfaceScale = initializeInterfaceScale();
-if (import.meta.hot) import.meta.hot.dispose(stopInterfaceScale);
+const stopAppearance = initializeAppearance();
+if (import.meta.hot) import.meta.hot.dispose(() => { stopInterfaceScale(); stopAppearance(); });
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },

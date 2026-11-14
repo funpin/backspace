@@ -1,35 +1,41 @@
+/* Onest (SIL OFL 1.1, public/fonts/Onest-OFL.txt): one variable family for
+   every Latin and Cyrillic locale, split by script so a browser fetches only
+   the subsets a page uses. The family has no italic; the browser slants the
+   upright for emphasis. Chinese takes the platform stack (see :lang(zh)). */
 @font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/DMSans-Variable.woff2') format('woff2');
-  font-weight: 100 1000;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/DMSans-Variable-Italic.woff2') format('woff2');
-  font-weight: 100 1000;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Inter';
-  src: url('/fonts/InterVariable.woff2') format('woff2');
+  font-family: 'Onest';
+  src: url('/fonts/Onest-cyrillic-ext.woff2') format('woff2');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0301, U+0304, U+0308, U+0329, U+0400-052F, U+1C80-1C8A, U+2000-206F, U+20AC, U+20B4, U+20BD, U+2116, U+2122, U+2191-2193, U+2212, U+2215, U+2713, U+2717, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F, U+FEFF, U+FFFD;
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/InterVariable-Italic.woff2') format('woff2');
+  font-family: 'Onest';
+  src: url('/fonts/Onest-cyrillic.woff2') format('woff2');
   font-weight: 100 900;
-  font-style: italic;
+  font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0301, U+0304, U+0308, U+0329, U+0400-052F, U+1C80-1C8A, U+2000-206F, U+20AC, U+20B4, U+20BD, U+2116, U+2122, U+2191-2193, U+2212, U+2215, U+2713, U+2717, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F, U+FEFF, U+FFFD;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/Onest-latin-ext.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/Onest-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @tailwind base;
@@ -46,92 +52,115 @@
     --app-vh: calc(1vh / var(--interface-scale));
     --app-dvh: calc(1dvh / var(--interface-scale));
     --app-vw: calc(1vw / var(--interface-scale));
-    /* ── Matte Surfaces (RGB channels for Tailwind opacity support) ── */
-    --bg-base: 11 11 16;
-    --bg-channel: 26 26 35;
-    --bg-chat: 19 19 26;
-    --bg-members: 26 26 35;
-    --bg-elevated: 37 37 48;
-    --bg-input: 17 17 24;
-    --bg-overlay: rgba(0, 0, 0, 0.85);
+    /* ── Kamen tokens (docs/brand/brandbook.md). RGB channels so Tailwind
+       opacity modifiers work. Neutrals carry no hue: colour belongs to
+       meaning, never to a surface. ── */
+    --bg-base: 12 12 14;
+    --bg-channel: 18 18 20;
+    --bg-chat: 12 12 14;
+    --bg-members: 18 18 20;
+    --bg-elevated: 27 27 31;
+    --bg-input: 21 21 24;
+    --bg-overlay: rgba(0, 0, 0, 0.55);
 
     /* ── Borders ── */
-    --border-hard: 34 34 44;
-    --border-soft: 42 42 54;
+    --border-hard: 30 30 33;
+    --border-soft: 38 38 42;
 
-    /* ── Pastel Accents ── */
-    --accent-mint: 134 239 172;
-    --accent-peach: 252 165 165;
+    /* ── Accent theme (default: lavender). Four values with one job each:
+       primary = fill under --on-accent text; tone = the accent as it reads
+       on a dark surface (focus ring, sliders, progress); secondary = unread
+       marks, mentions, links. Other themes: the [data-accent] blocks after
+       this layer. ── */
+    --accent-primary: 110 91 239;
+    --accent-primary-hover: 124 107 241;
+    --accent-primary-active: 97 80 210;
+    --accent-tone: 169 157 255;
+    --accent-secondary: 127 176 255;
+    --on-accent: 255 255 255;
+
+    /* ── Status: never themed, the meaning must survive a theme change ── */
+    --status-online: 111 220 154;
+    --status-idle: 232 182 90;
+    --status-dnd: 242 119 122;
+    --status-offline: 126 126 137;
+
+    /* ── Legacy pastel names. mint / amber / rose / peach are read across the
+       markup as ok / warn / danger, so they resolve to the status colours;
+       lavender / sky / coral stay as content colours (roles, avatars). ── */
+    --accent-mint: var(--status-online);
+    --accent-amber: var(--status-idle);
+    --accent-rose: var(--status-dnd);
+    --accent-peach: var(--status-dnd);
     --accent-lavender: 196 181 253;
     --accent-sky: 125 211 252;
-    --accent-amber: 252 211 77;
-    --accent-rose: 253 164 175;
     --accent-coral: 251 146 60;
 
-    /* ── Primary Action (replaces blurple) ── */
-    --accent-primary: 124 108 246;
-    --accent-primary-hover: 107 92 224;
-    --accent-primary-active: 95 79 208;
-
-    /* ── Text Hierarchy ── */
-    --text-primary: 239 239 239;
-    --text-secondary: 160 160 170;
-    --text-tertiary: 92 92 104;
-    --text-category: 72 72 84;
-    --text-message: 216 216 222;
-    --text-link: 125 211 252;
-    --text-positive: 134 239 172;
-    --text-warning: 252 211 77;
-    --text-danger: 252 165 165;
+    /* ── Text Hierarchy (contrast on --bg-base: 16.7 / 14.6 / 7.5 / 4.9) ── */
+    --text-primary: 237 237 240;
+    --text-secondary: 160 160 168;
+    --text-tertiary: 126 126 137;
+    --text-category: 126 126 137;
+    --text-message: 222 222 227;
+    --text-link: var(--accent-secondary);
+    --text-positive: var(--status-online);
+    --text-warning: var(--status-idle);
+    --text-danger: var(--status-dnd);
 
     /* ── Interactive ── */
-    --interactive-hover: rgba(255, 255, 255, 0.06);
-    --interactive-active: rgba(255, 255, 255, 0.12);
-    --interactive-selected: rgba(255, 255, 255, 0.16);
-    --interactive-muted: 58 58 68;
+    --interactive-hover: rgba(255, 255, 255, 0.05);
+    --interactive-active: rgba(255, 255, 255, 0.10);
+    --interactive-selected: rgb(27 27 31);
+    --interactive-muted: 54 54 60;
 
-    /* ── Status ── */
-    --status-online: 134 239 172;
-    --status-idle: 252 211 77;
-    --status-dnd: 252 165 165;
-    --status-offline: 58 58 68;
+    /* ── Glass Material: denser and calmer than before ── */
+    --glass-bg: rgba(27, 27, 31, 0.78);
+    --glass-modal-bg: rgba(27, 27, 31, 0.86);
+    --glass-border: rgba(255, 255, 255, 0.075);
+    --glass-highlight: rgba(255, 255, 255, 0);
+    --glass-shadow: 0 0 0 1px rgba(255, 255, 255, 0.075), 0 14px 40px rgba(0, 0, 0, 0.5);
 
-    /* ── Glass Material ── */
-    --glass-bg: rgba(20, 20, 26, 0.52);
-    --glass-modal-bg: rgba(20, 20, 26, 0.82);
-    --glass-border: rgba(255, 255, 255, 0.07);
-    --glass-highlight: rgba(255, 255, 255, 0.05);
+    /* ── Motion ── */
+    --motion-fast: 120ms;
+    --motion-base: 220ms;
+    --motion-slow: 320ms;
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-pop: cubic-bezier(0.3, 1.5, 0.55, 1);
 
-    /* ── Notification ── */
-    --notification: 253 164 175;
+    /* ── Notification: unread and waiting-on-you marks ── */
+    --notification: var(--accent-secondary);    --notification: 253 164 175;
   }
 
   * {
     @apply border-0;
-    outline: none !important;
+  }
+
+  /* Pointer focus stays quiet; keyboard focus gets the brandbook ring. Text
+     fields are excluded: the input tiers draw their own ring. */
+  :focus {
+    outline: none;
+  }
+  :focus-visible:not(input, textarea, select, [contenteditable]) {
+    outline: 1.5px solid rgb(var(--accent-tone));
+    outline-offset: 2px;
   }
 
   ::selection {
-    background: rgba(134, 239, 172, 0.25);
+    background: rgb(var(--accent-tone) / 0.3);
     color: rgb(var(--text-primary));
   }
 
   html, body, #root {
     @apply h-full w-full overflow-hidden bg-surface-base text-txt-message;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family: 'Onest', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-optical-sizing: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
-  :root:lang(ru) body,
-  :root:lang(ru) #root {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  }
-
-  /* Simplified Chinese takes the platform stack outright. Neither DM Sans
-     nor the bundled Inter subset has Han glyphs, and a CJK face is several
+  /* Simplified Chinese takes the platform stack outright. The bundled Onest
+     subsets have no Han glyphs, and a CJK face is several
      megabytes, so the fix is to stop naming a Latin webfont at all: each OS
      Latin face is listed directly ahead of the CJK companion it ships with,
      so Latin, digits and Han come from one designed pair instead of a
@@ -164,14 +193,14 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--bg-input));
+    background-color: rgba(255, 255, 255, 0.12);
     border-radius: 9999px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(var(--bg-channel));
+    background-color: rgba(255, 255, 255, 0.2);
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -267,27 +296,18 @@
 
   /* Standard glass — popovers, floating elements */
   .glass {
-    -webkit-backdrop-filter: blur(20px) saturate(120%);
-    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+    backdrop-filter: blur(16px) saturate(120%);
     background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow:
-      0 2px 8px rgba(0, 0, 0, 0.25),
-      0 8px 24px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 var(--glass-highlight);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--glass-shadow);
   }
 
   /* Floating bubble glass — bottom bar, input pill */
   .glass-bubble {
-    -webkit-backdrop-filter: blur(20px) saturate(120%);
-    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+    backdrop-filter: blur(16px) saturate(120%);
     background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow:
-      0 2px 8px rgba(0, 0, 0, 0.20),
-      0 8px 24px rgba(0, 0, 0, 0.12),
-      inset 0 1px 0 var(--glass-highlight);
+    box-shadow: var(--glass-shadow);
   }
 
   /* Modal glass — center-screen dialogs with backdrop.
@@ -303,11 +323,7 @@
   .glass-modal {
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--glass-border);
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.30),
-      0 12px 40px rgba(0, 0, 0, 0.20),
-      inset 0 1px 0 var(--glass-highlight);
+    box-shadow: var(--glass-shadow);
   }
   .glass-modal::before {
     content: '';
@@ -316,45 +332,42 @@
     z-index: -1;
     border-radius: inherit;
     pointer-events: none;
-    -webkit-backdrop-filter: blur(20px) saturate(120%);
-    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(24px) saturate(120%);
+    backdrop-filter: blur(24px) saturate(120%);
     background: var(--glass-modal-bg);
   }
 
-  /* Reaction pill glass — lighter blur for small inline elements */
+  /* Reaction pill — a matte chip now: small inline elements gain nothing
+     from blur and it costs a compositor layer each. */
   .glass-pill {
-    -webkit-backdrop-filter: blur(12px) saturate(110%);
-    backdrop-filter: blur(12px) saturate(110%);
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    background: rgb(var(--bg-elevated));
+    box-shadow: inset 0 0 0 1px var(--glass-border);
+    transition: background-color var(--motion-fast) var(--ease-out);
   }
   .glass-pill:hover {
-    background: rgba(255, 255, 255, 0.10);
-    border-color: rgba(255, 255, 255, 0.14);
+    background: rgb(var(--border-soft));
   }
   .glass-pill-mine {
-    background: rgba(134, 239, 172, 0.10);
-    border-color: rgba(134, 239, 172, 0.25);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(134, 239, 172, 0.06);
+    background: rgb(var(--accent-tone) / 0.16);
+    box-shadow: inset 0 0 0 1px rgb(var(--accent-tone) / 0.45);
   }
   .glass-pill-mine:hover {
-    background: rgba(134, 239, 172, 0.16);
+    background: rgb(var(--accent-tone) / 0.22);
   }
 
   /* ── Input Tiers ── */
   .input-standard {
-    @apply bg-surface-input rounded px-3 py-2 text-sm text-txt-primary
+    @apply bg-surface-input rounded-lg px-3 py-2 text-sm text-txt-primary
            placeholder:text-txt-tertiary outline-none
-           border border-white/[0.06] shadow-input
-           focus:ring-2 focus:ring-accent-primary focus:border-accent-primary/30
+           border border-white/[0.075]
+           focus:ring-2 focus:ring-accent-tone/25 focus:border-accent-tone
            transition-colors;
   }
   .input-search {
-    @apply bg-surface-input rounded px-3 py-1.5 text-sm text-txt-primary
+    @apply bg-surface-input rounded-lg px-3 py-1.5 text-sm text-txt-primary
            placeholder:text-txt-tertiary outline-none
-           border border-white/[0.06] shadow-input
-           focus:ring-1 focus:ring-accent-primary focus:border-accent-primary/30
+           border border-white/[0.075]
+           focus:ring-2 focus:ring-accent-tone/25 focus:border-accent-tone
            transition-colors;
   }
   .input-embedded {
@@ -362,10 +375,10 @@
            placeholder:text-txt-tertiary/60 outline-none;
   }
   .input-danger {
-    @apply bg-surface-input rounded px-3 py-2 text-sm text-txt-primary
+    @apply bg-surface-input rounded-lg px-3 py-2 text-sm text-txt-primary
            placeholder:text-txt-tertiary outline-none
-           border border-white/[0.06] shadow-input
-           focus:ring-2 focus:ring-accent-rose focus:border-accent-rose/30
+           border border-white/[0.075]
+           focus:ring-2 focus:ring-status-dnd/25 focus:border-status-dnd
            transition-colors;
   }
 
@@ -426,13 +439,7 @@
   .glass {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    background: rgb(var(--bg-channel));
-  }
-  .glass-strip {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: rgb(var(--bg-channel));
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.20);
+    background: rgb(var(--bg-elevated));
   }
   .glass-bubble {
     -webkit-backdrop-filter: none;
@@ -444,23 +451,22 @@
     backdrop-filter: none;
     background: rgb(var(--bg-elevated));
   }
-  .glass-pill {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: rgb(var(--bg-elevated));
-  }
 }
 
 @layer utilities {
   /* Space strip glass — in utilities layer so desktop:glass-strip wins over bg-surface-* */
   .glass-strip {
-    -webkit-backdrop-filter: blur(20px) saturate(120%);
-    backdrop-filter: blur(20px) saturate(120%);
-    background: var(--glass-bg);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.03),
-      2px 0 12px rgba(0, 0, 0, 0.20);
+    background: rgb(var(--bg-channel));
+  }
+
+  /* Text on an accent fill follows the theme: amber and mono are light fills
+     and need dark text. The markup says `text-white` next to
+     `bg-accent-primary` in ~70 places; matching the pair here retints them
+     without touching those files (the attribute pair outranks `.text-white`). */
+  [class~="bg-accent-primary"][class~="text-white"],
+  [class~="hover:bg-accent-primary"][class~="hover:text-white"]:hover,
+  [class~="bg-accent-primary"] > [class~="text-white"] {
+    color: rgb(var(--on-accent));
   }
 
   .rounded-inherit {
@@ -483,20 +489,16 @@
 
 /* ── Emoji Mart Overrides ── */
 .emoji-picker-wrapper em-emoji-picker {
-  --em-rgb-background: 20, 20, 26;
-  --em-rgb-input: 17, 17, 24;
-  --em-rgb-color: 216, 216, 222;
-  --em-color-border: rgba(255, 255, 255, 0.07);
+  --em-rgb-background: 27, 27, 31;
+  --em-rgb-input: 21, 21, 24;
+  --em-rgb-color: 222, 222, 227;
+  --em-color-border: rgba(255, 255, 255, 0.075);
   --em-color-border-over: rgba(255, 255, 255, 0.12);
-  --rgb-accent: var(--accent-primary);
-  --font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --rgb-accent: var(--accent-tone);
+  --font-family: 'Onest', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   border: none !important;
   background: transparent !important;
   max-height: 400px;
-}
-
-:root:lang(ru) .emoji-picker-wrapper em-emoji-picker {
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 :root:lang(zh) .emoji-picker-wrapper em-emoji-picker {
@@ -716,3 +718,46 @@
 /* ── Electron window drag regions ── */
 .titlebar-drag { -webkit-app-region: drag; }
 .titlebar-no-drag { -webkit-app-region: no-drag; }
+
+/* ── Accent themes (Settings → Appearance; platform/accentTheme.ts sets the
+   attribute before React mounts). Each fill gives ≥4.5:1 with its --on-accent;
+   tone and secondary give ≥7:1 on --bg-base. ── */
+:root[data-accent="emerald"] {
+  --accent-primary: 20 128 90; --accent-primary-hover: 44 141 106; --accent-primary-active: 18 113 79;
+  --accent-tone: 95 214 166; --accent-secondary: 111 211 217; --on-accent: 255 255 255;
+}
+:root[data-accent="amber"] {
+  --accent-primary: 233 165 60; --accent-primary-hover: 235 174 80; --accent-primary-active: 205 145 53;
+  --accent-tone: 243 189 99; --accent-secondary: 240 144 108; --on-accent: 12 12 16;
+}
+:root[data-accent="ice"] {
+  --accent-primary: 47 111 230; --accent-primary-hover: 68 125 232; --accent-primary-active: 41 98 202;
+  --accent-tone: 138 182 255; --accent-secondary: 127 220 240; --on-accent: 255 255 255;
+}
+:root[data-accent="rose"] {
+  --accent-primary: 207 63 124; --accent-primary-hover: 212 82 137; --accent-primary-active: 182 55 109;
+  --accent-tone: 255 156 194; --accent-secondary: 199 155 255; --on-accent: 255 255 255;
+}
+:root[data-accent="mono"] {
+  --accent-primary: 236 236 240; --accent-primary-hover: 238 238 242; --accent-primary-active: 208 208 211;
+  --accent-tone: 236 236 240; --accent-secondary: 180 180 189; --on-accent: 12 12 16;
+}
+
+/* ── Motion off: the system setting, or the switch in Appearance
+   (html[data-motion="off"]). State still changes, it just does not travel. ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

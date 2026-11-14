@@ -4,6 +4,22 @@
     "description": "调整文字、按钮和面板的大小。设置保存在此设备上的当前浏览器或应用中。",
     "reset": "重置为 100%"
   },
+  "accentTheme": {
+    "label": "颜色主题",
+    "description": "按钮和选中项的强调色，以及用于未读标记和提及的配套颜色。设置保存在此设备上的当前浏览器或应用中。",
+    "themes": {
+      "lavender": "薰衣草",
+      "emerald": "翡翠",
+      "amber": "琥珀",
+      "ice": "冰蓝",
+      "rose": "玫瑰",
+      "mono": "单色"
+    }
+  },
+  "motion": {
+    "label": "界面动画",
+    "description": "平滑的过渡和点击反馈。关闭后所有变化立即生效。"
+  },
   "voice": {
     "input": {
       "title": "输入设备",

@@ -4,6 +4,22 @@
     "description": "Größe von Text, Schaltflächen und Bereichen. Wird in diesem Browser oder dieser App auf diesem Gerät gespeichert.",
     "reset": "Auf 100 % zurücksetzen"
   },
+  "accentTheme": {
+    "label": "Farbthema",
+    "description": "Die Akzentfarbe für Schaltflächen und Auswahl, mit einer passenden Farbe für Ungelesenes und Erwähnungen. Wird in diesem Browser oder dieser App auf diesem Gerät gespeichert.",
+    "themes": {
+      "lavender": "Lavendel",
+      "emerald": "Smaragd",
+      "amber": "Bernstein",
+      "ice": "Eis",
+      "rose": "Rose",
+      "mono": "Mono"
+    }
+  },
+  "motion": {
+    "label": "Animationen der Oberfläche",
+    "description": "Weiche Übergänge und eine Reaktion auf Klicks. Ausschalten, damit sich alles sofort ändert."
+  },
   "voice": {
     "input": {
       "title": "Eingabegerät",
