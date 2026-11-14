@@ -85,11 +85,11 @@ td{color:var(--t2);font-variant-numeric:tabular-nums}td b{color:var(--t1);font-w
 .inp.ph{color:var(--t3)}
 .inp.focus{box-shadow:inset 0 0 0 1.5px var(--acc),0 0 0 3px var(--acc-soft)}
 .inp.err{box-shadow:inset 0 0 0 1.5px var(--danger)}
-.tg{width:38px;height:22px;border-radius:999px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);position:relative;transition:background var(--base) var(--out)}
+.tg{display:inline-block;flex:none;width:38px;height:22px;border-radius:999px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);position:relative;transition:background var(--base) var(--out)}
 .tg::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--t2);transition:transform var(--base) var(--pop),background var(--base)}
 .tg[aria-pressed="true"]{background:var(--acc-f)}
 .tg[aria-pressed="true"]::after{transform:translateX(16px);background:var(--on-acc)}
-.opt{height:32px;padding:0 14px;border-radius:var(--r-md);background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);color:var(--t2);font-weight:500;transition:background var(--fast),color var(--fast)}
+.opt{height:32px;display:inline-flex;align-items:center;padding:0 14px;border-radius:var(--r-md);background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);color:var(--t2);font-weight:500;transition:background var(--fast),color var(--fast)}
 .opt[aria-pressed="true"]{background:var(--acc-f);color:var(--on-acc);box-shadow:none}
 .list{display:flex;flex-direction:column;gap:2px;position:relative;width:230px;max-width:100%}
 .li{position:relative;z-index:1;height:34px;padding:0 8px;border-radius:var(--r-md);display:flex;align-items:center;gap:8px;color:var(--t2);text-align:left;transition:color var(--fast),background var(--fast)}
@@ -119,6 +119,23 @@ td{color:var(--t2);font-variant-numeric:tabular-nums}td b{color:var(--t1);font-w
 .dd small{display:block;font-size:11.5px;font-weight:500;margin-bottom:4px}
 .dd .y small{color:var(--ok)}.dd .n small{color:var(--danger)}.dd .n{color:var(--t2)}
 .type b{color:var(--t1)}
+.print-only{display:none}
+.tcards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tcards .panel{gap:10px}
+.tcards b.n{color:var(--t1);font-weight:600}
+@page{size:A4;margin:0}
+@media print{
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:14mm 13mm;font-size:12.5px}
+  .wrap{gap:30px;max-width:none}
+  .bar,.screen-only{display:none!important}
+  .print-only{display:flex}
+  .panel,.tw,.grid,.rules,.rad,.stagebg,.icons,.dd,.tcards>div{break-inside:avoid}
+  h2,h3,section>p{break-after:avoid}
+  .break{break-before:page}
+  h2{break-after:avoid}
+  *{animation:none!important;transition:none!important}
+  .glass{backdrop-filter:none;-webkit-backdrop-filter:none;background:#1b1b1f}
+}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media (max-width:640px){h1{font-size:26px}.dd{grid-template-columns:1fr}}
 </style>
@@ -128,6 +145,7 @@ td{color:var(--t2);font-variant-numeric:tabular-nums}td b{color:var(--t1);font-w
     <svg class="mk" viewBox="62 38 133 180" aria-hidden="true"><path fill="currentColor" d="M151.191 38C175.386 38 195 57.5367 195 81.6364C195 103.651 177.153 121.498 155.138 121.498H121.104C119.429 121.498 118.269 120.983 117.625 119.953C116.981 118.795 117.432 117.443 118.978 115.899L149.516 85.5845C151.32 83.7826 151.32 81.9809 149.516 80.179L144.684 75.3519C142.88 73.5498 141.076 73.5498 139.272 75.3519L89.0206 125.553C87.2168 127.355 87.2168 129.222 89.0206 131.152L139.659 181.739C141.463 183.541 143.267 183.541 145.071 181.739L149.516 177.106C151.32 175.304 151.32 173.501 149.516 171.699L118.978 141.192C117.432 139.648 116.981 138.36 117.625 137.33C118.269 136.172 119.429 135.593 121.104 135.593H156.229C177.642 135.593 195 152.951 195 174.364C195 198.463 175.386 218 151.191 218H105.809C81.614 218 62 198.463 62 174.364V81.6364C62 57.5367 81.614 38 105.809 38L151.191 38Z"/></svg>
     <h1>Брендбук Backspace</h1>
     <p>Направление «Камень», иконки Lucide, акцент с родственным дополнительным цветом. Здесь значения, из которых собирается интерфейс. Полный текст с правилами и токенами для кода лежит в <code>docs/brand/brandbook.md</code>, порядок внедрения в <code>docs/brand/implementation-plan.md</code>.</p>
+    <p class="print-only" style="color:var(--t3);font-size:12px">Версия 1.0 · ноябрь 2026 · тёмная тема · образцы показаны в теме «Лаванда», если не указано иное</p>
   </header>
 
   <div class="bar" role="toolbar" aria-label="Цветовая тема"><span>Тема образцов</span><div class="rowx" id="themes"></div></div>
@@ -150,7 +168,7 @@ td{color:var(--t2);font-variant-numeric:tabular-nums}td b{color:var(--t1);font-w
 
   <section>
     <h2>Цветовая тема</h2>
-    <p>Тему выбирает человек в настройках. Тема задаёт четыре значения, и у каждого своя работа. Переключите тему в панели выше: образцы на всей странице перекрасятся.</p>
+    <p>Тему выбирает человек в настройках. Тема задаёт четыре значения, и у каждого своя работа.<span class="screen-only"> Переключите тему в панели выше: образцы на всей странице перекрасятся.</span></p>
     <div class="grid g2">
       <div class="panel">
         <div class="role"><u style="--c:var(--acc-f);--on:var(--on-acc)">Аа</u><div><b>Заливка и текст на ней</b>Основная кнопка, включённый переключатель, выбранный вариант</div></div>
@@ -164,6 +182,11 @@ td{color:var(--t2);font-variant-numeric:tabular-nums}td b{color:var(--t1);font-w
       </div>
     </div>
     <div class="tw"><table id="themetable"></table></div>
+  </section>
+
+  <section class="print-only" style="flex-direction:column">
+    <h2>Шесть тем на одних и тех же элементах</h2>
+    <div class="tcards" id="tcards"></div>
   </section>
 
   <section>
@@ -243,11 +266,11 @@ td{color:var(--t2);font-variant-numeric:tabular-nums}td b{color:var(--t1);font-w
       <div class="panel"><h3>Поле: пустое, в фокусе, с ошибкой</h3>
         <div class="rowx"><div class="inp ph">Название канала</div><div class="inp focus">планы-на-релиз</div><div class="inp err">планы на релиз</div></div>
         <span style="color:var(--danger);font-size:12.5px">В названии нельзя использовать пробелы</span></div>
-      <div class="panel"><h3>Список: наведите и нажмите, выбранная строка переезжает</h3>
+      <div class="panel"><h3>Список: выбранная строка переезжает к новой</h3>
         <div class="list" id="list"><div class="mark" id="mark"></div><button class="li">общий</button><button class="li on">разработка</button><button class="li">мемы<i></i></button></div></div>
       <div class="panel"><h3>Варианты и переключатель</h3>
         <div class="rowx" id="opts"><button class="opt" aria-pressed="false">30</button><button class="opt" aria-pressed="true">60</button><button class="tg" aria-pressed="false" aria-label="Образец переключателя"></button></div>
-        <p style="font-size:13px">Фокус с клавиатуры: кольцо 1,5 px и мягкий ореол. Нажмите Tab на этой странице, чтобы увидеть.</p></div>
+        <p style="font-size:13px">Фокус с клавиатуры: кольцо 1,5 px и мягкий ореол, как у поля в фокусе.</p></div>
     </div>
   </section>
 
@@ -262,10 +285,10 @@ td{color:var(--t2);font-variant-numeric:tabular-nums}td b{color:var(--t1);font-w
       <tr><td>ease-pop</td><td>.3, 1.5, .55, 1</td><td>Отскок: реакция, стопка лиц, стикер</td></tr>
     </tbody></table></div>
     <div class="grid g2">
-      <div class="panel"><h3>Нажмите на реакцию, наведите на стопку лиц</h3>
+      <div class="panel"><h3>Реакция подпрыгивает, стопка лиц раздвигается, рамка говорящего пульсирует</h3>
         <div class="rowx" style="gap:18px"><button class="pill mine" id="rx">🔥 <span>3</span></button><span class="faces"><b style="background:#e9b58a">М</b><b style="background:#d9a6c9">Л</b><b style="background:#a9d1ae">Т</b><b style="background:#e79a86">Н</b></span><div class="speak">говорит</div></div></div>
-      <div class="panel"><h3>Появление окна</h3>
-        <div class="rowx" style="align-items:flex-start;gap:16px"><button class="btn sec" id="replay">Показать ещё раз</button><div class="popd" id="popd"><b style="font-weight:600;font-size:16px">Создать канал</b><span style="color:var(--t2);font-size:13px">Сдвиг на 10 px, масштаб с 0,96, 320 мс</span></div></div></div>
+      <div class="panel screen-only"><h3>Появление окна</h3>
+        <div class="rowx" style="align-items:flex-start;gap:16px"><button class="btn sec screen-only" id="replay">Показать ещё раз</button><div class="popd" id="popd"><b style="font-weight:600;font-size:16px">Создать канал</b><span style="color:var(--t2);font-size:13px">Сдвиг на 10 px, масштаб с 0,96, 320 мс</span></div></div></div>
     </div>
   </section>
 
@@ -307,6 +330,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)r
   else if(t.classList.contains('opt')){[...t.parentElement.querySelectorAll('.opt')].forEach(b=>b.setAttribute('aria-pressed',b===t))}
   else if(t.id==='rx'){const m=t.classList.toggle('mine');t.querySelector('span').textContent=m?3:2;t.classList.remove('bump');void t.offsetWidth;t.classList.add('bump')}
   else if(t.id==='replay'){const p=$('#popd');p.classList.remove('go');void p.offsetWidth;p.classList.add('go')}});
+$('#tcards').innerHTML=THEMES.map(t=>`<div class="panel" style="--acc-f:${t[1]};--acc-fh:${t[2]};--acc:${t[3]};--acc2:${t[4]};--on-acc:${t[5]};--acc-soft:color-mix(in srgb,${t[3]} 16%,transparent)"><b class="n">${t[0]}</b><div class="rowx"><span class="btn pri">Создать</span><span class="tg" aria-pressed="true"></span><span class="opt" aria-pressed="true">1080p</span><span class="pill mine">🔥 3</span></div><div class="rowx"><div class="inp focus" style="width:150px">канал</div><span><span class="mention">@Тимур</span> <span style="color:var(--acc2)">ссылка</span></span></div></div>`).join('');
 let t0=0;try{t0=+localStorage.getItem('bb-theme')||0}catch(e){}
 setTheme(THEMES[t0]?t0:0);mark();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(mark);
 </script>
