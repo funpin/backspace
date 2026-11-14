@@ -83,6 +83,12 @@ h2.sec{font-size:20px;line-height:28px;font-weight:600;margin:40px 0 6px}
 .s-off .eye{opacity:0}.s-off .cross{opacity:1}.s-off .all{filter:grayscale(1);opacity:.7}
 .cross{opacity:0}
 .joy .eye{opacity:0}.joy .arc{opacity:1}.joy .all{animation:hop 1s 1}
+@keyframes watch{0%,40%{transform:translate(1.5px,3px)}50%,70%{transform:translate(0,0)}80%,100%{transform:translate(1.5px,3px)}}
+.s-screen .eyes{animation:watch 3.6s infinite ease-in-out}
+@keyframes glow{0%,100%{opacity:.12}50%{opacity:.32}}
+.s-screen .glow{animation:glow 2.4s infinite ease-in-out}
+@keyframes live{0%,55%{opacity:1}65%,90%{opacity:.2}100%{opacity:1}}
+.s-screen .live{animation:live 1.6s infinite}
 @media (prefers-reduced-motion: reduce){.m *,.m{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -172,6 +178,7 @@ document.querySelectorAll('canvas.px').forEach(cv=>{
 });
 
 // ---- animated character: eyes are separate shapes painted in the tile colour
+const SCREEN='M43 60H65A3 3 0 0 1 68 63V77A3 3 0 0 1 65 80H43A3 3 0 0 1 40 77V63A3 3 0 0 1 43 60Z';
 const FACE=FACES.find(f=>f.id==='E1');
 function character(cls,size,bg){
   const [l,r]=FACE.eyes;
@@ -180,7 +187,8 @@ function character(cls,size,bg){
   return `<svg class="m ${cls}" viewBox="0 0 100 100" width="${size}" height="${size}">
    <g class="all">
     <path class="ring" d="${A4D[1]}" fill="none" stroke="#6fdc9a" stroke-width="2.5" opacity="0"/>
-    <path class="body" d="${A4D[1]}" fill="#6e5bef"/>
+    <path class="body" d="${A4D[1]}${cls.includes('screen')?SCREEN:''}" fill="#6e5bef" fill-rule="evenodd"/>
+    ${cls.includes('screen')?`<rect class="glow" x="40" y="60" width="28" height="20" rx="3" fill="#a99dff"/><circle class="live" cx="46.5" cy="66.5" r="2.8" fill="#f2777a"/>`:''}
     <path class="head" d="${A4D[0]}" fill="#ededf0"/>
     <g class="eyes">${[l,r].map(([x,y,rx,ry])=>`<ellipse class="eye" cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${bg}"/>`).join('')}${arc(l)}${arc(r)}${cross(l)}${cross(r)}</g>
     ${cls.includes('typing')?`<g>${[42,52,62].map(x=>`<circle class="dot" cx="${x}" cy="70" r="3.4" fill="#ededf0"/>`).join('')}</g>`:''}
@@ -195,6 +203,7 @@ const STATES=[
   ['s-notify','Новое сообщение','Уведомление: прыжок и широко открытые глаза, красная точка.'],
   ['s-typing','Пишет','Кто-то печатает: смотрит вниз, в нижней реплике бегут точки.'],
   ['s-voice','Говорит','Голосовой канал: тело пульсирует, зелёный контур как у говорящего.'],
+  ['s-screen','Показывает экран','Демонстрация экрана («В ЭФИРЕ»): тело стало экраном, глаза смотрят на него и обратно, мигает точка эфира.'],
   ['s-joy','Радуется','Сообщение отправлено, вход выполнен, приглашение принято.'],
   ['s-sleep','Спит','«Не беспокоить» или «Отошёл»: глаза закрыты, плывут «z».'],
   ['s-off','Нет связи','Сервер недоступен: серый, глаза-крестики.'],

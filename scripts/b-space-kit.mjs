@@ -40,6 +40,9 @@ const MARK_BOX = [20, 10, 60, 80];
 // is larger and wider apart so the holes survive at 16 px.
 const EYES = { std: [[41, 26, 3.6, 5.6], [56, 26, 3.6, 5.6]], small: [[39.5, 27, 5, 7], [57, 27, 5, 7]] };
 
+// The screen cut out of the body for the screen-sharing state.
+const SCREEN = 'M43 60H65A3 3 0 0 1 68 63V77A3 3 0 0 1 65 80H43A3 3 0 0 1 40 77V63A3 3 0 0 1 43 60Z';
+
 const C = {
   head: '#ededf0', // text-primary, on dark grounds
   ink: '#0c0c0e', // bg-base, the head on light grounds
@@ -75,6 +78,9 @@ const STATES = {
   typing: { eyes: (e) => e.map(([x, y, rx, ry]) => ellipse([x - 3, y + 3, rx, ry])), bodyHoles: [42, 52, 62].map((x) => circle(x, 70.5, 3.4)) },
   voice: { eyes: (e) => e.map(ellipse), ring: true },
   joy: { eyes: (e) => e.map(happy) },
+  // Screen sharing: the body becomes a screen, the eyes look down at it,
+  // and a live dot sits in the screen's corner.
+  screen: { eyes: (e) => e.map(([x, y, rx, ry]) => ellipse([x + 1.5, y + 3, rx, ry])), bodyHoles: [SCREEN], live: true },
   dnd: { eyes: (e) => e.map(([x, y, rx]) => ellipse([x, y + 1, rx + 0.4, 1.3])), muted: true },
   offline: { eyes: (e) => e.map((p) => cross(p)), off: true },
 };
@@ -102,6 +108,7 @@ function markInner({ state = 'idle', eyes = 'std', head, body, badgeColor = C.da
   out += `<path d="${bodyD}" fill="${body}" fill-rule="evenodd"/>`;
   out += `<path d="${headD}" fill="${head}" fill-rule="evenodd"${headAttr}/>`;
   if (s.badge) out += `<circle cx="77" cy="13" r="8" fill="${badgeColor}"/>`;
+  if (s.live) out += `<circle cx="46.5" cy="66.5" r="2.8" fill="${badgeColor}"/>`;
   return out;
 }
 
@@ -224,7 +231,7 @@ async function main() {
   }
 
   // Tray: macOS template PNGs and Windows .ico per state
-  const TRAY = ['idle', 'notify', 'dnd', 'offline'];
+  const TRAY = ['idle', 'notify', 'screen', 'dnd', 'offline'];
   const ICO_SIZES = [16, 20, 24, 32, 40, 48];
   for (const state of TRAY) {
     const tpl = trayTemplateSvg(state);
