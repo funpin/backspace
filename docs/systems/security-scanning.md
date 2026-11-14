@@ -14,12 +14,26 @@ below.
 |------|---------|---------|--------|
 | `.github/dependabot.yml` | Dependency + action + base-image update PRs | weekly | PRs |
 | `.github/workflows/codeql.yml` | CodeQL SAST (`javascript-typescript`, build-mode none) | PR + push main + weekly | Security tab |
-| `.github/workflows/security.yml` | gitleaks (secrets, full history), OSV-Scanner (deps), Trivy config (IaC), Trivy license | PR + push main + weekly | Security tab |
+| `.github/workflows/security.yml` | gitleaks (secrets, full history), OSV-Scanner (deps), Trivy config (IaC), Trivy license | PR + weekly | Security tab |
 | `.github/workflows/scorecard.yml` | OpenSSF Scorecard (repo posture) | push main + weekly + on branch-protection change | Security tab + public badge |
-| `.github/workflows/dast.yml` | ZAP baseline against an ephemeral instance (spider + passive, unauthenticated) | push main + weekly + manual + PRs touching its own config | Job summary + artifact (advisory) |
+| `.github/workflows/dast.yml` | ZAP baseline against an ephemeral instance (spider + passive, unauthenticated) | weekly + manual + PRs touching its own config | Job summary + artifact (advisory) |
 | `.github/workflows/docker-publish.yml` | Image scan (Trivy) + SBOM + provenance for the published container | tag push / manual | image scan (report-only) + SBOM + provenance |
 | `.github/workflows/telemetry-receiver.yml` | Typecheck + Workers test suite for `scripts/telemetry-receiver`, and its deploy to Cloudflare | PR + push main, both path-filtered to the package; deploy on manual dispatch only | job status; a published Worker |
 | `.github/workflows/pr-triage.yml` | Fork PR triage: "routine" or "read first" verdict for the CI approval click, plus lockfile and Flatpak source summary | `pull_request_target` on fork PRs + manual | one comment per PR, updated in place |
+
+> **Fork run budget.** GitHub pauses workflows on a fork that uses Actions at
+> scale ("Workflows are not currently being run on this fork due to the scale
+> of GitHub Actions usage"); it happened here on 2026-11-14 after 91 runs in two
+> days and a 9.8 GB cache, and only the owner can lift it, with the button on
+> the Actions tab. While paused the API still reports Actions as enabled, no
+> event starts a run, and a manual dispatch answers "Actions has been disabled
+> for this repository". The triggers above are therefore trimmed to one run per
+> change where a second would repeat the first: `security.yml` and `dast.yml`
+> do not run on pushes to `main` (the tree was scanned in its pull request; the
+> weekly runs catch new advisories), `ci.yml` runs Node 24 alone on pull
+> requests and adds the Node 22 floor and the image build on the push to
+> `main`, and the image caches use `mode=min`. CodeQL keeps its push run: code
+> scanning compares against an analysis of the default branch.
 
 > **gitleaks findings** surface in the workflow's job log and PR summary — the
 > `gitleaks` job does not upload SARIF, so secret hits do **not** appear under
@@ -150,7 +164,9 @@ serves `index.html` for every path that is not under `/api/` or `/ws`.
 
 **Advisory, deliberately.** ZAP runs with `-I`, so a finding never fails the job. A
 container that will not become healthy does fail it, because that is a real
-regression and the reason the job is worth running on every push to `main`.
+regression and the reason the job is worth running every week. (It ran on every
+push to `main` until the fork's run budget was trimmed; `ci.yml` builds the
+image on that push.)
 
 **Why not on every pull request.** It builds the whole image, which costs minutes
 of runner time, and an advisory result does not belong in the merge path. It does

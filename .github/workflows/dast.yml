@@ -19,12 +19,13 @@ name: DAST
 #
 # Not on every pull request: the job builds the full image, which is minutes of
 # runner time, and an advisory result does not belong in the merge path. It runs
-# on every push to main, weekly, on demand, and on pull requests that touch its
-# own configuration so that it self-tests when changed.
+# weekly, on demand, and on pull requests that touch its own configuration so
+# that it self-tests when changed.
+#
+# Fork: not on pushes to main. The scan is advisory and builds the whole image
+# each time; CI already builds the image on that push.
 
 on:
-  push:
-    branches: [main]
   pull_request:
     paths:
       - '.github/workflows/dast.yml'

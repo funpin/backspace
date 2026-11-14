@@ -18,18 +18,74 @@ export function useStreamViewers(sharer: ParticipantInfo): ParticipantInfo[] {
   return streamViewers(sharer, participants, streamWatchers, watchingStreams);
 }
 
-/** How long the pointer may be off the count and its list before the list closes: enough to cross the gap between them. */
+/** How long the pointer may be off the "+N" chip and the list before the list closes: enough to cross the gap between them. */
 const VIEWERS_CLOSE_DELAY_MS = 150;
+/** Faces shown before the rest fold into "+N": a grid tile's caption is short, the focused one's is not. */
+const MAX_FACES = 3;
+const MAX_FACES_LARGE = 6;
+
+function EyeIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="flex-shrink-0">
+      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+    </svg>
+  );
+}
 
 /**
- * The eye and the number on a stream tile's caption. Draws nothing while
- * nobody watches. Hovering it, focusing it or pressing it opens the list of
- * who watches; a press pins the list open until the next press, Escape or a
- * press elsewhere, which is the only way to reach it without a hover.
+ * One face of the group. Hovering it lifts it out of the row and names its
+ * owner; `quiet` holds the name back while the full list is open over it.
  */
-export function StreamViewerCount({ sharer, compact }: { sharer: ParticipantInfo; compact?: boolean }) {
+function ViewerFace({ participant, size, quiet }: { participant: ParticipantInfo; size: number; quiet: boolean }) {
+  const { displayName, avatar, user } = useVoiceParticipantMeta(participant);
+  const [hovered, setHovered] = useState(false);
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  const floatingRef = useRef<HTMLDivElement>(null);
+  const portalContainer = usePortalContainer();
+  const named = hovered && !quiet;
+  const { style } = useFloatingPosition(anchorRef, floatingRef, { placement: 'top', offset: 8, enabled: named });
+  return (
+    <span
+      ref={anchorRef}
+      data-testid="stream-viewer-face"
+      data-viewer-identity={participant.identity}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="stream-viewer-face relative flex rounded-full ring-2 ring-black/70 transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-110 hover:z-10"
+    >
+      <Avatar src={avatar} name={displayName} size={size} userId={participant.homeUserId ?? participant.userId} user={user ?? undefined} />
+      {named && createPortal(
+        <div
+          ref={floatingRef}
+          role="tooltip"
+          style={style}
+          className="stream-viewer-name px-2 py-1 text-xs font-medium text-txt-primary glass rounded-md whitespace-nowrap pointer-events-none z-50"
+        >
+          {displayName}
+        </div>,
+        portalContainer,
+      )}
+    </span>
+  );
+}
+
+/**
+ * Who watches a share, on its tile's caption: an eye and a row of overlapping
+ * faces. Draws nothing while nobody watches.
+ *
+ * - Hovering a face names that viewer.
+ * - Past `MAX_FACES` the rest fold into a "+N" chip; hovering the chip opens
+ *   the full list, which scrolls, so the row never outgrows the caption
+ *   however many people watch.
+ * - A press anywhere on the group pins the list open until the next press,
+ *   Escape or a press elsewhere, which is the only way to reach it without a
+ *   hover. Keyboard focus opens it too.
+ * - A `compact` thumbnail has no room for faces and keeps the plain number.
+ */
+export function StreamViewerCount({ sharer, compact, large }: { sharer: ParticipantInfo; compact?: boolean; large?: boolean }) {
   const { t } = useTranslation(['voice', 'common']);
-  const count = useStreamViewers(sharer).length;
+  const viewers = useStreamViewers(sharer);
+  const count = viewers.length;
   const [hovered, setHovered] = useState(false);
   const [pinned, setPinned] = useState(false);
   const anchorRef = useRef<HTMLButtonElement>(null);
@@ -68,7 +124,7 @@ export function StreamViewerCount({ sharer, compact }: { sharer: ParticipantInfo
 
   useDismissOnEscape(open, close);
 
-  // A pinned list closes on a press anywhere outside it and its count.
+  // A pinned list closes on a press anywhere outside it and its group.
   useEffect(() => {
     if (!pinned) return;
     const handlePointerDown = (e: PointerEvent) => {
@@ -82,6 +138,13 @@ export function StreamViewerCount({ sharer, compact }: { sharer: ParticipantInfo
   }, [pinned, close]);
 
   if (count === 0) return null;
+
+  const maxFaces = large ? MAX_FACES_LARGE : MAX_FACES;
+  // "+1" would take the room of the face it stands for, so one extra viewer is simply shown.
+  const faces = count > maxFaces + 1 ? viewers.slice(0, maxFaces) : viewers;
+  const overflow = count - faces.length;
+  const faceSize = large ? 28 : 22;
+
   return (
     <>
       <button
@@ -92,20 +155,37 @@ export function StreamViewerCount({ sharer, compact }: { sharer: ParticipantInfo
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={(e) => {
-          // The tile under the count has its own click (focus, back to grid).
+          // The tile under the group has its own click (focus, back to grid).
           e.stopPropagation();
           setPinned((value) => !value);
         }}
-        onMouseEnter={enter}
-        onMouseLeave={leave}
-        onFocus={enter}
+        // Keyboard only: a mouse press focuses the button too, and must not
+        // leave the list open behind the pin it just toggled.
+        onFocus={(e) => { if (e.currentTarget.matches(':focus-visible')) enter(); }}
         onBlur={leave}
-        className={`flex items-center gap-1 flex-shrink-0 rounded px-1 -mx-1 text-white/80 hover:text-white hover:bg-white/10 font-semibold tabular-nums transition-colors ${compact ? 'text-[10px]' : 'text-xs'}`}
+        className={`flex items-center flex-shrink-0 rounded-full text-white/80 hover:text-white transition-colors ${compact ? 'gap-1 text-[10px] font-semibold tabular-nums' : 'gap-1.5'}`}
       >
-        <svg width={compact ? 11 : 13} height={compact ? 11 : 13} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-        </svg>
-        {count}
+        <EyeIcon size={compact ? 11 : 13} />
+        {compact ? count : (
+          <span className="flex items-center pl-0.5">
+            {faces.map((viewer, index) => (
+              <span key={viewer.identity} className={index === 0 ? 'flex' : 'flex -ml-2'}>
+                <ViewerFace participant={viewer} size={faceSize} quiet={open} />
+              </span>
+            ))}
+            {overflow > 0 && (
+              <span
+                data-testid="stream-viewer-overflow"
+                onMouseEnter={enter}
+                onMouseLeave={leave}
+                style={{ height: faceSize, minWidth: faceSize }}
+                className="relative -ml-2 px-1.5 flex items-center justify-center rounded-full ring-2 ring-black/70 bg-surface-elevated text-[10px] leading-none font-semibold tabular-nums text-txt-secondary"
+              >
+                {`+${overflow}`}
+              </span>
+            )}
+          </span>
+        )}
       </button>
       {open && createPortal(
         <div
@@ -164,7 +244,7 @@ function StreamViewersList({ sharer, title, empty }: { sharer: ParticipantInfo; 
       {viewers.length === 0 ? (
         <p className="text-sm text-txt-tertiary">{empty}</p>
       ) : (
-        <ul className="space-y-1.5 max-h-40 overflow-y-auto">
+        <ul className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
           {viewers.map((viewer) => <ViewerRow key={viewer.identity} participant={viewer} />)}
         </ul>
       )}

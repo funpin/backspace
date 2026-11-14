@@ -76,6 +76,19 @@ const SCENES: Record<string, Scene> = {
     focus: 'marsel:stream',
     watchers: { marsel: ['akk0', 'fox'], funpin: ['akk0', 'fox', 'nika'] },
   },
+  crowd: {
+    caption: 'Many viewers: a few faces, the rest behind "+N"; hover a face for the name, the chip for the list',
+    people: [
+      { name: 'funpin', local: true },
+      { name: 'akk0', screen: true },
+      { name: 'marsel', screen: true },
+      ...['fox', 'nika', 'leo', 'vera', 'kim', 'dan', 'oli', 'pat', 'max', 'noa', 'eve', 'zoe'].map((name) => ({ name })),
+    ],
+    watchers: {
+      akk0: ['fox', 'nika', 'leo', 'vera', 'kim', 'dan', 'oli', 'pat', 'max', 'noa', 'eve', 'zoe'],
+      marsel: ['fox', 'nika'],
+    },
+  },
   pointer: {
     caption: 'Two viewers point at the focused share; press P or the arrow button to point yourself',
     people: [

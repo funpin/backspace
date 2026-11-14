@@ -157,6 +157,9 @@
       "includedLinux": "O Linux compartilha todo o som, inclusive o chat de voz: os espectadores vão ouvir a própria voz. Requer PulseAudio, ou PipeWire com pipewire-pulse.",
       "unavailableMac": "O áudio do sistema requer o macOS 13 ou posterior."
     },
+    "audioRouterWarning_one": "{{apps}} está em execução. Ele reproduz novamente o som de outros apps, então os espectadores ouvem o áudio do sistema duas vezes. Feche-o enquanto compartilha o áudio do sistema.",
+    "audioRouterWarning_many": "{{apps}} estão em execução. Eles reproduzem novamente o som de outros apps, então os espectadores ouvem o áudio do sistema duas vezes. Feche-os enquanto compartilha o áudio do sistema.",
+    "audioRouterWarning_other": "{{apps}} estão em execução. Eles reproduzem novamente o som de outros apps, então os espectadores ouvem o áudio do sistema duas vezes. Feche-os enquanto compartilha o áudio do sistema.",
     "systemAudioStartFailed": "Não foi possível iniciar a transmissão com o áudio do sistema. Desative Compartilhar áudio do sistema se esta plataforma não for compatível.",
     "systemAudioAddFailed": "Não foi possível adicionar o áudio do sistema à transmissão.",
     "systemAudioAdding": "Adicionando áudio do sistema…",
