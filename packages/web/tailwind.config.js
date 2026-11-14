@@ -101,7 +101,9 @@ export default {
         raised: '10',
         float: '20',
         popover: '200',
-        modal: '300',
+        // Same layer as popovers on purpose: overlays stack by portal order, so a
+        // menu opened from inside a dialog is appended after it and draws above.
+        modal: '200',
         toast: '400',
         confirm: '500',
       },

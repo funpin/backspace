@@ -72,9 +72,10 @@ describe('UserProfilePopoutLayer', () => {
 
     expect(screen.getByTestId('app-root')).not.toContainElement(card);
     expect(card.parentElement).toBe(document.body);
-    // Same z-index, so the later element in the document draws on top.
-    expect(dialog).toHaveClass('z-[200]');
-    expect(card).toHaveClass('z-[200]');
+    // z-modal and z-popover are the same layer (200 in tailwind.config.js), so
+    // the later element in the document draws on top.
+    expect(dialog).toHaveClass('z-modal');
+    expect(card).toHaveClass('z-popover');
     expect(dialog.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 

@@ -438,7 +438,7 @@ function DesktopMenu({ items, position, close, closeGuard }: DesktopMenuProps) {
         ref={menuRef}
         role="menu"
         tabIndex={-1}
-        className="fixed z-[200] min-w-[180px] py-1.5 glass rounded-md animate-fade-in max-h-[calc(calc(100*var(--app-vh))-16px)] overflow-y-auto scrollbar-thin outline-none"
+        className="fixed z-popover min-w-[180px] py-1.5 glass rounded-xl animate-fade-in max-h-[calc(calc(100*var(--app-vh))-16px)] overflow-y-auto scrollbar-thin outline-none"
         style={{ left: position.x, top: position.y }}
         onKeyDown={handleKeyDown}
         onContextMenu={suppressNativeMenu}

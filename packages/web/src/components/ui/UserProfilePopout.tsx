@@ -158,7 +158,7 @@ export function UserProfilePopout({ user: propUser, origin, onClose, anchor, pla
     <div
       ref={cardRef}
       data-user-profile-popout
-      className="fixed z-[200] w-[340px] rounded-[12px] overflow-hidden animate-fade-in select-none glass-modal"
+      className="fixed z-popover w-[340px] rounded-xl overflow-hidden animate-fade-in select-none glass-modal"
       style={cardStyle}
     >
       {/* Banner */}

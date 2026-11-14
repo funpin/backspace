@@ -95,7 +95,7 @@ export function ToastContainer() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`glass-pill border-l-2 ${borderColors[toast.type]} rounded-[10px] px-4 py-2.5 max-w-[320px] animate-slide-up pointer-events-auto cursor-pointer flex items-center gap-3`}
+          className={`glass-pill border-l-2 ${borderColors[toast.type]} rounded-lg px-4 py-2.5 max-w-80 animate-slide-up pointer-events-auto cursor-pointer flex items-center gap-3`}
           onClick={() => removeToast(toast.id)}
         >
           <span className="flex-1 text-sm text-txt-primary leading-snug">{toast.message}</span>
@@ -107,7 +107,7 @@ export function ToastContainer() {
                 toast.action?.onClick();
                 removeToast(toast.id);
               }}
-              className="shrink-0 px-2 py-1 text-xs font-medium rounded-md text-accent-primary hover:bg-white/[0.08] transition-colors"
+              className="shrink-0 px-2 py-1 text-xs font-medium rounded-md text-accent-tone hover:bg-interactive-hover transition-colors"
             >
               {toast.action.label}
             </button>

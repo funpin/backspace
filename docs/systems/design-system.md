@@ -382,6 +382,20 @@ not part of the system.
 
 ## Primitives
 
+### The kit (`components/ui`)
+
+Workbench: `dev-ui-kit.html`. How to move a file onto these: `docs/brand/migration-guide.md`.
+
+| Component | Use |
+|---|---|
+| `Icon` | Every icon. `name` from the `ICONS` list in `Icon.tsx` (Lucide, outline, 1.75 stroke), `size` `xs` 13 / `sm` 15 / `md` 18 / `lg` 20. `lucide-react` may be imported only in `Icon.tsx` (lint rule). |
+| `Button` | `variant` `primary` / `secondary` / `ghost` / `danger` / `danger-solid`, `size` `sm` 28 / `md` 34 / `lg` 40, optional `icon`, `loading`, `fullWidth`. Defaults to `type="button"`. |
+| `IconButton` | An icon-only button; `label` is required and becomes the accessible name and title. `tone` `default` / `off` / `on` / `danger` / `danger-solid`. |
+| `Tag`, `Badge` | `Tag`: `live`, `neutral`, `onMedia`, `accent`, or a content `color`. `Badge`: the unread dot or count in `accent-secondary`. |
+| `Options`, `Tabs` | Mutually exclusive chips; a segmented switch between views. |
+| `Card`, `Field`, `Progress` | A grouped surface; a label + description + control + error wired by id; the 3px transfer bar. |
+
+
 ### Radial Progress Ring
 
 Used in `AttachmentProgress` overlays inside the optimistic bubble and the staged-files row. Implementation:
