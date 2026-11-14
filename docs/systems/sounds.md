@@ -321,6 +321,13 @@ Mirrors the envelope already used by `playTestTone`.
 
 ### Viewer tracking — data-channel protocol
 
+The watcher sets also feed the viewer count and viewer list on stream tiles
+(`docs/systems/voice.md` → "Viewers"). For that they have to be right on every
+client, not only the sharer's: each viewer re-announces its watches to a
+participant who joins (`announceWatchesTo`, addressed to the newcomer alone, so
+no other client's set changes and no cue plays), and every client clears a
+share's set when the share ends (`endRemoteStream`).
+
 LiveKit JS 2.17 does **not** expose per-subscriber events on the publisher
 side: `LocalTrackSubscribed` only fires for the *first* subscriber and has no
 unsubscribe twin; there is no public `numSubscribers` API. Backspace uses a

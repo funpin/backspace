@@ -11,6 +11,7 @@ import { DEFAULT_STREAMING_LIMITS } from '../../stores/settingsStore';
 import { handleViewerWatchToggle } from '../../utils/voiceTileActions';
 import { ScreenShareSettingsPopover } from './ScreenShareSettingsPopover';
 import { useVoiceParticipantMeta } from '../../hooks/useVoiceParticipantMeta';
+import { StreamViewerCount, StreamViewersItem } from './StreamViewers';
 import type { StreamTile as StreamTileType } from '../../hooks/useLiveKit';
 import type { TrackStatsSnapshot } from '../../hooks/useTrackStats';
 import {
@@ -276,6 +277,14 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
 
       const items: ContextMenuItem[] = [];
 
+      // Who is watching, first: for the sharer it is the point of the menu.
+      items.push({
+        key: 'stream-viewers',
+        type: 'custom',
+        render: () => React.createElement(StreamViewersItem, { sharerIdentity: participant.identity }),
+      });
+      items.push({ key: 'viewers-sep', type: 'separator' });
+
       if (isLocal) {
         // Local stream: stop, change, quality
         items.push({
@@ -479,6 +488,9 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
           {isLocal && !compact && (
             <span className="text-[10px] text-white/40 font-medium">{t('voice:badges.you')}</span>
           )}
+          {/* After the name rather than at the right edge: that corner
+              belongs to the inset and its badge. */}
+          <span className="ml-1 flex"><StreamViewerCount sharer={participant} compact={compact} /></span>
         </div>
       </div>}
     </div>

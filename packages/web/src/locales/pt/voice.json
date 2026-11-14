@@ -169,7 +169,12 @@
     "watch": "Assistir à transmissão",
     "watchShort": "Assistir",
     "mute": "Silenciar transmissão",
-    "isStreaming": "{{name}} está transmitindo"
+    "isStreaming": "{{name}} está transmitindo",
+    "viewers": "Espectadores",
+    "viewersLabel_one": "{{count}} espectador",
+    "viewersLabel_many": "{{count}} espectadores",
+    "viewersLabel_other": "{{count}} espectadores",
+    "noViewers": "Ninguém está assistindo ainda"
   },
   "streamDiagnostics": {
     "publisherNetwork": "A rede de quem transmite está instável",

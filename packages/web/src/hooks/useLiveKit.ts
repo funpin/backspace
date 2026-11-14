@@ -242,12 +242,35 @@ function resumeIfPublished(room: Room, memory: StreamResumeMemory, identity: str
 }
 
 /** A remote screen share ended: drop the watch and the per-stream audio settings. */
-function endRemoteStream(identity: string): void {
+export function endRemoteStream(identity: string): void {
   const userId = resolveParticipantUserId(identity);
   const state = useVoiceStore.getState();
   state.unwatchStream(userId);
   state.clearStreamVolume(userId);
   state.clearStreamMute(userId);
+  // The share is over, and so is everyone's watching of it. Viewers drop their
+  // own watch here without a ping, so without this the set would carry them
+  // into the sharer's next share.
+  state.clearStreamWatchers(identity);
+}
+
+/**
+ * Tells a participant who just joined which shares this client is watching.
+ * Watch pings are events, not state: a newcomer has heard none of them, and
+ * would count nobody as watching until each viewer next toggles. Sent to the
+ * newcomer alone, so nobody else's watcher set or sound cue is touched.
+ */
+export function announceWatchesTo(room: Room, newcomerIdentity: string): void {
+  const state = useVoiceStore.getState();
+  for (const p of state.participants) {
+    if (p.isLocal || !p.isScreenSharing || !state.watchingStreams.has(p.userId)) continue;
+    room.localParticipant
+      .publishData(
+        encodeStreamWatch(streamWatchFor({ userId: p.userId, identity: p.identity }, true)),
+        { reliable: true, destinationIdentities: [newcomerIdentity] },
+      )
+      .catch(() => { });
+  }
 }
 
 let _connectGeneration = 0;
@@ -835,6 +858,7 @@ export function useLiveKit() {
       const guardedUpdate = () => { if (isCurrent()) updateParticipants(); };
       newRoom.on(RoomEvent.ParticipantConnected, (participant) => {
         guardedUpdate();
+        announceWatchesTo(newRoom, participant.identity);
         // Notify new participant of our effective deafen state
         const vsConn = useVoiceStore.getState();
         const cvIdConn = vsConn.currentVoiceChannelId;

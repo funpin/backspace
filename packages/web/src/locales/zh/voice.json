@@ -169,7 +169,10 @@
     "watch": "观看直播",
     "watchShort": "观看",
     "mute": "静音直播",
-    "isStreaming": "{{name}} 正在直播"
+    "isStreaming": "{{name}} 正在直播",
+    "viewers": "观众",
+    "viewersLabel_other": "{{count}} 位观众",
+    "noViewers": "暂时无人观看"
   },
   "streamDiagnostics": {
     "publisherNetwork": "推流端网络不稳定",
