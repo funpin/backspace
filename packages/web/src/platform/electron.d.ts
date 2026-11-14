@@ -147,6 +147,12 @@ interface BackspaceElectronAPI {
    */
   getSystemAudioCapability?: (usesAppSource?: boolean) => Promise<OwnAudioInSystemAudio>;
   /**
+   * Names of the audio routers running now that replay other applications'
+   * sound, which a System Audio share then carries twice (macOS; empty
+   * elsewhere). Optional: older desktop builds lack it and show no warning.
+   */
+  getAudioRouters?: () => Promise<string[]>;
+  /**
    * Linux: route every other app's playback into a virtual source that the
    * renderer opens as a microphone (`label` names the device). Optional: only
    * desktop builds that ship it have it.
