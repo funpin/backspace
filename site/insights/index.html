@@ -56,13 +56,38 @@
 <link rel="stylesheet" href="../assets/logo.css" />
 
 <style>
-/* ================= Aether Drift tokens (verbatim from the landing page) ================= */
+/* ================= Kamen tokens (verbatim from the landing page) ================= */
 @font-face {
-  font-family: "DM Sans";
-  src: url("../assets/dm-sans.woff2") format("woff2");
-  font-weight: 100 1000;
+  font-family: "Onest";
+  src: url("../assets/onest-cyrillic-ext.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: "Onest";
+  src: url("../assets/onest-cyrillic.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Onest";
+  src: url("../assets/onest-latin-ext.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Onest";
+  src: url("../assets/onest-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: "Fabio XM";
@@ -72,30 +97,30 @@
   font-display: swap;
 }
 :root {
-  --base: #0b0b10;
-  --chat: #13131a;
-  --channel: #1a1a23;
-  --elevated: #252530;
-  --input: #111118;
-  --txt: #efefef;
-  --txt2: #a0a0aa;
-  --txt3: #6d6d7c;
-  --txt4: #5c5c68;
-  --primary: #7c6cf6;
-  --primary-hover: #6b5ce0;
-  --mint: #86efac;
-  --peach: #fca5a5;
+  --base: #0c0c0e;
+  --chat: #0c0c0e;
+  --channel: #121214;
+  --elevated: #1b1b1f;
+  --input: #151518;
+  --txt: #ededf0;
+  --txt2: #a0a0a8;
+  --txt3: #7e7e89;
+  --txt4: #7e7e89;
+  --primary: #6e5bef;
+  --primary-hover: #7c6bf1;
+  --mint: #6fdc9a;
+  --peach: #f2777a;
   --lavender: #c4b5fd;
   --sky: #7dd3fc;
-  --amber: #fcd34d;
-  --rose: #fda4af;
+  --amber: #e8b65a;
+  --rose: #f2777a;
   --coral: #fb923c;
-  --glass: rgba(20, 20, 26, 0.52);
-  --glass-hi: rgba(30, 30, 40, 0.62);
+  --glass: rgba(27, 27, 31, 0.78);
+  --glass-hi: rgba(27, 27, 31, 0.86);
   --glass-border: rgba(255, 255, 255, 0.07);
   --line: rgba(255, 255, 255, 0.07);
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  --sans: "DM Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --sans: "Onest", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --display: "Fabio XM", var(--sans);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -3203,7 +3228,7 @@ footer a:hover { color: var(--txt); }
 
   /* The page's own type stack, so canvas text matches the DOM around it. Every
    * family here is either self-hosted or a system font; nothing is fetched. */
-  var FONT_STACK = '"DM Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif';
+  var FONT_STACK = '"Onest", -apple-system, BlinkMacSystemFont, system-ui, sans-serif';
   var AXIS_FONT = "12px " + FONT_STACK;
 
   /* Grid and tick lines. Deliberately dimmer than --line so the series read as
@@ -4344,7 +4369,7 @@ footer a:hover { color: var(--txt); }
     var opts = settings || {};
     var profile = profileOf(opts.profile);
     var size = plotSize(host, profile);
-    var axisStroke = colour("--txt4", "#5c5c68");
+    var axisStroke = colour("--txt4", "#7e7e89");
 
     /* A fresh object per axis, nested `grid`/`ticks` included. uPlot keeps
      * per-axis state on these, so two axes sharing one literal would share it
@@ -5161,13 +5186,13 @@ footer a:hover { color: var(--txt); }
   var RAMP = [
     { token: "--sky", fallback: "#7dd3fc" },
     { token: "--lavender", fallback: "#c4b5fd" },
-    { token: "--mint", fallback: "#86efac" },
-    { token: "--amber", fallback: "#fcd34d" },
-    { token: "--peach", fallback: "#fca5a5" }
+    { token: "--mint", fallback: "#6fdc9a" },
+    { token: "--amber", fallback: "#e8b65a" },
+    { token: "--peach", fallback: "#f2777a" }
   ];
   /* A ranked row with no line of its own — rank six and below. Muted, so the
    * five that are drawn read as the ones the chart is about. */
-  var NEUTRAL = { token: "--txt4", fallback: "#5c5c68" };
+  var NEUTRAL = { token: "--txt4", fallback: "#7e7e89" };
 
   /* Long enough for a referrer host and a short path title; past this the
    * uPlot legend starts to set the width of the card it sits in. The full
@@ -6502,12 +6527,12 @@ footer a:hover { color: var(--txt); }
       },
       lines: [
         {
-          column: "count", label: "Clones", token: "--mint", fallback: "#86efac",
+          column: "count", label: "Clones", token: "--mint", fallback: "#6fdc9a",
           fill: "rgba(134, 239, 172, 0.10)", width: 2
         },
         {
           column: "uniques", label: uniquesLabel("Unique cloners", ctx.downsampled),
-          token: "--amber", fallback: "#fcd34d", width: 1.5, dash: [5, 4]
+          token: "--amber", fallback: "#e8b65a", width: 1.5, dash: [5, 4]
         }
       ],
       yPolicy: "zero",
@@ -6782,7 +6807,7 @@ footer a:hover { color: var(--txt); }
          * pixels apart is the duplication `INSIGHTS_FIGURES` exists to make
          * unnecessary. Reach's and Adoption's heroes do the same. */
         return G.chartCard(hero, cumulativeSpec("hero", "Stars", null,
-          "stars", "total", "Stars", "--amber", "#fcd34d", ctx.downsampled), ctx);
+          "stars", "total", "Stars", "--amber", "#e8b65a", ctx.downsampled), ctx);
       }));
 
       /* Each on its own y axis. Stars and forks shared one x axis while a
@@ -6909,7 +6934,7 @@ footer a:hover { color: var(--txt); }
    *
    * Every line in one card is the same kind of thing, so a card shares one y
    * scale honestly, and every line on all four is a count with a true floor at
-   * zero. Colours come from the Aether Drift tokens, read at draw time, so the
+   * zero. Colours come from the Kamen tokens, read at draw time, so the
    * canvas stroke is the same resolved value the page uses everywhere else.
    *
    * Every column here is a GAUGE describing the fleet on its date, never a
@@ -6941,7 +6966,7 @@ footer a:hover { color: var(--txt); }
         "that across the same snapshot. Consecutive dates cover overlapping weeks, so two of these dates are not two " +
         "weeks of messages.",
       lines: [
-        { field: "messages7d", label: "Messages in 7 days", token: "--peach", fallback: "#fca5a5" }
+        { field: "messages7d", label: "Messages in 7 days", token: "--peach", fallback: "#f2777a" }
       ]
     }
   ];
@@ -6954,7 +6979,7 @@ footer a:hover { color: var(--txt); }
       lines: [
         { field: "instances_1d", label: "Reported that day", token: "--sky", fallback: "#7dd3fc" },
         { field: "instances_7d", label: "Within 7 days", token: "--lavender", fallback: "#c4b5fd" },
-        { field: "instances_30d", label: "Within 30 days", token: "--mint", fallback: "#86efac" }
+        { field: "instances_30d", label: "Within 30 days", token: "--mint", fallback: "#6fdc9a" }
       ]
     },
     {
@@ -6964,8 +6989,8 @@ footer a:hover { color: var(--txt); }
         "The first line counts only the instances that reported on that date, while the other two count every instance seen in the seven days ending there, " +
         "so an instance whose ping was late is absent from the first line and present in the other two.",
       lines: [
-        { field: "users_active1d", label: "Active that day", token: "--amber", fallback: "#fcd34d" },
-        { field: "users_active7d", label: "Active within 7 days", token: "--peach", fallback: "#fca5a5" },
+        { field: "users_active1d", label: "Active that day", token: "--amber", fallback: "#e8b65a" },
+        { field: "users_active7d", label: "Active within 7 days", token: "--peach", fallback: "#f2777a" },
         { field: "users_active30d", label: "Active within 30 days", token: "--coral", fallback: "#fb923c" }
       ]
     }
@@ -7007,7 +7032,7 @@ footer a:hover { color: var(--txt); }
   /* A ranked row with no line of its own. Every bar here takes it, because on
    * this page a palette colour means "this row has a line below it in this
    * colour" and this band draws no per-dimension lines. */
-  var NEUTRAL = { token: "--txt4", fallback: "#5c5c68" };
+  var NEUTRAL = { token: "--txt4", fallback: "#7e7e89" };
 
   var LEAD = {
     label: "App downloads", kind: "point", series: "repo", field: "downloads_app",
@@ -7034,7 +7059,7 @@ footer a:hover { color: var(--txt); }
     columns: { downloads: { series: "repo", field: "downloads_app" } },
     lines: [{
       column: "downloads", label: "App downloads",
-      token: "--mint", fallback: "#86efac",
+      token: "--mint", fallback: "#6fdc9a",
       fill: "rgba(134, 239, 172, 0.10)", width: 2
     }],
     yPolicy: "zero",
@@ -7755,7 +7780,7 @@ footer a:hover { color: var(--txt); }
       columns: { runs: { series: "workflows", field: "runs" } },
       lines: [{
         column: "runs", label: "Workflow runs",
-        token: "--rose", fallback: "#fda4af",
+        token: "--rose", fallback: "#f2777a",
         fill: "rgba(253, 164, 175, 0.10)", width: 2
       }],
       yPolicy: "zero",
@@ -7793,7 +7818,7 @@ footer a:hover { color: var(--txt); }
     title: "Contributors",
     figure: { label: "Contributors", kind: "step", series: "contributors", field: "total" },
     columns: { total: { series: "contributors", field: "total" } },
-    /* --sky, not --peach. --peach #fca5a5 and this group's hero --rose #fda4af
+    /* --sky, not --peach. --peach #f2777a and this group's hero --rose #f2777a
      * are three hex digits apart and this card sits directly under that hero,
      * so a reader glancing down the group would read one series drawn twice.
      * --sky repeats a colour used in Reach and in Adoption, which is a repeat

@@ -1,10 +1,35 @@
-/* ================= Aether Drift tokens (from the app's globals.css) ================= */
+/* ================= Kamen tokens (from the app's globals.css) ================= */
 @font-face {
-  font-family: "DM Sans";
-  src: url("dm-sans.woff2") format("woff2");
-  font-weight: 100 1000;
+  font-family: "Onest";
+  src: url("onest-cyrillic-ext.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: "Onest";
+  src: url("onest-cyrillic.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Onest";
+  src: url("onest-latin-ext.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Onest";
+  src: url("onest-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: "Fabio XM";
@@ -14,54 +39,35 @@
   font-display: swap;
 }
 :root {
-  --base: #0b0b10;
-  --chat: #13131a;
-  --channel: #1a1a23;
-  --elevated: #252530;
-  --input: #111118;
-  --txt: #efefef;
-  --txt2: #a0a0aa;
-  --txt3: #6d6d7c;
-  --txt4: #5c5c68;
-  --primary: #7c6cf6;
-  --primary-hover: #6b5ce0;
-  --mint: #86efac;
-  --peach: #fca5a5;
+  --base: #0c0c0e;
+  --chat: #0c0c0e;
+  --channel: #121214;
+  --elevated: #1b1b1f;
+  --input: #151518;
+  --txt: #ededf0;
+  --txt2: #a0a0a8;
+  --txt3: #7e7e89;
+  --txt4: #7e7e89;
+  --primary: #6e5bef;
+  --primary-hover: #7c6bf1;
+  --mint: #6fdc9a;
+  --peach: #f2777a;
   --lavender: #c4b5fd;
   --sky: #7dd3fc;
-  --amber: #fcd34d;
-  --rose: #fda4af;
+  --amber: #e8b65a;
+  --rose: #f2777a;
   --coral: #fb923c;
-  --glass: rgba(20, 20, 26, 0.52);
-  --glass-hi: rgba(30, 30, 40, 0.62);
+  --glass: rgba(27, 27, 31, 0.78);
+  --glass-hi: rgba(27, 27, 31, 0.86);
   --glass-border: rgba(255, 255, 255, 0.07);
   --line: rgba(255, 255, 255, 0.07);
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  --sans: "DM Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --sans: "Onest", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --display: "Fabio XM", var(--sans);
 }
-/*
- * DM Sans covers Latin and Latin Extended and nothing else: Google Fonts
- * publishes the family with exactly two subsets, and there is no Cyrillic cut
- * of it to vendor. On a Russian page that leaves every Cyrillic character
- * falling through to the next family in the stack while the Latin ones around
- * it -- "Backspace", "Discord", "4K", and every digit -- stay in DM Sans, which
- * is two typefaces inside one sentence and, in the stat tiles, a number in one
- * face directly above its label in another.
- *
- * So a page whose language is written in Cyrillic opts out of DM Sans
- * altogether and is set in the platform UI font, which covers both scripts in
- * one face. Within-page consistency is what a reader can actually perceive;
- * nobody holds the two translations side by side. It also means such a page
- * never downloads the 88 KB font it could not have used.
- *
- * Selecting on the language rather than on a class keeps this true for any
- * Cyrillic-script translation added later, and costs nothing on the pages that
- * do not match.
- */
-:root:lang(ru) {
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "Noto Sans", "Helvetica Neue", sans-serif;
-}
+/* Onest ships Latin and Cyrillic subsets (unicode-range above), so the
+ * Russian page is set in the same face as the others and a page fetches
+ * only the subsets it uses. */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -281,7 +287,7 @@ h1 {
 .msg .mh { display: flex; align-items: baseline; gap: 8px; }
 .msg .mh b { font-weight: 620; font-size: 13.5px; }
 .msg .mh time { color: var(--txt4); font-size: 11px; font-family: var(--mono); }
-.msg p { color: #d8d8de; font-size: 13.5px; line-height: 1.45; }
+.msg p { color: #dedee3; font-size: 13.5px; line-height: 1.45; }
 .js .msg[data-step] { display: none; }
 .js .msg[data-step].shown { display: flex; animation: msgIn 0.28s ease; }
 @keyframes msgIn {

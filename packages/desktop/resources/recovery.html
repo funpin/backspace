@@ -6,24 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --primary: #7c6cf6;
-      --primary-hover: #6b5ce0;
+      --primary: #6e5bef;
+      --primary-hover: #7c6bf1;
     }
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: #13131a;
-      color: #efefef;
-      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #0c0c0e;
+      color: #ededf0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     }
     body { display: flex; flex-direction: column; }
 
     .titlebar {
       height: 32px;
       min-height: 32px;
-      background: #0b0b10;
+      background: #0c0c0e;
       -webkit-app-region: drag;
       position: relative;
       z-index: 100;
@@ -44,7 +44,7 @@
     }
 
     .card {
-      background: #1a1a23;
+      background: #121214;
       border-radius: 8px;
       padding: 2rem;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.24);
@@ -58,7 +58,7 @@
 
     .hint {
       font-size: 0.875rem;
-      color: #a0a0aa;
+      color: #a0a0a8;
       margin: 0 0 1.5rem 0;
       line-height: 1.5;
     }
@@ -76,28 +76,28 @@
     button.action {
       width: 100%;
       padding: 0.625rem 1rem;
-      background: #2a2a33;
+      background: #1b1b1f;
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 6px;
-      color: #efefef;
+      color: #ededf0;
       font-family: inherit;
       font-size: 0.875rem;
       cursor: pointer;
       transition: background 0.15s ease;
     }
-    button.action:hover:not(:disabled) { background: #34343f; }
+    button.action:hover:not(:disabled) { background: #26262a; }
     button.action:disabled { opacity: 0.5; cursor: default; }
     button.action.primary { background: var(--primary); border-color: transparent; }
     button.action.primary:hover { background: var(--primary-hover); }
     button.action.subtle {
       background: transparent;
-      color: #a0a0aa;
+      color: #a0a0a8;
       border: none;
       padding-top: 0.375rem;
       padding-bottom: 0.375rem;
       font-size: 0.8125rem;
     }
-    button.action.subtle:hover { color: #efefef; background: transparent; }
+    button.action.subtle:hover { color: #ededf0; background: transparent; }
 
     .divider {
       height: 1px;
@@ -107,7 +107,7 @@
 
     details {
       font-size: 0.8125rem;
-      color: #a0a0aa;
+      color: #a0a0a8;
     }
     details summary {
       cursor: pointer;

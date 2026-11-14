@@ -225,8 +225,8 @@ function releaseTable(rows: readonly ReleaseEntry[]): string {
 }
 
 const STYLE = `
-:root { color-scheme: dark; --bg:#0b0b10; --panel:#13131a; --line:rgba(255,255,255,.09);
-        --txt:#efefef; --txt2:#a0a0aa; --txt3:#6d6d7c; --accent:#7c6cf6;
+:root { color-scheme: dark; --bg:#0c0c0e; --panel:#0c0c0e; --line:rgba(255,255,255,.09);
+        --txt:#ededf0; --txt2:#a0a0a8; --txt3:#7e7e89; --accent:#6e5bef;
         --mono: ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace; }
 * { box-sizing:border-box; }
 body { margin:0; padding:40px 24px 72px; background:var(--bg); color:var(--txt);

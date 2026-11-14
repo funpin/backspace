@@ -11,7 +11,7 @@
  * The template embeds everything it needs so Chrome has no file:// fetch
  * to make: the mark is read live from assets/brand/mark-icon.svg, the
  * dimensional app-icon family's bare gradient glyph (white to
- * `#7c6cf6`), transparent, matching the app icon rather than the flat
+ * `#6e5bef`), transparent, matching the app icon rather than the flat
  * `mark.svg` used on UI surfaces, and inlined as SVG markup, and both
  * webfonts (site/assets/*) are inlined as base64 data: URIs. Chrome over
  * file:// does not resolve external @font-face sources, so anything
@@ -43,7 +43,7 @@ const ROOT = join(__dirname, '..');
 const TEMPLATE = join(ROOT, 'scripts/social-preview.html');
 const MARK_SVG = join(ROOT, 'assets/brand/mark-icon.svg');
 const FABIO_FONT = join(ROOT, 'site/assets/fabio-xm-variable.ttf');
-const DM_SANS_FONT = join(ROOT, 'site/assets/dm-sans.woff2');
+const ONEST_FONT = join(ROOT, 'site/assets/onest-latin.woff2');
 
 const OUT_PATHS = [
   join(ROOT, 'assets/social-preview.png'),
@@ -56,7 +56,7 @@ const HEIGHT = 640;
 // The template's flat ground colour — used only as the flatten
 // background for any stray transparent pixel Chrome's screenshot might
 // carry; the page itself paints opaque all the way to its own edges.
-const FLATTEN_BG = '#0b0b10';
+const FLATTEN_BG = '#0c0c0e';
 
 const DEFAULT_CHROME_MAC =
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -89,17 +89,17 @@ async function main() {
   requireFile(TEMPLATE, 'template');
   requireFile(MARK_SVG, 'mark SVG');
   requireFile(FABIO_FONT, 'Fabio XM font');
-  requireFile(DM_SANS_FONT, 'DM Sans font');
+  requireFile(ONEST_FONT, 'Onest font');
 
   const template = readFileSync(TEMPLATE, 'utf8');
   const markSvg = readFileSync(MARK_SVG, 'utf8').trim();
   const fabioDataUri = dataUri(FABIO_FONT, 'font/ttf');
-  const dmSansDataUri = dataUri(DM_SANS_FONT, 'font/woff2');
+  const onestDataUri = dataUri(ONEST_FONT, 'font/woff2');
 
   const html = template
     .replaceAll('{{MARK_SVG}}', markSvg)
     .replaceAll('{{FABIO_XM_DATA_URI}}', fabioDataUri)
-    .replaceAll('{{DM_SANS_DATA_URI}}', dmSansDataUri);
+    .replaceAll('{{ONEST_DATA_URI}}', onestDataUri);
 
   const tmpDir = mkdtempSync(join(tmpdir(), 'backspace-social-preview-'));
   const tmpHtml = join(tmpDir, 'social-preview.html');

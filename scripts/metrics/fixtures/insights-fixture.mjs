@@ -58,7 +58,7 @@
  * the modes above cannot show.
  *
  * The output directory mirrors the deployed layout, so `../assets/logo.png`
- * and `../assets/dm-sans.woff2` resolve from the page exactly as they do in
+ * and `../assets/onest-latin.woff2` resolve from the page exactly as they do in
  * production:
  *
  *   <outDir>/archive/          the metrics archive `cli-bundle.ts` reads
@@ -107,7 +107,7 @@ const site = path.join(outDir, 'site');
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(archive, { recursive: true });
 cpSync(path.join(REPO_ROOT, 'site/insights'), path.join(site, 'insights'), { recursive: true });
-// The page loads `../assets/logo.png` and `../assets/dm-sans.woff2`. Without
+// The page loads `../assets/logo.png` and `../assets/onest-latin.woff2`. Without
 // these the run reports two 404s, which makes a clean-console check
 // impossible to pass and hides a real failure behind expected noise.
 cpSync(path.join(REPO_ROOT, 'site/assets'), path.join(site, 'assets'), { recursive: true });
