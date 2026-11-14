@@ -186,6 +186,25 @@
     transform-origin: 0 0;
     transform: translate(var(--stage-zoom-x, 0px), var(--stage-zoom-y, 0px)) scale(var(--stage-zoom-scale, 1));
   }
+  /* Viewer faces on a stream tile (components/voice/StreamViewers.tsx): a
+     face pops in when its owner starts watching, its name fades up on hover. */
+  .stream-viewer-face {
+    animation: stream-viewer-face-in 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .stream-viewer-name {
+    animation: stream-viewer-name-in 140ms ease-out;
+  }
+  @keyframes stream-viewer-face-in {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes stream-viewer-name-in {
+    0% { transform: translateY(4px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stream-viewer-face, .stream-viewer-name { animation: none; }
+  }
   /* Stream pointers (components/voice/StreamPointers.tsx). The layer zooms
      with the picture; each mark is scaled back so it keeps its size. */
   .stream-pointer-glide {
