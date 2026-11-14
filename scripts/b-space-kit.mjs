@@ -12,6 +12,7 @@
  *   - the character's states as static SVG frames (states/)
  *   - tray icons per state: macOS template PNGs, Windows .ico (tray/)
  *   - PNG previews of the mark, app icon and lockup (png/)
+ *   - animated SVGs of the character's states for the GitHub README (animated/)
  *
  * The geometry is the source of truth; the SVG files are outputs. Run
  * `node scripts/b-space-kit.mjs` after changing anything here and commit
@@ -181,6 +182,60 @@ function trayTemplateSvg(state) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="22" viewBox="0 0 180 220"><g${opacity} transform="translate(${tx} ${ty}) scale(${s})">${markInner({ ...palette.black, state, eyes: 'small', idp: `tray-${state}` })}</g></svg>\n`;
 }
 
+
+// ---- animated states (self-contained SVG with CSS keyframes) ----
+// For places that show an SVG as an image, such as the GitHub README:
+// the character sits on its own tile so it reads on light and dark pages,
+// and the eyes are separate shapes painted in the tile colour so they can
+// move. Same motion as the `.s-*` classes in docs/brand/b-space-logo.html.
+const ANIM = ['blink', 'look', 'notify', 'typing', 'voice', 'screen', 'joy', 'dnd', 'offline'];
+const TILE = C.badge;
+function animTile(state, p) {
+  const [l, r] = EYES.std;
+  const eye = ([x, y, rx, ry]) => `<ellipse class="${p}e" cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${TILE}"/>`;
+  const off = state === 'offline';
+  const head = off ? C.offHead : C.head;
+  const body = off ? C.offBody : C.body;
+  let eyes = '';
+  if (state === 'joy') eyes = [l, r].map(([x, y]) => `<path d="M${x - 4.4} ${y + 2}Q${x} ${y - 5.6} ${x + 4.4} ${y + 2}" fill="none" stroke="${TILE}" stroke-width="3" stroke-linecap="round"/>`).join('');
+  else if (off) eyes = [l, r].map(([x, y]) => `<path d="M${x - 3.2} ${y - 3.2}L${x + 3.2} ${y + 3.2}M${x + 3.2} ${y - 3.2}L${x - 3.2} ${y + 3.2}" stroke="${TILE}" stroke-width="2.6" stroke-linecap="round"/>`).join('');
+  else if (state === 'dnd') eyes = [l, r].map(([x, y, rx]) => `<rect x="${x - rx - 0.4}" y="${y}" width="${2 * rx + 0.8}" height="2.6" rx="1.3" fill="${TILE}"/>`).join('');
+  else eyes = eye(l) + eye(r);
+  let out = '';
+  if (state === 'voice') out += `<defs><mask id="${p}m" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><path d="${BODY}" stroke="#000" stroke-width="5" stroke-linejoin="round"/></mask></defs><path class="${p}ring" d="${BODY}" fill="none" stroke="${C.ok}" stroke-width="11" stroke-linejoin="round" mask="url(#${p}m)"/>`;
+  out += `<g class="${p}all">`;
+  out += `<path class="${p}body" d="${BODY}${state === 'screen' ? SCREEN : ''}" fill="${body}" fill-rule="evenodd"/>`;
+  if (state === 'screen') out += `<rect class="${p}glow" x="40" y="60" width="28" height="20" rx="3" fill="${C.tone}"/><circle class="${p}live" cx="46.5" cy="66.5" r="2.8" fill="${C.danger}"/>`;
+  if (state === 'typing') out += [42, 52, 62].map((x, i) => `<circle class="${p}dot ${p}d${i}" cx="${x}" cy="70.5" r="3.4" fill="${C.head}"/>`).join('');
+  out += `<path d="${HEAD}" fill="${head}"/><g class="${p}eyes">${eyes}</g></g>`;
+  if (state === 'notify') out += `<circle class="${p}badge" cx="77" cy="13" r="8" fill="${C.danger}" stroke="${TILE}" stroke-width="3"/>`;
+  if (state === 'dnd') out += `<path class="${p}z" d="M74 6h6l-6 7h6" fill="none" stroke="${C.offHead}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const css = {
+    blink: `.${p}e{animation:${p}k 3.2s infinite}@keyframes ${p}k{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.08)}}`,
+    look: `.${p}eyes{animation:${p}k 4.5s infinite ease-in-out}@keyframes ${p}k{0%,15%,85%,100%{transform:translate(0,0)}25%,45%{transform:translate(-4.5px,1px)}55%,75%{transform:translate(4px,0)}}`,
+    notify: `.${p}all{animation:${p}h 2.4s infinite}.${p}e{animation:${p}w 2.4s infinite}.${p}badge{animation:${p}p 2.4s infinite}@keyframes ${p}h{0%,55%,100%{transform:translateY(0)}62%{transform:translateY(-9px)}70%{transform:translateY(0)}76%{transform:translateY(-4px)}82%{transform:translateY(0)}}@keyframes ${p}w{0%,55%,85%,100%{transform:scale(1)}62%,78%{transform:scale(1.25)}}@keyframes ${p}p{0%,58%{transform:scale(0)}64%{transform:scale(1.15)}70%,100%{transform:scale(1)}}`,
+    typing: `.${p}eyes{transform:translate(-3px,3px)}.${p}dot{animation:${p}t 1.2s infinite}.${p}d1{animation-delay:.2s}.${p}d2{animation-delay:.4s}@keyframes ${p}t{0%,60%,100%{opacity:.25}30%{opacity:1}}`,
+    voice: `.${p}body{animation:${p}v .9s infinite}.${p}ring{animation:${p}r 1.8s infinite}@keyframes ${p}v{0%,100%{transform:scale(1)}20%{transform:scale(1.05)}40%{transform:scale(.99)}60%{transform:scale(1.04)}}@keyframes ${p}r{0%,100%{opacity:1}50%{opacity:.35}}`,
+    screen: `.${p}eyes{animation:${p}s 3.6s infinite ease-in-out}.${p}glow{animation:${p}g 2.4s infinite ease-in-out}.${p}live{animation:${p}l 1.6s infinite}@keyframes ${p}s{0%,40%,80%,100%{transform:translate(1.5px,3px)}50%,70%{transform:translate(0,0)}}@keyframes ${p}g{0%,100%{opacity:.12}50%{opacity:.32}}@keyframes ${p}l{0%,55%,100%{opacity:1}65%,90%{opacity:.2}}`,
+    joy: `.${p}all{animation:${p}h 1.6s infinite}@keyframes ${p}h{0%,55%,100%{transform:translateY(0)}62%{transform:translateY(-9px)}70%{transform:translateY(0)}76%{transform:translateY(-4px)}82%{transform:translateY(0)}}`,
+    dnd: `.${p}all{opacity:.6}.${p}z{animation:${p}z 3s infinite}@keyframes ${p}z{0%{opacity:0;transform:translate(0,0)}30%{opacity:1}100%{opacity:0;transform:translate(6px,-8px)}}`,
+    offline: `.${p}all{opacity:.8}`,
+  }[state];
+  return { markup: out, css: `.${p}t *{transform-box:fill-box;transform-origin:center}${css}` };
+}
+function animatedSvg(states, { cell = 120, gap = 12 } = {}) {
+  let body = '';
+  let css = '';
+  states.forEach((state, i) => {
+    const p = `s${i}`;
+    const t = animTile(state, p);
+    css += t.css;
+    body += `<g transform="translate(${i * (cell + gap)} 0)"><rect width="${cell}" height="${cell}" rx="26" fill="${TILE}"/><g class="${p}t" transform="translate(${cell * 0.12} ${cell * 0.12}) scale(${(cell * 0.76) / 100})">${t.markup}</g></g>`;
+  });
+  const w = states.length * cell + (states.length - 1) * gap;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${cell}" viewBox="0 0 ${w} ${cell}"><style>${css}@media (prefers-reduced-motion:reduce){*{animation:none!important}}</style>${body}</svg>\n`;
+}
+
 // ---- output ----
 const files = [];
 function write(rel, data) {
@@ -192,7 +247,7 @@ function write(rel, data) {
 const png = (svg, w, h = w) => sharp(Buffer.from(svg), { density: DENSITY }).resize(w, h, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png({ compressionLevel: 9 }).toBuffer();
 
 async function main() {
-  for (const d of ['gen-icons', 'states', 'tray', 'png']) rmSync(join(KIT, d), { recursive: true, force: true });
+  for (const d of ['gen-icons', 'states', 'tray', 'png', 'animated']) rmSync(join(KIT, d), { recursive: true, force: true });
 
   // Mark
   write('mark.svg', header('mark, two-tone, for dark grounds') + markSvg({ ...palette.dark }, { tight: true }));
@@ -250,6 +305,10 @@ async function main() {
     }
     write(`tray/win/tray-${state}.ico`, await pngToIco(frames));
   }
+
+  // Animated states: one file per state and one row with all of them
+  for (const state of ANIM) write(`animated/${state}.svg`, animatedSvg([state]));
+  write('animated/states-row.svg', animatedSvg(ANIM));
 
   // PNG previews
   for (const s of [16, 24, 32, 48, 64, 128, 256, 512, 1024]) {
