@@ -79,7 +79,16 @@
       "screenAudio": "Bildschirmaudio",
       "unknown": "Unbekannt"
     },
-    "remoteParticipant": "Gegenstelle"
+    "remoteParticipant": "Gegenstelle",
+    "pingGraph": {
+      "title": "Ping",
+      "window": "letzte {{minutes}} Min.",
+      "min": "Min.",
+      "avg": "Mittel",
+      "max": "Max.",
+      "empty": "Noch keine Messungen",
+      "summaryLabel": "Ping: niedrigster {{min}}, Mittel {{avg}}, höchster {{max}}"
+    }
   },
   "screenPicker": {
     "title": "Bildschirm teilen",

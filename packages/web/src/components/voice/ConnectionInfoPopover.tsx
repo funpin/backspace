@@ -9,6 +9,7 @@ import i18n from '../../i18n';
 import { formatters } from '../../i18n/formatters';
 import { VOICE_HEALTH, healthBand, type HealthBand } from '../../utils/voiceHealth';
 import { useVoiceStore } from '../../stores/voiceStore';
+import { PingGraph } from './PingGraph';
 
 interface ConnectionInfoPopoverProps {
   open: boolean;
@@ -185,9 +186,14 @@ export function ConnectionInfoPopover({ open, onClose, anchorRef }: ConnectionIn
         {!room ? (
           <div className="text-[12px] text-txt-tertiary py-2 text-center">{t('voice:connectionInfo.notConnected')}</div>
         ) : !stats ? (
-          <div className="text-[12px] text-txt-tertiary py-2 text-center">{t('voice:connectionInfo.gathering')}</div>
+          <>
+            <PingGraph />
+            <div className="text-[12px] text-txt-tertiary py-2 text-center">{t('voice:connectionInfo.gathering')}</div>
+          </>
         ) : (
           <>
+            {/* History first: the rows under it are the last two seconds only. */}
+            <PingGraph />
             {/* Network */}
             <SectionHeader title={t('voice:connectionInfo.section.network')} />
             <Row

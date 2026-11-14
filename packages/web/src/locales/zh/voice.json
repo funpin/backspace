@@ -79,7 +79,16 @@
       "screenAudio": "屏幕音频",
       "unknown": "未知"
     },
-    "remoteParticipant": "远端参与者"
+    "remoteParticipant": "远端参与者",
+    "pingGraph": {
+      "title": "延迟",
+      "window": "最近 {{minutes}} 分钟",
+      "min": "最低",
+      "avg": "平均",
+      "max": "最高",
+      "empty": "暂无测量数据",
+      "summaryLabel": "延迟：最低 {{min}}，平均 {{avg}}，最高 {{max}}"
+    }
   },
   "screenPicker": {
     "title": "共享屏幕",

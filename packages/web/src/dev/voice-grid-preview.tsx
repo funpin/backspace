@@ -9,6 +9,8 @@ import type { Track } from 'livekit-client';
 import { VoiceGrid } from '../components/voice/VoiceGrid';
 import { ContextMenuRenderer } from '../components/ui/ContextMenuRenderer';
 import { useVoiceStore } from '../stores/voiceStore';
+import { PingGraph } from '../components/voice/PingGraph';
+import { pushPing } from '../utils/pingHistory';
 import { useUIStore } from '../stores/uiStore';
 import { useStreamPointerStore } from '../stores/streamPointerStore';
 import type { ParticipantInfo } from '../hooks/useLiveKit';
@@ -191,6 +193,12 @@ function Workbench({ scene, participants }: { scene: Scene; participants: Partic
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <VoiceGrid participants={participants} chromeRevealed={chromeRevealed} />
       </div>
+      {params.get('ping') === '1' && (
+        // `?ping=1`: the connection popover's ping graph, on a link that spikes every few seconds.
+        <div className="glass rounded-lg" style={{ position: 'fixed', left: 16, bottom: 16, width: 300, padding: '8px 12px' }}>
+          <PingGraph />
+        </div>
+      )}
       <ContextMenuRenderer />
     </div>
   );
@@ -216,6 +224,12 @@ async function main(): Promise<void> {
   });
   useUIStore.setState({ voiceFullscreen: params.get('fullscreen') === '1' });
   if (scene.pointers) animatePointers(scene.pointers);
+  if (params.get('ping') === '1') {
+    const sample = (i: number) => (i % 37 === 20 ? null : i % 18 === 0 ? 87 : i % 18 === 5 ? 62 : 6 + (i * 7) % 9);
+    for (let i = 0; i < 90; i++) pushPing(sample(i));
+    let next = 90;
+    window.setInterval(() => pushPing(sample(next++)), 1000);
+  }
   createRoot(host).render(<Workbench scene={scene} participants={participants} />);
 }
 

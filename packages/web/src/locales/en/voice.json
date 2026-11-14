@@ -79,7 +79,16 @@
       "screenAudio": "Screen Audio",
       "unknown": "Unknown"
     },
-    "remoteParticipant": "Remote"
+    "remoteParticipant": "Remote",
+    "pingGraph": {
+      "title": "Ping",
+      "window": "last {{minutes}} min",
+      "min": "min",
+      "avg": "avg",
+      "max": "max",
+      "empty": "No measurements yet",
+      "summaryLabel": "Ping: lowest {{min}}, average {{avg}}, highest {{max}}"
+    }
   },
   "screenPicker": {
     "title": "Share Your Screen",
