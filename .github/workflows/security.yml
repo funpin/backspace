@@ -10,10 +10,12 @@ name: Security
 # a NEW vulnerability blocks while the documented backlog stays visible. See
 # docs/systems/security-scanning.md.
 
+# Fork: no run on pushes to main. Every change reaches main through a pull
+# request, where the same tree was just scanned, and the weekly run catches
+# advisories published since. GitHub pauses workflows on forks that use
+# Actions heavily, so the duplicate run after each merge is left out.
 on:
   pull_request:
-  push:
-    branches: [main]
   schedule:
     - cron: '32 5 * * 1' # weekly Monday 05:32 UTC
 
