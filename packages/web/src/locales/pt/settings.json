@@ -4,6 +4,22 @@
     "description": "Redimensiona textos, botões e painéis. Salva neste navegador ou app, neste dispositivo.",
     "reset": "Redefinir para 100%"
   },
+  "accentTheme": {
+    "label": "Tema de cores",
+    "description": "A cor de destaque dos botões e da seleção, com uma cor combinada para não lidas e menções. Salvo neste navegador ou app, neste dispositivo.",
+    "themes": {
+      "lavender": "Lavanda",
+      "emerald": "Esmeralda",
+      "amber": "Âmbar",
+      "ice": "Gelo",
+      "rose": "Rosa",
+      "mono": "Mono"
+    }
+  },
+  "motion": {
+    "label": "Animações da interface",
+    "description": "Transições suaves e resposta aos cliques. Desative para que tudo mude na hora."
+  },
   "voice": {
     "input": {
       "title": "Dispositivo de entrada",

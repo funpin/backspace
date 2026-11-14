@@ -6,6 +6,8 @@ import { uploadSticker } from './stickerUpload';
 import { describeError } from '../../i18n/errors';
 import { HttpError } from '../../api/client';
 import { usePickerEscapeClaim } from './pickerEscape';
+import { Button } from '../ui/Button';
+import { IconButton } from '../ui/IconButton';
 
 interface StickerUploadFormProps {
   /**
@@ -203,19 +205,9 @@ export function StickerUploadForm({ onAdded, onCancel, capacity }: StickerUpload
         choose(Array.from(event.clipboardData.files), items.length === 1 ? 'replace' : 'append');
       }}
     >
-      <div className="flex items-center justify-between border-b border-border-soft px-4 py-3">
+      <div className="flex items-center justify-between border-b border-glass-border px-4 py-2.5">
         <h3 className="text-sm font-semibold">{t('stickers.upload')}</h3>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={onCancel}
-          className="sticker-icon-button"
-          aria-label={t('stickers.cancel')}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-            <path d="m6 6 12 12M6 18 18 6" />
-          </svg>
-        </button>
+        <IconButton icon="x" size="sm" noTitle label={t('stickers.cancel')} disabled={busy} onClick={onCancel} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-4 space-y-3">
@@ -241,28 +233,27 @@ export function StickerUploadForm({ onAdded, onCancel, capacity }: StickerUpload
         />
 
         {items.length === 0 && (
-          <p className="text-center text-[11px] text-txt-tertiary">{t('stickers.limits')}</p>
+          <p className="text-center text-2xs text-txt-tertiary">{t('stickers.limits')}</p>
         )}
 
         {error && (
-          <p role="alert" className="rounded-lg bg-accent-rose/10 px-3 py-2 text-xs text-txt-danger">
+          <p role="alert" className="rounded-lg bg-status-danger/10 px-3 py-2 text-xs text-status-danger">
             {error}
           </p>
         )}
       </div>
 
-      <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border-soft px-4 py-3">
-        <button type="button" disabled={busy} onClick={onCancel} className="sticker-secondary-button">
+      <div className="flex shrink-0 items-center justify-end gap-2 border-t border-glass-border px-4 py-2.5">
+        <Button variant="ghost" size="sm" disabled={busy} onClick={onCancel}>
           {t('stickers.cancel')}
-        </button>
-        <button type="submit" disabled={!isAllReady || busy} className="sticker-primary-button">
-          {busy && <span className="sticker-spinner" aria-hidden="true" />}
+        </Button>
+        <Button type="submit" variant="primary" size="sm" loading={busy} disabled={!isAllReady || busy}>
           <span role={busy ? 'status' : undefined}>
             {progress && progress.total > 1
               ? t('stickers.uploadingProgress', progress)
               : t(busy ? 'stickers.uploading' : 'stickers.save')}
           </span>
-        </button>
+        </Button>
       </div>
     </form>
   );

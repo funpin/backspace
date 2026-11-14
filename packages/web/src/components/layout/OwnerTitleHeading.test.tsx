@@ -153,7 +153,7 @@ describe('owner title heading', () => {
     delete olderHostSpace.ownerTitle;
     useSpaceStore.setState({ spaces: [olderHostSpace as TaggedSpace] });
     render(<Heading />);
-    expect(screen.getByRole('heading', { name: 'Owner — 1' })).toHaveClass('uppercase');
+    expect(screen.getByRole('heading', { name: 'Owner — 1' })).not.toHaveClass('uppercase');
     expect(screen.queryByRole('button', { name: 'Edit owner title' })).not.toBeInTheDocument();
   });
 

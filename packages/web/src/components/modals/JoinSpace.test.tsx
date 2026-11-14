@@ -83,7 +83,7 @@ describe('JoinSpaceModal', () => {
     // The submit button is the validation gate in this UI — there is no
     // click-to-show-error path. parseInviteInput's 'Invite code is required'
     // branch is defensive only and unreachable from the rendered form.
-    expect(screen.getByText('Join Space')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Join Space' })).toBeDisabled();
   });
 
   it('calls joinByCode with the entered invite code and navigates on success', async () => {

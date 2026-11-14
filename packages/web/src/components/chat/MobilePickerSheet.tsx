@@ -36,7 +36,7 @@ export function MobilePickerSheet({ onClose, header, label, children }: MobilePi
       {/* Backdrop: a single tap (mousedown or touchstart) closes */}
       <div
         data-testid="picker-sheet-backdrop"
-        className="fixed inset-0 z-[300] bg-black/30"
+        className="fixed inset-0 z-modal bg-surface-overlay"
         onMouseDown={onClose}
         onTouchStart={onClose}
       />
@@ -44,7 +44,7 @@ export function MobilePickerSheet({ onClose, header, label, children }: MobilePi
       <div
         role={label ? 'dialog' : undefined}
         aria-label={label}
-        className={`fixed left-0 right-0 z-[301] rounded-t-2xl glass-modal flex flex-col ${
+        className={`fixed left-0 right-0 z-modal rounded-t-2xl glass-modal flex flex-col ${
           hasInteracted ? '' : 'animate-slide-up-sheet'
         }`}
         style={{

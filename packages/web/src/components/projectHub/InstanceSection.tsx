@@ -20,7 +20,7 @@ export function InstanceSection(props: { info: InstanceInfoResponse | null }): J
 
   return (
     <section aria-labelledby={titleId}>
-      <h2 id={titleId} className="mb-2 text-xs font-semibold uppercase tracking-wider text-txt-tertiary">
+      <h2 id={titleId} className="mb-2 text-xs font-medium text-txt-tertiary">
         {t('instance.title')}
       </h2>
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

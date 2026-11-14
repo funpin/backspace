@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { TriStateToggle, type TriState } from './TriStateToggle';
 import { PermissionBits } from '../../utils/permissions';
 import { Tooltip } from './Tooltip';
-import { LOCK_ICON } from './LockNote';
+import { Button } from './Button';
+import { Icon } from './Icon';
 
-const TRASH_ICON = 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z';
 
 export type PermissionKey = keyof typeof PermissionBits;
 
@@ -105,10 +105,10 @@ export function OverrideEntry({
   const hasLockedRow = !readOnly && permDefs.some((p) => (lockedBits & p.bit) !== 0n);
 
   return (
-    <div className="rounded-lg bg-white/[0.02] overflow-hidden">
+    <div className="rounded-lg bg-surface-elevated overflow-hidden">
       {/* The expand toggle and the remove action are siblings: a button inside
           a button is invalid HTML and reads as one control. */}
-      <div className="flex items-center hover:bg-interactive-hover transition-colors">
+      <div className="flex items-center hover:bg-interactive-hover transition-colors duration-fast">
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
@@ -122,16 +122,15 @@ export function OverrideEntry({
           />
           <span className="text-sm font-medium text-txt-primary flex-1 truncate">{label}</span>
           {!expanded && summary.length > 0 && (
-            <span className="text-[11px] text-txt-tertiary flex-shrink-0">
+            <span className="text-2xs text-txt-tertiary flex-shrink-0 tabular-nums">
               {t('spaces:permissions.overrideCount', { count: summary.length })}
             </span>
           )}
-          <svg
-            width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
-            className={`text-txt-tertiary transition-transform flex-shrink-0 ${expanded ? 'rotate-180' : ''}`}
-          >
-            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
-          </svg>
+          <Icon
+            name="chevron-down"
+            size="sm"
+            className={`text-txt-tertiary transition-transform duration-base ease-out ${expanded ? 'rotate-180' : ''}`}
+          />
         </button>
         {removable ? (
           <Tooltip
@@ -145,13 +144,11 @@ export function OverrideEntry({
               onClick={removeDisabled ? undefined : onRemove}
               disabled={removeDisabled}
               aria-label={t('spaces:permissions.removeOverrideFor', { name: label })}
-              className={`w-7 h-7 mr-1.5 flex items-center justify-center rounded text-txt-tertiary transition-colors ${
-                removeDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:text-accent-rose hover:bg-accent-rose/10'
+              className={`w-7 h-7 mr-1.5 flex items-center justify-center rounded-lg text-txt-tertiary transition-colors duration-fast ${
+                removeDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:text-status-danger hover:bg-status-danger/10'
               }`}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d={TRASH_ICON} />
-              </svg>
+              <Icon name="trash-2" size="sm" />
             </button>
           </Tooltip>
         ) : (
@@ -164,13 +161,11 @@ export function OverrideEntry({
           id={panelId}
           role="region"
           aria-label={label}
-          className="px-3 pb-3 space-y-1.5 border-t border-white/[0.04] pt-2"
+          className="px-3 pb-3 space-y-1.5 border-t border-border-soft pt-2"
         >
           {(readOnly || hasLockedRow) && (
-            <div className="flex items-start gap-2 pb-1 text-[12px] leading-snug text-txt-tertiary">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="flex-shrink-0 mt-[2px]">
-                <path d={LOCK_ICON} />
-              </svg>
+            <div className="flex items-start gap-2 pb-1 text-xs text-txt-tertiary">
+              <Icon name="lock" size="xs" className="mt-px" />
               <span>{readOnly ? readOnlyNote : t('spaces:permissions.unheldLocked')}</span>
             </div>
           )}
@@ -180,18 +175,12 @@ export function OverrideEntry({
             const name = permissionNames[perm.key];
             return (
               <div key={perm.key} className="flex items-center justify-between gap-3">
-                <span className={`text-[13px] text-txt-secondary${locked ? ' opacity-60' : ''}`}>{name}</span>
+                <span className={`text-compact text-txt-secondary${locked ? ' opacity-60' : ''}`}>{name}</span>
                 <span className="flex items-center gap-2 flex-shrink-0">
                   {unheld && (
-                    <svg
-                      width="12" height="12" viewBox="0 0 24 24" fill="currentColor"
-                      className="text-txt-tertiary"
-                      role="img"
-                      aria-label={t('spaces:permissions.unheldPermission')}
-                    >
-                      <title>{t('spaces:permissions.unheldPermission')}</title>
-                      <path d={LOCK_ICON} />
-                    </svg>
+                    <span className="text-txt-tertiary" title={t('spaces:permissions.unheldPermission')}>
+                      <Icon name="lock" size="xs" label={t('spaces:permissions.unheldPermission')} />
+                    </span>
                   )}
                   <TriStateToggle
                     value={getState(perm.bit)}
@@ -204,20 +193,19 @@ export function OverrideEntry({
             );
           })}
           {removable && !readOnly && (
-            <div className="flex items-center justify-between gap-3 pt-2.5 !mt-2.5 border-t border-white/[0.04]">
-              <span className="text-[12px] leading-snug text-txt-tertiary">
+            <div className="flex items-center justify-between gap-3 pt-2.5 !mt-2.5 border-t border-border-soft">
+              <span className="text-xs text-txt-tertiary">
                 {t(removeLocked ? 'spaces:permissions.removeUnheld' : 'spaces:permissions.removeOverrideHint')}
               </span>
-              <button
-                type="button"
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={removeLocked ? undefined : onRemove}
                 disabled={removeLocked}
-                className={`flex-shrink-0 px-2.5 py-1 rounded text-[12.5px] font-medium text-accent-rose transition-colors ${
-                  removeLocked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-accent-rose/10'
-                }`}
+                className="flex-shrink-0"
               >
                 {t('spaces:permissions.removeOverride')}
-              </button>
+              </Button>
             </div>
           )}
         </div>

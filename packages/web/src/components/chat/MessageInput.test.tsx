@@ -298,7 +298,7 @@ describe('MessageInput staged attachment controls', () => {
       const abortButton = screen.getByRole('button', { name: 'Abort' });
       const clip = abortButton.closest('.overflow-hidden');
 
-      expect(clip).toHaveClass('absolute', 'inset-0', 'rounded-lg');
+      expect(clip).toHaveClass('absolute', 'inset-0', 'rounded-xl');
       expect(clip?.parentElement).not.toHaveClass('overflow-hidden');
       expect(screen.queryByRole('button', { name: 'Remove attachment' })).not.toBeInTheDocument();
       fireEvent.click(abortButton);

@@ -13,6 +13,8 @@ import { useTransferStore } from '../../stores/transferStore';
 import { waitForTransferAttachment } from '../../utils/waitForTransfer';
 import { SourceCodeLink } from '../ui/SourceCodeLink';
 import { describeError } from '../../i18n/errors';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 
 // Single-source regex for extracting a bare invite token from a pasted full URL.
 // Token format: 22 chars base64url ([A-Za-z0-9_-]).
@@ -418,23 +420,23 @@ export function RegisterPage() {
     // uses `min-h-full` so short content still centers vertically.
     <div className="h-full overflow-y-auto bg-surface-base relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--accent-primary)/0.06)_0%,transparent_50%)] pointer-events-none" />
-      <div className="min-h-full flex items-center justify-center px-4 py-6 md:py-10 relative z-10">
-        <div className="w-full max-w-[480px] bg-surface-elevated rounded-md p-6 md:p-8 shadow-elevation-high overflow-hidden">
+      <div className="min-h-full flex items-center justify-center px-4 py-6 md:py-10 relative z-raised">
+        <div className="w-full max-w-[480px] bg-surface-channel border border-border-hard rounded-2xl p-6 md:p-8 overflow-hidden">
         {/* Progress dots */}
         <div className="flex justify-center gap-2 mb-5">
-          <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${step === 1 ? 'bg-accent-primary' : 'bg-txt-tertiary/30'}`} />
-          <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${step === 2 ? 'bg-accent-primary' : 'bg-txt-tertiary/30'}`} />
+          <div className={`w-2 h-2 rounded-full transition-colors duration-slow ${step === 1 ? 'bg-accent-tone' : 'bg-txt-tertiary/30'}`} />
+          <div className={`w-2 h-2 rounded-full transition-colors duration-slow ${step === 2 ? 'bg-accent-tone' : 'bg-txt-tertiary/30'}`} />
         </div>
 
         {step === 1 ? (
           <div key="step1" className={`w-full${direction === 'back' ? ' animate-step-back' : ''}`}>
             <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-txt-primary">{t('auth:register.title')}</h1>
+              <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:register.title')}</h1>
             </div>
 
             <form onSubmit={handleContinue}>
               {error && (
-                <div className="mb-4 p-3 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+                <div className="mb-4 px-3 py-2.5 bg-status-danger/10 rounded-lg text-status-danger text-sm">
                   {error}
                 </div>
               )}
@@ -442,7 +444,7 @@ export function RegisterPage() {
               {/* Closed-registration invite entry — shown when registration is closed and:
                   (a) no URL token is present, or (b) the URL token has already failed validation */}
               {showManualEntry && (
-                <div className="mb-4 p-3 rounded-lg bg-surface-elevated border border-white/[0.06] space-y-2">
+                <div className="mb-4 p-3 rounded-lg bg-surface-elevated space-y-2">
                   <div className="text-sm text-txt-secondary">
                     {t('auth:register.invite.closedNotice')}
                   </div>
@@ -461,15 +463,13 @@ export function RegisterPage() {
                     <div className="text-xs text-txt-tertiary">{t('auth:register.invite.checking')}</div>
                   )}
                   {!inviteChecking && inviteCheck?.valid === true && (
-                    <div className="text-xs text-status-online flex items-center gap-1">
-                      <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
+                    <div className="text-xs text-status-ok flex items-center gap-1">
+                      <Icon name="check" size="xs" />
                       {t('auth:register.invite.valid', { name: inviteCheck.name })}
                     </div>
                   )}
                   {!inviteChecking && inviteCheck?.valid === false && (
-                    <div className="text-xs text-txt-danger">
+                    <div className="text-xs text-status-danger">
                       {inviteCheck.reason === 'expired' && t('auth:register.invite.expired')}
                       {inviteCheck.reason === 'exhausted' && t('auth:register.invite.exhausted')}
                       {inviteCheck.reason === 'invalid' && t('auth:register.invite.invalidCode')}
@@ -484,7 +484,7 @@ export function RegisterPage() {
                   error copy ("Invalid invite link — please request a new one") wraps cleanly
                   inside a 360 px viewport instead of forcing a single-line pill that overflows. */}
               {urlInviteToken && instanceInfo && !instanceInfo.registrationOpen && (
-                <div className="mb-4 flex md:inline-flex items-start md:items-center gap-2 px-3 py-1.5 rounded-md md:rounded-full bg-accent-primary/10 text-accent-primary text-xs">
+                <div className="mb-4 flex md:inline-flex items-start md:items-center gap-2 px-3 py-1.5 rounded-lg bg-accent-tone/[0.16] text-accent-tone text-xs">
                   {inviteChecking ? (
                     <>
                       <svg className="w-3 h-3 animate-spin flex-shrink-0 mt-0.5 md:mt-0" viewBox="0 0 24 24" fill="none">
@@ -495,16 +495,12 @@ export function RegisterPage() {
                     </>
                   ) : inviteCheck?.valid === true ? (
                     <>
-                      <svg className="w-3 h-3 flex-shrink-0 mt-0.5 md:mt-0" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
+                      <Icon name="check" size="xs" className="mt-0.5 md:mt-0" />
                       <span className="break-all">{t('auth:register.invite.using', { name: inviteCheck.name })}</span>
                     </>
                   ) : inviteCheck?.valid === false ? (
                     <>
-                      <svg className="w-3 h-3 flex-shrink-0 mt-0.5 md:mt-0" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
+                      <Icon name="x" size="xs" className="mt-0.5 md:mt-0" />
                       <span>{t('auth:register.invite.invalidLink')}</span>
                     </>
                   ) : (
@@ -514,8 +510,8 @@ export function RegisterPage() {
               )}
 
               <div className="mb-5">
-                <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
-                  {t('common:labels.username')} <span className="text-txt-danger">*</span>
+                <label className="block text-xs font-medium text-txt-secondary mb-1.5">
+                  {t('common:labels.username')} <span className="text-status-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -528,9 +524,9 @@ export function RegisterPage() {
                 />
                 {usernameStatus !== 'idle' && (
                   <div className={`mt-1.5 flex items-center gap-1.5 text-xs ${
-                    usernameStatus === 'available' ? 'text-status-online' :
+                    usernameStatus === 'available' ? 'text-status-ok' :
                     usernameStatus === 'checking' ? 'text-txt-tertiary' :
-                    'text-txt-danger'
+                    'text-status-danger'
                   }`}>
                     {usernameStatus === 'checking' && (
                       <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -539,14 +535,10 @@ export function RegisterPage() {
                       </svg>
                     )}
                     {usernameStatus === 'available' && (
-                      <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
+                      <Icon name="check" size="xs" />
                     )}
                     {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
-                      <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
+                      <Icon name="x" size="xs" />
                     )}
                     <span>{usernameStatusMessage}</span>
                   </div>
@@ -554,8 +546,8 @@ export function RegisterPage() {
               </div>
 
               <div className="mb-5">
-                <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
-                  {t('common:labels.password')} <span className="text-txt-danger">*</span>
+                <label className="block text-xs font-medium text-txt-secondary mb-1.5">
+                  {t('common:labels.password')} <span className="text-status-danger">*</span>
                 </label>
                 <input
                   type="password"
@@ -567,8 +559,8 @@ export function RegisterPage() {
               </div>
 
               <div className="mb-5">
-                <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
-                  {t('auth:fields.confirmPassword')} <span className="text-txt-danger">*</span>
+                <label className="block text-xs font-medium text-txt-secondary mb-1.5">
+                  {t('auth:fields.confirmPassword')} <span className="text-status-danger">*</span>
                 </label>
                 <input
                   type="password"
@@ -579,15 +571,18 @@ export function RegisterPage() {
                 />
               </div>
 
-              <button
+              <Button
                 type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
                 disabled={continueDisabled}
-                // py-3 on mobile yields ≥44 px tap target (Apple HIG); py-2.5 keeps the
-                // tighter desktop look from before.
-                className="w-full py-3 md:py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                // h-11 on mobile yields a ≥44 px tap target (Apple HIG); the
+                // desktop keeps the large control height.
+                className="h-11 md:h-10"
               >
                 {t('common:actions.continue')}
-              </button>
+              </Button>
 
               {/* Helper text when invite is required but not yet entered */}
               {inviteRequired && !manualInviteToken.trim() && !urlInviteToken && (
@@ -601,7 +596,7 @@ export function RegisterPage() {
                   t={t}
                   i18nKey="auth:register.loginPrompt"
                   components={{
-                    actionLink: <Link to={`/login${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="text-accent-primary hover:underline" />,
+                    actionLink: <Link to={`/login${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="text-txt-link hover:underline" />,
                   }}
                 />
               </p>
@@ -610,19 +605,19 @@ export function RegisterPage() {
         ) : (
           <div key="step2" className={`w-full${direction === 'forward' ? ' animate-step-forward' : ''}`}>
             <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-txt-primary">{t('auth:register.personalize.title')}</h1>
+              <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:register.personalize.title')}</h1>
               <p className="text-txt-tertiary text-sm mt-1">{t('auth:register.personalize.subtitle')}</p>
             </div>
 
             {retryAfter > 0 && (
-              <div className="mb-4 p-3 bg-accent-amber/10 border border-accent-amber/30 rounded text-sm">
-                <p className="font-medium text-accent-amber">{t('auth:register.rateLimited.title')}</p>
+              <div className="mb-4 px-3 py-2.5 bg-status-warn/10 rounded-lg text-sm">
+                <p className="font-medium text-status-warn">{t('auth:register.rateLimited.title')}</p>
                 <p className="text-txt-secondary mt-0.5">{t('auth:register.rateLimited.retryIn', { seconds: retryAfter })}</p>
               </div>
             )}
 
             {error && (
-              <div className="mb-4 p-3 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+              <div className="mb-4 px-3 py-2.5 bg-status-danger/10 rounded-lg text-status-danger text-sm">
                 {error}
               </div>
             )}
@@ -640,17 +635,14 @@ export function RegisterPage() {
                   size={80}
                   avatarColor={avatarColor}
                 />
-                <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                <div className="absolute inset-0 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-fast flex items-center justify-center">
+                  <Icon name="camera" size="lg" />
                 </div>
               </button>
               <button
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
-                className="text-xs text-accent-primary hover:underline mt-2"
+                className="text-xs text-txt-link hover:underline mt-2"
               >
                 {t('auth:register.uploadPhoto')}
               </button>
@@ -665,7 +657,7 @@ export function RegisterPage() {
 
             {/* Display Name */}
             <div className="mb-5">
-              <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+              <label className="block text-xs font-medium text-txt-secondary mb-1.5">
                 {t('common:labels.displayName')}
               </label>
               <input
@@ -680,7 +672,7 @@ export function RegisterPage() {
 
             {/* Avatar Color Picker */}
             <div className="mb-6">
-              <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+              <label className="block text-xs font-medium text-txt-secondary mb-1.5">
                 {t('auth:fields.avatarColor')}
               </label>
               {/* Color swatch row: gap tightens on narrow viewports so the 7 swatches
@@ -694,10 +686,10 @@ export function RegisterPage() {
                       key={key}
                       type="button"
                       onClick={() => setAvatarColor(key)}
-                      className="w-8 h-8 rounded-full border-2 transition-all hover:scale-110"
+                      className="w-8 h-8 rounded-full border-2 transition-transform duration-base ease-pop hover:scale-110"
                       style={{
                         background: entry.gradient,
-                        borderColor: avatarColor === key ? 'white' : 'transparent',
+                        borderColor: avatarColor === key ? 'rgb(var(--text-primary))' : 'transparent',
                         boxShadow: avatarColor === key ? `0 0 0 2px ${entry.glow}40` : 'none',
                       }}
                       // `key` is the closed AvatarColor union; the catalog lists every member:
@@ -710,18 +702,20 @@ export function RegisterPage() {
             </div>
 
             {/* Actions */}
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
               onClick={() => handleRegister(false)}
               disabled={isDisabled}
-              className="w-full py-3 md:py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-11 md:h-10"
             >
               {retryAfter > 0
                 ? t('auth:register.rateLimited.retryIn', { seconds: retryAfter })
                 : isRegistering
                   ? t('auth:register.submitting')
                   : t('auth:register.submit')}
-            </button>
+            </Button>
 
             <div className="flex items-center justify-between mt-3">
               <button
@@ -729,7 +723,7 @@ export function RegisterPage() {
                 onClick={() => { setError(''); setRetryAfter(0); setDirection('back'); setStep(1); }}
                 disabled={isRegistering}
                 // py-2 px-1 widens the tap area on mobile while keeping the visual link style.
-                className="text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50 py-2 px-1 -mx-1"
+                className="text-sm text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast disabled:opacity-40 py-2 px-1 -mx-1"
               >
                 {t('common:actions.back')}
               </button>
@@ -737,7 +731,7 @@ export function RegisterPage() {
                 type="button"
                 onClick={() => handleRegister(true)}
                 disabled={isDisabled}
-                className="text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50 py-2 px-1 -mx-1"
+                className="text-sm text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast disabled:opacity-40 py-2 px-1 -mx-1"
               >
                 {t('auth:register.skip')}
               </button>
@@ -747,7 +741,7 @@ export function RegisterPage() {
 
         {/* AGPL § 13: source offer for anonymous visitors, shown on both steps. */}
         {instanceInfo && (
-          <div className="mt-6 pt-4 border-t border-white/[0.04] flex justify-center">
+          <div className="mt-6 pt-4 border-t border-border-hard flex justify-center">
             <SourceCodeLink sourceCodeUrl={instanceInfo.sourceCodeUrl} version={instanceInfo.version} commit={instanceInfo.commit} />
           </div>
         )}

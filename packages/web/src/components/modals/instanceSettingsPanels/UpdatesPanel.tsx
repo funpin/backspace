@@ -3,6 +3,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { useFormatters, type Formatters } from '../../../i18n/formatters';
 import { useUIStore } from '../../../stores/uiStore';
 import { useSettingsStore } from '../../../stores/settingsStore';
+import { Button } from '../../ui/Button';
+import { Icon } from '../../ui/Icon';
 import type { InstanceUpdateStatus } from '@backspace/shared';
 
 /**
@@ -39,13 +41,15 @@ function CommandBlock({ command }: { command: string }) {
       <code className="flex-1 min-w-0 rounded-lg bg-surface-input px-3 py-2 font-mono text-xs text-txt-primary overflow-x-auto whitespace-pre select-all">
         {command}
       </code>
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        size="sm"
+        icon={copied ? 'check' : 'copy'}
+        className="shrink-0 self-start"
         onClick={copy}
-        className="shrink-0 px-3 py-2 text-xs font-medium rounded-lg text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] transition-colors"
       >
         {copied ? t('common:actions.copied') : t('common:actions.copy')}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -110,17 +114,17 @@ export function UpdatesPanel() {
   if (status === null) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-txt-primary">{t('admin:updates.title')}</h2>
-        <div className="rounded-lg bg-accent-rose/10 border border-accent-rose/20 p-3.5 text-sm text-txt-secondary">
+        <h2 className="text-xl font-semibold text-txt-primary">{t('admin:updates.title')}</h2>
+        <div className="rounded-xl bg-status-danger/10 border border-status-danger/30 p-3.5 text-sm text-status-danger">
           {loadError || t('admin:updates.loadFailed')}
         </div>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          icon="refresh-cw"
           onClick={() => void load(false)}
-          className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
         >
           {t('common:actions.tryAgain')}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -144,7 +148,7 @@ export function UpdatesPanel() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold text-txt-primary">{t('admin:updates.title')}</h2>
+        <h2 className="text-xl font-semibold text-txt-primary">{t('admin:updates.title')}</h2>
         <div className="text-xs text-txt-tertiary mt-1">
           {t('admin:updates.description')}
         </div>
@@ -154,17 +158,17 @@ export function UpdatesPanel() {
           still on hand: keep showing it and surface the failure inline rather
           than discarding a perfectly good view for an error page. */}
       {loadError !== '' && (
-        <div className="rounded-lg bg-accent-rose/10 border border-accent-rose/20 p-3.5 text-sm text-txt-secondary">
+        <div className="rounded-xl bg-status-danger/10 border border-status-danger/30 p-3.5 text-sm text-status-danger">
           {loadError}
         </div>
       )}
 
       {/* What is running now */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('admin:updates.running.label')}
         </div>
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <div className="text-sm text-txt-primary font-medium">
             {t('common:appName')} {status.current.version}
           </div>
@@ -178,10 +182,10 @@ export function UpdatesPanel() {
       {/* What to do about it */}
       {updateAvailable && status.latest !== null ? (
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">
             {t('admin:updates.available.label')}
           </div>
-          <div className="rounded-lg bg-accent-primary/[0.06] border border-accent-primary/25 p-3.5 space-y-3">
+          <div className="rounded-xl bg-accent-tone/[0.16] border border-accent-tone/25 p-3.5 space-y-3">
             <div>
               <div className="text-sm text-txt-primary font-medium">
                 {t('admin:updates.available.version', { version: status.latest.version })}
@@ -192,7 +196,7 @@ export function UpdatesPanel() {
                   href={status.latest.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent-primary hover:underline"
+                  className="text-txt-link hover:underline"
                 >
                   {t('admin:updates.available.releaseNotes')}
                 </a>
@@ -212,15 +216,13 @@ export function UpdatesPanel() {
                 type="button"
                 onClick={() => setShowManual((v) => !v)}
                 aria-expanded={showManual}
-                className="flex items-center gap-1 -ml-1 px-1 py-0.5 rounded text-xs text-txt-secondary hover:text-txt-primary transition-colors"
+                className="flex items-center gap-1 -ml-1 px-1 py-0.5 rounded text-xs text-txt-secondary hover:text-txt-primary transition-colors duration-fast"
               >
-                <svg
-                  className={`w-3 h-3 transition-transform ${showManual ? 'rotate-90' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
-                  aria-hidden="true"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
+                <Icon
+                  name="chevron-right"
+                  size="xs"
+                  className={`transition-transform duration-base ease-out ${showManual ? 'rotate-90' : ''}`}
+                />
                 {t('admin:updates.available.noScript')}
               </button>
               {showManual && (
@@ -259,9 +261,12 @@ export function UpdatesPanel() {
           </div>
         </div>
       ) : (
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           {status.state === 'up-to-date' && (
-            <div className="text-sm text-accent-mint">{t('admin:updates.upToDate')}</div>
+            <div className="flex items-center gap-2 text-sm text-status-ok">
+              <Icon name="circle-check" size="sm" />
+              {t('admin:updates.upToDate')}
+            </div>
           )}
           {status.state === 'unknown' && status.reason === 'disabled' && (
             <>
@@ -298,14 +303,15 @@ export function UpdatesPanel() {
         <div className="text-xs text-txt-tertiary">
           {lastCheckedLine()}
         </div>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
+          icon="refresh-cw"
           onClick={() => void load(true)}
           disabled={checking || !status.checkEnabled}
-          className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-50"
         >
           {checking ? t('admin:updates.checking') : t('admin:updates.checkAgain')}
-        </button>
+        </Button>
       </div>
     </div>
   );

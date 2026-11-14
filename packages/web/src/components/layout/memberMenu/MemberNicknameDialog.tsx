@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MAX_MEMBER_NICKNAME_LENGTH, normalizeMemberNickname } from '@backspace/shared/src/constants';
 import { Modal } from '../../ui/Modal';
+import { Button } from '../../ui/Button';
 import { getApiForOrigin } from '../../../stores/spaceStore';
 import { applySpaceMemberUpdate } from '../../../stores/spaceMemberUpdates';
 import { describeError } from '../../../i18n/errors';
@@ -68,13 +69,13 @@ export function MemberNicknameDialog({ target, nickname, accountName, self, onCl
         </p>
 
         {error && (
-          <div role="alert" className="mb-3 p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+          <div role="alert" className="mb-3 rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger">
             {error}
           </div>
         )}
 
         <div className="mb-4">
-          <label htmlFor="member-nickname-input" className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+          <label htmlFor="member-nickname-input" className="block text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:members.nickname.label')}
           </label>
           <input
@@ -90,36 +91,18 @@ export function MemberNicknameDialog({ target, nickname, accountName, self, onCl
           />
         </div>
 
-        <div className="sticky bottom-0 z-10 pointer-events-none">
-          <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-3 py-2 flex items-center gap-3 pointer-events-auto">
-              {nickname !== null && (
-                <button
-                  type="button"
-                  onClick={() => void save(null)}
-                  disabled={saving}
-                  className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
-                >
-                  {t('spaces:members.nickname.reset')}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={close}
-                disabled={saving}
-                className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
-              >
-                {t('common:actions.cancel')}
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
-              >
-                {saving ? t('common:states.pleaseWait') : t('common:actions.save')}
-              </button>
-            </div>
-          </div>
+        <div className="flex items-center justify-end gap-2 pt-1">
+          {nickname !== null && (
+            <Button variant="ghost" onClick={() => void save(null)} disabled={saving} className="mr-auto">
+              {t('spaces:members.nickname.reset')}
+            </Button>
+          )}
+          <Button variant="ghost" onClick={close} disabled={saving}>
+            {t('common:actions.cancel')}
+          </Button>
+          <Button variant="primary" type="submit" disabled={saving}>
+            {saving ? t('common:states.pleaseWait') : t('common:actions.save')}
+          </Button>
         </div>
       </form>
     </Modal>

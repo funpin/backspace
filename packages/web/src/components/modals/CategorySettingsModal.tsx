@@ -11,6 +11,8 @@ import type { PermissionDef } from '../ui/OverrideEntry';
 import { describeError } from '../../i18n/errors';
 import { useEntityOverrides } from '../../hooks/useEntityOverrides';
 import { PrivacySetting } from './PrivacySetting';
+import { Icon } from '../ui/Icon';
+import { Button } from '../ui/Button';
 import { CATEGORY_NAME_MAX_LENGTH, normalizeCategoryName } from '@backspace/shared/src/constants';
 
 // ─── Permission Definitions for Category Overrides ──────────────────────────────
@@ -63,15 +65,13 @@ function OverviewTab({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+        <label className="block text-xs font-medium text-txt-secondary mb-1.5">
           {t('spaces:category.settings.categoryLabel')}
         </label>
         <InlineNameEditor
           name={categoryName}
           icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="opacity-60 flex-shrink-0">
-              <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-            </svg>
+            <Icon name="folder" size="md" className="text-txt-tertiary" />
           }
           canEdit={canManageChannels}
           editLabel={t('spaces:category.settings.rename')}
@@ -83,7 +83,7 @@ function OverviewTab({
       </div>
 
       {error && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+        <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
           {error}
         </div>
       )}
@@ -102,14 +102,11 @@ function OverviewTab({
       )}
 
       {canManageChannels && (
-        <div className="pt-4 border-t border-border-soft">
-          <label className="block text-xs font-bold text-accent-rose uppercase mb-2">{t('common:labels.dangerZone')}</label>
-          <button
-            onClick={onDeleteCategory}
-            className="w-full px-3 py-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-accent-rose text-sm font-medium hover:bg-accent-rose/20 transition-colors"
-          >
+        <div className="pt-4 border-t border-border-hard">
+          <label className="block text-xs font-medium text-status-danger mb-2">{t('common:labels.dangerZone')}</label>
+          <Button variant="danger" icon="trash-2" onClick={onDeleteCategory}>
             {t('spaces:category.settings.deleteButton')}
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -201,8 +198,8 @@ export function CategorySettingsModal() {
   const showTabs = canManageRoles;
 
   const tabClass = (target: typeof tab) =>
-    `w-full text-left px-2.5 py-1.5 rounded text-sm transition-colors ${
-      tab === target ? 'bg-interactive-selected text-txt-primary' : 'text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover'
+    `w-full h-[34px] text-left px-2.5 rounded-lg text-sm transition-colors duration-fast ${
+      tab === target ? 'bg-surface-elevated text-txt-primary font-medium' : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
     }`;
 
   return (
@@ -212,7 +209,7 @@ export function CategorySettingsModal() {
           <div className="flex gap-4 h-[min(520px,calc(70*var(--app-vh)))]">
             {/* Tabs */}
             <div className="w-32 flex-shrink-0 self-start z-10">
-              <div className="glass-bubble rounded-lg p-1.5 space-y-0.5">
+              <div className="space-y-0.5">
                 <button onClick={() => setTab('overview')} className={tabClass('overview')}>
                   {t('spaces:settings.nav.tabs.overview')}
                 </button>

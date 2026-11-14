@@ -40,7 +40,7 @@ function renderNav() {
 
 /** The You tab's dot, or null when the tab shows none. */
 function youDot(): Element | null {
-  return screen.getByRole('button', { name: 'You' }).querySelector('.bg-notification');
+  return screen.getByRole('button', { name: 'You' }).querySelector('.bg-accent-secondary');
 }
 
 beforeEach(() => {

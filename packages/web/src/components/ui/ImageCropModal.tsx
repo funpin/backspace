@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
 import { cropImage } from '../../utils/cropImage';
+import { Button } from './Button';
+import { Icon } from './Icon';
+import { IconButton } from './IconButton';
 
 interface ImageCropModalProps {
   isOpen: boolean;
@@ -77,28 +80,20 @@ export function ImageCropModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[210] flex items-center justify-center animate-fade-in">
+    <div className="fixed inset-0 z-confirm flex items-center justify-center animate-fade-in">
       <div className="absolute inset-0 bg-surface-overlay" onClick={onClose} />
-      <div className="relative max-w-md w-full mx-4 bg-surface-elevated rounded-lg shadow-xl animate-slide-up">
+      <div className="relative max-w-md w-full mx-4 glass-modal rounded-2xl animate-slide-up">
         {/* Title bar */}
-        <div className="flex items-center justify-between px-4 pt-4">
-          <h2 className="text-xl font-bold text-txt-primary">{heading}</h2>
-          <button
-            onClick={onClose}
-            className="text-txt-tertiary hover:text-txt-primary transition-colors p-1"
-            aria-label={t('common:actions.close')}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-            </svg>
-          </button>
+        <div className="flex items-center justify-between gap-3 px-5 pt-5">
+          <h2 className="text-lg font-semibold text-txt-primary">{heading}</h2>
+          <IconButton icon="x" size="sm" label={t('common:actions.close')} onClick={onClose} />
         </div>
 
         {/* Crop area */}
         {/* react-easy-crop mixes DOM rect/client coordinates with CSS pixels.
             Keep only its interactive canvas at effective 100%; dialog controls
             still use the selected interface scale. */}
-        <div className="relative h-[350px] mx-4 mt-3 rounded-lg overflow-hidden bg-surface-base"
+        <div className="relative h-[350px] mx-5 mt-4 rounded-xl overflow-hidden bg-surface-base"
           style={{ zoom: 'calc(1 / var(--interface-scale, 1))' }}>
           <Cropper
             image={imageSrc}
@@ -114,10 +109,8 @@ export function ImageCropModal({
         </div>
 
         {/* Zoom slider */}
-        <div className="px-4 pt-3 flex items-center gap-3">
-          <svg className="w-4 h-4 text-txt-tertiary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-          </svg>
+        <div className="px-5 pt-4 flex items-center gap-3 text-txt-tertiary">
+          <Icon name="zoom-in" size="sm" />
           <input
             type="range"
             min={1}
@@ -125,27 +118,22 @@ export function ImageCropModal({
             step={0.05}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
-            className="flex-1 min-w-0 h-1.5 rounded-full appearance-none bg-surface-input accent-accent-primary cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent-primary"
+            className="flex-1 min-w-0 h-1.5 rounded-full appearance-none bg-surface-input accent-accent-tone cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent-tone"
           />
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 p-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-2.5 text-sm font-medium text-txt-secondary bg-interactive-hover hover:bg-interactive-selected rounded-lg transition-colors"
-          >
+        <div className="flex justify-end gap-2 p-5">
+          <Button variant="ghost" onClick={onClose}>
             {t('common:actions.cancel')}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="primary"
             onClick={handleApply}
             disabled={isProcessing || !croppedAreaPixels}
-            className="flex-1 py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
           >
             {isProcessing ? t('uploads:crop.applying') : t('common:actions.apply')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

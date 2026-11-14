@@ -118,7 +118,7 @@ export function GifPicker({ onGifSelect, mobile = false }: GifPickerProps) {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-surface-elevated rounded-lg animate-pulse"
+                className="skeleton rounded-lg"
                 style={{ height: 100 + Math.random() * 60 }}
               />
             ))}
@@ -133,7 +133,7 @@ export function GifPicker({ onGifSelect, mobile = false }: GifPickerProps) {
               <button
                 key={gif.id}
                 onClick={() => onGifSelect(gif.url)}
-                className="w-full mb-1.5 rounded-lg overflow-hidden hover:ring-2 hover:ring-accent-primary transition-all break-inside-avoid"
+                className="w-full mb-1.5 rounded-lg overflow-hidden hover:ring-2 hover:ring-accent-tone transition-shadow duration-fast break-inside-avoid"
               >
                 <img
                   src={gif.previewUrl}
@@ -156,7 +156,7 @@ export function GifPicker({ onGifSelect, mobile = false }: GifPickerProps) {
       </div>
 
       {/* Attribution */}
-      <div className="px-3 py-1 text-[10px] text-txt-tertiary text-right shrink-0">
+      <div className="px-3 py-1 text-2xs text-txt-tertiary text-right shrink-0">
         {t('chat:gif.attribution')}
       </div>
     </div>

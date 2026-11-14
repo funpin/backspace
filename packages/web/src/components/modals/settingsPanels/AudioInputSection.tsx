@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useVoiceStore } from '../../../stores/voiceStore';
 import { AudioManager } from '../../../audio/AudioManager';
 import { useAudioDevices } from '../../../hooks/useAudioDevices';
+import { Button } from '../../ui/Button';
+import { Icon } from '../../ui/Icon';
 import { SectionShell, DropdownItem } from './_shared/SettingsPickerPrimitives';
 
 export function AudioInputSection() {
@@ -103,16 +105,16 @@ export function AudioInputSection() {
     return (
       <SectionShell title={t('voice.input.title')}>
         <div className="space-y-2">
-          <div className="text-sm text-txt-primary">⚠ {t('voice.input.accessDenied.title')}</div>
+          <div className="flex items-center gap-2 text-sm text-txt-primary">
+            <Icon name="triangle-alert" size="sm" className="text-status-warn" />
+            {t('voice.input.accessDenied.title')}
+          </div>
           <div className="text-xs text-txt-tertiary">
             {t('voice.input.accessDenied.description')}
           </div>
-          <button
-            onClick={() => { requestPermission().catch(() => {}); }}
-            className="text-xs px-3 py-1.5 rounded-md bg-surface-base hover:bg-interactive-hover text-txt-secondary transition-colors"
-          >
+          <Button variant="secondary" size="sm" onClick={() => { requestPermission().catch(() => {}); }}>
             {t('voice.input.accessDenied.retry')}
-          </button>
+          </Button>
         </div>
       </SectionShell>
     );
@@ -125,12 +127,9 @@ export function AudioInputSection() {
           <div className="text-xs text-txt-tertiary">
             {t('voice.input.permissionPrompt.description')}
           </div>
-          <button
-            onClick={() => { requestPermission().catch(() => {}); }}
-            className="text-[13px] px-3 py-2 rounded-md bg-accent-primary hover:bg-accent-primary-hover text-white font-medium transition-colors"
-          >
+          <Button variant="primary" onClick={() => { requestPermission().catch(() => {}); }}>
             {t('voice.input.permissionPrompt.enable')}
-          </button>
+          </Button>
         </div>
       </SectionShell>
     );
@@ -161,16 +160,17 @@ export function AudioInputSection() {
           <button
             type="button"
             onClick={() => setListOpen((v) => !v)}
-            className="w-full px-3 py-2 flex items-center justify-between rounded-md bg-surface-base hover:bg-interactive-hover transition-colors"
+            className="w-full h-[38px] px-3 flex items-center justify-between rounded-lg bg-surface-input shadow-[inset_0_0_0_1px_var(--glass-border)] hover:bg-interactive-hover transition-colors duration-fast"
           >
-            <span className="text-[13px] text-txt-primary truncate text-left">{selectedLabel}</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-              className={`text-txt-tertiary flex-shrink-0 ml-2 transition-transform ${listOpen ? 'rotate-90' : ''}`}>
-              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-            </svg>
+            <span className="text-compact text-txt-primary truncate text-left">{selectedLabel}</span>
+            <Icon
+                name="chevron-right"
+                size="sm"
+                className={`text-txt-tertiary ml-2 transition-transform duration-base ease-out ${listOpen ? 'rotate-90' : ''}`}
+              />
           </button>
           {listOpen && (
-            <div className="mt-1 rounded-md bg-surface-base border border-border-hard py-1 max-h-64 overflow-y-auto">
+            <div className="mt-1 rounded-lg bg-surface-input border border-border-soft py-1 max-h-64 overflow-y-auto">
               <DropdownItem label={systemDefaultLabel} active={inputDeviceId === 'default'} onClick={() => handleSelect('default')} />
               {inputs.filter(d => d.deviceId !== 'default').map((d) => (
                 <DropdownItem
@@ -192,7 +192,7 @@ export function AudioInputSection() {
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <div className="text-[13px] font-medium text-txt-primary">{t('voice.input.volume.label')}</div>
+            <div className="text-compact font-medium text-txt-primary">{t('voice.input.volume.label')}</div>
             <div className="text-xs text-txt-tertiary tabular-nums">{t('common:units.percent', { value: inputVolume })}</div>
           </div>
           <input
@@ -201,17 +201,17 @@ export function AudioInputSection() {
             max={200}
             value={inputVolume}
             onChange={(e) => setInputVolume(Number(e.target.value))}
-            className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-surface-base [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md"
+            className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-interactive-muted [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-txt-primary [&::-webkit-slider-thumb]:shadow-md"
             style={{
-              background: `linear-gradient(to right, rgb(var(--accent-primary)) 0%, rgb(var(--accent-primary)) ${inputVolume / 2}%, rgb(var(--interactive-muted)) ${inputVolume / 2}%, rgb(var(--interactive-muted)) 100%)`,
+              background: `linear-gradient(to right, rgb(var(--accent-tone)) 0%, rgb(var(--accent-tone)) ${inputVolume / 2}%, rgb(var(--interactive-muted)) ${inputVolume / 2}%, rgb(var(--interactive-muted)) 100%)`,
             }}
           />
           <div className="flex items-center gap-[3px] mt-2">
             {Array.from({ length: micBars }).map((_, i) => (
               <div
                 key={i}
-                className={`flex-1 h-[6px] rounded-[1px] transition-colors duration-75 ${
-                  i < activeBars ? 'bg-status-online' : 'bg-interactive-muted'
+                className={`flex-1 h-1.5 rounded-sm transition-colors duration-75 ${
+                  i < activeBars ? 'bg-status-ok' : 'bg-interactive-muted'
                 }`}
               />
             ))}

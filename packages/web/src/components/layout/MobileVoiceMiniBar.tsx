@@ -1,9 +1,10 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUIStore } from '../../stores/uiStore';
 import { useVoiceStore } from '../../stores/voiceStore';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { useActiveDmCall } from '../../hooks/useActiveDmCall';
+import { Icon } from '../ui/Icon';
+import { IconButton } from '../ui/IconButton';
 import { handleDisconnectAction, reconnectVoice, toggleDeafenFromControl, toggleMuteFromControl } from '../../utils/voiceActions';
 
 /**
@@ -50,33 +51,32 @@ export function MobileVoiceMiniBar() {
   // one here, down to the stale participant count.
   const isReconnecting = voiceConnectionStatus === 'reconnecting';
   const isDropped = voiceConnectionStatus === 'disconnected' && !!connectionError;
-  const accentClass = isDropped
-    ? 'text-accent-rose'
-    : isReconnecting ? 'text-accent-amber' : 'text-accent-mint';
-
+  // Connection health is a traffic light whatever the theme: ok, warn, danger.
+  const healthText = isDropped
+    ? 'text-status-danger'
+    : isReconnecting ? 'text-status-warn' : 'text-status-ok';
+  const healthGround = isDropped
+    ? 'bg-status-danger/[0.14]'
+    : isReconnecting ? 'bg-status-warn/[0.14]' : 'bg-status-ok/[0.14]';
 
   return (
-    <div className="glass-bubble mx-2 mb-1 rounded-2xl flex items-center gap-2 px-3 py-2 shrink-0">
+    <div className="glass-bubble mx-2 mb-1 rounded-xl flex items-center gap-1 pl-2 pr-1 py-1 shrink-0">
       {/* Tap to expand */}
       <button
         onClick={() => pushMobileScreen('voice-full')}
-        className="flex-1 flex items-center gap-2 min-w-0"
+        className="flex-1 flex items-center gap-2 min-w-0 min-h-11 text-left"
       >
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-          isDropped ? 'bg-accent-rose/20' : isReconnecting ? 'bg-accent-amber/20' : 'bg-accent-mint/20'
-        }`}>
-          <svg className={`w-4 h-4 ${accentClass}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
-          </svg>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${healthGround} ${healthText}`}>
+          <Icon name="volume-2" size="sm" />
         </div>
         <div className="min-w-0">
-          <p className={`text-xs font-medium truncate ${accentClass}`}>{channelName}</p>
+          <p className={`text-xs font-medium truncate ${healthText}`}>{channelName}</p>
           {isReconnecting ? (
-            <p className="text-[10px] text-txt-tertiary">{t('voice:status.reconnecting')}</p>
+            <p className="text-2xs text-txt-tertiary">{t('voice:status.reconnecting')}</p>
           ) : isDropped ? (
-            <p className="text-[10px] text-txt-tertiary">{t('voice:status.disconnected')}</p>
+            <p className="text-2xs text-txt-tertiary">{t('voice:status.disconnected')}</p>
           ) : participantCount > 0 ? (
-            <p className="text-[10px] text-txt-tertiary">{t('spaces:main.voice.participants', { count: participantCount })}</p>
+            <p className="text-2xs text-txt-tertiary tabular-nums">{t('spaces:main.voice.participants', { count: participantCount })}</p>
           ) : null}
         </div>
       </button>
@@ -84,58 +84,41 @@ export function MobileVoiceMiniBar() {
       {isDropped && (
         <button
           onClick={(e) => { e.stopPropagation(); reconnectVoice(); }}
-          className="px-2 h-8 rounded-full text-[11px] font-medium text-accent-primary hover:bg-interactive-hover transition-colors shrink-0"
+          className="px-2.5 h-11 rounded-lg text-xs font-medium text-accent-tone hover:bg-interactive-hover transition-colors duration-fast shrink-0"
         >
           {t('voice:status.retry')}
         </button>
       )}
 
-      {/* Quick controls */}
-      <div className="flex items-center gap-1 shrink-0">
-        <button
+      {/* Quick controls. 44px squares: the phone's minimum touch target. */}
+      <div className="flex items-center gap-0.5 shrink-0">
+        <IconButton
+          icon={isMuted ? 'mic-off' : 'mic'}
+          label={isMuted ? t('voice:controls.unmute') : t('voice:controls.mute')}
+          size="lg"
+          tone={isMuted ? 'off' : 'default'}
+          className="h-11 w-11"
           onClick={(e) => { e.stopPropagation(); toggleMuteFromControl(); }}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-            isMuted ? 'bg-accent-rose/20 text-accent-rose' : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
-          }`}
-          aria-label={isMuted ? t('voice:controls.unmute') : t('voice:controls.mute')}
-        >
-          {isMuted ? (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-            </svg>
-          )}
-        </button>
-
-        <button
+        />
+        <IconButton
+          icon={isDeafened ? 'headphone-off' : 'headphones'}
+          label={isDeafened ? t('voice:controls.undeafen') : t('voice:controls.deafen')}
+          size="lg"
+          tone={isDeafened ? 'off' : 'default'}
+          className="h-11 w-11"
           onClick={(e) => { e.stopPropagation(); toggleDeafenFromControl(); }}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-            isDeafened ? 'bg-accent-rose/20 text-accent-rose' : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
-          }`}
-          aria-label={isDeafened ? t('voice:controls.undeafen') : t('voice:controls.deafen')}
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
-            {isDeafened && <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />}
-          </svg>
-        </button>
-
-        <button
+        />
+        <IconButton
+          icon="phone-off"
+          label={t('voice:mobileCall.disconnect')}
+          size="lg"
+          tone="danger"
+          className="h-11 w-11"
           onClick={(e) => {
             e.stopPropagation();
             handleDisconnectAction();
           }}
-          className="w-8 h-8 rounded-full flex items-center justify-center bg-accent-rose/20 text-accent-rose hover:bg-accent-rose/30 transition-colors"
-          aria-label={t('voice:mobileCall.disconnect')}
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-          </svg>
-        </button>
+        />
       </div>
     </div>
   );

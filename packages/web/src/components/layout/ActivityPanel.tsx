@@ -30,8 +30,8 @@ function ActivityFriendRow({
   const friendDisplayName = canonical.displayName ?? baseName;
 
   const rowClass = isRichActivity
-    ? `flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] mb-1 cursor-pointer transition-colors glass-pill border-l-2 ${accentClass}`
-    : 'flex items-center gap-2.5 px-2 py-1.5 rounded-[4px] hover:bg-interactive-hover cursor-pointer group transition-colors';
+    ? `flex items-center gap-2.5 px-2.5 py-2 rounded-lg mb-1 cursor-pointer transition-colors duration-fast glass-pill border-l-2 ${accentClass}`
+    : 'flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-interactive-hover cursor-pointer group transition-colors duration-fast';
 
   return (
     <div
@@ -48,9 +48,9 @@ function ActivityFriendRow({
         avatarColor={canonical.avatarColor}
       />
       <div className="flex-1 min-w-0">
-        <span className={`text-[13.5px] leading-[1.2] font-medium truncate ${isOffline ? 'text-txt-tertiary' : 'text-txt-primary'}`}>{friendDisplayName}</span>
+        <span className={`block text-sm font-medium truncate ${isOffline ? 'text-txt-tertiary' : 'text-txt-primary'}`}>{friendDisplayName}</span>
         {!isOffline && isFederationGlobeApplicable(canonical) && (
-          <div className="text-[10px] leading-[1.3] text-txt-tertiary truncate opacity-60">@{parseFederatedUsername(canonical.username).domain}</div>
+          <div className="text-2xs text-txt-tertiary truncate">@{parseFederatedUsername(canonical.username).domain}</div>
         )}
         {!isOffline && (
           <ActivityCard
@@ -146,13 +146,15 @@ export function ActivityPanel() {
 
   return (
     <div className="w-60 bg-surface-channel flex-shrink-0 overflow-y-auto select-none no-scrollbar hidden desktop:block border-l border-border-hard">
+      <div className="sticky top-0 z-raised h-12 px-4 flex items-center border-b border-border-hard bg-surface-channel">
+        <h3 className="text-lg font-semibold text-txt-primary truncate">{t('social:activity.title')}</h3>
+      </div>
       <div className="p-3">
-        <h3 className="text-[20px] font-bold text-txt-primary mb-4 px-2">{t('social:activity.title')}</h3>
 
         {activeFriends.length === 0 && onlineFriends.length === 0 && offlineFriends.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-[16px] font-bold text-txt-primary mb-1">{t('social:activity.quietTitle')}</div>
-            <div className="text-[14px] text-txt-tertiary max-w-[200px] mx-auto">
+            <div className="text-lg font-semibold text-txt-primary mb-1">{t('social:activity.quietTitle')}</div>
+            <div className="text-sm text-txt-tertiary max-w-[200px] mx-auto">
               {t('social:activity.quietDescription')}
             </div>
           </div>
@@ -165,7 +167,7 @@ export function ActivityPanel() {
             )}
             {onlineFriends.length > 0 && (
               <div className="mb-4">
-                <h3 className="text-[10.5px] font-bold text-txt-tertiary uppercase tracking-[0.06em] px-2 mb-1">
+                <h3 className="text-xs font-medium text-txt-tertiary px-2 mb-1">
                   {t('social:activity.online', { n: onlineFriends.length })}
                 </h3>
                 {onlineFriends.map(f => renderFriend(f))}
@@ -173,7 +175,7 @@ export function ActivityPanel() {
             )}
             {offlineFriends.length > 0 && (
               <div>
-                <h3 className="text-[10.5px] font-bold text-txt-tertiary uppercase tracking-[0.06em] px-2 mb-1">
+                <h3 className="text-xs font-medium text-txt-tertiary px-2 mb-1">
                   {t('social:activity.offline', { n: offlineFriends.length })}
                 </h3>
                 {offlineFriends.map(f => renderFriend(f, true))}

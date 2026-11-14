@@ -10,6 +10,7 @@ import {
 } from '@backspace/shared';
 import { describeCodedError } from '../../i18n/errors';
 import { Toggle } from '../ui/Toggle';
+import { Button } from '../ui/Button';
 import { useFormatters } from '../../i18n/formatters';
 import { useUIStore } from '../../stores/uiStore';
 import {
@@ -43,11 +44,11 @@ function RadioDot({ checked }: { checked: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-        checked ? 'border-accent-primary' : 'border-txt-tertiary'
+      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-fast ${
+        checked ? 'border-accent-tone' : 'border-txt-tertiary'
       }`}
     >
-      {checked && <span className="w-2 h-2 rounded-full bg-accent-primary" />}
+      {checked && <span className="w-2 h-2 rounded-full bg-accent-tone" />}
     </span>
   );
 }
@@ -137,10 +138,10 @@ export function NotificationSettingsControls({ origin, spaceId, channelId }: Not
   return (
     <div className="flex flex-col gap-3" aria-busy={saving}>
       <div>
-        <div id={levelHeadingId} className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-txt-tertiary">
+        <div id={levelHeadingId} className="px-1 pb-1.5 text-xs font-medium text-txt-tertiary">
           {t('spaces:notifications.levelHeading')}
         </div>
-        <div role="radiogroup" aria-labelledby={levelHeadingId} className="flex flex-col gap-[2px]">
+        <div role="radiogroup" aria-labelledby={levelHeadingId} className="flex flex-col gap-0.5">
           {choices.map((choice, index) => {
             const checked = choice === selected;
             return (
@@ -153,8 +154,8 @@ export function NotificationSettingsControls({ origin, spaceId, channelId }: Not
                 disabled={saving}
                 onClick={() => onChoose(choice)}
                 onKeyDown={(e) => onRadioKeyDown(e, index)}
-                className={`w-full flex items-center gap-2.5 px-2.5 h-9 rounded-[6px] text-left text-[14px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary disabled:opacity-60 ${
-                  checked ? 'text-txt-primary bg-interactive-selected' : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
+                className={`w-full flex items-center gap-2.5 px-2.5 h-[34px] rounded-lg text-left text-sm transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone disabled:opacity-40 ${
+                  checked ? 'text-txt-primary font-medium bg-surface-elevated' : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
                 }`}
               >
                 <RadioDot checked={checked} />
@@ -165,27 +166,28 @@ export function NotificationSettingsControls({ origin, spaceId, channelId }: Not
         </div>
       </div>
 
-      <div className="h-px bg-glass-border" />
+      <div className="h-px bg-border-hard" />
 
       <div>
-        <div className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-txt-tertiary">
+        <div className="px-1 pb-1.5 text-xs font-medium text-txt-tertiary">
           {t('spaces:notifications.muteHeading')}
         </div>
         {ownMuted && own ? (
           <div className="flex items-center justify-between gap-3 px-2.5 py-1.5">
-            <span className="text-[13px] text-txt-secondary min-w-0">
+            <span className="text-compact text-txt-secondary min-w-0">
               {own.mutedUntil === null
                 ? t('spaces:notifications.mutedIndefinitely')
                 : t('spaces:notifications.mutedUntil', { time: formatMuteEnd(own.mutedUntil) })}
             </span>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               disabled={saving}
               onClick={() => void save({ mute: null })}
-              className="flex-shrink-0 px-3 h-8 rounded-[6px] text-[13px] font-medium text-txt-primary bg-interactive-hover hover:bg-interactive-active transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary disabled:opacity-60"
+              className="flex-shrink-0"
             >
               {t('spaces:notifications.unmute')}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-1">
@@ -195,7 +197,7 @@ export function NotificationSettingsControls({ origin, spaceId, channelId }: Not
                 type="button"
                 disabled={saving}
                 onClick={() => void save({ mute: duration })}
-                className="px-2.5 h-8 rounded-[6px] text-left text-[13px] text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover transition-colors truncate focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary disabled:opacity-60"
+                className="px-2.5 h-8 rounded-lg text-left text-compact text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover transition-colors duration-fast truncate focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone disabled:opacity-40"
               >
                 {durationLabel(duration)}
               </button>
@@ -203,20 +205,20 @@ export function NotificationSettingsControls({ origin, spaceId, channelId }: Not
           </div>
         )}
         {spaceMuted && (
-          <p className="px-2.5 pt-1.5 text-[12px] text-accent-amber">{t('spaces:notifications.spaceMuted')}</p>
+          <p className="px-2.5 pt-1.5 text-xs text-status-warn">{t('spaces:notifications.spaceMuted')}</p>
         )}
       </div>
 
       {!isChannel && (
         <>
-          <div className="h-px bg-glass-border" />
+          <div className="h-px bg-border-hard" />
           <div>
-            <div className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-txt-tertiary">
+            <div className="px-1 pb-1.5 text-xs font-medium text-txt-tertiary">
               {t('spaces:notifications.massHeading')}
             </div>
             {(['suppressEveryone', 'suppressRoles'] as const).map((field) => (
               <div key={field} className="flex items-center justify-between gap-3 px-2.5 h-9">
-                <span className="text-[14px] text-txt-secondary min-w-0 truncate">{t(`spaces:notifications.${field}`)}</span>
+                <span className="text-sm text-txt-secondary min-w-0 truncate">{t(`spaces:notifications.${field}`)}</span>
                 <Toggle
                   enabled={own?.[field] === true}
                   disabled={saving}
@@ -225,12 +227,12 @@ export function NotificationSettingsControls({ origin, spaceId, channelId }: Not
                 />
               </div>
             ))}
-            <p className="px-2.5 pt-1 text-[12px] text-txt-tertiary">{t('spaces:notifications.massNote')}</p>
+            <p className="px-2.5 pt-1 text-xs text-txt-tertiary">{t('spaces:notifications.massNote')}</p>
           </div>
         </>
       )}
 
-      <p className="px-1 text-[12px] text-txt-tertiary">{t('spaces:notifications.dmNote')}</p>
+      <p className="px-1 text-xs text-txt-tertiary">{t('spaces:notifications.dmNote')}</p>
     </div>
   );
 }

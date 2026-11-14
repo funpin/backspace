@@ -23,7 +23,7 @@ export function Toggle({ enabled, onChange, disabled, ariaLabel }: ToggleProps) 
       }${disabled ? ' cursor-not-allowed opacity-50' : ''}`}
     >
       <span
-        className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+        className={`inline-block h-4 w-4 rounded-full transition-transform duration-base ease-pop ${enabled ? 'bg-on-accent' : 'bg-txt-secondary'} ${
           enabled ? 'translate-x-6' : 'translate-x-1'
         }`}
       />

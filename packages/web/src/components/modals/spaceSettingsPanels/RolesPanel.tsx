@@ -17,7 +17,12 @@ import {
 } from '../../../utils/roleHierarchy';
 import { RoleOrderList } from './RoleOrderList';
 import { withSavedRole } from '../../../utils/roleOrder';
-import { LockNote, LOCK_ICON } from '../../ui/LockNote';
+import { LockNote } from '../../ui/LockNote';
+import { Button } from '../../ui/Button';
+import { Icon } from '../../ui/Icon';
+
+/** A control floating on glass over the scrolling panel. */
+const FLOATING_BUTTON = 'text-txt-primary hover:bg-interactive-hover transition-colors duration-fast pointer-events-auto disabled:opacity-40';
 
 const ALL_PERMISSION_DEFS: PermDef[] = PERMISSION_GROUPS.flatMap((group) => group.perms);
 
@@ -99,30 +104,27 @@ export function RolesPanel({ spaceId }: RolesPanelProps) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('spaces:roles.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('spaces:roles.title')}</h2>
       {error && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{error}</div>
+        <div className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger">{error}</div>
       )}
 
-      <div className="sticky top-0 z-10 pointer-events-none pb-3">
+      <div className="sticky top-0 z-raised pointer-events-none pb-3">
         <button
           onClick={handleCreateRole}
           disabled={creating || !canCreateRole}
-          className="glass-bubble rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm text-txt-primary hover:text-txt-secondary transition-colors pointer-events-auto disabled:opacity-50"
+          className={`glass-bubble rounded-lg h-[34px] px-3 inline-flex items-center gap-1.5 text-sm font-medium ${FLOATING_BUTTON}`}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <Icon name="plus" size="sm" />
           {creating ? t('spaces:roles.creating') : t('spaces:roles.create')}
         </button>
       </div>
 
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('spaces:roles.listHeading')}</div>
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('spaces:roles.listHeading')}</div>
         <p className="text-xs text-txt-tertiary">{t('spaces:roles.description')}</p>
         <p className="text-xs text-txt-tertiary mb-2">{t('spaces:roles.hierarchyHint')}</p>
-        <div className="rounded-lg bg-white/[0.02] p-2">
+        <div className="rounded-xl bg-surface-elevated p-1.5">
           <RoleOrderList
             spaceId={spaceId}
             onOpen={(roleId) => { setIsNewRole(false); setEditingRoleId(roleId); }}
@@ -329,20 +331,18 @@ function RoleEditView({ role, spaceId, isNew, onBack, onDeleted, onCopied }: Rol
   return (
     <div className="space-y-5">
       {/* Back button */}
-      <div className="sticky top-0 z-10 pointer-events-none pb-3">
+      <div className="sticky top-0 z-raised pointer-events-none pb-3">
         <button
           onClick={onBack}
-          className="glass-bubble rounded-full px-3 py-1.5 flex items-center gap-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors pointer-events-auto"
+          className={`glass-bubble rounded-lg h-[34px] pl-2 pr-3 inline-flex items-center gap-1 text-sm font-medium ${FLOATING_BUTTON}`}
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+          <Icon name="chevron-left" size="sm" />
           {t('spaces:roles.backToList')}
         </button>
       </div>
 
       {isNew && !hasChanges && (
-        <div className="p-2 bg-status-online/10 border border-status-online/30 rounded text-status-online text-sm">
+        <div className="rounded-lg bg-status-ok/10 px-3 py-2 text-sm text-status-ok">
           {t('spaces:roles.created')}
         </div>
       )}
@@ -360,11 +360,11 @@ function RoleEditView({ role, spaceId, isNew, onBack, onDeleted, onCopied }: Rol
       {/* Identity card (Name + Color — not shown for @everyone) */}
       {!isEveryone && (
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('spaces:roles.identity')}</div>
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('spaces:roles.identity')}</div>
           {/* A disabled fieldset disables every control inside it. */}
-          <fieldset disabled={!canEdit} className={`rounded-lg bg-white/[0.02] p-3.5 space-y-4 min-w-0 ${canEdit ? '' : 'opacity-60'}`}>
+          <fieldset disabled={!canEdit} className={`rounded-xl bg-surface-elevated p-3.5 space-y-4 min-w-0 ${canEdit ? '' : 'opacity-60'}`}>
             <div>
-              <label className="block text-xs text-txt-secondary mb-1.5">
+              <label className="block text-xs font-medium text-txt-secondary mb-1.5">
                 {t('spaces:roles.nameLabel')}
               </label>
               <input
@@ -376,14 +376,14 @@ function RoleEditView({ role, spaceId, isNew, onBack, onDeleted, onCopied }: Rol
                   setNameError(validateName(e.target.value));
                 }}
                 onBlur={() => setNameError(validateName(draftName))}
-                className={`input-standard w-full${nameError ? ' ring-2 ring-accent-rose' : ''}`}
+                className={`input-standard w-full${nameError ? ' ring-2 ring-status-danger' : ''}`}
               />
               {nameError && (
-                <p className="text-xs text-txt-danger mt-1">{nameError}</p>
+                <p className="text-xs text-status-danger mt-1">{nameError}</p>
               )}
             </div>
             <div>
-              <label className="block text-xs text-txt-secondary mb-1.5">
+              <label className="block text-xs font-medium text-txt-secondary mb-1.5">
                 {t('spaces:roles.colorLabel')}
               </label>
               <div className="flex items-center gap-2 flex-wrap">
@@ -391,20 +391,22 @@ function RoleEditView({ role, spaceId, isNew, onBack, onDeleted, onCopied }: Rol
                   <button
                     key={c}
                     onClick={() => setDraftColor(c)}
-                    className={`w-7 h-7 rounded-full border-2 transition-all ${
-                      draftColor === c ? 'border-white scale-110' : 'border-transparent hover:scale-105'
+                    className={`w-7 h-7 rounded-full transition-[transform,box-shadow] duration-fast ease-out ${
+                      draftColor === c
+                        ? 'scale-110 shadow-[0_0_0_2px_rgb(var(--bg-elevated)),0_0_0_3.5px_rgb(var(--accent-tone))]'
+                        : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: c }}
                   />
                 ))}
-                <label className="relative w-7 h-7 rounded-full border-2 border-border-soft hover:border-accent-primary transition-colors cursor-pointer overflow-hidden">
+                <label className="relative w-7 h-7 rounded-full grid place-items-center bg-surface-input text-txt-secondary shadow-[inset_0_0_0_1px_var(--glass-border)] hover:text-accent-tone hover:shadow-[inset_0_0_0_1.5px_rgb(var(--accent-tone))] transition-[color,box-shadow] duration-fast cursor-pointer overflow-hidden">
                   <input
                     type="color"
                     value={draftColor}
                     onChange={(e) => setDraftColor(e.target.value)}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-red-400 via-green-400 to-blue-400" />
+                  <Icon name="palette" size="sm" />
                 </label>
                 <input
                   type="text"
@@ -425,11 +427,11 @@ function RoleEditView({ role, spaceId, isNew, onBack, onDeleted, onCopied }: Rol
       {/* Permission groups — each gets its own section card */}
       {PERMISSION_GROUPS.map((group) => (
         <div key={group.id}>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">
             {groupTitle(group.id)}
           </div>
-          <div className="rounded-lg bg-white/[0.02] p-3.5">
-            <div className="space-y-1">
+          <div className="rounded-xl bg-surface-elevated p-1.5">
+            <div className="space-y-0.5">
               {group.perms.map((perm) => {
                 const isAdminBit = perm.bit === PermissionBits.ADMINISTRATOR;
                 const hasAdmin = (draftPermissions & PermissionBits.ADMINISTRATOR) !== 0n;
@@ -441,24 +443,18 @@ function RoleEditView({ role, spaceId, isNew, onBack, onDeleted, onCopied }: Rol
                 return (
                   <label
                     key={perm.key}
-                    className={`flex items-center justify-between gap-3 py-1.5 px-2 rounded group/perm ${
+                    className={`flex items-center justify-between gap-3 min-h-10 py-1.5 px-2 rounded-lg transition-colors duration-fast group/perm ${
                       isLocked ? 'cursor-default' : 'cursor-pointer hover:bg-interactive-hover'
                     }`}
                   >
-                    <span className={`text-sm ${isLocked ? 'opacity-50 ' : ''}${isAdminBit ? 'text-txt-danger font-medium' : 'text-txt-primary'}`}>
+                    <span className={`text-sm ${isLocked ? 'opacity-50 ' : ''}${isAdminBit ? 'text-status-danger font-medium' : 'text-txt-primary'}`}>
                       {name}
                     </span>
                     <span className="flex items-center gap-2 flex-shrink-0">
                       {isUnheld && (
-                        <svg
-                          width="12" height="12" viewBox="0 0 24 24" fill="currentColor"
-                          className="text-txt-tertiary"
-                          role="img"
-                          aria-label={t('spaces:roles.unheldPermission')}
-                        >
-                          <title>{t('spaces:roles.unheldPermission')}</title>
-                          <path d={LOCK_ICON} />
-                        </svg>
+                        <span title={t('spaces:roles.unheldPermission')} className="inline-flex text-txt-tertiary">
+                          <Icon name="lock" size="xs" label={t('spaces:roles.unheldPermission')} />
+                        </span>
                       )}
                       <div
                         role="switch"
@@ -475,13 +471,13 @@ function RoleEditView({ role, spaceId, isNew, onBack, onDeleted, onCopied }: Rol
                           e.preventDefault();
                           if (!isLocked) togglePermission(perm.bit);
                         }}
-                        className={`relative w-9 h-5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary ${
+                        className={`relative w-9 h-5 rounded-full transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone ${
                           isLocked ? 'cursor-default opacity-50' : 'cursor-pointer'
                         } ${isOn ? 'bg-accent-primary' : 'bg-interactive-muted'}`}
                       >
                         <div
-                          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
-                            isOn ? 'translate-x-4' : 'translate-x-0.5'
+                          className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform duration-base ease-pop ${
+                            isOn ? 'translate-x-4 bg-on-accent' : 'translate-x-0.5 bg-txt-secondary'
                           }`}
                         />
                       </div>
@@ -495,54 +491,45 @@ function RoleEditView({ role, spaceId, isNew, onBack, onDeleted, onCopied }: Rol
       ))}
 
       {saveError && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{saveError}</div>
+        <div className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger">{saveError}</div>
       )}
-      <div className="sticky bottom-0 z-10 pointer-events-none">
+      <div className="sticky bottom-0 z-raised pointer-events-none">
           <div className="flex justify-center pt-3 pb-1">
-            <div className={`glass-bubble rounded-full px-4 py-2 flex items-center gap-2 pointer-events-auto${
+            <div className={`glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 pointer-events-auto${
               isEveryone ? ' animate-slide-up' : ''
             }`}>
               {hasChanges && (
                 <>
-                  <button
-                    onClick={handleDiscard}
-                    className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-                  >
+                  <Button variant="ghost" size="sm" onClick={handleDiscard}>
                     {t('spaces:settings.discardChanges')}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
                     onClick={handleSave}
                     disabled={saving || (!isEveryone && !draftName.trim()) || !!nameError}
-                    className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
                   >
                     {saving ? t('common:states.saving') : t('common:actions.save')}
-                  </button>
+                  </Button>
                 </>
               )}
               {hasChanges && (
-                <div className="w-px h-5 bg-white/10" />
+                <div className="w-px h-5 bg-border-soft" />
               )}
-              <button
-                onClick={handleCopy}
-                disabled={copying || !canCopy}
-                className="px-3 py-1.5 text-sm font-medium rounded-full text-txt-secondary hover:bg-interactive-hover transition-colors disabled:opacity-50"
-              >
+              <Button variant="ghost" size="sm" onClick={handleCopy} disabled={copying || !canCopy}>
                 {copying ? t('spaces:roles.copying') : t('spaces:roles.copy')}
-              </button>
+              </Button>
               {offersDelete && (
                 <>
-                  <div className="w-px h-5 bg-white/10" />
-                  <button
+                  <div className="w-px h-5 bg-border-soft" />
+                  <Button
+                    variant={confirmDelete ? 'danger-solid' : 'danger'}
+                    size="sm"
                     onClick={handleDelete}
                     disabled={deleting || deleteCarriesUnheld}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors disabled:opacity-50 ${
-                      confirmDelete
-                        ? 'bg-accent-rose/15 text-accent-rose'
-                        : 'text-accent-rose hover:bg-accent-rose/10'
-                    }`}
                   >
                     {deleting ? t('spaces:roles.deleting') : confirmDelete ? t('spaces:roles.confirmDelete') : t('spaces:roles.delete')}
-                  </button>
+                  </Button>
                 </>
               )}
             </div>

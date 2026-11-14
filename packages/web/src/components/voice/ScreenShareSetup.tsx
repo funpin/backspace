@@ -17,6 +17,10 @@ import {
   canAddScreenShareAudioLater,
 } from '../../utils/screenShare';
 import { StreamQualityControls, StreamSummary, StreamHostSubtitle } from './StreamQualityControls';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
+import { IconButton } from '../ui/IconButton';
+import { Tag } from '../ui/Tag';
 import { pickAutoStageSource, type ScreenSourceTab } from '../../utils/screenShareSources';
 
 /**
@@ -448,36 +452,33 @@ export function ScreenShareSetup() {
     : t('voice:screenPicker.stageReady');
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center animate-fade-in">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
+      <div className="absolute inset-0 bg-surface-overlay" onClick={handleClose} />
 
       {/* Card — fixed to the viewport so the layout never jumps with its content */}
       <div
         data-testid="screen-share-setup"
-        className="relative w-[calc(calc(100*var(--app-vw))-6rem)] max-w-6xl h-[calc(88*var(--app-vh))] glass-modal rounded-xl animate-slide-up flex flex-col"
+        className="relative w-[calc(calc(100*var(--app-vw))-6rem)] max-w-6xl h-[calc(88*var(--app-vh))] glass-modal rounded-2xl animate-slide-up flex flex-col"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-4 px-6 pt-5 pb-3 flex-shrink-0">
           <div className="min-w-0">
-            <h2 className="text-xl font-bold text-txt-primary leading-tight">{t('voice:screenPicker.title')}</h2>
-            <p className="text-[13px] text-txt-tertiary mt-0.5">{t('voice:screenPicker.subtitle')}</p>
+            <h2 className="text-xl font-semibold text-txt-primary leading-tight">{t('voice:screenPicker.title')}</h2>
+            <p className="text-sm text-txt-secondary mt-0.5">{t('voice:screenPicker.subtitle')}</p>
           </div>
-          <button
+          <IconButton
+            icon="x"
             onClick={handleClose}
-            className="text-txt-tertiary hover:text-txt-primary transition-colors p-1 -mr-1 flex-shrink-0"
-            aria-label={t('common:actions.close')}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-            </svg>
-          </button>
+            label={t('common:actions.close')}
+            className="-mr-1"
+          />
         </div>
 
         {/* Toolbar — Screens / Windows plus window search; only where the app lists sources */}
         {showGrid && (
           <div className="flex items-center justify-between gap-3 px-6 pb-3 flex-shrink-0">
-            <div className="flex items-center gap-1 p-1 rounded-full bg-white/[0.04] ring-1 ring-white/[0.06]">
+            <div className="inline-flex gap-0.5 p-[3px] rounded-xl bg-surface-input shadow-[inset_0_0_0_1px_var(--glass-border)]">
               <TabButton
                 active={activeTab === 'screens'}
                 onClick={() => setActiveTab('screens')}
@@ -511,7 +512,7 @@ export function ScreenShareSetup() {
             {showGrid ? (
               <>
                 {/* Source grid */}
-                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin rounded-xl bg-black/20 ring-1 ring-white/[0.06] p-3">
+                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin rounded-xl bg-surface-input shadow-[inset_0_0_0_1px_var(--glass-border)] p-3">
                   {loadingSources && sources.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-txt-tertiary text-sm">
                       {t('voice:screenPicker.loadingSources')}
@@ -533,17 +534,18 @@ export function ScreenShareSetup() {
                       {sources.length === 0 && (
                         <>
                           {isElectronMac() && (
-                            <p className="text-[13px] text-txt-tertiary max-w-sm">
+                            <p className="text-compact text-txt-secondary max-w-sm">
                               {t('voice:screenPicker.permissionHintMac')}
                             </p>
                           )}
-                          <button
+                          <Button
+                            variant="secondary"
+                            icon="refresh-cw"
                             onClick={() => setSourcesNonce((n) => n + 1)}
                             disabled={loadingSources}
-                            className="px-4 py-2 rounded-full glass text-txt-primary hover:bg-white/[0.08] text-[13px] font-medium transition-colors disabled:opacity-40"
                           >
                             {t('voice:screenPicker.retrySources')}
-                          </button>
+                          </Button>
                         </>
                       )}
                     </div>
@@ -563,20 +565,20 @@ export function ScreenShareSetup() {
                 </div>
 
                 {/* Staged strip — live preview of the chosen tile */}
-                <div className={`flex-shrink-0 overflow-hidden transition-all duration-300 ${staged ? 'max-h-40 mt-3 opacity-100' : 'max-h-0 mt-0 opacity-0'}`}>
-                  <div className="flex items-center gap-4 rounded-xl glass px-3 py-3">
+                <div className={`flex-shrink-0 overflow-hidden transition-all duration-slow ease-out ${staged ? 'max-h-40 mt-3 opacity-100' : 'max-h-0 mt-0 opacity-0'}`}>
+                  <div className="flex items-center gap-4 rounded-xl bg-surface-elevated px-3 py-3">
                     <div className="w-44 flex-shrink-0">
-                      <div className="relative rounded-lg overflow-hidden bg-black/60 aspect-video ring-1 ring-white/[0.08]">
+                      <div className="relative rounded-lg overflow-hidden bg-black aspect-video shadow-[inset_0_0_0_1px_var(--glass-border)]">
                         <video ref={previewRef} autoPlay muted playsInline className="w-full h-full object-contain" />
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-accent-mint truncate">{readyLabel}</div>
-                      <div className="text-[14px] font-semibold text-txt-primary truncate mt-0.5">
+                      <div className="text-xs font-medium text-status-ok truncate">{readyLabel}</div>
+                      <div className="text-sm font-semibold text-txt-primary truncate mt-0.5">
                         {stagedName ?? t('voice:screenPicker.preview')}
                       </div>
                       {audioNeedsRepick && (
-                        <div className="text-[11px] text-accent-amber/80 mt-1">{t('voice:screenPicker.audioNeedsRepick')}</div>
+                        <div className="text-2xs text-status-warn mt-1">{t('voice:screenPicker.audioNeedsRepick')}</div>
                       )}
                     </div>
                   </div>
@@ -584,68 +586,71 @@ export function ScreenShareSetup() {
               </>
             ) : (
               /* Browser, system picker, or older desktop before its prompt: the stage */
-              <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden bg-surface-base ring-1 ring-white/[0.06]">
+              <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden bg-surface-base shadow-[inset_0_0_0_1px_var(--glass-border)]">
                 {/* Ambient glow so the empty stage reads as a screen, not a form field */}
-                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_50%_40%,rgba(255,255,255,0.05),transparent_60%)]" />
-                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_50%_110%,rgba(140,130,255,0.12),transparent_55%)]" />
+                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_50%_110%,rgb(var(--accent-tone)/0.12),transparent_55%)]" />
 
                 {staged ? (
                   <>
-                    <video ref={previewRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-contain bg-black/70" />
-                    <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-black/60 text-[10px] font-bold uppercase tracking-wide text-white/80">
-                      {t('voice:screenPicker.preview')}
+                    <video ref={previewRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-contain bg-black" />
+                    <div className="absolute top-3 left-3 flex">
+                      <Tag tone="onMedia">{t('voice:screenPicker.preview')}</Tag>
                     </div>
-                    <div className="absolute inset-x-0 bottom-0 px-4 py-3 flex flex-col items-start gap-2 desktop:flex-row desktop:items-center desktop:justify-between desktop:gap-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                    {/* A caption plate over the picture, not a gradient across its bottom edge */}
+                    <div className="absolute left-3 right-3 bottom-3 px-3 py-2 rounded-xl bg-black/60 backdrop-blur-md flex flex-col items-start gap-2 desktop:flex-row desktop:items-center desktop:justify-between desktop:gap-3">
                       <div className="min-w-0">
-                        <div className="text-[11px] font-semibold uppercase tracking-wider text-accent-mint truncate">{readyLabel}</div>
+                        <div className="text-xs font-medium text-status-ok truncate">{readyLabel}</div>
                         {stagedName && (
-                          <div className="text-[13px] font-semibold text-white truncate mt-0.5">{stagedName}</div>
+                          <div className="text-compact font-semibold text-white truncate mt-0.5">{stagedName}</div>
                         )}
                         {audioNeedsRepick && (
-                          <div className="text-[11px] text-accent-amber/90 mt-0.5">{t('voice:screenPicker.audioNeedsRepick')}</div>
+                          <div className="text-2xs text-status-warn mt-0.5">{t('voice:screenPicker.audioNeedsRepick')}</div>
                         )}
                       </div>
-                      <button
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={stageNow}
                         disabled={staging}
-                        className="flex-shrink-0 px-3 py-1.5 rounded-full glass text-txt-primary hover:bg-white/[0.08] text-[13px] font-medium transition-colors disabled:opacity-40"
+                        className="flex-shrink-0"
                       >
                         {t('voice:screenPicker.chooseAgain')}
-                      </button>
+                      </Button>
                     </div>
                   </>
                 ) : (
                   <div className="relative h-full flex flex-col items-center justify-center text-center gap-4 px-6">
                     {/* Monitor illustration */}
-                    <svg width="112" height="88" viewBox="0 0 112 88" fill="none" aria-hidden="true" className="drop-shadow-[0_8px_24px_rgba(140,130,255,0.25)]">
-                      <rect x="4" y="4" width="104" height="66" rx="8" stroke="rgba(255,255,255,0.22)" strokeWidth="2" fill="rgba(255,255,255,0.03)" />
+                    <svg width="112" height="88" viewBox="0 0 112 88" fill="none" aria-hidden="true" className="drop-shadow-[0_8px_24px_rgb(var(--accent-tone)/0.25)]">
+                      <rect x="4" y="4" width="104" height="66" rx="8" stroke="rgba(255,255,255,0.22)" strokeWidth="1.75" fill="rgba(255,255,255,0.03)" />
                       <rect x="10" y="10" width="92" height="54" rx="4" fill="url(#ss-stage-screen)" />
-                      <path d="M46 78h20M56 70v8" stroke="rgba(255,255,255,0.22)" strokeWidth="2" strokeLinecap="round" />
-                      <path d="M40 84h32" stroke="rgba(255,255,255,0.16)" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M46 78h20M56 70v8" stroke="rgba(255,255,255,0.22)" strokeWidth="1.75" strokeLinecap="round" />
+                      <path d="M40 84h32" stroke="rgba(255,255,255,0.16)" strokeWidth="1.75" strokeLinecap="round" />
                       <path d="M62 37l-10-6.5v13L62 37z" fill="rgba(255,255,255,0.55)" />
                       <defs>
                         <linearGradient id="ss-stage-screen" x1="10" y1="10" x2="102" y2="64" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="rgba(140,130,255,0.35)" />
-                          <stop offset="1" stopColor="rgba(140,130,255,0.08)" />
+                          <stop style={{ stopColor: 'rgb(var(--accent-tone) / 0.35)' }} />
+                          <stop offset="1" style={{ stopColor: 'rgb(var(--accent-tone) / 0.08)' }} />
                         </linearGradient>
                       </defs>
                     </svg>
                     <div>
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-txt-tertiary">{t('voice:screenPicker.stageIdle')}</div>
-                      <div className="text-[17px] font-bold text-txt-primary mt-1">{t('voice:screenPicker.chooseTitle')}</div>
+                      <div className="text-xs font-medium text-txt-tertiary">{t('voice:screenPicker.stageIdle')}</div>
+                      <div className="text-lg font-semibold text-txt-primary mt-1">{t('voice:screenPicker.chooseTitle')}</div>
                       {chooseHint && (
-                        <div className="text-[13px] text-txt-tertiary max-w-md mt-1">{chooseHint}</div>
+                        <div className="text-compact text-txt-secondary max-w-md mt-1">{chooseHint}</div>
                       )}
                     </div>
-                    <button
+                    <Button
+                      variant="primary"
+                      size="lg"
                       onClick={stageNow}
                       disabled={staging || !supported || (electron && pickerMode === null)}
-                      className="px-5 py-2.5 rounded-full bg-accent-primary hover:bg-accent-primary-hover text-white text-sm font-semibold transition-colors shadow-lg shadow-accent-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
                     >
                       {t('voice:screenPicker.choose')}
-                    </button>
+                    </Button>
                     {!supported && (
-                      <div className="text-[12px] text-txt-danger">{t('voice:screenPicker.unsupported')}</div>
+                      <div className="text-xs text-status-danger">{t('voice:screenPicker.unsupported')}</div>
                     )}
                   </div>
                 )}
@@ -655,7 +660,7 @@ export function ScreenShareSetup() {
 
           {/* Drawer scrim — click outside the drawer closes it */}
           <div
-            className={`absolute inset-0 z-10 bg-black/40 transition-opacity duration-300 ${settingsOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            className={`absolute inset-0 z-[1] bg-surface-overlay transition-opacity duration-slow ease-out ${settingsOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             onClick={() => setSettingsOpen(false)}
           />
 
@@ -665,24 +670,22 @@ export function ScreenShareSetup() {
             id="stream-settings-drawer-panel"
             data-testid="stream-settings-drawer"
             aria-hidden={!settingsOpen}
-            className={`absolute inset-y-0 right-0 z-20 w-[calc(calc(100*var(--app-vw))-5rem)] desktop:w-[340px] glass border-l border-border-hard flex flex-col min-h-0 shadow-2xl transition-transform duration-300 ease-out ${
+            className={`absolute inset-y-0 right-0 z-[2] w-[calc(calc(100*var(--app-vw))-5rem)] desktop:w-[340px] glass border-l border-border-hard flex flex-col min-h-0 transition-transform duration-slow ease-out ${
               settingsOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
           >
             <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3 border-b border-border-hard flex-shrink-0">
               <div className="min-w-0">
-                <div className="text-[15px] font-bold text-txt-primary">{t('voice:streamSettings.title')}</div>
+                <div className="text-sm font-semibold text-txt-primary">{t('voice:streamSettings.title')}</div>
                 <StreamHostSubtitle className="mt-0.5" />
               </div>
-              <button
+              <IconButton
+                icon="x"
+                size="sm"
                 onClick={() => setSettingsOpen(false)}
-                className="text-txt-tertiary hover:text-txt-primary transition-colors p-1 -mr-1"
-                aria-label={t('common:actions.close')}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-                </svg>
-              </button>
+                label={t('common:actions.close')}
+                className="-mr-1"
+              />
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-5 py-4">
               <StreamQualityControls />
@@ -695,49 +698,40 @@ export function ScreenShareSetup() {
           <div className="min-w-0 flex flex-col">
             <button
               onClick={() => setSettingsOpen(true)}
-              className="text-left hover:text-txt-secondary transition-colors truncate"
+              className="text-left hover:text-txt-secondary transition-colors duration-fast truncate"
               title={t('voice:streamSettings.title')}
             >
               <StreamSummary />
             </button>
             {error && (
-              <span className="text-[12px] text-txt-danger truncate" role="alert">
+              <span className="text-xs text-status-danger truncate" role="alert">
                 {t(`voice:screenPicker.${error}`)}
               </span>
             )}
           </div>
-          <div className="glass-bubble rounded-full px-2 py-2 flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => setSettingsOpen((open) => !open)}
               aria-expanded={settingsOpen}
               aria-controls="stream-settings-drawer-panel"
               aria-label={t('voice:streamSettings.title')}
               title={t('voice:streamSettings.title')}
-              className={`flex items-center gap-2 pl-3 pr-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2 h-[34px] px-3 rounded-lg text-sm font-medium transition-colors duration-fast ${
                 settingsOpen
-                  ? 'bg-white/[0.1] text-txt-primary'
-                  : 'text-txt-secondary hover:text-txt-primary hover:bg-white/[0.06]'
+                  ? 'bg-interactive-active text-txt-primary'
+                  : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
               }`}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="flex-shrink-0">
-                <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z" />
-              </svg>
+              <Icon name="sliders-horizontal" />
               <span className="hidden desktop:inline">{t('voice:streamSettings.title')}</span>
             </button>
-            <div className="w-px h-5 bg-white/10 mx-1" />
-            <button
-              onClick={handleClose}
-              className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-            >
+            <div className="w-px h-5 bg-border-soft mx-1" />
+            <Button variant="ghost" onClick={handleClose}>
               {t('common:actions.cancel')}
-            </button>
-            <button
-              onClick={() => void handleStart()}
-              disabled={!canStart}
-              className="px-4 py-1.5 bg-accent-primary hover:bg-accent-primary-hover text-white text-sm font-semibold rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
+            </Button>
+            <Button variant="primary" onClick={() => void handleStart()} disabled={!canStart}>
               {t('voice:screenPicker.start')}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -751,6 +745,7 @@ export function ScreenShareSetup() {
 // Sub-components
 // ---------------------------------------------------------------------------
 
+/** One side of the Screens / Windows switch, drawn like the kit's `Tabs`. */
 function TabButton({ active, onClick, label, count }: {
   active: boolean;
   onClick: () => void;
@@ -760,15 +755,15 @@ function TabButton({ active, onClick, label, count }: {
   return (
     <button
       onClick={onClick}
-      className={`px-3.5 py-1.5 text-sm font-medium rounded-full transition-colors ${
+      className={`h-7 px-3 rounded-lg text-compact font-medium transition-colors duration-fast ease-out ${
         active
-          ? 'bg-accent-primary text-white shadow-sm'
-          : 'text-txt-secondary hover:text-txt-primary hover:bg-white/[0.06]'
+          ? 'bg-surface-elevated text-txt-primary'
+          : 'text-txt-secondary hover:text-txt-primary'
       }`}
     >
       {label}
       {count !== null && count > 0 && (
-        <span className={`ml-1.5 text-xs ${active ? 'text-white/70' : 'text-txt-tertiary'}`}>
+        <span className="ml-1.5 text-txt-tertiary tabular-nums">
           {count}
         </span>
       )}
@@ -786,14 +781,14 @@ function SourceCard({ source, selected, onClick, onDoubleClick }: {
     <button
       onClick={onClick}
       onDoubleClick={onDoubleClick}
-      className={`group flex flex-col rounded-lg overflow-hidden transition-all text-left ring-2 ${
+      className={`group flex flex-col rounded-xl overflow-hidden transition-[background-color,box-shadow] duration-fast text-left ${
         selected
-          ? 'ring-accent-primary bg-accent-primary/10'
-          : 'ring-transparent hover:ring-white/20 bg-surface-elevated/60 hover:bg-surface-elevated'
+          ? 'ring-[1.5px] ring-accent-tone bg-accent-tone/[0.16]'
+          : 'ring-1 ring-transparent hover:ring-border-soft bg-surface-elevated/60 hover:bg-surface-elevated'
       }`}
     >
       {/* Thumbnail */}
-      <div className="relative aspect-video bg-black/40 overflow-hidden">
+      <div className="relative aspect-video bg-surface-input overflow-hidden">
         <img
           src={source.thumbnailDataUrl}
           alt={source.name}
@@ -801,10 +796,8 @@ function SourceCard({ source, selected, onClick, onDoubleClick }: {
           draggable={false}
         />
         {selected && (
-          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent-primary flex items-center justify-center">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-            </svg>
+          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent-primary text-on-accent flex items-center justify-center">
+            <Icon name="check" size="xs" />
           </div>
         )}
       </div>

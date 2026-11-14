@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
+import { Field } from '../ui/Controls';
 import { useUIStore } from '../../stores/uiStore';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { describeError } from '../../i18n/errors';
@@ -47,44 +49,32 @@ export function CreateCategoryModal() {
     <Modal isOpen={isOpen} onClose={closeModal} title={t('spaces:category.create.title')} mobileStyle="sheet">
       <form onSubmit={handleSubmit}>
         {error && (
-          <div className="mb-3 p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+          <div className="mb-3 px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
             {error}
           </div>
         )}
 
-        <div className="mb-4">
-          <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
-            {t('spaces:category.create.nameLabel')}
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="input-standard w-full"
-            placeholder={t('spaces:category.create.namePlaceholder')}
-            autoFocus
-          />
-        </div>
+        <Field label={t('spaces:category.create.nameLabel')} className="mb-5">
+          {({ id }) => (
+            <input
+              id={id}
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="input-standard w-full"
+              placeholder={t('spaces:category.create.namePlaceholder')}
+              autoFocus
+            />
+          )}
+        </Field>
 
-        <div className="sticky bottom-0 z-10 pointer-events-none">
-          <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-3 py-2 flex items-center gap-3 pointer-events-auto">
-              <button
-                type="button"
-                onClick={closeModal}
-                className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-              >
-                {t('common:actions.cancel')}
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
-              >
-                {isLoading ? t('spaces:category.create.submitting') : t('spaces:category.create.submit')}
-              </button>
-            </div>
-          </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={closeModal}>
+            {t('common:actions.cancel')}
+          </Button>
+          <Button variant="primary" type="submit" disabled={isLoading}>
+            {isLoading ? t('spaces:category.create.submitting') : t('spaces:category.create.submit')}
+          </Button>
         </div>
       </form>
     </Modal>

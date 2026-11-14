@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MessageWithUser } from '@backspace/shared';
 import { Avatar } from '../ui/Avatar';
+import { IconButton } from '../ui/IconButton';
 import { useChatStore } from '../../stores/chatStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useSelfIdInChannel } from '../../utils/channelUser';
@@ -52,7 +53,7 @@ function ChatToast({ message, origin, onOpen, onDismiss }: {
   return (
     <div
       data-testid="voice-chat-toast"
-      className="voice-chat-toast glass rounded-xl w-[280px] max-w-full flex items-start gap-2.5 p-2.5 pr-1.5 pointer-events-auto"
+      className="voice-chat-toast glass rounded-lg w-[280px] max-w-full flex items-start gap-2.5 p-2.5 pr-1.5 pointer-events-auto"
     >
       <button
         type="button"
@@ -63,20 +64,10 @@ function ChatToast({ message, origin, onOpen, onDismiss }: {
         <Avatar src={author.avatar} name={name} size={28} userId={author.homeUserId ?? author.id} user={author} />
         <span className="min-w-0 flex-1">
           <span className="block text-xs font-semibold text-txt-primary truncate">{name}</span>
-          <span className="block text-[13px] leading-snug text-txt-secondary line-clamp-2 break-words">{text}</span>
+          <span className="block text-compact leading-snug text-txt-secondary line-clamp-2 break-words">{text}</span>
         </span>
       </button>
-      <button
-        type="button"
-        onClick={onDismiss}
-        className="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded text-txt-tertiary hover:text-txt-primary transition-colors"
-        aria-label={t('voice:chatToast.dismiss')}
-        title={t('voice:chatToast.dismiss')}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-        </svg>
-      </button>
+      <IconButton icon="x" size="sm" label={t('voice:chatToast.dismiss')} onClick={onDismiss} />
     </div>
   );
 }
@@ -183,7 +174,7 @@ export function VoiceChatToasts({ channelId }: { channelId: string | null }) {
       data-testid="voice-chat-toasts"
       aria-live="polite"
       style={{ bottom }}
-      className="absolute right-4 z-20 flex flex-col items-end gap-2 max-w-[calc(100%-2rem)] pointer-events-none transition-[bottom] duration-200"
+      className="absolute right-4 z-float flex flex-col items-end gap-2 max-w-[calc(100%-2rem)] pointer-events-none transition-[bottom] duration-base ease-out"
     >
       {toasts.map((message) => (
         <ChatToast

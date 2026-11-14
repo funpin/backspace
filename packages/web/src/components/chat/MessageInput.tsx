@@ -13,6 +13,7 @@ import { InputPopover, type InputPopoverTab } from './InputPopover';
 import { StagedTransferTiles } from './StagedTransferTiles';
 import { hasPermissionBit, PermissionBits } from '../../utils/permissions';
 import { MAX_MESSAGE_LENGTH } from '@backspace/shared';
+import { PASTED_FILE_NAME, shouldPasteAsFile } from './pasteAsFile';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useComposerStore } from '../../stores/composerStore';
@@ -24,6 +25,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { selfIdentityOf } from '../../utils/identity';
 import { findLastOwnEditableMessage } from './messageEditing';
 import { describeError } from '../../i18n/errors';
+import { IconButton } from '../ui/IconButton';
 
 interface MessageInputProps {
   channelId: string;
@@ -41,6 +43,9 @@ interface MessageInputProps {
 
 // Default tus expiration window if a transfer doesn't yet have one (24h).
 const DEFAULT_TUS_TTL_MS = 24 * 60 * 60 * 1000;
+
+/** A composer button whose picker is open. */
+const COMPOSER_BUTTON_PRESSED = 'bg-interactive-active !text-accent-tone';
 
 function makeFileHandleKey(): string {
   return `up-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -420,12 +425,25 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
 
   const handlePaste = (e: React.ClipboardEvent): void => {
     const items = e.clipboardData.items;
+    let pastedImage = false;
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item && item.type.startsWith('image/')) {
         const file = item.getAsFile();
-        if (file) void enqueueFile({ file });
+        if (file) {
+          pastedImage = true;
+          void enqueueFile({ file });
+        }
       }
+    }
+    if (pastedImage) return;
+
+    // Text too long for a message becomes a file instead of being cut off or
+    // flooding the chat: the reader gets a card they can open.
+    const text = e.clipboardData.getData('text/plain');
+    if (shouldPasteAsFile(text, draftText.length)) {
+      e.preventDefault();
+      void enqueueFile({ file: new File([text], PASTED_FILE_NAME, { type: 'text/plain' }) });
     }
   };
 
@@ -547,7 +565,7 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
 
   // Composer positioning model — IDENTICAL across desktop and mobile.
   // ─────────────────────────────────────────────────────────────────
-  // The composer is a floating glass-bubble (`glass-bubble rounded-[14px]`)
+  // The composer is a floating glass-bubble (`glass-bubble rounded-xl`)
   // pinned to the bottom of the chat region with `position: absolute`. The
   // MessageList sibling fills the entire chat area; the last messages scroll
   // *behind* the translucent bubble. MessageList content carries a dynamic
@@ -575,8 +593,8 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
   // `MobileVoiceMiniBar`'s `mx-2` and the `MobileBottomNav` spacing tier);
   // `desktop:left-3 desktop:right-3` on desktop (the historical 12 px inset).
   //
-  // `z-[110]` keeps the bubble above any in-chat overlays (mention popover,
-  // staged-attachment tiles) but below modals (`z-[300]+`).
+  // `z-float` is the composer's layer (docs/brand/brandbook.md §7): above the
+  // message list and its overlays, below popovers and modals.
   const isMobile = useUIStore((s) => s.isMobile);
   const { keyboardOpen, textInputFocused } = useVisualViewportInset();
   // iOS PWA standalone shrinks the *layout viewport* itself for the keyboard
@@ -599,8 +617,10 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
             : 'calc(var(--safe-bottom) + 6px)',
       }
     : undefined;
+  // Composer buttons: 40px touch targets on a phone, the 34px control on desktop.
+  const composerButtonSize = isMobile ? 'lg' : 'md';
   const composerClass =
-    'absolute left-2 right-2 z-[110] glass-bubble rounded-[14px]' +
+    'absolute left-2 right-2 z-float glass-bubble rounded-xl' +
     ' desktop:left-3 desktop:right-3 desktop:bottom-3';
 
   // Dynamic message-list bottom padding ("composer clearance"):
@@ -731,7 +751,7 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
         <div className="flex items-center justify-center py-[14px] px-4">
           {/* While the channel is unknown (before its ready) nothing is refused yet:
               the shell alone, a non-breaking space keeping its height. */}
-          <span className="text-txt-tertiary text-[14px]">
+          <span className="text-txt-tertiary text-sm">
             {isDm === undefined ? '\u00a0' : t('chat:composer.noPermission')}
           </span>
         </div>
@@ -762,26 +782,23 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
       )}
 
       {chatReplyTo && (
-        <div className="bg-interactive-hover rounded-t-lg px-4 py-2 flex items-center justify-between border-b border-white/[0.06]">
-          <div className="flex items-center gap-1 text-[14px] text-txt-message truncate">
-            <span className="opacity-60">{t('chat:composer.replyingTo')}</span>
-            <span className="font-bold">
+        <div className="bg-interactive-hover rounded-t-xl pl-4 pr-1.5 py-1 flex items-center justify-between gap-2 border-b border-border-soft">
+          <div className="flex items-center gap-1 text-sm text-txt-message truncate">
+            <span className="text-txt-secondary">{t('chat:composer.replyingTo')}</span>
+            <span className="font-semibold text-txt-primary">
               {chatReplyTo.user.displayName ?? chatReplyTo.user.username}
             </span>
           </div>
-          <button
+          <IconButton
+            icon="x"
+            size="sm"
+            label={t('chat:composer.cancelReply')}
             onClick={() => chatSetReplyTo(channelId, null)}
-            className="text-txt-tertiary hover:text-txt-primary transition-colors"
-            aria-label={t('chat:composer.cancelReply')}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-            </svg>
-          </button>
+          />
         </div>
       )}
       <div
-        className={`relative ${chatReplyTo ? 'rounded-b-lg' : ''} overflow-visible`}
+        className={`relative ${chatReplyTo ? 'rounded-b-xl' : ''} overflow-visible`}
         onDrop={canAttachFiles ? handleDrop : undefined}
         onDragOver={canAttachFiles ? handleDragOver : undefined}
       >
@@ -804,16 +821,12 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
         <div className="flex items-center gap-1 desktop:gap-0 pl-2 desktop:pl-[10px] pr-2 desktop:pr-1">
           {/* File attach button */}
           {canAttachFiles && (
-            <button
+            <IconButton
+              icon="paperclip"
+              size={composerButtonSize}
+              label={t('chat:composer.attachFile')}
               onClick={() => fileInputRef.current?.click()}
-              className="w-10 h-10 desktop:w-[34px] desktop:h-[34px] flex items-center justify-center rounded-[6px] text-txt-tertiary hover:text-txt-secondary transition-colors flex-shrink-0"
-              title={t('chat:composer.attachFile')}
-              aria-label={t('chat:composer.attachFile')}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
-              </svg>
-            </button>
+            />
           )}
           <input
             ref={fileInputRef}
@@ -844,7 +857,7 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
                 ? t('chat:composer.placeholder.dm', { name: channelName.slice(1) })
                 : t('chat:composer.placeholder.channel', { name: channelName }))
             }
-            className="input-embedded relative block w-full py-[10px] px-1 resize-none text-[15px] leading-[1.375rem] max-h-[calc(50*var(--app-vh))] scrollbar-thin"
+            className="input-embedded relative block w-full py-[10px] px-1 resize-none text-sm leading-[21px] max-h-[calc(50*var(--app-vh))] scrollbar-thin"
             rows={1}
           />
 
@@ -861,7 +874,7 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
           {/* Failed-upload hint (gates send button) */}
           {failedCount > 0 && (
             <span
-              className="text-[12px] font-medium text-accent-rose px-1 flex-shrink-0"
+              className="text-xs font-medium text-status-danger px-1 flex-shrink-0"
               title={t('chat:composer.failedHint')}
             >
               {t('chat:composer.failedCount', { count: failedCount })}
@@ -871,7 +884,7 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
           {/* Character counter (shows when near or over limit) */}
           {draftText.length > MAX_MESSAGE_LENGTH - 200 && (
             <span
-              className={`text-[12px] font-medium tabular-nums flex-shrink-0 px-1 ${isOverLimit ? 'text-accent-rose' : 'text-txt-tertiary'}`}
+              className={`text-xs font-medium tabular-nums flex-shrink-0 px-1 ${isOverLimit ? 'text-status-danger' : 'text-txt-tertiary'}`}
             >
               {remaining}
             </span>
@@ -879,47 +892,34 @@ export function MessageInput({ channelId, channelName, placeholder }: MessageInp
 
           {/* GIF button */}
           {gifEnabled && (
-            <button
+            <IconButton
+              icon="image"
+              size={composerButtonSize}
+              label={t('chat:composer.gifPicker')}
               onClick={() => togglePopover('gif')}
-              className={`w-10 h-10 desktop:w-[34px] desktop:h-[34px] flex items-center justify-center rounded-[6px] transition-colors flex-shrink-0 ${
-                activePopover === 'gif' ? 'text-accent-primary' : 'text-txt-tertiary hover:text-txt-secondary'
-              }`}
-              title={t('chat:composer.gif')}
-              aria-label={t('chat:composer.gifPicker')}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2 5.5A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 18.5v-13ZM5.1 14V10h3.2v1.2H6.5v.6h1.6v1.1H6.5V14H5.1Zm4.5 0V10h1.4v4H9.6Zm2.5 0V10h3.2v1.2h-1.8v.5h1.6v1h-1.6V14h-1.4Z" />
-              </svg>
-            </button>
+              className={activePopover === 'gif' ? COMPOSER_BUTTON_PRESSED : undefined}
+            />
           )}
 
           {/* Emoji button */}
-          <button
+          <IconButton
+            icon="smile"
+            size={composerButtonSize}
+            label={t('chat:composer.emojiPicker')}
             onClick={() => togglePopover('emoji')}
-            className={`w-10 h-10 desktop:w-[34px] desktop:h-[34px] flex items-center justify-center rounded-[6px] transition-colors flex-shrink-0 ${
-              activePopover === 'emoji' ? 'text-accent-primary' : 'text-txt-tertiary hover:text-txt-secondary'
-            }`}
-            title={t('chat:composer.emoji')}
-            aria-label={t('chat:composer.emojiPicker')}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5s.67 1.5 1.5 1.5zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-            </svg>
-          </button>
+            className={activePopover === 'emoji' ? COMPOSER_BUTTON_PRESSED : undefined}
+          />
 
           {/* Send button — appears when there's content/attachments to send */}
           {canSend && (
-            <button
+            <IconButton
+              icon="send"
+              tone="on"
+              size={composerButtonSize}
+              label={t('chat:composer.sendMessage')}
               onClick={() => void handleSubmit()}
               disabled={anyUnshippable}
-              className="w-10 h-10 desktop:w-[34px] desktop:h-[34px] flex items-center justify-center rounded-[6px] bg-accent-primary hover:bg-accent-primary-hover text-white transition-all duration-150 flex-shrink-0 disabled:opacity-50"
-              aria-label={t('chat:composer.sendMessage')}
-              title={t('chat:composer.send')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a.993.993 0 00-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z" />
-              </svg>
-            </button>
+            />
           )}
         </div>
       </div>

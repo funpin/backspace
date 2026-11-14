@@ -35,12 +35,12 @@ export function MentionTextarea({ model, textareaRef, mentionAnchorRef, mentionS
   }, [textareaRef, model.text]);
   return <div className="relative flex-1 min-w-0">
     <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div ref={mirrorRef} className="py-[10px] px-1 text-[15px] leading-[1.375rem] text-txt-primary whitespace-pre-wrap break-words">
+      <div ref={mirrorRef} className="py-[10px] px-1 text-sm leading-[1.375rem] text-txt-primary whitespace-pre-wrap break-words">
         {model.parts.map((part, index) => {
           const offset = anchor - part.start;
           const content = offset >= 0 && offset < part.text.length
             ? <>{part.text.slice(0, offset)}{marker}{part.text.slice(offset)}</> : part.text;
-          return <span key={index} className={part.painted ? 'rounded bg-accent-primary/15 text-accent-primary' : undefined}>{content}</span>;
+          return <span key={index} className={part.painted ? 'rounded bg-accent-secondary/15 text-accent-secondary' : undefined}>{content}</span>;
         })}
         {'\u200b'}
       </div>

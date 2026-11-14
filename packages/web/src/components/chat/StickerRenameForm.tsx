@@ -4,6 +4,8 @@ import { MAX_STICKER_NAME_LENGTH, normalizeStickerName, stickerUrl, type Persona
 import { api } from '../../api/client';
 import { describeError } from '../../i18n/errors';
 import { usePickerEscapeClaim } from './pickerEscape';
+import { Button } from '../ui/Button';
+import { IconButton } from '../ui/IconButton';
 
 interface StickerRenameFormProps {
   sticker: PersonalSticker;
@@ -61,17 +63,13 @@ export function StickerRenameForm({ sticker, onRenamed, onCancel }: StickerRenam
 
   return (
     <form onSubmit={event => void submit(event)} aria-labelledby={headingId} className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center justify-between border-b border-border-soft px-4 py-3">
+      <div className="flex items-center justify-between border-b border-glass-border px-4 py-2.5">
         <h3 id={headingId} className="text-sm font-semibold">{t('chat:stickers.renameTitle')}</h3>
-        <button type="button" disabled={saving} onClick={onCancel} className="sticker-icon-button" aria-label={t('chat:stickers.cancel')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-            <path d="m6 6 12 12M6 18 18 6" />
-          </svg>
-        </button>
+        <IconButton icon="x" size="sm" noTitle label={t('chat:stickers.cancel')} disabled={saving} onClick={onCancel} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-4 space-y-3">
-        <div className="flex min-h-40 items-center justify-center rounded-xl border border-border-soft bg-surface-input/40 p-4 sticker-checkerboard">
+        <div className="flex min-h-40 items-center justify-center rounded-xl bg-surface-input p-4 sticker-checkerboard">
           <img src={stickerUrl(sticker.token) ?? undefined} alt={sticker.name} className="h-32 w-full object-contain" />
         </div>
         <div>
@@ -95,20 +93,19 @@ export function StickerRenameForm({ sticker, onRenamed, onCancel }: StickerRenam
           />
         </div>
         {error && (
-          <p id={`${inputId}-error`} role="alert" className="rounded-lg bg-accent-rose/10 px-3 py-2 text-xs text-txt-danger">
+          <p id={`${inputId}-error`} role="alert" className="rounded-lg bg-status-danger/10 px-3 py-2 text-xs text-status-danger">
             {error}
           </p>
         )}
       </div>
 
-      <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border-soft px-4 py-3">
-        <button type="button" disabled={saving} onClick={onCancel} className="sticker-secondary-button">
+      <div className="flex shrink-0 items-center justify-end gap-2 border-t border-glass-border px-4 py-2.5">
+        <Button variant="ghost" size="sm" disabled={saving} onClick={onCancel}>
           {t('chat:stickers.cancel')}
-        </button>
-        <button type="submit" disabled={saving || !name.trim()} className="sticker-primary-button">
-          {saving && <span className="sticker-spinner" aria-hidden="true" />}
+        </Button>
+        <Button type="submit" variant="primary" size="sm" loading={saving} disabled={saving || !name.trim()}>
           {t('chat:stickers.rename')}
-        </button>
+        </Button>
       </div>
     </form>
   );

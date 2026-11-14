@@ -1,5 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from './Button';
+import { Icon } from './Icon';
 
 interface InlineNameEditorProps {
   /** The stored name: shown while not editing, and where an edit starts. */
@@ -145,21 +147,24 @@ export function InlineNameEditor({
             maxLength={maxLength}
             className="input-standard min-w-0 flex-1 py-1.5 px-2 text-sm"
           />
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="sm"
             disabled={isSaving}
-            className="flex-shrink-0 px-2.5 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded transition-colors disabled:opacity-50"
+            className="flex-shrink-0"
           >
             {isSaving ? t('states.saving') : t('actions.save')}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={cancelEditing}
             disabled={isSaving}
-            className="flex-shrink-0 px-2 py-1.5 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
+            className="flex-shrink-0"
           >
             {t('actions.cancel')}
-          </button>
+          </Button>
         </form>
       ) : (
         <button
@@ -167,20 +172,15 @@ export function InlineNameEditor({
           type="button"
           onClick={startEditing}
           title={editLabel}
-          className="group -mx-1 flex min-w-0 items-center gap-1.5 rounded px-1 text-left text-sm font-medium transition-colors hover:bg-interactive-hover"
+          className="group -mx-1 flex min-w-0 items-center gap-1.5 rounded px-1 text-left text-sm font-medium transition-colors duration-fast hover:bg-interactive-hover"
         >
           <span className="min-w-0 truncate">{name}</span>
           <span className="sr-only">{editLabel}</span>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-            className="flex-shrink-0 text-txt-tertiary opacity-70 transition-opacity group-hover:opacity-100"
-          >
-            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-          </svg>
+          <Icon
+            name="pencil"
+            size="xs"
+            className="text-txt-tertiary opacity-70 transition-opacity duration-fast group-hover:opacity-100"
+          />
         </button>
       )}
     </div>

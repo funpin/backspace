@@ -1,8 +1,8 @@
 import React, { createContext, useContext } from 'react';
 import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Highlight, themes } from 'prism-react-renderer';
 import type { Components } from 'react-markdown';
+import { MemoizedCodeBlock } from './CodeBlock';
 import { MassMentionBadge } from './MassMentionBadge';
 import { MentionBadge } from './MentionBadge';
 import { remarkEmojiShortcodes } from '../../utils/remarkEmojiShortcodes';
@@ -68,56 +68,9 @@ function urlTransform(url: string): string {
   return defaultUrlTransform(url);
 }
 
-// ─── Custom Theme (Aether Drift) ──────────────────────────────────────────
-// Based on One Dark, tuned to match Aether Drift's elevated surface aesthetic.
-
-const aetherTheme = {
-  ...themes.oneDark,
-  plain: {
-    ...themes.oneDark.plain,
-    backgroundColor: 'rgb(var(--bg-elevated))',
-    color: 'rgb(var(--text-message))',
-  },
-};
-
 // ─── Markdown Component Overrides ──────────────────────────────────────────
 
 const REMARK_PLUGINS = [remarkGfm, remarkDefaultCodeLang, remarkEmojiShortcodes];
-
-function CodeBlock({ language, code }: { language: string; code: string }) {
-  // 'text' means a bare fenced block with no language — render without highlighting
-  if (language === 'text') {
-    return (
-      <pre className="mt-1 p-3 bg-surface-elevated border border-white/[0.06] rounded text-[0.875rem] leading-[1.125rem] font-mono overflow-x-auto whitespace-pre">
-        <code>{code}</code>
-      </pre>
-    );
-  }
-
-  return (
-    <Highlight theme={aetherTheme} code={code} language={language}>
-      {({ style, tokens, getLineProps, getTokenProps }) => (
-        <pre
-          className="mt-1 rounded border border-white/[0.06] text-[0.875rem] leading-[1.125rem] font-mono overflow-x-auto"
-          style={{ ...style, padding: '0.625rem 0.75rem', margin: 0 }}
-        >
-          {tokens.map((line, i) => {
-            const lineProps = getLineProps({ line });
-            return (
-              <div key={i} {...lineProps} style={{ ...lineProps.style, minHeight: '1.125rem' }}>
-                {line.map((token, key) => (
-                  <span key={key} {...getTokenProps({ token })} />
-                ))}
-              </div>
-            );
-          })}
-        </pre>
-      )}
-    </Highlight>
-  );
-}
-
-const MemoizedCodeBlock = React.memo(CodeBlock);
 
 // ─── Mentions: Channel Context ─────────────────────────────────────────────
 // The component overrides below are built once and shared by every message,
@@ -180,7 +133,7 @@ function buildComponents(): Components {
       // Inline code
       return (
         <code
-          className="px-[6px] py-px bg-[#111115] border border-border-soft rounded text-[13.5px] font-mono text-accent-lavender"
+          className="rounded bg-surface-elevated px-1.5 py-px text-[12.5px] font-mono"
           {...rest}
         >
           {children}
@@ -192,7 +145,7 @@ function buildComponents(): Components {
     pre: ({ children }) => <>{children}</>,
 
     // Bold / Italic / Strikethrough
-    strong: ({ children }) => <strong className="font-bold text-txt-primary">{children}</strong>,
+    strong: ({ children }) => <strong className="font-semibold text-txt-primary">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     del: ({ children }) => <del className="line-through text-txt-secondary">{children}</del>,
 
@@ -209,9 +162,9 @@ function buildComponents(): Components {
     li: ({ children }) => <li>{children}</li>,
 
     // Headings — Discord renders these with slightly larger/bolder text
-    h1: ({ children }) => <div className="text-[1.5rem] font-bold text-txt-primary mt-2 mb-1">{children}</div>,
-    h2: ({ children }) => <div className="text-[1.25rem] font-bold text-txt-primary mt-2 mb-1">{children}</div>,
-    h3: ({ children }) => <div className="text-[1.1rem] font-bold text-txt-primary mt-1 mb-0.5">{children}</div>,
+    h1: ({ children }) => <div className="text-2xl font-semibold text-txt-primary mt-2 mb-1">{children}</div>,
+    h2: ({ children }) => <div className="text-xl font-semibold text-txt-primary mt-2 mb-1">{children}</div>,
+    h3: ({ children }) => <div className="text-lg font-semibold text-txt-primary mt-1 mb-0.5">{children}</div>,
 
     // Horizontal rules
     hr: () => <hr className="border-border-soft my-2" />,
@@ -222,7 +175,7 @@ function buildComponents(): Components {
         <img
           src={src}
           alt={alt ?? ''}
-          className="max-w-full max-h-[300px] rounded-md"
+          className="max-w-full max-h-[300px] rounded-xl"
           loading="lazy"
           referrerPolicy="no-referrer"
           crossOrigin="anonymous"
@@ -233,12 +186,12 @@ function buildComponents(): Components {
     // Tables (GFM)
     table: ({ children }) => (
       <div className="overflow-x-auto my-1">
-        <table className="border-collapse text-[0.875rem]">{children}</table>
+        <table className="border-collapse text-sm">{children}</table>
       </div>
     ),
     thead: ({ children }) => <thead className="border-b border-border-soft">{children}</thead>,
     tbody: ({ children }) => <tbody>{children}</tbody>,
-    tr: ({ children }) => <tr className="border-b border-white/[0.06]">{children}</tr>,
+    tr: ({ children }) => <tr className="border-b border-border-soft">{children}</tr>,
     th: ({ children }) => <th className="px-3 py-1.5 text-left text-txt-primary font-semibold">{children}</th>,
     td: ({ children }) => <td className="px-3 py-1.5">{children}</td>,
   };

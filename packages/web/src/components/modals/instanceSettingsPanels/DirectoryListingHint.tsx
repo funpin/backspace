@@ -5,6 +5,7 @@ import { useSpaceStore } from '../../../stores/spaceStore';
 import { useUIStore } from '../../../stores/uiStore';
 import { resolveSpaceLayout, spacesInLayoutOrder } from '../../../utils/spaceLayout';
 import { spaceToShowForListing } from '../../../utils/directory';
+import { Button } from '../../ui/Button';
 
 /**
  * The note under the global rung while no space here is listed: the rung
@@ -54,17 +55,17 @@ export function DirectoryListingHint({ saveFirst, saving }: {
   };
 
   return (
-    <div className="p-2.5 bg-accent-amber/10 border border-accent-amber/30 rounded text-[13px] text-accent-amber space-y-2">
+    <div className="p-3 bg-status-warn/10 border border-status-warn/30 rounded-lg text-compact text-status-warn space-y-2">
       <p>{t('admin:general.directory.listingHint', { setting: t('spaces:settings.discovery.directory.label') })}</p>
       {target !== null && (
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={() => { void showMeWhere(); }}
           disabled={saving}
-          className="px-2.5 py-1 rounded bg-accent-amber/20 hover:bg-accent-amber/30 text-[13px] font-medium transition-colors disabled:opacity-50"
         >
           {saveFirst !== null ? t('admin:general.directory.saveAndShowMeWhere') : t('admin:general.directory.showMeWhere')}
-        </button>
+        </Button>
       )}
     </div>
   );

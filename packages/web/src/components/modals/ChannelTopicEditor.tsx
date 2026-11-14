@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CHANNEL_TOPIC_MAX_LENGTH, normalizeChannelTopic } from '@backspace/shared/src/constants';
+import { Button } from '../ui/Button';
 
 interface ChannelTopicEditorProps {
   /** The stored topic, `null` when the channel has none. */
@@ -57,7 +58,7 @@ export function ChannelTopicEditor({ topic, canEdit, onSave }: ChannelTopicEdito
   if (!canEdit) {
     return (
       <div>
-        <span className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+        <span className="block text-xs font-medium text-txt-secondary mb-1.5">
           {t('spaces:channel.settings.topic.label')}
         </span>
         {topic ? (
@@ -107,7 +108,7 @@ export function ChannelTopicEditor({ topic, canEdit, onSave }: ChannelTopicEdito
 
   return (
     <form onSubmit={handleSubmit}>
-      <label htmlFor={fieldId} className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+      <label htmlFor={fieldId} className="block text-xs font-medium text-txt-secondary mb-1.5">
         {t('spaces:channel.settings.topic.label')}
       </label>
       <textarea
@@ -127,32 +128,23 @@ export function ChannelTopicEditor({ topic, canEdit, onSave }: ChannelTopicEdito
         <p id={hintId} className="text-xs text-txt-tertiary">
           {t('spaces:channel.settings.topic.hint')}
         </p>
-        <span className={`flex-shrink-0 text-[11px] tabular-nums ${tooLong ? 'text-txt-danger' : 'text-txt-tertiary'}`}>
+        <span className={`flex-shrink-0 text-2xs tabular-nums ${tooLong ? 'text-status-danger' : 'text-txt-tertiary'}`}>
           {t('spaces:channel.settings.topic.counter', { used: length, max: CHANNEL_TOPIC_MAX_LENGTH })}
         </span>
       </div>
       {tooLong && (
-        <p id={limitId} role="alert" className="mt-1 text-xs text-txt-danger">
+        <p id={limitId} role="alert" className="mt-1 text-xs text-status-danger">
           {t('spaces:channel.settings.topic.tooLong', { max: CHANNEL_TOPIC_MAX_LENGTH })}
         </p>
       )}
       {isDirty && (
         <div className="mt-2 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={discard}
-            disabled={isSaving}
-            className="px-2.5 py-1.5 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
-          >
+          <Button variant="ghost" size="sm" onClick={discard} disabled={isSaving}>
             {t('spaces:channel.settings.topic.reset')}
-          </button>
-          <button
-            type="submit"
-            disabled={isSaving || tooLong}
-            className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded transition-colors disabled:opacity-50"
-          >
+          </Button>
+          <Button variant="primary" size="sm" type="submit" disabled={isSaving || tooLong}>
             {isSaving ? t('common:states.saving') : t('common:actions.save')}
-          </button>
+          </Button>
         </div>
       )}
     </form>

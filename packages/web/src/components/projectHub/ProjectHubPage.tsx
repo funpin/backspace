@@ -8,6 +8,7 @@ import { useUIStore } from '../../stores/uiStore';
 import { isElectron } from '../../platform/platform';
 import { PROJECT_LINKS, type ProjectLinks } from '../../utils/projectLinks';
 import { MemberListToggleButton } from '../layout/MemberListToggleButton';
+import { Icon } from '../ui/Icon';
 import { BackspaceMark } from './BackspaceMark';
 import { CommunityCard } from './CommunityCard';
 import { HUB_ACTION, HubCard, HubLinkAction } from './HubCard';
@@ -16,45 +17,22 @@ import { ReportCard } from './ReportCard';
 import { WhatsNewCard } from './WhatsNewCard';
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
-// 24px outline icons in the text colour; the card's icon tile colours them.
+// Outline icons in the text colour; the card's icon tile colours them.
 
 function SupportIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  );
+  return <Icon name="heart" />;
 }
 
 function InsightsIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 20V10" />
-      <path d="M12 20V4" />
-      <path d="M6 20v-6" />
-    </svg>
-  );
+  return <Icon name="chart" />;
 }
 
 function HostIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="8" rx="2" />
-      <rect x="2" y="14" width="20" height="8" rx="2" />
-      <path d="M6 6h.01" />
-      <path d="M6 18h.01" />
-    </svg>
-  );
+  return <Icon name="server" />;
 }
 
 function DesktopIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3" width="20" height="14" rx="2" />
-      <path d="M8 21h8" />
-      <path d="M12 17v4" />
-    </svg>
-  );
+  return <Icon name="monitor" />;
 }
 
 // ─── Seen-version snapshot ──────────────────────────────────────────────────
@@ -141,10 +119,10 @@ export function ProjectHubPage(props: { links?: ProjectLinks; showTopBar?: boole
   return (
     <div className="flex-1 flex flex-col bg-surface-chat h-full min-w-0">
       {showTopBar && (
-        <div className="h-12 px-4 flex items-center shadow-header flex-shrink-0 z-10 bg-surface-chat">
+        <div className="h-12 px-4 flex items-center border-b border-border-hard flex-shrink-0 z-raised bg-surface-chat">
           <div className="flex items-center gap-2 mr-4">
-            <BackspaceMark className="text-txt-tertiary" />
-            <span className="font-bold text-txt-primary">{t('header.title')}</span>
+            <BackspaceMark size={20} className="text-accent-tone" />
+            <span className="text-lg font-semibold text-txt-primary">{t('header.title')}</span>
           </div>
           <div className="ml-auto flex items-center gap-1">
             <MemberListToggleButton />
@@ -155,12 +133,15 @@ export function ProjectHubPage(props: { links?: ProjectLinks; showTopBar?: boole
       <div className="flex-1 overflow-y-auto">
         <div className="p-6 space-y-10">
           <header className="flex items-center gap-4">
-            {/* The space rail's home tile, scaled up: the white mark on the brand lavender. */}
-            <div className="w-12 h-12 rounded-2xl bg-accent-primary text-white flex items-center justify-center flex-shrink-0">
-              <img src="/icons/logo-mark.svg" alt="" className="w-6 h-auto" />
+            {/* The space rail's home tile, scaled up: the mark in the theme's tone on a raised tile. */}
+            <div
+              data-hub-mark-tile
+              className="w-12 h-12 rounded-xl bg-surface-elevated shadow-[inset_0_0_0_1px_var(--glass-border)] text-accent-tone flex items-center justify-center flex-shrink-0"
+            >
+              <BackspaceMark size={28} />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold text-txt-primary">{t('header.title')}</h1>
+              <h1 className="text-2xl font-semibold text-txt-primary">{t('header.title')}</h1>
               <p className="text-sm text-txt-secondary">{t('header.tagline')}</p>
             </div>
           </header>
@@ -202,16 +183,16 @@ export function ProjectHubPage(props: { links?: ProjectLinks; showTopBar?: boole
           <InstanceSection info={info} />
 
           <footer className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
-            <a href={links.license} target="_blank" rel="noopener noreferrer" className="text-txt-tertiary hover:text-txt-secondary transition-colors">
+            <a href={links.license} target="_blank" rel="noopener noreferrer" className="text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast">
               {t('footer.license')}
             </a>
-            <a href={links.security} target="_blank" rel="noopener noreferrer" className="text-txt-tertiary hover:text-txt-secondary transition-colors">
+            <a href={links.security} target="_blank" rel="noopener noreferrer" className="text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast">
               {t('footer.security')}
             </a>
-            <a href={links.contributors} target="_blank" rel="noopener noreferrer" className="text-txt-tertiary hover:text-txt-secondary transition-colors">
+            <a href={links.contributors} target="_blank" rel="noopener noreferrer" className="text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast">
               {t('footer.contributors')}
             </a>
-            <a href={links.repository} target="_blank" rel="noopener noreferrer" className="text-txt-tertiary hover:text-txt-secondary transition-colors">
+            <a href={links.repository} target="_blank" rel="noopener noreferrer" className="text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast">
               {t('footer.source')}
             </a>
           </footer>

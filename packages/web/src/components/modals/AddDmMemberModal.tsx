@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Avatar } from '../ui/Avatar';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { useUIStore } from '../../stores/uiStore';
 import { useSpaceStore, dmCopyOnOrigin } from '../../stores/spaceStore';
 import { useSelfIdentity } from '../../stores/authStore';
@@ -64,11 +66,11 @@ function AddDmFriendRow({
     <button
       onClick={() => onToggle(friendKey(friend))}
       disabled={isInDm || isAdding || atCapacity}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-[4px] transition-colors text-left ${
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-fast text-left ${
         isInDm
           ? 'opacity-40 cursor-not-allowed'
           : isSelected
-            ? 'bg-accent-mint/[0.08]'
+            ? 'bg-interactive-selected'
             : 'hover:bg-interactive-hover'
       } ${atCapacity && !isInDm ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
@@ -81,10 +83,10 @@ function AddDmFriendRow({
         avatarColor={canonical.avatarColor}
       />
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-medium text-txt-primary truncate">
+        <div className="text-compact font-medium text-txt-primary truncate">
           {friendDisplayName}
         </div>
-        <div className="text-[11px] text-txt-tertiary truncate">
+        <div className="text-2xs text-txt-tertiary truncate">
           {isInDm ? t('dm:addMember.alreadyInDm') : `@${canonical.username}`}
         </div>
       </div>
@@ -92,14 +94,12 @@ function AddDmFriendRow({
         <div
           className={`w-[18px] h-[18px] rounded flex-shrink-0 flex items-center justify-center ${
             isSelected
-              ? 'bg-accent-mint'
-              : 'border-2 border-border-hard'
+              ? 'bg-accent-primary text-on-accent'
+              : 'shadow-[inset_0_0_0_1.5px_var(--glass-border)]'
           }`}
         >
           {isSelected && (
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-surface-base">
-              <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <Icon name="check" size="xs" />
           )}
         </div>
       )}
@@ -257,10 +257,10 @@ export function AddDmMemberModal() {
       <div className="space-y-3">
         {/* Header with member count */}
         <div className="flex items-center justify-between">
-          <p className="text-[13px] text-txt-tertiary">
+          <p className="text-sm text-txt-secondary">
             {t('dm:addMember.description')}
           </p>
-          <span className="text-[12px] text-txt-tertiary flex-shrink-0 ml-2">
+          <span className="text-xs text-txt-tertiary tabular-nums flex-shrink-0 ml-2">
             {t('dm:addMember.capacity', { current: memberCount, max: maxMembers })}
           </span>
         </div>
@@ -271,14 +271,14 @@ export function AddDmMemberModal() {
             {selectedFriends.map((f) => (
               <span
                 key={friendKey(f)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] bg-accent-mint/15 text-accent-mint"
+                className="flex items-center gap-1 h-6 pl-2 pr-1 rounded text-xs font-medium bg-accent-tone/[0.16] text-accent-tone"
               >
                 {f.displayName ?? parseFederatedUsername(f.username).baseName}
                 <button
                   onClick={() => removeFriend(friendKey(f))}
-                  className="opacity-60 hover:opacity-100 transition-opacity text-[14px] leading-none"
+                  className="grid place-items-center h-4 w-4 rounded opacity-60 hover:opacity-100 transition-opacity duration-fast"
                 >
-                  &times;
+                  <Icon name="x" size="xs" />
                 </button>
               </span>
             ))}
@@ -292,22 +292,22 @@ export function AddDmMemberModal() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('dm:addMember.searchPlaceholder')}
-          className="input-search w-full py-2 text-[14px]"
+          className="input-search w-full"
           disabled={remainingSlots <= 0}
         />
 
         {remainingSlots <= 0 && (
-          <p className="text-txt-danger text-[13px]">{t('dm:addMember.limitReached', { max: maxMembers })}</p>
+          <p className="text-xs text-status-danger">{t('dm:addMember.limitReached', { max: maxMembers })}</p>
         )}
 
         {error && (
-          <p className="text-txt-danger text-[13px]">{error}</p>
+          <p className="text-xs text-status-danger">{error}</p>
         )}
 
         {/* Friend list */}
-        <div className="max-h-[300px] overflow-y-auto space-y-[2px]">
+        <div className="max-h-[300px] overflow-y-auto space-y-0.5">
           {filteredFriends.length === 0 && (
-            <div className="py-4 text-center text-txt-tertiary text-[14px]">
+            <div className="py-4 text-center text-txt-tertiary text-sm">
               {query.trim() ? t('dm:addMember.noMatch') : t('dm:addMember.noFriends')}
             </div>
           )}
@@ -332,13 +332,14 @@ export function AddDmMemberModal() {
         </div>
 
         {/* Submit button */}
-        <button
+        <Button
+          variant="primary"
+          fullWidth
           onClick={handleSubmit}
           disabled={selectedFriends.length === 0 || isAdding}
-          className="w-full py-2 rounded-md text-[13px] font-semibold transition-colors bg-accent-mint text-surface-base hover:bg-accent-mint/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isAdding ? t('dm:addMember.adding') : buttonText}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

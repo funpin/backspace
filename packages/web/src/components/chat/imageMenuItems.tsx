@@ -6,6 +6,7 @@ import { api, HttpError } from '../../api/client';
 import i18n from '../../i18n';
 import { uploadSticker, readStickerImage } from './stickerUpload';
 import { describeError } from '../../i18n/errors';
+import { Icon } from '../ui/Icon';
 
 interface ImageMenuParams {
   imageUrl?: string | null;
@@ -72,7 +73,7 @@ function collectStickerItem(source: string, name: string): ContextMenuAction | n
     key: 'collect-sticker',
     type: 'action',
     label: i18n.t('chat:stickers.save'),
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><path d="M12 7v10M7 12h10" /></svg>,
+    icon: <Icon name="sticker" size="sm" />,
     onClick: async () => {
       const { addToast } = useUIStore.getState();
       addToast(i18n.t('chat:stickers.uploading'), 'info');
@@ -93,16 +94,16 @@ export function buildImageMenuItems({ imageUrl, sourceUrl, stickerSource, sticke
   if (collect) items.push(collect);
   items.push({
     key: 'save-image', type: 'action', label: i18n.t('chat:menu.saveImage'),
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" /></svg>,
+    icon: <Icon name="download" size="sm" />,
     onClick: () => saveImage(imageUrl),
   }, {
     key: 'copy-image', type: 'action', label: i18n.t('chat:menu.copyImage'),
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 9v10c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h7l6 6zm-2 1h-5V4H8v15h11V10zM3 15V3c0-1.1.9-2 2-2h9v2H5v12H3z" /></svg>,
+    icon: <Icon name="copy" size="sm" />,
     onClick: () => { void copyImageToClipboard(imageUrl); },
   });
   if (!sourceUrl) items.push({
     key: 'open-original', type: 'action', label: i18n.t('chat:menu.openOriginal'),
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 19H5V5h7V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" /></svg>,
+    icon: <Icon name="external-link" size="sm" />,
     onClick: () => { window.open(imageUrl, '_blank', 'noopener'); },
   });
   items.push({ key: 'image-sep', type: 'separator' });

@@ -35,7 +35,7 @@ function MentionMemberRow({
     <div
       ref={isSelected ? selectedRef : undefined}
       onClick={() => onSelect(candidate)}
-      className={`flex items-center mx-1 rounded cursor-pointer transition-colors ${rowSizing} ${
+      className={`flex items-center mx-1 rounded-lg cursor-pointer transition-colors duration-fast ${rowSizing} ${
         isSelected ? 'bg-interactive-selected' : 'hover:bg-interactive-hover'
       }`}
     >
@@ -53,14 +53,14 @@ function MentionMemberRow({
           box, so a username squeezed to nothing takes its gap with it. */}
       <div className="flex items-center min-w-0 flex-1">
         <span
-          className={`${mobile ? 'text-[15px]' : 'text-[14px]'} font-medium shrink-0 max-w-full truncate`}
+          className="text-sm font-medium text-txt-primary shrink-0 max-w-full truncate"
           style={roleColor ? { color: roleColor } : undefined}
         >
           {displayName}
         </span>
         {showUsername && (
           <span className="flex min-w-0 overflow-hidden">
-            <span className={`text-[12px] text-txt-tertiary min-w-0 truncate ${mobile ? 'pl-3' : 'pl-2.5'}`}>
+            <span className={`text-xs text-txt-tertiary min-w-0 truncate ${mobile ? 'pl-3' : 'pl-2.5'}`}>
               @{canonical.username}
             </span>
           </span>
@@ -100,7 +100,7 @@ function MemberList({
   const { t } = useTranslation(['chat', 'common']);
   return (
     <>
-      <div className="px-2 py-1.5 text-[11px] font-bold text-txt-tertiary uppercase tracking-wider">
+      <div className="px-3 pt-2 pb-1 text-xs font-medium text-txt-tertiary">
         {t('common:labels.members')}
       </div>
       {candidates.map((candidate, i) => (
@@ -142,7 +142,7 @@ function DesktopMention({
 
   return createPortal(
     <div ref={floatingRef} style={style} className="w-[280px]">
-      <div className="glass rounded-lg overflow-hidden max-h-[320px] overflow-y-auto scrollbar-thin">
+      <div className="glass rounded-xl overflow-hidden max-h-[320px] overflow-y-auto scrollbar-thin pb-1">
         <MemberList
           candidates={candidates}
           selectedIndex={selectedIndex}
@@ -175,9 +175,9 @@ function MobileMention({
   // on the composer's own dismissal flow rather than a click-to-close handler.
   return createPortal(
     <>
-      <div className="fixed inset-0 z-[300] bg-black/30 pointer-events-none" />
+      <div className="fixed inset-0 z-modal bg-surface-overlay pointer-events-none" />
       <div
-        className="fixed left-0 right-0 z-[301] rounded-t-2xl glass-modal animate-slide-up-sheet flex flex-col"
+        className="fixed left-0 right-0 z-modal rounded-t-2xl glass-modal animate-slide-up-sheet flex flex-col"
         style={{
           bottom: 'var(--keyboard-inset)',
           paddingBottom: 'var(--safe-bottom)',

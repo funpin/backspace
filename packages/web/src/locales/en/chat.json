@@ -129,6 +129,12 @@
       "partialInstance": "{{username}}'s instance (limit: {{limit}})",
       "partialList": "File couldn't be cached on {{instances}}. They can still view it from yours.",
       "listPair": "{{first}} and {{second}}"
+    },
+    "preview": {
+      "show": "Show contents",
+      "hide": "Hide contents",
+      "failed": "Couldn't load the file. Download it instead.",
+      "truncated": "Showing the first part of the file. Download it to see the rest."
     }
   },
   "gif": {
@@ -221,5 +227,10 @@
     "action": "Poke",
     "received": "{{actor}} poked {{target}}",
     "disconnected": "Disconnected. Poke was not sent."
+  },
+  "code": {
+    "showAll_one": "Show all, {{count}} line",
+    "showAll_other": "Show all, {{count}} lines",
+    "collapse": "Collapse"
   }
 }

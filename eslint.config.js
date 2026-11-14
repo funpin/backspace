@@ -215,4 +215,19 @@ module.exports = tseslint.config(
       // the declaration moves above the effect.
     },
   },
+  {
+    // One icon set, one way in (docs/brand/brandbook.md §8). Screens name an
+    // icon through components/ui/Icon.tsx, which fixes the stroke and the
+    // four sizes; a direct import would bring back per-file sizes and weights.
+    files: ['packages/web/**/*.{ts,tsx}'],
+    ignores: ['packages/web/src/components/ui/Icon.tsx'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [{
+          name: 'lucide-react',
+          message: "Use <Icon name=\"…\" /> from components/ui/Icon and add the glyph to its ICONS list.",
+        }],
+      }],
+    },
+  },
 );

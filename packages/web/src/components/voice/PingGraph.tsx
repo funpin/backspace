@@ -12,12 +12,12 @@ const MIN_SCALE_MS = 100;
 const BAND_STROKE: Record<HealthBand, string> = {
   good: 'rgb(var(--status-online))',
   warn: 'rgb(var(--status-idle))',
-  bad: 'rgb(var(--accent-rose))',
+  bad: 'rgb(var(--status-dnd))',
 };
 const BAND_TEXT: Record<HealthBand, string> = {
-  good: 'text-status-online',
-  warn: 'text-status-idle',
-  bad: 'text-txt-danger',
+  good: 'text-status-ok',
+  warn: 'text-status-warn',
+  bad: 'text-status-danger',
 };
 
 function band(ms: number): HealthBand {
@@ -78,14 +78,14 @@ export function PingGraph() {
   return (
     <div data-testid="ping-graph" className="mb-2">
       <div className="flex items-baseline justify-between mb-1">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-txt-tertiary">
+        <span className="text-xs font-medium text-txt-tertiary">
           {t('voice:connectionInfo.pingGraph.title')}
         </span>
-        <span className="text-[10px] text-txt-tertiary tabular-nums">
+        <span className="text-2xs text-txt-tertiary tabular-nums">
           {t('voice:connectionInfo.pingGraph.window', { minutes: f.formatNumber(minutes) })}
         </span>
       </div>
-      <div className="relative rounded-md bg-surface-input overflow-hidden">
+      <div className="relative rounded-lg bg-surface-input overflow-hidden">
         <svg
           width="100%"
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -127,11 +127,11 @@ export function PingGraph() {
             );
           })}
         </svg>
-        <span className="absolute top-0.5 left-1 text-[9px] leading-none text-txt-tertiary tabular-nums pointer-events-none">
+        <span className="absolute top-0.5 left-1 text-2xs leading-none text-txt-tertiary tabular-nums pointer-events-none">
           {ms(scale)}
         </span>
       </div>
-      <div className="flex items-center justify-between mt-1 text-[11px] tabular-nums">
+      <div className="flex items-center justify-between mt-1 text-2xs tabular-nums">
         {summary ? (
           <>
             <span className="text-txt-tertiary">

@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Attachment } from '@backspace/shared';
 import { useUIStore } from '../../stores/uiStore';
 import { useTransferStore } from '../../stores/transferStore';
 import { Tooltip } from '../ui/Tooltip';
 import { useFormatters } from '../../i18n/formatters';
+import { Icon } from '../ui/Icon';
+import { Tag } from '../ui/Tag';
+import { Button } from '../ui/Button';
+import { CodeBlock } from './CodeBlock';
+import { isPreviewableTextFile, languageOfFilename } from './codeLanguage';
+
+/** A 1px edge drawn over a media box, so the box keeps the dimensions it reserved. */
+const MEDIA_EDGE = 'after:pointer-events-none after:absolute after:inset-0 after:rounded-xl after:shadow-[inset_0_0_0_1px_var(--glass-border)]';
+
+/** The 38px tile that carries a file card's icon. */
+const ICON_TILE = 'grid place-items-center w-[38px] h-[38px] rounded-lg bg-accent-tone/[0.16] text-accent-tone flex-shrink-0';
+
+/** The file type a card names next to the size: the extension, in capitals. */
+function fileTypeOf(name: string): string | null {
+  const dot = name.lastIndexOf('.');
+  if (dot <= 0 || dot === name.length - 1) return null;
+  const extension = name.slice(dot + 1);
+  return /^[a-z0-9]{1,8}$/i.test(extension) ? extension.toUpperCase() : null;
+}
 
 interface AttachmentRendererProps {
   attachment: Attachment;
@@ -102,7 +121,7 @@ function VideoAttachment({ attachment, attUrl, thumbUrl, federationInlineBadge }
           onClick={() => {
             void startDownload(attUrl, { filename: originalName, size, mimetype, tray: true });
           }}
-          className="block w-full text-left rounded-lg overflow-hidden border border-border-hard bg-surface-channel/50 hover:bg-interactive-hover transition-all group/vid"
+          className="block w-full text-left rounded-xl overflow-hidden bg-surface-elevated hover:bg-border-soft transition-colors duration-fast"
         >
           {thumbUrl && (
             <div className="relative w-full" style={sizing}>
@@ -113,27 +132,26 @@ function VideoAttachment({ attachment, attUrl, thumbUrl, federationInlineBadge }
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-black/45 flex flex-col items-center justify-center gap-1.5 text-white">
-                <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                </svg>
-                <span className="text-[12px] font-medium">{t('chat:attachment.video.cannotPlayDownload')}</span>
+                <Icon name="download" size="lg" />
+                <span className="text-xs font-medium">{t('chat:attachment.video.cannotPlayDownload')}</span>
               </div>
             </div>
           )}
-          <div className="flex items-center gap-3 p-3">
+          <div className="flex items-center gap-2.5 p-2.5">
             {!thumbUrl && (
-              <div className="p-2 bg-surface-base rounded text-txt-tertiary flex-shrink-0">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
+              <div className={ICON_TILE}>
+                <Icon name="video" />
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-txt-link text-[14px] font-medium truncate group-hover/vid:underline">{originalName}</p>
-              <p className="text-[12px] text-txt-tertiary">
+              <p className="text-txt-primary text-sm font-medium truncate">{originalName}</p>
+              <p className="text-xs text-txt-tertiary">
                 {meta ? `${meta} · ` : ''}{t('chat:attachment.video.unsupportedFormat')}
               </p>
             </div>
+            <span className="grid place-items-center w-[34px] h-[34px] flex-shrink-0 text-txt-secondary">
+              <Icon name="download" />
+            </span>
           </div>
         </button>
         {federationInlineBadge && <div className="mt-1">{federationInlineBadge}</div>}
@@ -144,7 +162,7 @@ function VideoAttachment({ attachment, attUrl, thumbUrl, federationInlineBadge }
   return (
     <div className="mt-1 max-w-[400px]">
       <div
-        className="relative max-h-[300px] rounded-lg overflow-hidden"
+        className={`relative max-h-[300px] rounded-xl overflow-hidden ${MEDIA_EDGE}`}
         style={sizing}
       >
         <video
@@ -153,7 +171,7 @@ function VideoAttachment({ attachment, attUrl, thumbUrl, federationInlineBadge }
           poster={thumbUrl ?? undefined}
           src={attUrl}
           onError={() => setFailed(true)}
-          className="w-full h-full rounded-lg"
+          className="w-full h-full rounded-xl"
         >
           {t('chat:attachment.video.unsupportedBrowser')}
         </video>
@@ -222,13 +240,8 @@ export function AttachmentRenderer({ attachment }: AttachmentRendererProps) {
   // Inline badge — sits next to file size or below media, never absolute-positioned
   const federationInlineBadge = federationTooltip ? (
     <Tooltip content={federationTooltip.text} position="top">
-      <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded glass-pill text-xs cursor-default ${federationTooltip.type === 'remote' ? 'text-txt-tertiary' : 'text-accent-amber'}`}>
-        <svg className="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          {federationTooltip.type === 'remote'
-            ? <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-            : <><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></>
-          }
-        </svg>
+      <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded glass-pill text-xs cursor-default ${federationTooltip.type === 'remote' ? 'text-txt-tertiary' : 'text-status-warn'}`}>
+        <Icon name={federationTooltip.type === 'remote' ? 'cloud' : 'triangle-alert'} size="xs" />
       </div>
     </Tooltip>
   ) : null;
@@ -238,17 +251,20 @@ export function AttachmentRenderer({ attachment }: AttachmentRendererProps) {
     return (
       <div className="mt-1 max-w-fit">
         <div
-          className="relative rounded-lg overflow-hidden border border-white/[0.06]"
+          className="relative rounded-xl overflow-hidden border border-glass-border"
           style={width && height ? { aspectRatio: `${width}/${height}`, maxWidth: Math.min(width, 400), maxHeight: 300 } : undefined}
         >
           <img
             src={thumbUrl ?? attUrl}
             data-sticker-source={attUrl}
             alt={originalName}
-            className="w-full h-full max-w-[400px] max-h-[300px] object-contain cursor-pointer hover:brightness-95 transition-all"
+            className="w-full h-full max-w-[400px] max-h-[300px] object-contain cursor-pointer hover:brightness-95 transition-[filter] duration-fast"
             onClick={() => openImagePreview(attUrl)}
             loading="lazy"
           />
+          {mimetype === 'image/gif' && (
+            <Tag tone="onMedia" className="absolute left-2 top-2 pointer-events-none">{t('chat:composer.gif')}</Tag>
+          )}
         </div>
         {federationInlineBadge && <div className="mt-1">{federationInlineBadge}</div>}
       </div>
@@ -268,22 +284,15 @@ export function AttachmentRenderer({ attachment }: AttachmentRendererProps) {
 
   if (mimetype.startsWith('audio/')) {
     return (
-      <div className="relative mt-1 flex flex-col p-3 bg-surface-channel/50 rounded-lg border border-border-hard max-w-[420px]">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-surface-base rounded text-txt-tertiary flex-shrink-0">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-              />
-            </svg>
+      <div className="relative mt-1 flex flex-col p-2.5 bg-surface-elevated rounded-xl max-w-[420px]">
+        <div className="flex items-center gap-2.5">
+          <div className={ICON_TILE}>
+            <Icon name="music" />
           </div>
           <div className="min-w-0">
-            <p className="text-txt-primary text-[14px] font-medium truncate">{originalName}</p>
+            <p className="text-txt-primary text-sm font-medium truncate">{originalName}</p>
             <div className="flex items-center gap-2">
-              <p className="text-[12px] text-txt-tertiary">{formatBytes(size)}</p>
+              <p className="text-xs text-txt-tertiary tabular-nums">{formatBytes(size)}</p>
               {federationInlineBadge}
             </div>
           </div>
@@ -306,7 +315,13 @@ export function AttachmentRenderer({ attachment }: AttachmentRendererProps) {
   // text block; without `min-w-0` the long-filename child would refuse to
   // shrink (flex children's min-content size defaults to their intrinsic
   // content) and would push the entire chip past the parent's right edge.
+  //
+  // The whole card is the download control, as before; the glyph at its right
+  // edge is the card's own affordance and not a second button inside it.
+  const fileType = fileTypeOf(originalName);
+  const previewable = isPreviewableTextFile(originalName, mimetype, size);
   return (
+    <div className="mt-1 max-w-full min-w-0">
     <button
       type="button"
       onClick={() => {
@@ -317,25 +332,87 @@ export function AttachmentRenderer({ attachment }: AttachmentRendererProps) {
           tray: true,
         });
       }}
-      className="mt-1 max-w-full desktop:max-w-[400px] flex items-center gap-3 p-4 bg-surface-channel/50 rounded-lg border border-border-hard hover:bg-interactive-hover transition-all group/att text-left w-full min-w-0"
+      className="max-w-full desktop:max-w-[400px] flex items-center gap-2.5 p-2.5 bg-surface-elevated rounded-xl hover:bg-border-soft transition-colors duration-fast group/att text-left w-full min-w-0"
     >
-      <div className="p-2 bg-surface-base rounded text-txt-tertiary group-hover/att:text-txt-primary transition-colors flex-shrink-0">
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-          />
-        </svg>
+      <div className={ICON_TILE}>
+        <Icon name="file-text" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-txt-link text-[15px] font-medium truncate hover:underline">{originalName}</p>
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-[12px] text-txt-tertiary font-medium">{formatBytes(size)}</p>
+        <p className="text-txt-primary text-sm font-medium truncate">{originalName}</p>
+        <div className="flex items-center gap-2 flex-wrap text-xs text-txt-tertiary">
+          <p className="tabular-nums">{formatBytes(size)}</p>
+          {fileType && <span>{fileType}</span>}
           {federationInlineBadge}
         </div>
       </div>
+      <span className="grid place-items-center w-[34px] h-[34px] rounded-lg flex-shrink-0 text-txt-secondary group-hover/att:text-txt-primary transition-colors duration-fast">
+        <Icon name="download" />
+      </span>
     </button>
+    {previewable && <TextFilePreview url={attUrl} name={originalName} />}
+    </div>
+  );
+}
+
+/** How much of a text file the preview reads; the rest stays in the download. */
+const PREVIEW_MAX_CHARS = 64 * 1024;
+
+type PreviewState =
+  | { status: 'closed' }
+  | { status: 'loading' }
+  | { status: 'failed' }
+  | { status: 'open'; text: string; truncated: boolean };
+
+/**
+ * The "show contents" control under a text file's card. The file is fetched
+ * only when the reader asks, so a message's height changes by their action
+ * and never while the list is settling (docs/systems/message-list.md).
+ */
+function TextFilePreview({ url, name }: { url: string; name: string }) {
+  const { t } = useTranslation(['chat']);
+  const [state, setState] = useState<PreviewState>({ status: 'closed' });
+  const requestRef = useRef(0);
+
+  useEffect(() => () => {
+    requestRef.current += 1;
+  }, []);
+
+  const toggle = (): void => {
+    if (state.status !== 'closed' && state.status !== 'failed') {
+      requestRef.current += 1;
+      setState({ status: 'closed' });
+      return;
+    }
+    const request = ++requestRef.current;
+    setState({ status: 'loading' });
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      })
+      .then((text) => {
+        if (requestRef.current !== request) return;
+        const truncated = text.length > PREVIEW_MAX_CHARS;
+        setState({ status: 'open', text: truncated ? text.slice(0, PREVIEW_MAX_CHARS) : text, truncated });
+      })
+      .catch(() => {
+        if (requestRef.current === request) setState({ status: 'failed' });
+      });
+  };
+
+  const open = state.status === 'open' || state.status === 'loading';
+  return (
+    <div className="mt-1">
+      <Button variant="ghost" size="sm" icon={open ? 'chevron-up' : 'chevron-down'} loading={state.status === 'loading'} aria-expanded={open} onClick={toggle}>
+        {open ? t('chat:attachment.preview.hide') : t('chat:attachment.preview.show')}
+      </Button>
+      {state.status === 'failed' && <p role="alert" className="mt-1 text-xs text-status-danger">{t('chat:attachment.preview.failed')}</p>}
+      {state.status === 'open' && (
+        <>
+          <CodeBlock language={languageOfFilename(name)} code={state.text} title={name} />
+          {state.truncated && <p className="mt-1 text-xs text-txt-tertiary">{t('chat:attachment.preview.truncated')}</p>}
+        </>
+      )}
+    </div>
   );
 }

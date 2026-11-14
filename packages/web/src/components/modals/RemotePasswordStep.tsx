@@ -1,6 +1,7 @@
 import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StatusDot } from '../ui/StatusDot';
+import { Button } from '../ui/Button';
 import type { RemoteLoginReason } from '../../stores/instanceStore';
 
 /**
@@ -46,10 +47,6 @@ export function safeHost(origin: string): string {
   try { return new URL(origin).host; } catch { return origin; }
 }
 
-const submitBase =
-  'px-4 py-2 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded transition-colors disabled:opacity-50';
-const submitClass = `w-full ${submitBase}`;
-
 function PasswordForm({
   host,
   homeUsername,
@@ -78,7 +75,7 @@ function PasswordForm({
     >
       <input type="text" autoComplete="username" value={homeUsername} readOnly tabIndex={-1} className="sr-only" />
       <div>
-        <label htmlFor={fieldId} className="block text-xs text-txt-tertiary mb-1">
+        <label htmlFor={fieldId} className="block text-xs font-medium text-txt-secondary mb-1.5">
           {t('federation:connections.add.passwordLabel', { host })}
         </label>
         <input
@@ -97,9 +94,9 @@ function PasswordForm({
         </div>
       </div>
       {extraFields}
-      <button type="submit" disabled={isLoading || !password} className={submitClass}>
+      <Button variant="primary" type="submit" disabled={isLoading || !password} fullWidth>
         {isLoading ? connectingLabel : connectLabel}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -122,7 +119,7 @@ export function FallbackNotice({ reason, host, className = '' }: {
 }) {
   const { t } = useTranslation(['federation']);
   return (
-    <div className={`p-2 bg-accent-amber/10 border border-accent-amber/30 rounded text-xs text-accent-amber ${className}`}>
+    <div className={`px-3 py-2 rounded-lg bg-status-warn/10 text-xs text-status-warn ${className}`}>
       {reason === 'credential-refused'
         ? t('federation:connections.add.fallbackNotice.credentialRefused', { host })
         : t('federation:connections.add.fallbackNotice.registrationClosed', { host })}
@@ -183,7 +180,7 @@ export function FallbackForm({
     >
       <FallbackNotice reason={reason} host={host} />
       <div>
-        <label htmlFor={usernameId} className="block text-xs text-txt-tertiary mb-1">{t('common:labels.username')}</label>
+        <label htmlFor={usernameId} className="block text-xs font-medium text-txt-secondary mb-1.5">{t('common:labels.username')}</label>
         <input
           id={usernameId}
           type="text"
@@ -203,7 +200,7 @@ export function FallbackForm({
         />
       </div>
       <div>
-        <label htmlFor={passwordId} className="block text-xs text-txt-tertiary mb-1">{t('federation:connections.add.remotePasswordLabel')}</label>
+        <label htmlFor={passwordId} className="block text-xs font-medium text-txt-secondary mb-1.5">{t('federation:connections.add.remotePasswordLabel')}</label>
         <input
           id={passwordId}
           type="password"
@@ -218,13 +215,14 @@ export function FallbackForm({
       </div>
       {extraFields}
       <div className="flex items-center gap-2">
-        <button
+        <Button
+          variant="primary"
           type="submit"
           disabled={isLoading || !username || !remotePassword}
-          className={secondaryAction ? submitBase : submitClass}
+          fullWidth={!secondaryAction}
         >
           {isLoading ? t('federation:connections.add.loggingIn') : t('federation:connections.add.loginAndConnect')}
-        </button>
+        </Button>
         {secondaryAction}
       </div>
     </form>
@@ -274,7 +272,7 @@ export function RemotePasswordStep({
       <RemoteInstanceLine instance={instance} status="connecting" />
 
       {phase === 'password' && !instance.federatedRegistrationOpen && (
-        <div className="p-3 rounded-lg bg-accent-amber/10 border border-accent-amber/30 text-sm text-accent-amber">
+        <div className="px-3 py-2.5 rounded-lg bg-status-warn/10 text-sm text-status-warn">
           {t('federation:connections.add.registrationClosed')}
         </div>
       )}
@@ -301,7 +299,7 @@ export function RemotePasswordStep({
       )}
 
       {error && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs">
+        <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
           {error}
         </div>
       )}

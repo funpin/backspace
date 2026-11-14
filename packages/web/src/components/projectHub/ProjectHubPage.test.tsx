@@ -416,7 +416,7 @@ describe('ProjectHubPage: frame', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: 'Backspace' })).toBeInTheDocument();
     expect(screen.getByText('Open-source chat you can host yourself.')).toBeInTheDocument();
-    expect(document.querySelector('img[src="/icons/logo-mark.svg"]')).not.toBeNull();
+    expect(document.querySelector('[data-hub-mark-tile] svg')).not.toBeNull();
   });
 
   it('has a top bar with the member list toggle by default', () => {

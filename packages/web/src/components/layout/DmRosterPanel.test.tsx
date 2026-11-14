@@ -211,7 +211,7 @@ function renderPanel() {
 }
 
 function getMenuLabels(): string[] {
-  const buttons = document.querySelectorAll<HTMLButtonElement>('div.fixed.z-\\[200\\] button');
+  const buttons = document.querySelectorAll<HTMLButtonElement>('div.fixed.z-popover button');
   return Array.from(buttons).map((b) => b.textContent?.trim() ?? '');
 }
 

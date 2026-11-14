@@ -21,7 +21,7 @@ export function UserProfilePopoutLayer() {
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-[145]"
+        className="fixed inset-0 z-popover"
         onClick={closeUserProfile}
       />
       <UserProfilePopout

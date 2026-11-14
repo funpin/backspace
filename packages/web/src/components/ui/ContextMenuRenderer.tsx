@@ -12,36 +12,35 @@ import {
 } from '../../stores/contextMenuStore';
 import { useUIStore } from '../../stores/uiStore';
 import { usePortalContainer } from '../../hooks/usePortalContainer';
+import { Icon } from './Icon';
 
 // ── Desktop item button ──────────────────────────────────────────────────────
 
 // An item the arrow keys moved to looks like a hovered one.
+const ITEM_SHAPE =
+  'w-full text-left h-[34px] px-2 mx-1.5 text-sm rounded-lg flex items-center gap-2 outline-none transition-colors duration-fast';
 const ITEM_CLASS =
-  'w-full text-left px-2 py-1.5 mx-1.5 text-sm rounded-sm flex items-center gap-2 text-txt-secondary hover:bg-accent-primary hover:text-white outline-none focus-visible:bg-accent-primary focus-visible:text-white';
+  `${ITEM_SHAPE} text-txt-secondary hover:bg-interactive-hover hover:text-txt-primary focus-visible:bg-interactive-hover focus-visible:text-txt-primary`;
 const ITEM_DANGER_CLASS =
-  'w-full text-left px-2 py-1.5 mx-1.5 text-sm rounded-sm flex items-center gap-2 text-txt-danger hover:bg-accent-rose hover:text-white outline-none focus-visible:bg-accent-rose focus-visible:text-white';
+  `${ITEM_SHAPE} text-status-danger hover:bg-status-danger/10 focus-visible:bg-status-danger/10`;
 const ITEM_DISABLED_CLASS =
-  'w-full text-left px-2 py-1.5 mx-1.5 text-sm rounded-sm flex items-center gap-2 text-txt-secondary opacity-50 cursor-default';
+  `${ITEM_SHAPE} text-txt-secondary opacity-40 cursor-default`;
 const ITEM_STYLE: React.CSSProperties = { width: 'calc(100% - 12px)' };
 
 // ── Mobile item button ───────────────────────────────────────────────────────
 
-const MOBILE_ITEM_CLASS = 'w-full text-left px-5 py-3 text-sm flex items-center gap-3';
+const MOBILE_ITEM_CLASS = 'w-full text-left min-h-11 px-5 py-3 text-sm flex items-center gap-3 active:bg-interactive-active';
 
 // ── Checkbox indicator ───────────────────────────────────────────────────────
 
 function CheckboxIndicator({ checked }: { checked: boolean }) {
   return (
     <div
-      className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-        checked ? 'bg-accent-primary border-accent-primary' : 'border-txt-tertiary'
+      className={`w-4 h-4 rounded border flex items-center justify-center transition-colors duration-fast ${
+        checked ? 'bg-accent-primary border-accent-primary text-on-accent' : 'border-txt-tertiary'
       }`}
     >
-      {checked && (
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-        </svg>
-      )}
+      {checked && <Icon name="check" size="xs" />}
     </div>
   );
 }
@@ -181,7 +180,7 @@ function SubmenuFlyout({ submenu, triggerRef, onMouseEnter, onMouseLeave, close 
       aria-label={submenu.label}
       onKeyDown={handleKeyDown}
       onContextMenu={suppressNativeMenu}
-      className="fixed z-[210] glass rounded-md py-1.5 min-w-[160px] overflow-y-auto scrollbar-thin animate-fade-in"
+      className="fixed z-popover glass rounded-xl py-1.5 min-w-[160px] overflow-y-auto scrollbar-thin animate-fade-in"
       style={{ left: -9999, top: -9999 }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -205,7 +204,7 @@ interface DesktopLeafItemProps {
 function DesktopLeafItem({ item, close }: DesktopLeafItemProps) {
   switch (item.type) {
     case 'separator':
-      return <div role="separator" className="h-px bg-white/[0.06] my-1 mx-1.5" />; // i18n-check: allow-literal (the check reads the following `case` as JSX text)
+      return <div role="separator" className="h-px bg-border-hard my-1 mx-1.5" />; // i18n-check: allow-literal (the check reads the following `case` as JSX text)
 
     case 'custom':
       return <div role="group">{item.render(close)}</div>; // i18n-check: allow-literal (the check reads the following `case` as JSX text)
@@ -320,7 +319,7 @@ function DesktopSubmenuItem({ item, close }: DesktopSubmenuItemProps) {
       >
         {item.icon && <span className="w-4 h-4">{item.icon}</span>}
         <span className="flex-1">{item.label}</span>
-        <span className="text-txt-tertiary text-xs ml-auto">{'\u203A'}</span>
+        <span className="text-txt-tertiary ml-auto"><Icon name="chevron-right" size="sm" /></span>
       </button>
       {isOpen && (
         <SubmenuFlyout
@@ -420,7 +419,7 @@ function DesktopMenu({ items, position, close, closeGuard }: DesktopMenuProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[199]"
+        className="fixed inset-0 z-popover"
         onMouseDown={(e) => {
           if (!closeGuard) {
             close();
@@ -438,7 +437,7 @@ function DesktopMenu({ items, position, close, closeGuard }: DesktopMenuProps) {
         ref={menuRef}
         role="menu"
         tabIndex={-1}
-        className="fixed z-[200] min-w-[180px] py-1.5 glass rounded-md animate-fade-in max-h-[calc(calc(100*var(--app-vh))-16px)] overflow-y-auto scrollbar-thin outline-none"
+        className="fixed z-popover min-w-[180px] py-1.5 glass rounded-xl animate-fade-in max-h-[calc(calc(100*var(--app-vh))-16px)] overflow-y-auto scrollbar-thin outline-none"
         style={{ left: position.x, top: position.y }}
         onKeyDown={handleKeyDown}
         onContextMenu={suppressNativeMenu}
@@ -463,7 +462,7 @@ interface MobileLeafItemProps {
 function MobileLeafItem({ item, close }: MobileLeafItemProps) {
   switch (item.type) {
     case 'separator':
-      return <div role="separator" className="h-px bg-white/[0.06] my-1 mx-1.5" />; // i18n-check: allow-literal (the check reads the following `case` as JSX text)
+      return <div role="separator" className="h-px bg-border-hard my-1 mx-1.5" />; // i18n-check: allow-literal (the check reads the following `case` as JSX text)
 
     case 'custom':
       return <div role="group">{item.render(close)}</div>; // i18n-check: allow-literal (the check reads the following `case` as JSX text)
@@ -472,7 +471,7 @@ function MobileLeafItem({ item, close }: MobileLeafItemProps) {
       return <ReactiveCheckboxItem item={item} isMobile />;
 
     case 'action': {
-      const colorClass = item.danger ? 'text-txt-danger' : 'text-txt-primary';
+      const colorClass = item.danger ? 'text-status-danger' : 'text-txt-primary';
       return (
         <button
           type="button"
@@ -525,12 +524,12 @@ function MobileMenu({ items, close }: MobileMenuProps) {
   return createPortal(
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-[300] bg-black/50" onClick={close} />
+      <div className="fixed inset-0 z-modal bg-surface-overlay" onClick={close} />
       {/* Bottom sheet */}
       <div
         role="menu"
         aria-label={submenuStack?.label}
-        className="fixed bottom-0 left-0 right-0 z-[301] rounded-t-2xl glass-bubble animate-slide-up-sheet"
+        className="fixed bottom-0 left-0 right-0 z-modal rounded-t-2xl glass-bubble animate-slide-up-sheet"
         style={{ paddingBottom: 'var(--safe-bottom)' }}
       >
         <div aria-hidden="true" className="w-10 h-1 bg-txt-tertiary/30 rounded-full mx-auto mt-2 mb-1" />
@@ -542,9 +541,7 @@ function MobileMenu({ items, close }: MobileMenuProps) {
             className={`${MOBILE_ITEM_CLASS} text-txt-secondary`}
             onClick={() => setSubmenuStack(null)}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="flex-shrink-0">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-            </svg>
+            <Icon name="arrow-left" size="md" />
             <span>{t('actions.back')}</span>
           </button>
         )}
@@ -567,7 +564,7 @@ function MobileMenu({ items, close }: MobileMenuProps) {
                 >
                   {item.icon && <span className="w-5 h-5">{item.icon}</span>}
                   <span className="flex-1">{item.label}</span>
-                  <span className="text-txt-tertiary text-sm">{'\u203A'}</span>
+                  <span className="text-txt-tertiary"><Icon name="chevron-right" size="sm" /></span>
                 </button>
               );
             }

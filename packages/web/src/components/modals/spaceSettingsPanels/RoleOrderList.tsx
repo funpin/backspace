@@ -5,7 +5,7 @@ import { canManageRoleAt } from '@backspace/shared/src/permissions';
 import { useSpaceStore, getApiForOrigin } from '../../../stores/spaceStore';
 import { useUIStore } from '../../../stores/uiStore';
 import { describeError } from '../../../i18n/errors';
-import { LOCK_ICON } from '../../ui/LockNote';
+import { Icon } from '../../ui/Icon';
 import { myStandingIn } from '../../../utils/roleHierarchy';
 import { rolesInRankOrder, canReorderRoles, canMoveRole, moveRoleInRankOrder, roleMoveRequest } from '../../../utils/roleOrder';
 
@@ -36,7 +36,7 @@ interface RoleOrderListProps {
   onOpen: (roleId: string) => void;
 }
 
-const FOCUS_RING = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/60';
+const FOCUS_RING = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone/60';
 
 export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
   const { t } = useTranslation('spaces');
@@ -170,18 +170,9 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
   };
 
   const lockIcon = (role: Role) => (
-    <svg
-      role="img"
-      aria-label={t('roles.reorder.locked', { name: role.name })}
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="text-txt-tertiary opacity-70 flex-shrink-0"
-    >
-      <title>{t('roles.reorder.locked', { name: role.name })}</title>
-      <path d={LOCK_ICON} />
-    </svg>
+    <span title={t('roles.reorder.locked', { name: role.name })} className="inline-flex text-txt-tertiary flex-shrink-0">
+      <Icon name="lock" size="xs" label={t('roles.reorder.locked', { name: role.name })} />
+    </span>
   );
 
   const renderRow = (role: Role, index: number | null) => {
@@ -211,11 +202,11 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
         onClick={() => onOpen(role.id)}
         onDragOver={index !== null ? handleDragOver(index) : undefined}
         onDrop={index !== null ? handleDrop(index) : undefined}
-        className={`relative flex items-center gap-1.5 rounded hover:bg-interactive-hover transition-colors cursor-pointer group/role ${
+        className={`relative flex items-center gap-1.5 min-h-10 rounded-lg hover:bg-interactive-hover transition-colors duration-fast cursor-pointer group/role ${
           reorderable && !isMobile ? 'pl-1 pr-2' : reorderable ? 'pl-3 pr-2' : 'px-3'
         } ${dragIndex !== null && dragIndex === index ? 'opacity-50' : ''}`}
       >
-        {marker === 'before' && <div className="absolute -top-[2px] left-2 right-2 h-[2px] bg-accent-mint rounded-full z-10" />}
+        {marker === 'before' && <div className="absolute -top-0.5 left-2 right-2 h-0.5 bg-accent-tone rounded-full z-raised" />}
 
         {reorderable && !isMobile && (
           <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
@@ -231,16 +222,9 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
                 title={t('roles.reorder.handleHint')}
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={handleKeyDown(index)}
-                className={`w-6 h-6 flex items-center justify-center rounded text-txt-tertiary hover:text-txt-secondary cursor-grab active:cursor-grabbing transition-colors ${FOCUS_RING}`}
+                className={`w-6 h-6 flex items-center justify-center rounded text-txt-tertiary hover:text-txt-secondary cursor-grab active:cursor-grabbing transition-colors duration-fast ${FOCUS_RING}`}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <circle cx="9" cy="6" r="1.6" />
-                  <circle cx="15" cy="6" r="1.6" />
-                  <circle cx="9" cy="12" r="1.6" />
-                  <circle cx="15" cy="12" r="1.6" />
-                  <circle cx="9" cy="18" r="1.6" />
-                  <circle cx="15" cy="18" r="1.6" />
-                </svg>
+                <Icon name="grip-vertical" size="sm" />
               </button>
             )}
             {locked && lockIcon(role)}
@@ -250,7 +234,7 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
         <button
           type="button"
           draggable={draggable || undefined}
-          className={`flex-1 min-w-0 flex items-center gap-2.5 py-2 rounded text-left ${FOCUS_RING}`}
+          className={`flex-1 min-w-0 flex items-center gap-2.5 py-2 rounded-lg text-left ${FOCUS_RING}`}
         >
           <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: role.color }} />
           <span className="text-sm text-txt-primary truncate">
@@ -262,7 +246,7 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
         {reorderable && (
           <div
             className={`flex items-center flex-shrink-0 ${
-              isMobile ? '' : 'opacity-0 group-hover/role:opacity-100 group-focus-within/role:opacity-100 transition-opacity'
+              isMobile ? '' : 'opacity-0 group-hover/role:opacity-100 group-focus-within/role:opacity-100 transition-opacity duration-fast'
             }`}
           >
             {movable && index !== null ? (
@@ -273,11 +257,9 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
                   aria-label={t('roles.reorder.up', { name: role.name })}
                   disabled={!canUp}
                   onClick={(e) => { e.stopPropagation(); void move(index, index - 1, 'up'); }}
-                  className={`${isMobile ? 'w-10 h-10' : 'w-6 h-6'} flex items-center justify-center rounded text-txt-tertiary hover:text-txt-primary hover:bg-white/[0.06] transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-txt-tertiary disabled:cursor-default ${FOCUS_RING}`}
+                  className={`${isMobile ? 'w-10 h-10' : 'w-6 h-6'} flex items-center justify-center rounded text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover transition-colors duration-fast disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-txt-tertiary disabled:cursor-default ${FOCUS_RING}`}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                  </svg>
+                  <Icon name="chevron-up" size="sm" />
                 </button>
                 <button
                   ref={registerControl(role.id, 'down')}
@@ -285,11 +267,9 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
                   aria-label={t('roles.reorder.down', { name: role.name })}
                   disabled={!canDown}
                   onClick={(e) => { e.stopPropagation(); void move(index, index + 1, 'down'); }}
-                  className={`${isMobile ? 'w-10 h-10' : 'w-6 h-6'} flex items-center justify-center rounded text-txt-tertiary hover:text-txt-primary hover:bg-white/[0.06] transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-txt-tertiary disabled:cursor-default ${FOCUS_RING}`}
+                  className={`${isMobile ? 'w-10 h-10' : 'w-6 h-6'} flex items-center justify-center rounded text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover transition-colors duration-fast disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-txt-tertiary disabled:cursor-default ${FOCUS_RING}`}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <Icon name="chevron-down" size="sm" />
                 </button>
               </>
             ) : (
@@ -300,18 +280,9 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
           </div>
         )}
 
-        <svg
-          className="w-4 h-4 text-txt-tertiary group-hover/role:text-txt-secondary transition-colors flex-shrink-0"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-          aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
+        <Icon name="chevron-right" size="sm" className="text-txt-tertiary group-hover/role:text-txt-secondary transition-colors duration-fast" />
 
-        {marker === 'after' && <div className="absolute -bottom-[2px] left-2 right-2 h-[2px] bg-accent-mint rounded-full z-10" />}
+        {marker === 'after' && <div className="absolute -bottom-0.5 left-2 right-2 h-0.5 bg-accent-tone rounded-full z-raised" />}
       </div>
     );
   };
@@ -326,7 +297,7 @@ export function RoleOrderList({ spaceId, onOpen }: RoleOrderListProps) {
               <div
                 ref={moveErrorRef}
                 role="alert"
-                className="mx-2 mt-1 mb-1.5 px-2.5 py-1.5 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-[13px]"
+                className="mx-2 mt-1 mb-1.5 px-2.5 py-1.5 rounded-lg bg-status-danger/10 text-status-danger text-compact"
               >
                 {moveError.message}
               </div>

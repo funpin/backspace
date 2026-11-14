@@ -20,9 +20,11 @@ import { NotificationSettingsModal, type NotificationSettingsModalTarget } from 
 import type { SpaceLayoutItem, SpaceFolder } from '@backspace/shared';
 
 import { getSpaceGradient } from '../../utils/gradients';
-import { isElectron } from '../../platform/platform';
 import { useFloatingPosition } from '../../hooks/useFloatingPosition';
 import { describeCodedError } from '../../i18n/errors';
+import { Icon, type IconName } from '../ui/Icon';
+import { Badge } from '../ui/Tag';
+import { BackspaceMark } from '../projectHub/BackspaceMark';
 
 // ─── Resolved layout types ─────────────────────────────────────────────────
 
@@ -77,61 +79,42 @@ function SidebarItem({ id, name, icon, avatarColor, active, onClick, onContextMe
     return 'h-2 scale-0';
   };
 
+  // A space without an icon image wears its gradient: that is content, set by
+  // its owner. The home tile and the actions are interface tiles.
   const backgroundStyle = useMemo((): React.CSSProperties | undefined => {
-    if (type === 'action') {
-      return {
-        background: isHovered ? 'rgba(134, 239, 172, 0.12)' : 'rgba(255, 255, 255, 0.04)',
-      };
-    }
-
-    if (type === 'dm') {
-      const lit = active || isHovered;
-      return { background: lit ? 'rgb(var(--accent-primary))' : 'rgb(var(--interactive-muted))' };
-    }
-
-    // Space type — if it has a custom icon image, no gradient needed
-    if (icon) return undefined;
-
-    const spaceGrad = getSpaceGradient(id, name, avatarColor);
-    return { background: spaceGrad.gradient };
-  }, [type, id, name, icon, avatarColor, isHovered, active]);
+    if (type !== 'space' || icon) return undefined;
+    return { background: getSpaceGradient(id, name, avatarColor).gradient };
+  }, [type, id, name, icon, avatarColor]);
 
   const getButtonClasses = () => {
-    const base = 'w-10 h-10 flex items-center justify-center duration-200 overflow-hidden [transition:border-radius_0.2s,background_0.2s,color_0.2s]';
+    const base = 'w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden transition-[background-color,color,transform] duration-fast ease-out';
 
     if (type === 'dm') {
-      return `${base} text-white ${active ? 'rounded-[13px]' : 'rounded-[20px] hover:rounded-[13px]'}`;
+      return `${base} bg-surface-elevated shadow-[inset_0_0_0_1px_var(--glass-border)] text-accent-tone hover:bg-border-soft`;
     }
 
     if (type === 'action') {
-      return `${base} rounded-[20px] hover:rounded-[13px] text-accent-mint`;
+      return `${base} bg-surface-elevated hover:-translate-y-0.5 ${active ? 'text-accent-tone' : 'text-txt-secondary hover:text-txt-primary'}`;
     }
 
     if (icon) {
-      return `${base} ${active ? 'rounded-[13px]' : 'rounded-[20px] hover:rounded-[13px]'}`;
+      return `${base} hover:-translate-y-0.5`;
     }
 
-    return `${base} text-white ${active ? 'rounded-[13px]' : 'rounded-[20px] hover:rounded-[13px]'}`;
+    return `${base} text-white hover:-translate-y-0.5`;
   };
+
+  const actionIcon: IconName = actionType === 'add' ? 'plus' : actionType === 'explore' ? 'compass' : 'log-in';
 
   const buttonContent = (
     <button onClick={onClick} className={`${getButtonClasses()} ${dimmed ? 'opacity-40 saturate-50' : ''}`} style={backgroundStyle} title={tooltipText ? undefined : name} aria-current={active ? 'page' : undefined}>
       {type === 'dm' ? (
-        <img src="/icons/logo-mark.svg" alt={t('common:appName')} className="w-5 h-auto" />
+        <>
+          <BackspaceMark size={25} />
+          <span className="sr-only">{t('common:appName')}</span>
+        </>
       ) : type === 'action' ? (
-        actionType === 'add' ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
-          </svg>
-        ) : actionType === 'explore' ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z" />
-          </svg>
-        ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
-          </svg>
-        )
+        <Icon name={actionIcon} size="lg" />
       ) : icon ? (
         <img
           src={icon.startsWith('http') || icon.startsWith('/') ? icon : `/api/uploads/${icon}`}
@@ -139,24 +122,22 @@ function SidebarItem({ id, name, icon, avatarColor, active, onClick, onContextMe
           className="w-full h-full object-cover"
         />
       ) : (
-        <span className="text-[15px] font-bold">{firstLetter}</span>
+        <span className="text-sm font-semibold">{firstLetter}</span>
       )}
     </button>
   );
 
   const innerContent = (
-    <div className={`relative ${dropIndicator === 'merge' ? 'scale-110 ring-2 ring-accent-mint/60 rounded-full' : ''} transition-transform duration-150`}>
+    <div className={`relative ${dropIndicator === 'merge' ? 'scale-110 ring-2 ring-accent-tone/60 rounded-xl' : ''} transition-transform duration-fast ease-out`}>
       {buttonContent}
       {type === 'space' && <SpaceUnreadBadge spaceId={id} />}
       {type === 'dm' && <DmUnreadBadge />}
       {federationBadge && (
-        <div className="absolute -bottom-0.5 -right-0.5 w-[14px] h-[14px] rounded-full bg-surface-base flex items-center justify-center">
+        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-surface-channel flex items-center justify-center">
           {federationDisconnected ? (
-            <div className="w-[8px] h-[8px] rounded-full bg-accent-amber" />
+            <div className="w-2 h-2 rounded-full bg-status-warn" />
           ) : (
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary/80">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-            </svg>
+            <span className="text-txt-tertiary"><Icon name="globe" size="xs" /></span>
           )}
         </div>
       )}
@@ -165,7 +146,7 @@ function SidebarItem({ id, name, icon, avatarColor, active, onClick, onContextMe
 
   return (
     <div
-      className={`relative flex items-center mb-1.5 w-full justify-center ${isDragging ? 'opacity-50' : ''}`}
+      className={`relative flex items-center w-full justify-center ${isDragging ? 'opacity-50' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={onContextMenu}
@@ -175,19 +156,19 @@ function SidebarItem({ id, name, icon, avatarColor, active, onClick, onContextMe
       onDragEnd={onDragEnd}
       onDrop={onDrop}
     >
-      {/* Drop indicator lines — offset into the mb-1.5 gap so adjacent items share one line */}
+      {/* Drop indicator lines — centred in the 8px gap so adjacent items share one line */}
       {dropIndicator === 'before' && (
-        <div className="absolute -top-[3px] left-3 right-3 h-[2px] bg-accent-mint rounded-full z-10" />
+        <div className="absolute -top-[5px] left-1 right-1 h-0.5 bg-accent-tone rounded-full z-[1]" />
       )}
       {dropIndicator === 'after' && (
-        <div className="absolute -bottom-[3px] left-3 right-3 h-[2px] bg-accent-mint rounded-full z-10" />
+        <div className="absolute -bottom-[5px] left-1 right-1 h-0.5 bg-accent-tone rounded-full z-[1]" />
       )}
 
-      {/* Pill Indicator */}
+      {/* Selection bar, at the strip's left edge */}
       {(type === 'space' || type === 'dm') && (
-        <div className="absolute -left-0 w-2 h-10 flex items-center">
+        <div className="absolute -left-2.5 w-1 h-10 flex items-center">
           <div
-            className={`bg-white rounded-r-full transition-all duration-200 origin-left ${getPillHeight()} w-1`}
+            className={`bg-txt-primary rounded-r-full transition-all duration-base ease-out origin-left ${getPillHeight()} w-[3px]`}
           />
         </div>
       )}
@@ -212,46 +193,46 @@ function MiniSpaceIcon({ space }: { space: TaggedSpace }) {
       <img
         src={icon.startsWith('http') || icon.startsWith('/') ? icon : `/api/uploads/${icon}`}
         alt=""
-        className="w-full h-full object-cover rounded-[3px]"
+        className="w-full h-full object-cover rounded-sm"
       />
     );
   }
   const grad = getSpaceGradient(space.id, space.name, space.avatarColor);
+  // A 13px avatar: its letter scales with it, as Avatar sizes its own.
   return (
     <div
-      className="w-full h-full rounded-[3px] flex items-center justify-center text-white"
-      style={{ background: grad.gradient }}
+      className="w-full h-full rounded-sm flex items-center justify-center text-white font-semibold leading-none"
+      style={{ background: grad.gradient, fontSize: 7 }}
     >
-      <span className="text-[7px] font-bold leading-none">{space.name.charAt(0).toUpperCase()}</span>
+      {space.name.charAt(0).toUpperCase()}
     </div>
   );
 }
 
 // ─── Folder icon (2×2 grid with glass-pill) ───────────────────────────────
 
-function FolderIcon({ spaces, color, isActive, isHovered }: { spaces: TaggedSpace[]; color: string | null; isActive: boolean; isHovered: boolean }) {
+function FolderIcon({ spaces, color }: { spaces: TaggedSpace[]; color: string | null }) {
   const display = spaces.slice(0, 4);
   const remaining = spaces.length - 4;
-  const borderColor = color ? `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.3)` : undefined;
+  // The folder's colour is the user's; it tints the tile's 1px edge.
+  const edge = color ? `inset 0 0 0 1px rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.45)` : undefined;
   return (
     <div
-      className={`relative w-10 h-10 flex items-center justify-center overflow-hidden glass-pill [transition:border-radius_0.2s] ${
-        isActive || isHovered ? 'rounded-[13px]' : 'rounded-[16px]'
-      }`}
-      style={borderColor ? { borderColor } : undefined}
+      className="relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden glass-pill transition-transform duration-fast ease-out hover:-translate-y-0.5"
+      style={edge ? { boxShadow: edge } : undefined}
     >
-      <div className="grid grid-cols-2 gap-[2px] w-[28px] h-[28px] relative z-[1]">
+      <div className="grid grid-cols-2 gap-0.5 w-7 h-7 relative z-[1]">
         {display.map((s) => (
           <div key={s.id} className="w-[13px] h-[13px]">
             <MiniSpaceIcon space={s} />
           </div>
         ))}
         {display.length < 4 && Array.from({ length: 4 - display.length }).map((_, i) => (
-          <div key={`empty-${i}`} className="w-[13px] h-[13px] rounded-[3px] bg-white/[0.04]" />
+          <div key={`empty-${i}`} className="w-[13px] h-[13px] rounded-sm bg-interactive-hover" />
         ))}
       </div>
       {remaining > 0 && (
-        <div className="absolute bottom-0 right-0 text-[7px] font-bold text-txt-tertiary bg-surface-base rounded-tl-sm px-0.5">
+        <div className="absolute bottom-0 right-0 text-txt-tertiary bg-surface-channel rounded-tl-sm px-0.5 font-semibold leading-none tabular-nums" style={{ fontSize: 7 }}>
           +{remaining}
         </div>
       )}
@@ -401,16 +382,16 @@ function FolderFlyout({
   return ReactDOM.createPortal(
     <div
       ref={floatingRef}
-      className="w-[220px] max-h-[360px] overflow-y-auto glass rounded-lg py-1.5 animate-in fade-in zoom-in-95 duration-100"
+      className="w-[220px] max-h-[360px] overflow-y-auto glass rounded-xl p-1 animate-slide-up"
       style={style}
     >
       {/* Folder header */}
       {(folder.name || isRenaming) && (
-        <div className="px-3 pb-1.5 pt-0.5">
+        <div className="px-2 pb-1 pt-1">
           {isRenaming ? (
             <input
               autoFocus
-              className="input-search w-full px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-txt-tertiary"
+              className="input-search w-full px-1.5 py-0.5 rounded text-xs font-medium text-txt-secondary"
               defaultValue={folder.name || ''}
               onBlur={(e) => onRename(e.currentTarget.value)}
               onKeyDown={(e) => {
@@ -419,7 +400,7 @@ function FolderFlyout({
               }}
             />
           ) : (
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-txt-tertiary">
+            <span className="text-xs font-medium text-txt-tertiary">
               {folder.name}
             </span>
           )}
@@ -440,14 +421,13 @@ function FolderFlyout({
           <React.Fragment key={space.id}>
             {/* Drop indicator: before first item */}
             {idx === 0 && flyoutDrop?.targetSpaceId === space.id && flyoutDrop.position === 'before' && (
-              <div className="h-0.5 bg-accent-mint rounded-full mx-2.5 my-0.5" />
+              <div className="h-0.5 bg-accent-tone rounded-full mx-2 my-0.5" />
             )}
 
             <button
-              className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 mx-1 rounded-md transition-colors ${
+              className={`w-full flex items-center gap-2.5 px-2 py-1 rounded-lg transition-colors duration-fast ${
                 isDimmed ? 'opacity-40 saturate-50' : ''
-              } ${isActive ? 'bg-white/[0.10]' : 'hover:bg-white/[0.06]'}`}
-              style={{ width: 'calc(100% - 8px)' }}
+              } ${isActive ? 'bg-surface-elevated text-txt-primary font-medium' : 'text-txt-secondary hover:bg-interactive-hover hover:text-txt-primary'}`}
               draggable
               onDragStart={(e) => onDragStart(e, space.id)}
               onDragOver={(e) => handleFlyoutDragOver(e, space.id)}
@@ -464,7 +444,7 @@ function FolderFlyout({
               {/* Space icon */}
               <div className="relative">
                 <SpaceUnreadBadge spaceId={space.id} />
-                <div className="w-8 h-8 rounded-[10px] flex-shrink-0 overflow-hidden flex items-center justify-center" style={grad ? { background: grad.gradient } : undefined}>
+                <div className="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center" style={grad ? { background: grad.gradient } : undefined}>
                   {icon ? (
                     <img
                       src={icon.startsWith('http') || icon.startsWith('/') ? icon : `/api/uploads/${icon}`}
@@ -472,30 +452,28 @@ function FolderFlyout({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-[13px] font-bold text-white">{space.name.charAt(0).toUpperCase()}</span>
+                    <span className="text-compact font-semibold text-white">{space.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
               </div>
 
               {/* Name */}
-              <span className="text-sm text-txt-primary truncate flex-1 text-left">{space.name}</span>
+              <span className="text-sm truncate flex-1 text-left">{space.name}</span>
 
               {/* Federation badge */}
               {isFederated && !isDimmed && (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary/80 flex-shrink-0">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                </svg>
+                <Icon name="globe" size="xs" className="text-txt-tertiary" />
               )}
 
               {/* Unread dot */}
               {hasUnread && (
-                <div className="w-2 h-2 rounded-full bg-white flex-shrink-0" />
+                <Badge className="flex-shrink-0" />
               )}
             </button>
 
             {/* Drop indicator: after item */}
             {flyoutDrop?.targetSpaceId === space.id && flyoutDrop.position === 'after' && (
-              <div className="h-0.5 bg-accent-mint rounded-full mx-2.5 my-0.5" />
+              <div className="h-0.5 bg-accent-tone rounded-full mx-2 my-0.5" />
             )}
           </React.Fragment>
         );
@@ -550,14 +528,14 @@ function FolderSlot({
 
   const iconContent = (
     <button onClick={onToggleFlyout}>
-      <FolderIcon spaces={folderSpaces} color={folder.color} isActive={isActive || isFlyoutOpen} isHovered={isHovered} />
+      <FolderIcon spaces={folderSpaces} color={folder.color} />
     </button>
   );
 
   return (
     <div
       ref={anchorRef}
-      className={`relative flex items-center mb-1.5 w-full justify-center ${isDragging ? 'opacity-50' : ''}`}
+      className={`relative flex items-center w-full justify-center ${isDragging ? 'opacity-50' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={onContextMenu}
@@ -567,22 +545,22 @@ function FolderSlot({
       onDragEnd={onDragEnd}
       onDrop={onDrop}
     >
-      {/* Drop indicators — offset into the mb-1.5 gap so adjacent items share one line */}
+      {/* Drop indicators — centred in the 8px gap so adjacent items share one line */}
       {dropIndicator === 'before' && (
-        <div className="absolute -top-[3px] left-3 right-3 h-[2px] bg-accent-mint rounded-full z-10" />
+        <div className="absolute -top-[5px] left-1 right-1 h-0.5 bg-accent-tone rounded-full z-[1]" />
       )}
       {dropIndicator === 'after' && (
-        <div className="absolute -bottom-[3px] left-3 right-3 h-[2px] bg-accent-mint rounded-full z-10" />
+        <div className="absolute -bottom-[5px] left-1 right-1 h-0.5 bg-accent-tone rounded-full z-[1]" />
       )}
       {dropIndicator === 'merge' && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="w-12 h-12 rounded-[16px] ring-2 ring-accent-mint/60" />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
+          <div className="w-12 h-12 rounded-xl ring-2 ring-accent-tone/60" />
         </div>
       )}
 
-      {/* Pill indicator */}
-      <div className="absolute -left-0 w-2 h-10 flex items-center">
-        <div className={`bg-white rounded-r-full transition-all duration-200 origin-left ${getPillHeight()} w-1`} />
+      {/* Selection bar, at the strip's left edge */}
+      <div className="absolute -left-2.5 w-1 h-10 flex items-center">
+        <div className={`bg-txt-primary rounded-r-full transition-all duration-base ease-out origin-left ${getPillHeight()} w-[3px]`} />
       </div>
 
       {isFlyoutOpen ? (
@@ -650,11 +628,7 @@ export function SpaceSidebar() {
         key: 'invite',
         type: 'action',
         label: t('common:actions.invitePeople'),
-        icon: (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-          </svg>
-        ),
+        icon: <Icon name="user-plus" size="sm" />,
         onClick: async () => {
           try {
             const code = await useSpaceStore.getState().generateInvite(spaceId);
@@ -673,11 +647,7 @@ export function SpaceSidebar() {
         key: 'notifications',
         type: 'action',
         label: t('spaces:notifications.open'),
-        icon: (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-          </svg>
-        ),
+        icon: <Icon name="bell" size="sm" />,
         // The settings live on the instance that hosts the space.
         onClick: () => setNotificationTarget({
           kind: 'space',
@@ -691,11 +661,7 @@ export function SpaceSidebar() {
         type: 'action',
         label: t('spaces:sidebar.space.transferOwnership'),
         hidden: !isOwner,
-        icon: (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z" />
-          </svg>
-        ),
+        icon: <Icon name="crown" size="sm" />,
         onClick: () => setTransferModalSpaceId(spaceId),
       },
       {
@@ -704,11 +670,7 @@ export function SpaceSidebar() {
         label: t('spaces:sidebar.space.leave'),
         hidden: isOwner,
         danger: true,
-        icon: (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
-          </svg>
-        ),
+        icon: <Icon name="log-out" size="sm" />,
         onClick: () => setLeaveConfirmSpaceId(spaceId),
       },
     ];
@@ -1081,7 +1043,10 @@ export function SpaceSidebar() {
   }, [openFolderId, resolvedLayout]);
 
   return (
-    <nav data-pip-obstacle="left" className="w-[72px] bg-surface-base flex flex-col items-center py-3 overflow-y-auto flex-shrink-0 no-scrollbar select-none desktop:fixed desktop:inset-y-0 desktop:left-0 desktop:z-[100] desktop:glass-strip" style={{ paddingBottom: floatingPanelHeight + 24, ...(isElectron() ? { top: 'var(--titlebar-inset)' } : {}) }} onDragOver={(e) => { if (dragState) e.preventDefault(); }} onDrop={handleDrop}>
+    // The 60px strip sits beside the channel list in the left column, on the
+    // same matte ground. Its bottom padding keeps the last tile clear of the
+    // floating user card, which spans both columns (8px margin + 8px gap).
+    <nav data-pip-obstacle="left" className="w-[60px] bg-surface-channel flex flex-col items-center gap-2 pt-2.5 px-2.5 overflow-y-auto flex-shrink-0 no-scrollbar select-none" style={{ paddingBottom: floatingPanelHeight + 16 }} onDragOver={(e) => { if (dragState) e.preventDefault(); }} onDrop={handleDrop}>
       <SidebarItem
         id="@me"
         name={t('spaces:sidebar.directMessages')}
@@ -1093,7 +1058,8 @@ export function SpaceSidebar() {
         hasUnread={hasDmUnread}
       />
 
-      <div className="w-8 h-[2px] bg-white/[0.06] rounded-full mb-1.5 shrink-0" />
+      {/* Groups are parted by extra space, not a line */}
+      <div className="h-2 flex-shrink-0" aria-hidden="true" />
 
       {/* Unified space list (ordered by user layout) */}
       {resolvedLayout.map((item) => {
@@ -1150,11 +1116,7 @@ export function SpaceSidebar() {
                   key: 'rename',
                   type: 'action',
                   label: t('spaces:sidebar.folder.rename'),
-                  icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                    </svg>
-                  ),
+                  icon: <Icon name="pencil" size="sm" />,
                   onClick: () => {
                     setRenamingFolderId(folderRef.id);
                     setOpenFolderId(folderRef.id);
@@ -1165,17 +1127,17 @@ export function SpaceSidebar() {
                   type: 'custom',
                   render: () => (
                     <div className="px-3 py-1.5">
-                      <p className="text-[11px] text-txt-tertiary mb-1.5">{t('spaces:sidebar.folder.color')}</p>
+                      <p className="text-xs font-medium text-txt-tertiary mb-1.5">{t('spaces:sidebar.folder.color')}</p>
                       <div className="flex gap-1.5">
                         <button
-                          className={`w-5 h-5 rounded-full border-2 ${!folderRef.color ? 'border-white/40' : 'border-transparent'} bg-white/10`}
+                          className={`w-5 h-5 rounded-full border-2 ${!folderRef.color ? 'border-accent-tone' : 'border-transparent'} bg-interactive-active`}
                           onClick={() => { handleFolderColorChange(folderRef.id, null); useContextMenuStore.getState().close(); }}
                           title={t('common:states.default')}
                         />
                         {FOLDER_COLORS.map((c) => (
                           <button
                             key={c.name}
-                            className={`w-5 h-5 rounded-full border-2 ${folderRef.color === c.value ? 'border-white/40' : 'border-transparent'}`}
+                            className={`w-5 h-5 rounded-full border-2 ${folderRef.color === c.value ? 'border-accent-tone' : 'border-transparent'}`}
                             style={{ background: c.value }}
                             onClick={() => { handleFolderColorChange(folderRef.id, c.value); useContextMenuStore.getState().close(); }}
                             title={t(c.labelKey)}
@@ -1195,8 +1157,9 @@ export function SpaceSidebar() {
                   label: t('spaces:sidebar.folder.ungroup'),
                   danger: true,
                   icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm12 6V8h-2v4H10v2h4v4h2v-4h4v-2h-4z" />
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="flex-shrink-0">
+                      <rect width="8" height="6" x="5" y="4" rx="1" />
+                      <rect width="8" height="6" x="11" y="14" rx="1" />
                     </svg>
                   ),
                   onClick: () => handleUngroup(folderRef.id),
@@ -1216,7 +1179,8 @@ export function SpaceSidebar() {
         );
       })}
 
-      <div className="w-8 h-[2px] bg-white/[0.06] rounded-full mb-1.5 shrink-0" />
+      {/* Groups are parted by extra space, not a line */}
+      <div className="h-2 flex-shrink-0" aria-hidden="true" />
 
       <SidebarItem
         id="add-space"

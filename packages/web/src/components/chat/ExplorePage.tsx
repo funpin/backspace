@@ -8,6 +8,8 @@ import { useInstanceStore } from '../../stores/instanceStore';
 import { useDirectoryStore } from '../../stores/directoryStore';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { useUIStore } from '../../stores/uiStore';
+import { Icon } from '../ui/Icon';
+import { IconButton } from '../ui/IconButton';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { Mascot } from '../ui/Mascot';
 import { MemberListToggleButton } from '../layout/MemberListToggleButton';
@@ -233,15 +235,13 @@ export function ExplorePage() {
   return (
     <div className="flex-1 flex flex-col bg-surface-chat h-full">
       {/* Header */}
-      <div className="h-12 px-4 flex items-center shadow-header flex-shrink-0 z-10 bg-surface-chat">
+      <div className="h-12 px-4 flex items-center shadow-header flex-shrink-0 z-raised bg-surface-chat">
         <div className="flex items-center gap-2 mr-4">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z" />
-          </svg>
-          <span className="font-bold text-txt-primary">{t('spaces:explore.title')}</span>
+          <Icon name="compass" className="text-txt-tertiary" />
+          <span className="text-lg font-semibold text-txt-primary">{t('spaces:explore.title')}</span>
         </div>
 
-        <div className="w-[1px] h-6 bg-surface-elevated mx-2" />
+        <div className="w-px h-6 bg-border-hard mx-2" />
 
         <div className="relative flex-1 max-w-xs ml-2">
           <input
@@ -252,15 +252,13 @@ export function ExplorePage() {
             className="input-search w-full"
           />
           {searchQuery && (
-            <button
+            <IconButton
+              icon="x"
+              size="sm"
+              label={t('common:actions.clear')}
               onClick={() => handleSearchChange('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-txt-tertiary hover:text-txt-secondary"
-              aria-label={t('common:actions.clear')}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-              </svg>
-            </button>
+              className="absolute right-1 top-1/2 -translate-y-1/2"
+            />
           )}
         </div>
 
@@ -275,10 +273,10 @@ export function ExplorePage() {
           {/* Inner Space: the home instance and every connected instance */}
           <section>
             <div className="mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-txt-tertiary">
+              <span className="text-xs font-medium text-txt-tertiary">
                 {t('spaces:explore.inner.title')}
               </span>
-              <p className="text-[13px] text-txt-tertiary">{t('spaces:explore.inner.subtitle')}</p>
+              <p className="text-compact text-txt-tertiary">{t('spaces:explore.inner.subtitle')}</p>
             </div>
 
             {/* Connections that are out, with the way back in; nothing when all are healthy */}
@@ -296,7 +294,7 @@ export function ExplorePage() {
                 renders the survivors' spaces and says nothing, and a user who
                 knows a space is on the missing instance reads it as deleted. */}
             {unansweredHosts.length > 0 && (
-              <div className="mb-4 p-2.5 bg-accent-amber/10 border border-accent-amber/30 rounded text-[13px] text-accent-amber">
+              <div className="mb-4 p-2.5 bg-status-warn/10 rounded-lg text-compact text-status-warn">
                 {t('spaces:explore.inner.unreachable', {
                   // One host or several is the only distinction the forms
                   // make, and none of them interpolates `count`, so the
@@ -314,7 +312,7 @@ export function ExplorePage() {
                 <LoadingSpinner />
               </div>
             ) : error ? (
-              <div className="p-3 bg-accent-rose/10 border border-accent-rose/30 rounded text-sm text-txt-danger">
+              <div className="p-2.5 bg-status-danger/10 rounded-lg text-compact text-status-danger">
                 {/* The store keeps the failure as a fact; the words are this
                     surface's, so they follow the reader's language and not
                     whatever language was selected when the request failed. */}
@@ -354,19 +352,15 @@ export function ExplorePage() {
                       onClick={() => setJoinedCollapsed(!joinedCollapsed)}
                       className="flex items-center gap-2 mb-3 group"
                     >
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className={`text-txt-tertiary transition-transform ${joinedCollapsed ? '-rotate-90' : ''}`}
-                      >
-                        <path d="M7 10l5 5 5-5z" />
-                      </svg>
-                      <span className="text-xs font-medium text-txt-tertiary group-hover:text-txt-secondary transition-colors">
+                      <Icon
+                        name="chevron-down"
+                        size="xs"
+                        className={`text-txt-tertiary transition-transform duration-base ease-out ${joinedCollapsed ? '-rotate-90' : ''}`}
+                      />
+                      <span className="text-xs font-medium text-txt-tertiary group-hover:text-txt-secondary transition-colors duration-fast">
                         {t('spaces:explore.joinedSection')}
                       </span>
-                      <span className="text-xs text-txt-tertiary/60">
+                      <span className="text-xs text-txt-tertiary tabular-nums">
                         {f.formatNumber(joinedSpaces.length)}
                       </span>
                     </button>

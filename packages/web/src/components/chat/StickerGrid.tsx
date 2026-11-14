@@ -1,5 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { stickerUrl, type PersonalSticker } from '@backspace/shared/src/stickers';
+import { Icon } from '../ui/Icon';
+
+/** The two round controls Manage mode puts on a tile's corners. */
+const TILE_CONTROL = 'grid h-6 w-6 place-items-center rounded-full bg-surface-elevated shadow-[inset_0_0_0_1px_var(--glass-border)] transition-colors duration-fast disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone';
 
 interface StickerGridProps {
   /** The entries the search leaves, in collection order. */
@@ -11,15 +15,6 @@ interface StickerGridProps {
   onSelect: (token: string) => void;
   onRename: (sticker: PersonalSticker) => void;
   onRemove: (id: string) => void;
-}
-
-function PencilIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-      <path d="m15 5 4 4" />
-    </svg>
-  );
 }
 
 /**
@@ -46,7 +41,7 @@ export function StickerGrid({ items, noMatches, managing, removing, onSelect, on
     <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-3 pb-3">
       <div className="grid grid-cols-4 gap-1.5">
         {items.map(item => (
-          <div key={item.id} className="group relative min-w-0 rounded-xl hover:bg-interactive-hover transition-colors">
+          <div key={item.id} className="group relative min-w-0 rounded-xl hover:bg-interactive-hover transition-colors duration-fast">
             <button
               type="button"
               data-sticker-id={item.id}
@@ -54,15 +49,15 @@ export function StickerGrid({ items, noMatches, managing, removing, onSelect, on
               onClick={() => onSelect(item.token)}
               title={item.name}
               aria-label={item.name}
-              className="sticker-tile w-full p-2"
+              className="w-full p-2 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone"
             >
               <img
                 src={stickerUrl(item.token) ?? undefined}
                 alt={item.name}
-                className="aspect-square w-full object-contain transition-transform group-hover:scale-105"
+                className="aspect-square w-full object-contain transition-transform duration-base ease-pop group-hover:scale-105"
                 loading="lazy"
               />
-              <span className="mt-1 block truncate text-[10px] text-txt-tertiary">{item.name}</span>
+              <span className="mt-1 block truncate text-2xs text-txt-tertiary">{item.name}</span>
             </button>
             {managing && (
               <>
@@ -71,24 +66,22 @@ export function StickerGrid({ items, noMatches, managing, removing, onSelect, on
                   data-sticker-rename={item.id}
                   disabled={!!removing}
                   aria-label={t('stickers.renameNamed', { name: item.name })}
-                  className="sticker-edit-button"
+                  className={`absolute top-1 left-1 text-txt-secondary hover:text-txt-primary ${TILE_CONTROL}`}
                   onClick={() => onRename(item)}
                 >
-                  <PencilIcon />
+                  <Icon name="pencil" size="xs" />
                 </button>
                 <button
                   type="button"
                   disabled={!!removing}
                   aria-label={t('stickers.removeNamed', { name: item.name })}
-                  className="sticker-remove-button"
+                  className={`absolute top-1 right-1 text-status-danger hover:bg-status-danger/20 ${TILE_CONTROL}`}
                   onClick={() => onRemove(item.id)}
                 >
                   {removing === item.id ? (
                     <span className="sticker-spinner" />
                   ) : (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                      <path d="m6 6 12 12M6 18 18 6" />
-                    </svg>
+                    <Icon name="x" size="xs" />
                   )}
                 </button>
               </>

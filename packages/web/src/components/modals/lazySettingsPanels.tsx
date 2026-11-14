@@ -90,12 +90,12 @@ function SettingsPanelFallback() {
 function SettingsPanelLoadFailed() {
   const { t } = useTranslation('common');
   return (
-    <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm flex flex-wrap items-center gap-3">
+    <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-status-danger text-sm flex flex-wrap items-center gap-3">
       <span>{t('states.loadSettingsFailed')}</span>
       <button
         type="button"
         onClick={() => window.location.reload()}
-        className="font-medium underline underline-offset-2 hover:no-underline transition-all"
+        className="font-medium underline underline-offset-2 hover:no-underline"
       >
         {t('crash.reload')}
       </button>

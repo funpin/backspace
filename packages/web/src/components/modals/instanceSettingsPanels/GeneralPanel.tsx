@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../../api/client';
 import { Toggle } from '../../ui/Toggle';
+import { Button } from '../../ui/Button';
 import { DirectoryListingHint } from './DirectoryListingHint';
 import { useSettingsStore } from '../../../stores/settingsStore';
 import { useUIStore } from '../../../stores/uiStore';
@@ -280,16 +281,16 @@ export function GeneralPanel() {
 
   return (
     <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-      <h2 className="text-lg font-semibold text-txt-primary">{t('admin:general.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary">{t('admin:general.title')}</h2>
       <div className="text-xs text-txt-tertiary">
         {t('admin:general.description')}
       </div>
 
       {/* Instance Name */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:general.instanceName.label')}</div>
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:general.instanceName.label')}</div>
         <p className="text-xs text-txt-tertiary mb-2">{t('admin:general.instanceName.description')}</p>
-        <div className="rounded-lg bg-white/[0.02] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <input
             type="text"
             value={draft.instanceName}
@@ -298,7 +299,7 @@ export function GeneralPanel() {
             aria-label={t('admin:general.instanceName.label')}
             className="input-standard w-full"
           />
-          <div className="text-[11px] text-txt-tertiary text-right mt-1">
+          <div className="text-2xs text-txt-tertiary text-right mt-1">
             {t('admin:general.instanceName.counter', { length: draft.instanceName.length, max: INSTANCE_NAME_MAX_LENGTH })}
           </div>
         </div>
@@ -306,9 +307,9 @@ export function GeneralPanel() {
 
       {/* Space discovery: one ladder, three rungs */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:general.discovery.label')}</div>
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:general.discovery.label')}</div>
         <p className="text-xs text-txt-tertiary mb-2">{t('admin:general.discovery.description')}</p>
-        <div className="rounded-lg bg-white/[0.02] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           {/*
             The group owns the three rungs and nothing else: a `radiogroup` may
             own only radios, so what hangs under the global rung is a sibling of
@@ -344,9 +345,9 @@ export function GeneralPanel() {
               return (
               <label
                 key={option.level}
-                className={`flex items-start gap-3 p-2.5 rounded transition-colors ${
+                className={`flex items-start gap-3 p-2.5 rounded-lg transition-colors duration-fast ${
                   dead ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-                } ${level === option.level ? 'bg-interactive-selected' : dead ? '' : 'hover:bg-interactive-hover'}`}
+                } ${level === option.level ? 'bg-accent-tone/[0.16]' : dead ? '' : 'hover:bg-interactive-hover'}`}
               >
                 <input
                   type="radio"
@@ -395,20 +396,20 @@ export function GeneralPanel() {
                 <DirectoryListingHint saveFirst={hasChanges ? handleSave : null} saving={saving} />
               )}
               {!instanceSettings.federatedRegistrationOpen && !noDirectoryEndpoint && (
-                <div className="p-2.5 bg-accent-amber/10 border border-accent-amber/30 rounded text-[13px] text-accent-amber space-y-2">
+                <div className="p-3 bg-status-warn/10 border border-status-warn/30 rounded-lg text-compact text-status-warn space-y-2">
                   <p>{t('admin:general.directory.registrationClosed')}</p>
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={handleOpenFederatedRegistration}
                     disabled={openingRegistration}
-                    className="px-2.5 py-1 rounded bg-accent-amber/20 hover:bg-accent-amber/30 text-[13px] font-medium transition-colors disabled:opacity-50"
                   >
                     {t('admin:general.directory.openFederatedRegistration')}
-                  </button>
+                  </Button>
                 </div>
               )}
               {/* What the pinger last did, the same shape as the telemetry panel's line */}
-              <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3 space-y-1">
+              <div className="rounded-lg border border-border-soft p-3 space-y-1">
                 <div className="text-xs text-txt-tertiary">{pingLabel}</div>
                 {instanceSettings.directoryListedSpaceCount > 0 && (
                   <div className="text-xs text-txt-tertiary">
@@ -416,7 +417,7 @@ export function GeneralPanel() {
                   </div>
                 )}
                 {lastError !== null && (
-                  <div className="text-xs text-txt-danger">
+                  <div className="text-xs text-status-danger">
                     {t('admin:general.directory.status.lastError', {
                       status: lastErrorReasonKey === null ? lastError.status : t(lastErrorReasonKey),
                     })}
@@ -432,7 +433,7 @@ export function GeneralPanel() {
             so it reads as its own row under a rule rather than as a fourth
             rung of a ladder it does not belong to.
           */}
-          <div className="mt-3 pt-3 border-t border-white/[0.04]">
+          <div className="mt-3 pt-3 border-t border-border-soft">
             <label className={`flex items-center justify-between gap-3 ${noDirectoryEndpoint ? '' : 'cursor-pointer'}`}>
               <div className="min-w-0">
                 <div className="text-sm font-medium text-txt-primary">{t('admin:general.browse.toggleLabel')}</div>
@@ -465,11 +466,11 @@ export function GeneralPanel() {
 
       {/* GIF Search */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:general.gif.label')}</div>
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:general.gif.label')}</div>
         <p className="text-xs text-txt-tertiary mb-2">
           {t('admin:general.gif.description')}
         </p>
-        <div className="rounded-lg bg-white/[0.02] p-3.5 space-y-2">
+        <div className="rounded-xl bg-surface-elevated p-3.5 space-y-2">
           <input
             type="password"
             value={gifKeyDirty ? gifKeyDraft : ''}
@@ -479,18 +480,19 @@ export function GeneralPanel() {
             autoComplete="off"
           />
           <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded ${
-              instanceSettings.gifEnabled ? 'bg-status-online/15 text-status-online' : 'bg-white/5 text-txt-tertiary'
+            <span className={`inline-flex items-center h-5 px-[7px] rounded text-2xs font-semibold ${
+              instanceSettings.gifEnabled ? 'bg-status-ok/15 text-status-ok' : 'bg-border-soft text-txt-secondary'
             }`}>
               {instanceSettings.gifEnabled ? t('admin:general.gif.enabled') : t('admin:general.gif.notConfigured')}
             </span>
             {instanceSettings.gifEnabled && !gifKeyDirty && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => { setGifKeyDraft(''); setGifKeyDirty(true); }}
-                className="text-[11px] text-txt-tertiary hover:text-txt-danger transition-colors"
               >
                 {t('admin:general.gif.clearKey')}
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -501,8 +503,8 @@ export function GeneralPanel() {
         page's other links stay.
       */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:general.supportCard.label')}</div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:general.supportCard.label')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <label className="flex items-center justify-between gap-3 cursor-pointer">
             <div className="min-w-0">
               <div className="text-sm font-medium text-txt-primary">{t('admin:general.supportCard.toggleLabel')}</div>
@@ -519,26 +521,19 @@ export function GeneralPanel() {
 
       {/* Status messages */}
       {saveError && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{saveError}</div>
+        <div className="p-2.5 bg-status-danger/10 border border-status-danger/30 rounded-lg text-status-danger text-sm">{saveError}</div>
       )}
       {/* Save / Reset bar */}
       {hasChanges && (
-        <div className="sticky bottom-0 z-10 pointer-events-none">
+        <div className="sticky bottom-0 z-raised pointer-events-none">
           <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 animate-slide-up pointer-events-auto">
-              <button
-                onClick={handleReset}
-                className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-              >
+            <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 animate-slide-up pointer-events-auto">
+              <Button variant="ghost" size="sm" onClick={handleReset}>
                 {t('common:actions.reset')}
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
-              >
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
                 {saving ? t('common:states.saving') : t('common:actions.save')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

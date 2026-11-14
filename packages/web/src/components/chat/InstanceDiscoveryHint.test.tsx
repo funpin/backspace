@@ -330,8 +330,8 @@ describe('InstanceDiscoveryHint', () => {
     const { container } = render(<InstanceDiscoveryHint directoryConfigured directoryAvailable onDiscoveryEnabled={onDiscoveryEnabled} onBrowseEnabled={onBrowseEnabled} />);
 
     expect(screen.getByText(NOT_LISTED_TEXT)).toBeInTheDocument();
-    // Informational, not a warning: no amber on this row.
-    expect(container.querySelector('.text-accent-amber')).toBeNull();
+    // Informational, not a warning: no warning tone on this row.
+    expect(container.querySelector('.text-status-warn')).toBeNull();
 
     await clickThrough(user, LIST_LABEL, LIST_CONFIRM_LABEL);
 
@@ -440,8 +440,8 @@ describe('InstanceDiscoveryHint', () => {
     // Alongside the listing row, outgoing before incoming.
     expect(rowTexts(container)).toEqual([NOT_LISTED_TEXT, BROWSE_OFF_TEXT]);
     // A choice the instance made, not a warning: the same quiet treatment the
-    // listing row gets, and no amber.
-    expect(container.querySelector('.text-accent-amber')).toBeNull();
+    // listing row gets, and no warning tone.
+    expect(container.querySelector('.text-status-warn')).toBeNull();
   });
 
   /*
@@ -655,11 +655,11 @@ describe('InstanceDiscoveryHint', () => {
         />,
       );
 
-      // Three facts above the spaces the page is for: one border, and the
+      // Three facts above the spaces the page is for: one frame, and the
       // warning row carries its tone in the text rather than in a fill.
-      expect(container.querySelectorAll('.border').length).toBe(1);
-      expect(container.querySelector('.bg-accent-amber\\/10')).toBeNull();
-      expect(container.querySelector('p.text-accent-amber')?.textContent).toBe(ADMIN_TEXT);
+      expect(container.querySelectorAll('.bg-surface-elevated').length).toBe(1);
+      expect(container.querySelector('.bg-status-warn\\/10')).toBeNull();
+      expect(container.querySelector('p.text-status-warn')?.textContent).toBe(ADMIN_TEXT);
     });
 
     /*

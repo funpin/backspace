@@ -21,13 +21,13 @@ export function ChannelHeaderTopic({ channelName, topic }: ChannelHeaderTopicPro
 
   return (
     <>
-      <div className="w-[1px] h-5 bg-border-soft mx-2 flex-shrink-0" aria-hidden="true" />
+      <div className="w-px h-5 bg-border-hard mx-1 flex-shrink-0" aria-hidden="true" />
       <button
         type="button"
         onClick={() => setIsOpen(true)}
         title={topic}
         aria-haspopup="dialog"
-        className="min-w-0 truncate rounded-[4px] px-1 -mx-1 text-left text-[13px] leading-tight text-txt-tertiary transition-colors hover:text-txt-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary"
+        className="min-w-0 truncate rounded px-1 text-left text-compact text-txt-tertiary transition-colors duration-fast hover:text-txt-secondary"
       >
         <span className="sr-only">{t('main.topic.show')}</span>{' '}
         {topic}

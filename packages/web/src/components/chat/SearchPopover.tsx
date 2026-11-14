@@ -6,6 +6,9 @@ import { createPortal } from 'react-dom';
 import { useFloatingPosition } from '../../hooks/useFloatingPosition';
 import { isDmChannel, getChannelOrigin, getApiForOrigin } from '../../stores/spaceStore';
 import { Avatar } from '../ui/Avatar';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
+import { IconButton } from '../ui/IconButton';
 import { highlightMatch } from './searchHighlight';
 import { messageTextForPreview } from '../../utils/stickerMessages';
 import { useEmojiShortcodeNames } from '../../utils/emojiShortcodes';
@@ -58,7 +61,7 @@ function SearchResultRow({
   return (
     <button
       onClick={() => onJumpToMessage(msg.id)}
-      className="w-full px-3 py-2.5 hover:bg-interactive-hover transition-colors text-left flex items-start gap-2.5 group/result"
+      className="w-full px-2.5 py-2 rounded-lg hover:bg-interactive-hover transition-colors duration-fast text-left flex items-start gap-2.5 group/result"
     >
       <div className="flex-shrink-0 mt-0.5">
         <Avatar
@@ -70,21 +73,19 @@ function SearchResultRow({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-[13px] font-semibold text-txt-primary truncate">
+          <span className="text-compact font-semibold text-txt-primary truncate">
             {displayName}
           </span>
-          <span className="text-[10px] text-txt-tertiary flex-shrink-0">
+          <span className="text-2xs text-txt-tertiary flex-shrink-0 tabular-nums">
             {formatTime(msg.createdAt)}
           </span>
         </div>
-        <div className="text-[13px] text-txt-secondary leading-[1.4] line-clamp-2 mt-0.5">
+        <div className="text-compact text-txt-secondary line-clamp-2 mt-0.5">
           {highlightMatch(messageTextForPreview(msg.content ?? ''), query)}
         </div>
         {msg.attachments && msg.attachments.length > 0 && (
-          <div className="flex items-center gap-1 mt-1 text-[11px] text-txt-tertiary">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H9v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S6 2.79 6 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z" />
-            </svg>
+          <div className="flex items-center gap-1 mt-1 text-2xs text-txt-tertiary">
+            <Icon name="paperclip" size="xs" />
             {t('search:results.attachments', { count: msg.attachments.length })}
           </div>
         )}
@@ -212,45 +213,39 @@ export function SearchPopover({ open, onClose, anchorRef, channelId, isDm, onJum
     <div
       ref={popoverRef}
       style={style}
-      className="w-[420px] max-h-[500px] glass rounded-lg shadow-xl flex flex-col animate-fade-in"
+      className="w-[420px] max-h-[500px] glass rounded-xl flex flex-col animate-fade-in"
     >
       {/* Search input */}
-      <div className="p-3 border-b border-white/[0.07]">
-        <div className="flex items-center gap-2 bg-surface-input rounded-lg px-3 py-2 border border-white/[0.06] shadow-input">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary flex-shrink-0">
-            <path d="M21.707 20.293l-5.395-5.395A7.457 7.457 0 0018 10.5 7.5 7.5 0 1010.5 18c1.575 0 3.027-.486 4.228-1.31l5.476 5.476a.997.997 0 001.414 0l.089-.089a1 1 0 000-1.414l.001-.37zM10.5 16a5.5 5.5 0 110-11 5.5 5.5 0 010 11z" />
-          </svg>
+      <div className="p-3 border-b border-glass-border">
+        <div className="flex items-center gap-2 bg-surface-input rounded-lg pl-3 pr-1 h-[38px]">
+          <Icon name="search" size="sm" className="text-txt-tertiary" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('search:input.placeholder')}
-            className="input-embedded flex-1 text-[14px]"
+            className="input-embedded flex-1 min-w-0 text-sm"
           />
           {query && (
-            <button
+            <IconButton
+              icon="x"
+              size="sm"
+              label={t('common:actions.clear')}
               onClick={() => setQuery('')}
-              className="text-txt-tertiary hover:text-txt-primary transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-              </svg>
-            </button>
+            />
           )}
         </div>
 
         {/* Filter toggle */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="mt-2 text-[12px] text-txt-tertiary hover:text-txt-secondary transition-colors flex items-center gap-1"
+          className="mt-2 text-xs font-medium text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast flex items-center gap-1"
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className={`transition-transform ${showFilters ? 'rotate-90' : ''}`}>
-            <path d="M10 17l5-5-5-5v10z" />
-          </svg>
+          <Icon name="chevron-right" size="xs" className={`transition-transform duration-base ease-out ${showFilters ? 'rotate-90' : ''}`} />
           {t('search:filters.toggle')}
           {(fromFilter || hasFilter || beforeFilter || afterFilter) && (
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-primary" />
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-tone" />
           )}
         </button>
 
@@ -258,21 +253,21 @@ export function SearchPopover({ open, onClose, anchorRef, channelId, isDm, onJum
         {showFilters && (
           <div className="mt-2 grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[11px] text-txt-tertiary font-medium mb-1 block">{t('search:filters.from.label')}</label>
+              <label className="text-2xs text-txt-tertiary font-medium mb-1 block">{t('search:filters.from.label')}</label>
               <input
                 type="text"
                 value={fromFilter}
                 onChange={(e) => setFromFilter(e.target.value)}
                 placeholder={t('search:filters.from.placeholder')}
-                className="input-search w-full px-2 py-1 text-[13px]"
+                className="input-search w-full px-2 py-1 text-compact"
               />
             </div>
             <div>
-              <label className="text-[11px] text-txt-tertiary font-medium mb-1 block">{t('search:filters.has.label')}</label>
+              <label className="text-2xs text-txt-tertiary font-medium mb-1 block">{t('search:filters.has.label')}</label>
               <select
                 value={hasFilter}
                 onChange={(e) => setHasFilter(e.target.value)}
-                className="input-search w-full px-2 py-1 text-[13px] appearance-none cursor-pointer"
+                className="input-search w-full px-2 py-1 text-compact appearance-none cursor-pointer"
               >
                 <option value="">{t('search:filters.has.any')}</option>
                 <option value="file">{t('search:filters.has.file')}</option>
@@ -281,21 +276,21 @@ export function SearchPopover({ open, onClose, anchorRef, channelId, isDm, onJum
               </select>
             </div>
             <div>
-              <label className="text-[11px] text-txt-tertiary font-medium mb-1 block">{t('search:filters.before.label')}</label>
+              <label className="text-2xs text-txt-tertiary font-medium mb-1 block">{t('search:filters.before.label')}</label>
               <input
                 type="date"
                 value={beforeFilter}
                 onChange={(e) => setBeforeFilter(e.target.value)}
-                className="input-search w-full px-2 py-1 text-[13px]"
+                className="input-search w-full px-2 py-1 text-compact"
               />
             </div>
             <div>
-              <label className="text-[11px] text-txt-tertiary font-medium mb-1 block">{t('search:filters.after.label')}</label>
+              <label className="text-2xs text-txt-tertiary font-medium mb-1 block">{t('search:filters.after.label')}</label>
               <input
                 type="date"
                 value={afterFilter}
                 onChange={(e) => setAfterFilter(e.target.value)}
-                className="input-search w-full px-2 py-1 text-[13px]"
+                className="input-search w-full px-2 py-1 text-compact"
               />
             </div>
           </div>
@@ -312,42 +307,38 @@ export function SearchPopover({ open, onClose, anchorRef, channelId, isDm, onJum
 
         {!isSearching && results.length === 0 && (query || fromFilter || hasFilter || beforeFilter || afterFilter) && (
           <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary/50 mb-2">
-              <path d="M21.707 20.293l-5.395-5.395A7.457 7.457 0 0018 10.5 7.5 7.5 0 1010.5 18c1.575 0 3.027-.486 4.228-1.31l5.476 5.476a.997.997 0 001.414 0l.089-.089a1 1 0 000-1.414l.001-.37zM10.5 16a5.5 5.5 0 110-11 5.5 5.5 0 010 11z" />
-            </svg>
-            <span className="text-txt-tertiary text-[13px]">{t('search:results.empty')}</span>
+            <Icon name="search" size="lg" className="text-txt-tertiary mb-2" />
+            <span className="text-txt-tertiary text-compact">{t('search:results.empty')}</span>
           </div>
         )}
 
         {!query && !fromFilter && !hasFilter && !beforeFilter && !afterFilter && results.length === 0 && (
           <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-            <span className="text-txt-tertiary text-[13px]">{t('search:results.hint')}</span>
+            <span className="text-txt-tertiary text-compact">{t('search:results.hint')}</span>
           </div>
         )}
 
         {results.length > 0 && (
           <>
-            <div className="px-3 py-2 text-[11px] text-txt-tertiary font-medium">
+            <div className="px-3 py-2 text-xs text-txt-tertiary font-medium tabular-nums">
               {t('search:results.count', { count: totalCount })}
             </div>
-            {results.map((msg) => (
-              <SearchResultRow
-                key={msg.id}
-                msg={msg}
-                origin={getChannelOrigin(channelId)}
-                query={query}
-                onJumpToMessage={onJumpToMessage}
-              />
-            ))}
+            <div className="px-1.5 pb-1.5">
+              {results.map((msg) => (
+                <SearchResultRow
+                  key={msg.id}
+                  msg={msg}
+                  origin={getChannelOrigin(channelId)}
+                  query={query}
+                  onJumpToMessage={onJumpToMessage}
+                />
+              ))}
+            </div>
             {results.length < totalCount && (
-              <div className="px-3 py-2 border-t border-white/[0.07]">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={isSearching}
-                  className="w-full py-1.5 text-[13px] text-accent-primary hover:text-accent-primary-hover transition-colors font-medium disabled:opacity-50"
-                >
+              <div className="px-3 py-2 border-t border-glass-border">
+                <Button variant="ghost" size="sm" fullWidth onClick={handleLoadMore} disabled={isSearching}>
                   {isSearching ? t('common:states.loading') : t('search:results.loadMore', { remaining: totalCount - results.length })}
-                </button>
+                </Button>
               </div>
             )}
           </>

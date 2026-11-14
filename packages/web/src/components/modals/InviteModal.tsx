@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { Modal } from '../ui/Modal';
 import { Avatar } from '../ui/Avatar';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { useUIStore } from '../../stores/uiStore';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { useSelfIdentity } from '../../stores/authStore';
@@ -99,7 +101,7 @@ function InviteResultFriendRow({
   const { baseName } = parseFederatedUsername(canonical.username);
   const dn = canonical.displayName ?? baseName;
   return (
-    <div className="flex items-center gap-3 px-3 py-2 rounded-[4px]">
+    <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
       <Avatar
         src={canonical.avatar}
         name={dn}
@@ -108,17 +110,17 @@ function InviteResultFriendRow({
         avatarColor={canonical.avatarColor}
       />
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-medium text-txt-primary truncate">{dn}</div>
-        <div className="text-[11px] text-txt-tertiary truncate">@{canonical.username}</div>
+        <div className="text-compact font-medium text-txt-primary truncate">{dn}</div>
+        <div className="text-2xs text-txt-tertiary truncate">@{canonical.username}</div>
       </div>
       {status?.kind === 'success' && (
-        <span className="text-[12px] text-accent-mint flex-shrink-0">{t('spaces:invite.status.sent')}</span>
+        <span className="text-xs text-status-ok flex-shrink-0">{t('spaces:invite.status.sent')}</span>
       )}
       {status?.kind === 'failure' && (
-        <span className="text-[12px] text-txt-danger flex-shrink-0">{t('spaces:invite.status.failed', { reason: status.reason })}</span>
+        <span className="text-xs text-status-danger flex-shrink-0">{t('spaces:invite.status.failed', { reason: status.reason })}</span>
       )}
       {status?.kind === 'pending' && (
-        <span className="text-[12px] text-txt-tertiary flex-shrink-0">...</span>
+        <span className="text-xs text-txt-tertiary flex-shrink-0">...</span>
       )}
     </div>
   );
@@ -145,11 +147,11 @@ function InviteSelectFriendRow({
     <button
       onClick={() => onToggle(friendKey(friend), friend)}
       disabled={alreadyMember || sending}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-[4px] transition-colors text-left ${
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-fast text-left ${
         alreadyMember
           ? 'opacity-40 cursor-not-allowed'
           : isSelected
-            ? 'bg-accent-mint/[0.08]'
+            ? 'bg-interactive-selected'
             : 'hover:bg-interactive-hover'
       }`}
     >
@@ -162,21 +164,19 @@ function InviteSelectFriendRow({
         avatarColor={canonical.avatarColor}
       />
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-medium text-txt-primary truncate">{dn}</div>
-        <div className="text-[11px] text-txt-tertiary truncate">
+        <div className="text-compact font-medium text-txt-primary truncate">{dn}</div>
+        <div className="text-2xs text-txt-tertiary truncate">
           {alreadyMember ? t('spaces:invite.alreadyMember') : `@${canonical.username}`}
         </div>
       </div>
       {!alreadyMember && (
         <div
           className={`w-[18px] h-[18px] rounded flex-shrink-0 flex items-center justify-center ${
-            isSelected ? 'bg-accent-mint' : 'border-2 border-border-hard'
+            isSelected ? 'bg-accent-primary text-on-accent' : 'shadow-[inset_0_0_0_1.5px_var(--glass-border)]'
           }`}
         >
           {isSelected && (
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-surface-base">
-              <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <Icon name="check" size="xs" />
           )}
         </div>
       )}
@@ -392,7 +392,7 @@ export function InviteModal() {
       mobileStyle="sheet"
     >
       <div className="space-y-3">
-        <p className="text-[13px] text-txt-tertiary">
+        <p className="text-sm text-txt-secondary">
           {joinsByRequest ? t('spaces:invite.introRequest') : t('spaces:invite.intro')}
         </p>
 
@@ -402,15 +402,15 @@ export function InviteModal() {
             {selectedFriends.map((f) => (
               <span
                 key={friendKey(f)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] bg-accent-mint/15 text-accent-mint"
+                className="flex items-center gap-1 h-6 pl-2 pr-1 rounded text-xs font-medium bg-accent-tone/[0.16] text-accent-tone"
               >
                 {f.displayName ?? parseFederatedUsername(f.username).baseName}
                 <button
                   onClick={() => removeFriend(friendKey(f))}
-                  className="opacity-60 hover:opacity-100 transition-opacity text-[14px] leading-none"
+                  className="grid place-items-center h-4 w-4 rounded opacity-60 hover:opacity-100 transition-opacity duration-fast"
                   aria-label={t('spaces:invite.removeSelected', { name: f.displayName ?? f.username })}
                 >
-                  &times;
+                  <Icon name="x" size="xs" />
                 </button>
               </span>
             ))}
@@ -425,12 +425,12 @@ export function InviteModal() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('spaces:invite.searchPlaceholder')}
-            className="input-search w-full py-2 text-[14px]"
+            className="input-search w-full"
           />
         )}
 
         {/* Friend list / Results view */}
-        <div className="max-h-[280px] overflow-y-auto space-y-[2px]">
+        <div className="max-h-[280px] overflow-y-auto space-y-0.5">
           {inResultsView ? (
             selectedFriends.map((f) => (
               <InviteResultFriendRow
@@ -442,7 +442,7 @@ export function InviteModal() {
           ) : (
             <>
               {filteredFriends.length === 0 && (
-                <div className="py-4 text-center text-txt-tertiary text-[14px]">
+                <div className="py-4 text-center text-txt-tertiary text-sm">
                   {query.trim()
                     ? t('spaces:invite.noMatches')
                     : t('spaces:invite.noFriends')}
@@ -464,57 +464,50 @@ export function InviteModal() {
 
         {/* Submit / Retry / Done */}
         {inResultsView ? (
-          <div className="flex gap-2">
+          <div className="flex justify-end gap-2">
             {hasFailures && (
-              <button
-                onClick={onRetryFailed}
-                disabled={sending}
-                className="flex-1 py-2 rounded-md text-[13px] font-semibold transition-colors bg-accent-mint text-surface-base hover:bg-accent-mint/90 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <Button variant="secondary" icon="refresh-cw" onClick={onRetryFailed} disabled={sending}>
                 {t('spaces:invite.retryFailed')}
-              </button>
+              </Button>
             )}
-            <button
-              onClick={closeModal}
-              className="flex-1 py-2 rounded-md text-[13px] font-semibold glass-pill text-txt-primary"
-            >
+            <Button variant="primary" onClick={closeModal}>
               {t('common:actions.done')}
-            </button>
+            </Button>
           </div>
         ) : (
-          <button
+          <Button
+            variant="primary"
+            fullWidth
             onClick={onSubmit}
             disabled={selectedFriends.length === 0 || sending || codeLoading}
-            className="w-full py-2 rounded-md text-[13px] font-semibold transition-colors bg-accent-mint text-surface-base hover:bg-accent-mint/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? t('spaces:invite.sending') : submitLabel}
-          </button>
+          </Button>
         )}
 
         {/* Share-link footer */}
-        <div className="pt-3 border-t border-white/[0.06]">
-          <p className="text-[12px] text-txt-tertiary mb-2">
+        <div className="pt-3 border-t border-border-hard">
+          <p className="text-xs font-medium text-txt-secondary mb-2">
             {t('spaces:invite.shareLink')}
           </p>
           {codeError && (
-            <div className="mb-2 text-[12px] text-txt-danger">{codeError}</div>
+            <div className="mb-2 text-xs text-status-danger">{codeError}</div>
           )}
           <div className="flex items-center gap-2">
             <input
               type="text"
               value={codeLoading ? t('spaces:invite.generating') : inviteUrl}
               readOnly
-              className="input-embedded flex-1 font-mono text-xs px-2 py-1.5"
+              className="input-standard flex-1 min-w-0 font-mono text-xs"
             />
-            <button
+            <Button
+              variant="secondary"
+              icon={linkCopied ? 'check' : 'copy'}
               onClick={handleCopy}
               disabled={codeLoading || !inviteUrl}
-              className={`glass-pill px-3 py-1.5 text-[12px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                linkCopied ? 'text-accent-mint' : 'text-txt-primary'
-              }`}
             >
               {linkCopied ? t('common:actions.copied') : t('common:actions.copy')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

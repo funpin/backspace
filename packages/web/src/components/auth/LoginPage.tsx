@@ -5,6 +5,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { api, RateLimitError } from '../../api/client';
 import type { InstanceInfoResponse } from '@backspace/shared';
 import { SourceCodeLink } from '../ui/SourceCodeLink';
+import { Button } from '../ui/Button';
 import { describeError } from '../../i18n/errors';
 
 export function LoginPage() {
@@ -79,29 +80,29 @@ export function LoginPage() {
   return (
     <div className="h-full overflow-y-auto flex flex-col items-center bg-surface-base relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--accent-primary)/0.06)_0%,transparent_50%)]" />
-      <div className="my-auto flex-shrink-0 w-full max-w-[480px] bg-surface-elevated rounded-md p-8 shadow-elevation-high relative z-10">
+      <div className="my-auto flex-shrink-0 w-full max-w-[480px] bg-surface-channel border border-border-hard rounded-2xl p-8 relative z-raised">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-txt-primary">{t('auth:login.title')}</h1>
+          <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:login.title')}</h1>
           <p className="text-txt-tertiary mt-1">{t('auth:login.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           {retryAfter > 0 && (
-            <div className="mb-4 p-3 bg-accent-amber/10 border border-accent-amber/30 rounded text-sm">
-              <p className="font-medium text-accent-amber">{t('auth:login.rateLimited.title')}</p>
+            <div className="mb-4 px-3 py-2.5 bg-status-warn/10 rounded-lg text-sm">
+              <p className="font-medium text-status-warn">{t('auth:login.rateLimited.title')}</p>
               <p className="text-txt-secondary mt-0.5">{t('auth:login.rateLimited.retryIn', { seconds: retryAfter })}</p>
             </div>
           )}
 
           {error && (
-            <div className="mb-4 p-3 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+            <div className="mb-4 px-3 py-2.5 bg-status-danger/10 rounded-lg text-status-danger text-sm">
               {error}
             </div>
           )}
 
           <div className="mb-5">
-            <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
-              {t('common:labels.username')} <span className="text-txt-danger">*</span>
+            <label className="block text-xs font-medium text-txt-secondary mb-1.5">
+              {t('common:labels.username')} <span className="text-status-danger">*</span>
             </label>
             <input
               type="text"
@@ -114,8 +115,8 @@ export function LoginPage() {
           </div>
 
           <div className="mb-5">
-            <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
-              {t('common:labels.password')} <span className="text-txt-danger">*</span>
+            <label className="block text-xs font-medium text-txt-secondary mb-1.5">
+              {t('common:labels.password')} <span className="text-status-danger">*</span>
             </label>
             <input
               type="password"
@@ -126,31 +127,27 @@ export function LoginPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isDisabled}
-            className="w-full py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <Button type="submit" variant="primary" size="lg" fullWidth disabled={isDisabled}>
             {retryAfter > 0
               ? t('auth:login.rateLimited.retryIn', { seconds: retryAfter })
               : isLoading
                 ? t('auth:login.submitting')
                 : t('common:actions.logIn')}
-          </button>
+          </Button>
 
           <p className="mt-3 text-sm text-txt-tertiary">
             <Trans
               t={t}
               i18nKey="auth:login.registerPrompt"
               components={{
-                actionLink: <Link to={`/register${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="text-accent-primary hover:underline" />,
+                actionLink: <Link to={`/register${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="text-txt-link hover:underline" />,
               }}
             />
           </p>
         </form>
 
         {instanceInfo && (
-          <div className="mt-6 pt-4 border-t border-white/[0.04] flex justify-center">
+          <div className="mt-6 pt-4 border-t border-border-hard flex justify-center">
             <SourceCodeLink sourceCodeUrl={instanceInfo.sourceCodeUrl} version={instanceInfo.version} commit={instanceInfo.commit} />
           </div>
         )}

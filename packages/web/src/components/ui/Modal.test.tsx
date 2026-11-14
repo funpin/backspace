@@ -16,7 +16,7 @@ function overlayOf(heading: HTMLElement): HTMLElement {
 }
 
 function backdropOf(overlay: HTMLElement): HTMLElement {
-  const backdrop = overlay.querySelector(':scope > .bg-black\\/50');
+  const backdrop = overlay.querySelector(':scope > .bg-surface-overlay');
   if (!(backdrop instanceof HTMLElement)) throw new Error('dialog has no backdrop');
   return backdrop;
 }

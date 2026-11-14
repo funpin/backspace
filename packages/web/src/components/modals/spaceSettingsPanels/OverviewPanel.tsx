@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { ImageCropModal } from '../../ui/ImageCropModal';
+import { Button } from '../../ui/Button';
+import { Icon } from '../../ui/Icon';
 import { getSpaceGradient, SPACE_GRADIENT_MAP } from '../../../utils/gradients';
 import { AVATAR_COLORS } from '@backspace/shared';
 import type { AvatarColor } from '@backspace/shared';
@@ -18,6 +20,16 @@ import { useAvatarColorNames } from './spaceOptions';
 
 interface OverviewPanelProps {
   spaceId: string;
+}
+
+/** Shown over the icon or banner while its upload runs. */
+function UploadSpinner() {
+  return (
+    <svg className="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  );
 }
 
 export function OverviewPanel({ spaceId }: OverviewPanelProps) {
@@ -299,14 +311,14 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
   return (
     <>
       <div className="space-y-5">
-        <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('spaces:settings.nav.tabs.overview')}</h2>
+        <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('spaces:settings.nav.tabs.overview')}</h2>
         {/* Space Identity */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('spaces:settings.overview.identity')}</div>
-          <div className="rounded-lg bg-white/[0.02] p-3.5 space-y-4">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('spaces:settings.overview.identity')}</div>
+          <div className="rounded-xl bg-surface-elevated p-3.5 space-y-4">
         {/* Space Icon */}
         <div>
-          <label className="block text-xs text-txt-secondary mb-1.5">
+          <label className="block text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:settings.overview.iconLabel')}
           </label>
           <div className="flex items-center gap-3">
@@ -315,24 +327,21 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
               onClick={() => canManageSpace && fileInputRef.current?.click()}
               disabled={!canManageSpace || uploadingIcon}
               className={`relative w-16 h-16 rounded-full bg-surface-input border-2 border-dashed border-border-soft flex items-center justify-center overflow-hidden group ${
-                canManageSpace ? 'hover:border-accent-primary cursor-pointer' : 'cursor-default'
-              } transition-colors`}
+                canManageSpace ? 'hover:border-accent-tone cursor-pointer' : 'cursor-default'
+              } transition-colors duration-fast`}
             >
               {displayIconSrc ? (
                 <>
                   <img src={displayIconSrc} alt={t('spaces:settings.overview.iconAlt')} className="w-full h-full object-cover" />
                   {canManageSpace && (
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                    <div className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-fast flex items-center justify-center">
+                      <Icon name="camera" size="lg" />
                     </div>
                   )}
                 </>
               ) : (
                 <div
-                  className="w-full h-full rounded-full flex items-center justify-center text-white text-xl font-bold"
+                  className="w-full h-full rounded-full flex items-center justify-center text-white text-xl font-semibold"
                   style={{ background: getSpaceGradient(space.id, space.name, avatarColorState).gradient }}
                 >
                   {space.name.charAt(0).toUpperCase()}
@@ -340,10 +349,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
               )}
               {uploadingIcon && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
+                  <UploadSpinner />
                 </div>
               )}
             </button>
@@ -358,7 +364,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
               <button
                 type="button"
                 onClick={handleRemoveIcon}
-                className="text-xs text-txt-tertiary hover:text-txt-danger transition-colors"
+                className="text-xs font-medium text-txt-tertiary hover:text-status-danger transition-colors duration-fast"
               >
                 {t('common:actions.remove')}
               </button>
@@ -368,7 +374,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
 
         {/* Space Avatar Color */}
         <div>
-          <label className="block text-xs text-txt-secondary mb-1.5">
+          <label className="block text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:settings.overview.colorLabel')}
           </label>
           <div className="flex gap-2">
@@ -380,12 +386,10 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
                   type="button"
                   onClick={() => canManageSpace && setAvatarColorState(key)}
                   disabled={!canManageSpace}
-                  className="w-7 h-7 rounded-full border-2 transition-all hover:scale-110 disabled:cursor-default disabled:hover:scale-100"
-                  style={{
-                    background: entry.gradient,
-                    borderColor: avatarColorState === key ? 'white' : 'transparent',
-                    boxShadow: avatarColorState === key ? `0 0 0 2px ${entry.glow}40` : 'none',
-                  }}
+                  className={`w-7 h-7 rounded-full transition-[transform,box-shadow] duration-fast ease-out hover:scale-110 disabled:cursor-default disabled:hover:scale-100 ${
+                    avatarColorState === key ? 'shadow-[0_0_0_2px_rgb(var(--bg-elevated)),0_0_0_3.5px_rgb(var(--accent-tone))]' : ''
+                  }`}
+                  style={{ background: entry.gradient }}
                   title={colorNames[key]}
                 />
               );
@@ -395,7 +399,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
 
         {/* Space Banner */}
         <div>
-          <label className="block text-xs text-txt-secondary mb-1.5">
+          <label className="block text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:settings.overview.bannerLabel')}
           </label>
           <div className="flex flex-col gap-2">
@@ -403,36 +407,28 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
               type="button"
               onClick={() => canManageSpace && bannerFileInputRef.current?.click()}
               disabled={!canManageSpace || uploadingBanner}
-              className={`relative w-full h-24 rounded-lg bg-surface-input border-2 border-dashed border-border-soft flex items-center justify-center overflow-hidden group ${
-                canManageSpace ? 'hover:border-accent-primary cursor-pointer' : 'cursor-default'
-              } transition-colors`}
+              className={`relative w-full h-24 rounded-xl bg-surface-input border-2 border-dashed border-border-soft flex items-center justify-center overflow-hidden group ${
+                canManageSpace ? 'hover:border-accent-tone cursor-pointer' : 'cursor-default'
+              } transition-colors duration-fast`}
             >
               {displayBannerSrc ? (
                 <>
                   <img src={displayBannerSrc} alt={t('spaces:settings.overview.bannerAlt')} className="w-full h-full object-cover" />
                   {canManageSpace && (
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                    <div className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-fast flex items-center justify-center">
+                      <Icon name="camera" size="lg" />
                     </div>
                   )}
                 </>
               ) : (
                 <div className="flex flex-col items-center gap-1 text-txt-tertiary">
-                  <svg className="w-6 h-6 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                  </svg>
-                  <span className="text-[11px]">{t('spaces:settings.overview.uploadBanner')}</span>
+                  <Icon name="image" size="lg" />
+                  <span className="text-2xs">{t('spaces:settings.overview.uploadBanner')}</span>
                 </div>
               )}
               {uploadingBanner && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
+                  <UploadSpinner />
                 </div>
               )}
             </button>
@@ -447,7 +443,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
               <button
                 type="button"
                 onClick={handleRemoveBanner}
-                className="text-xs text-txt-tertiary hover:text-txt-danger transition-colors self-start"
+                className="text-xs font-medium text-txt-tertiary hover:text-status-danger transition-colors duration-fast self-start"
               >
                 {t('spaces:settings.overview.removeBanner')}
               </button>
@@ -457,7 +453,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
 
         {/* Space Name */}
         <div>
-          <label className="block text-xs text-txt-secondary mb-1.5">
+          <label className="block text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:settings.overview.nameLabel')}
           </label>
           <input
@@ -473,13 +469,13 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
 
         {/* Save / Discard */}
         {saveError && (
-          <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{saveError}</div>
+          <div className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger">{saveError}</div>
         )}
         {/* Danger Zone */}
         {isOwner && (
           <div>
-            <div className="text-[11px] font-semibold text-txt-danger uppercase tracking-wider mb-1.5">{t('common:labels.dangerZone')}</div>
-            <div className="rounded-lg bg-white/[0.02] p-3.5 space-y-4">
+            <div className="text-xs font-medium text-status-danger mb-1.5">{t('common:labels.dangerZone')}</div>
+            <div className="rounded-xl bg-surface-elevated p-3.5 space-y-4">
               {/* Transfer Ownership */}
               <div>
                 <p className="text-xs text-txt-tertiary mb-3">{t('spaces:settings.overview.transfer.description')}</p>
@@ -487,7 +483,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
                   transferTargetId && transferTarget ? (
                     /* Confirm step */
                     <div className="space-y-3">
-                      <div className="p-2.5 rounded-lg bg-accent-amber/10 border border-accent-amber/20">
+                      <div className="p-2.5 rounded-lg bg-status-warn/10 border border-status-warn/20">
                         <p className="text-sm text-txt-secondary">
                           <Trans
                             t={t}
@@ -498,20 +494,12 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => setTransferTargetId(null)}
-                          className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary transition-colors"
-                          disabled={transferring}
-                        >
+                        <Button variant="ghost" onClick={() => setTransferTargetId(null)} disabled={transferring}>
                           {t('common:actions.back')}
-                        </button>
-                        <button
-                          onClick={handleTransfer}
-                          disabled={transferring}
-                          className="px-3 py-1.5 bg-accent-amber hover:bg-accent-amber/80 text-white text-sm font-medium rounded transition-colors disabled:opacity-50"
-                        >
+                        </Button>
+                        <Button variant="danger-solid" onClick={handleTransfer} disabled={transferring}>
                           {transferring ? t('spaces:settings.overview.transfer.transferring') : t('spaces:settings.overview.transfer.confirm')}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -525,7 +513,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
                         className="input-search w-full"
                         autoFocus
                       />
-                      <div className="max-h-[160px] overflow-y-auto space-y-0.5">
+                      <div className="max-h-40 overflow-y-auto space-y-0.5">
                         {transferCandidates.length === 0 ? (
                           <p className="text-xs text-txt-tertiary text-center py-3">{t('common:labels.noMembersFound')}</p>
                         ) : (
@@ -537,13 +525,13 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
                               <button
                                 key={member.userId}
                                 onClick={() => setTransferTargetId(member.userId)}
-                                className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-white/[0.06] transition-colors"
+                                className="w-full flex items-center gap-2.5 min-h-10 px-2 py-1.5 rounded-lg hover:bg-interactive-hover transition-colors duration-fast"
                               >
                                 <div className="w-7 h-7 rounded-full bg-surface-input flex-shrink-0 overflow-hidden flex items-center justify-center">
                                   {avatarUrl ? (
                                     <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                                   ) : (
-                                    <span className="text-[10px] font-bold text-txt-secondary">
+                                    <span className="text-2xs font-semibold text-txt-secondary">
                                       {(member.user.displayName || member.user.username).charAt(0).toUpperCase()}
                                     </span>
                                   )}
@@ -553,7 +541,7 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
                                     {member.user.displayName || member.user.username}
                                   </span>
                                   {member.user.displayName && (
-                                    <span className="text-[11px] text-txt-tertiary truncate max-w-full">
+                                    <span className="text-2xs text-txt-tertiary truncate max-w-full">
                                       {member.user.username}
                                     </span>
                                   )}
@@ -563,58 +551,47 @@ export function OverviewPanel({ spaceId }: OverviewPanelProps) {
                           })
                         )}
                       </div>
-                      <button
-                        onClick={() => { setShowTransfer(false); setTransferSearch(''); }}
-                        className="text-xs text-txt-tertiary hover:text-txt-secondary transition-colors"
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => { setShowTransfer(false); setTransferSearch(''); }}>
                         {t('common:actions.cancel')}
-                      </button>
+                      </Button>
                     </div>
                   )
                 ) : (
-                  <button
-                    onClick={() => setShowTransfer(true)}
-                    className="px-4 py-2 bg-accent-amber hover:bg-accent-amber/80 text-white text-sm font-medium rounded transition-colors"
-                  >
+                  <Button variant="danger" onClick={() => setShowTransfer(true)}>
                     {t('spaces:settings.overview.transfer.button')}
-                  </button>
+                  </Button>
                 )}
               </div>
 
               {/* Divider */}
-              <div className="border-t border-white/[0.05]" />
+              <div className="border-t border-border-soft" />
 
               {/* Delete Space */}
               <div>
                 <p className="text-xs text-txt-tertiary mb-3">{t('spaces:settings.overview.delete.description')}</p>
-                <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-accent-rose hover:bg-accent-rose/80 text-white text-sm font-medium rounded transition-colors"
-                >
+                <Button variant={confirmDelete ? 'danger-solid' : 'danger'} onClick={handleDelete}>
                   {confirmDelete ? t('spaces:settings.overview.delete.confirmAgain') : t('spaces:settings.overview.delete.button')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
         )}
 
         {canManageSpace && hasChanges && (
-          <div className="sticky bottom-0 z-10 pointer-events-none">
+          <div className="sticky bottom-0 z-raised pointer-events-none">
             <div className="flex justify-center pt-3 pb-1">
-              <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 animate-slide-up pointer-events-auto">
-                <button
-                  onClick={handleDiscard}
-                  className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-                >
+              <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 animate-slide-up pointer-events-auto">
+                <Button variant="ghost" size="sm" onClick={handleDiscard}>
                   {t('spaces:settings.discardChanges')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={handleSave}
                   disabled={saving || uploadingIcon || uploadingBanner || !spaceName.trim()}
-                  className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
                 >
                   {saving ? t('common:states.saving') : t('common:actions.save')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

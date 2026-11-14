@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useSpaceJoin } from '../../hooks/useSpaceJoin';
 import { getSpaceGradient } from '../../utils/gradients';
 import type { TaggedExploreSpace } from '../../stores/exploreStore';
+import { Button } from '../ui/Button';
 
 export function ExploreSpacePreviewCard({
   space,
@@ -39,14 +40,14 @@ export function ExploreSpacePreviewCard({
   };
 
   return (
-    <div className="rounded-lg bg-surface-channel border border-border-soft hover:border-border-hard transition-colors px-3 py-2.5">
+    <div className="rounded-xl bg-surface-elevated px-3 py-2.5">
       <div className="flex items-center gap-3">
         {/* Icon */}
         {iconUrl ? (
           <img src={iconUrl} alt={space.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
         ) : (
           <div
-            className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-sm font-bold text-white/90"
+            className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-sm font-semibold text-white/90"
             style={{ background: fallbackGradient }}
           >
             {space.name.charAt(0).toUpperCase()}
@@ -56,7 +57,7 @@ export function ExploreSpacePreviewCard({
         {/* Name + meta */}
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold text-txt-primary truncate">{space.name}</div>
-          <div className="flex items-center gap-2 text-[12px] text-txt-tertiary">
+          <div className="flex items-center gap-2 text-xs text-txt-tertiary">
             <span>{t('spaces:explore.memberCount', { count: space.memberCount })}</span>
             {originLabel && <span className="truncate text-txt-tertiary/70">· {originLabel}</span>}
           </div>
@@ -65,24 +66,15 @@ export function ExploreSpacePreviewCard({
         {/* Action */}
         <div className="flex-shrink-0">
           {isPublic ? (
-            <button
-              type="button"
-              onClick={handleJoin}
-              disabled={joining}
-              className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary-hover text-white text-xs font-medium rounded-full transition-colors disabled:opacity-50"
-            >
+            <Button variant="primary" size="sm" onClick={handleJoin} disabled={joining}>
               {joining ? t('spaces:explore.preview.joining') : t('spaces:explore.preview.join')}
-            </button>
+            </Button>
           ) : isPending ? (
-            <span className="px-3 py-1.5 text-xs font-medium text-txt-tertiary">{t('spaces:explore.preview.pending')}</span>
+            <span className="px-2.5 text-compact font-medium text-txt-tertiary">{t('spaces:explore.preview.pending')}</span>
           ) : (
-            <button
-              type="button"
-              onClick={openRequestForm}
-              className="px-3 py-1.5 bg-accent-amber/20 hover:bg-accent-amber/30 text-accent-amber text-xs font-medium rounded-full transition-colors"
-            >
+            <Button variant="primary" size="sm" onClick={openRequestForm}>
               {t('spaces:explore.preview.request')}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -97,27 +89,18 @@ export function ExploreSpacePreviewCard({
             rows={2}
             className="input-standard w-full resize-none text-sm"
           />
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={sendRequest}
-              disabled={joining}
-              className="flex-1 py-1.5 bg-accent-amber hover:bg-accent-amber/80 text-[#13131a] text-xs font-medium rounded transition-colors disabled:opacity-50"
-            >
-              {joining ? t('spaces:explore.preview.sending') : t('spaces:explore.sendRequest')}
-            </button>
-            <button
-              type="button"
-              onClick={cancelRequestForm}
-              className="px-3 py-1.5 text-xs text-txt-tertiary hover:text-txt-secondary transition-colors"
-            >
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={cancelRequestForm}>
               {t('common:actions.cancel')}
-            </button>
+            </Button>
+            <Button variant="primary" size="sm" onClick={sendRequest} disabled={joining}>
+              {joining ? t('spaces:explore.preview.sending') : t('spaces:explore.sendRequest')}
+            </Button>
           </div>
         </div>
       )}
 
-      {joinError && <div className="mt-2 text-[12px] text-txt-danger">{joinError}</div>}
+      {joinError && <div className="mt-2 text-xs text-status-danger">{joinError}</div>}
     </div>
   );
 }

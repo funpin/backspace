@@ -9,7 +9,7 @@ export default {
       height: { screen: 'calc(100 * var(--app-vh))' },
       minHeight: { screen: 'calc(100 * var(--app-vh))' },
       colors: {
-        // ── AETHER DRIFT TOKENS ──
+        // ── KAMEN TOKENS (docs/brand/brandbook.md) ──
         // RGB-channel variables enable Tailwind opacity modifiers (e.g. bg-accent-rose/10)
         surface: {
           base:     'rgb(var(--bg-base) / <alpha-value>)',
@@ -35,7 +35,11 @@ export default {
           primary:         'rgb(var(--accent-primary) / <alpha-value>)',
           'primary-hover': 'rgb(var(--accent-primary-hover) / <alpha-value>)',
           'primary-active':'rgb(var(--accent-primary-active) / <alpha-value>)',
+          tone:            'rgb(var(--accent-tone) / <alpha-value>)',
+          secondary:       'rgb(var(--accent-secondary) / <alpha-value>)',
         },
+        // Text and icons on an accent fill; dark for the light fills (amber, mono).
+        'on-accent': 'rgb(var(--on-accent) / <alpha-value>)',
         txt: {
           primary:   'rgb(var(--text-primary) / <alpha-value>)',
           secondary: 'rgb(var(--text-secondary) / <alpha-value>)',
@@ -57,6 +61,10 @@ export default {
           idle:    'rgb(var(--status-idle) / <alpha-value>)',
           dnd:     'rgb(var(--status-dnd) / <alpha-value>)',
           offline: 'rgb(var(--status-offline) / <alpha-value>)',
+          // Brandbook names for the same three: ok / warn / danger.
+          ok:      'rgb(var(--status-online) / <alpha-value>)',
+          warn:    'rgb(var(--status-idle) / <alpha-value>)',
+          danger:  'rgb(var(--status-dnd) / <alpha-value>)',
         },
         glass: {
           bg:        'var(--glass-bg)',
@@ -65,15 +73,58 @@ export default {
         },
         notification: 'rgb(var(--notification) / <alpha-value>)',
       },
+      // One radius scale (docs/brand/brandbook.md §6). Redefining Tailwind's own
+      // steps retunes ~1000 existing classes without touching the markup:
+      // rounded = 6 (tags), rounded-lg = 10 (buttons, fields, rows),
+      // rounded-xl = 14 (tiles, cards, popovers), rounded-2xl = 16 (dialogs).
+      borderRadius: {
+        none: '0',
+        sm: '4px',
+        DEFAULT: '6px',
+        md: '8px',
+        lg: '10px',
+        xl: '14px',
+        '2xl': '16px',
+        full: '9999px',
+      },
+      // Two steps the default scale lacks, and `lg` pulled to 16 for header
+      // names. xs (12), sm (14, the body size) and base (16) keep their
+      // Tailwind values, so nothing reflows from this block alone.
+      fontSize: {
+        '2xs': ['11px', '16px'],
+        compact: ['13px', '18px'],
+        lg: ['16px', '24px'],
+      },
+      // Named layers; `z-[…]` values in the markup map onto these as files
+      // are touched.
+      zIndex: {
+        raised: '10',
+        float: '20',
+        popover: '200',
+        // Same layer as popovers on purpose: overlays stack by portal order, so a
+        // menu opened from inside a dialog is appended after it and draws above.
+        modal: '200',
+        toast: '400',
+        confirm: '500',
+      },
+      transitionDuration: {
+        fast: '120ms',
+        base: '220ms',
+        slow: '320ms',
+      },
+      transitionTimingFunction: {
+        out: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        pop: 'cubic-bezier(0.3, 1.5, 0.55, 1)',
+      },
       boxShadow: {
-        'header': '0 1px 0 rgba(4, 4, 5, 0.2), 0 1.5px 0 rgba(6, 6, 7, 0.05), 0 2px 0 rgba(4, 4, 5, 0.05)',
-        'elevation-low': '0 1px 0 rgba(4, 4, 5, 0.2), 0 1.5px 0 rgba(6, 6, 7, 0.05), 0 2px 0 rgba(4, 4, 5, 0.05)',
-        'elevation-high': '0 8px 16px rgba(0, 0, 0, 0.24)',
-        'glass': '0 2px 8px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.15), inset 0 1px 0 var(--glass-highlight)',
-        'input': 'inset 0 1px 2px rgba(0, 0, 0, 0.25)',
+        'header': '0 1px 0 rgb(var(--border-hard))',
+        'elevation-low': '0 1px 0 rgb(var(--border-hard))',
+        'elevation-high': 'var(--glass-shadow)',
+        'glass': 'var(--glass-shadow)',
+        'input': 'none',
       },
       fontFamily: {
-        sans: ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        sans: ['Onest', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
       },
       animation: {
         'slide-up-sheet': 'slide-up-sheet 200ms ease-out',

@@ -4,6 +4,22 @@
     "description": "Resize text, buttons, and panels. Saved in this browser or app on this device.",
     "reset": "Reset to 100%"
   },
+  "accentTheme": {
+    "label": "Colour theme",
+    "description": "The accent colour for buttons and selection, with a matching colour for unread marks and mentions. Saved in this browser or app on this device.",
+    "themes": {
+      "lavender": "Lavender",
+      "emerald": "Emerald",
+      "amber": "Amber",
+      "ice": "Ice",
+      "rose": "Rose",
+      "mono": "Mono"
+    }
+  },
+  "motion": {
+    "label": "Interface animations",
+    "description": "Smooth transitions and a response to presses. Turn off to change everything instantly."
+  },
   "voice": {
     "input": {
       "title": "Input Device",

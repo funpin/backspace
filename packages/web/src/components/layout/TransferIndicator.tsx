@@ -2,6 +2,9 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTransferStore, type Transfer } from '../../stores/transferStore';
 import { useFormatters } from '../../i18n/formatters';
+import { Icon } from '../ui/Icon';
+import { Badge } from '../ui/Tag';
+import { Progress } from '../ui/Controls';
 
 export function TransferIndicator() {
   const { t } = useTranslation(['uploads', 'common']);
@@ -49,28 +52,29 @@ export function TransferIndicator() {
   const failed = visible.some((t) => t.state === 'failed');
   const idle = visible.length === 0;
 
-  const badgeColor = failed ? 'bg-accent-rose' : 'bg-accent-amber';
-
   return (
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`relative w-8 h-8 flex items-center justify-center rounded-[6px] transition-colors ${
-          idle
-            ? 'text-txt-tertiary/60 hover:text-txt-tertiary hover:bg-interactive-hover'
-            : 'text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover'
+        className={`relative w-[34px] h-[34px] flex items-center justify-center rounded-lg transition-colors duration-fast ${
+          open
+            ? 'text-txt-primary bg-interactive-active'
+            : idle
+              ? 'text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover'
+              : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
         }`}
         title={t('uploads:transfers.title')}
         aria-label={t('uploads:transfers.title')}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
-        </svg>
-        {active.length > 0 && (
-          <span className={`absolute -top-0.5 -right-0.5 ${badgeColor} text-black text-[10px] font-medium rounded-full px-1.5 leading-4 min-w-[16px] text-center`}>
+        <Icon name="download" />
+        {active.length > 0 && (failed ? (
+          // A failed transfer turns the running count red.
+          <span className="absolute -top-0.5 -right-0.5 inline-grid place-items-center min-w-4 h-4 px-1 rounded-full text-2xs leading-none font-semibold tabular-nums bg-status-danger text-surface-base">
             {active.length}
           </span>
-        )}
+        ) : (
+          <Badge count={active.length} className="absolute -top-0.5 -right-0.5" />
+        ))}
       </button>
       {open && (
         // Desktop: anchor below the trigger via `absolute right-0 top-full`.
@@ -81,8 +85,8 @@ export function TransferIndicator() {
         // viewport's right edge — `right-0` would otherwise anchor the
         // panel to the trigger's right and let the 300px panel extend off
         // the left of the viewport.
-        <div className="fixed right-2 top-14 desktop:absolute desktop:right-0 desktop:top-full desktop:mt-2 w-[min(300px,calc(calc(100*var(--app-vw))-16px))] glass z-50 rounded-lg overflow-hidden">
-          <div className="px-3 py-2 border-b border-border-soft text-xs flex justify-between items-center">
+        <div className="fixed right-2 top-14 desktop:absolute desktop:right-0 desktop:top-full desktop:mt-2 w-[min(300px,calc(calc(100*var(--app-vw))-16px))] glass z-popover rounded-xl overflow-hidden animate-slide-up">
+          <div className="px-3 h-10 border-b border-border-soft text-xs flex justify-between items-center">
             <span className="text-txt-secondary">
               {t('uploads:transfers.count', { count: visible.length })}
             </span>
@@ -92,7 +96,7 @@ export function TransferIndicator() {
                   .filter((t) => t.state === 'completed' || t.state === 'aborted')
                   .forEach((t) => remove(t.id))
               }
-              className="text-txt-tertiary hover:text-txt-primary transition-colors"
+              className="font-medium text-txt-tertiary hover:text-txt-primary transition-colors duration-fast"
             >
               {t('uploads:transfers.clearCompleted')}
             </button>
@@ -138,24 +142,23 @@ function TransferRow({ transfer, onPause, onResume, onAbort, onDismiss }: Transf
     transfer.progress.total > 0
       ? Math.min(100, Math.round((transfer.progress.loaded / transfer.progress.total) * 100))
       : 0;
-  const barColor =
-    transfer.state === 'failed'
-      ? 'bg-accent-rose'
-      : transfer.state === 'completed'
-      ? 'bg-accent-mint'
-      : 'bg-accent-mint/70';
   return (
-    <div className="px-3 py-2 border-b border-border-soft last:border-none">
-      <div className="flex items-center gap-2 text-[11px]">
-        <span className="text-txt-tertiary text-[10px]">
-          {transfer.type === 'upload' ? '↑' : '↓'}
-        </span>
-        <span className="text-txt-primary truncate flex-1">{transfer.file.name}</span>
+    <div className="px-3 py-2.5 border-b border-border-soft last:border-none">
+      <div className="flex items-center gap-2 text-xs">
+        <Icon name={transfer.type === 'upload' ? 'upload' : 'download'} size="xs" className="text-txt-tertiary" />
+        <span className="text-txt-primary font-medium truncate flex-1">{transfer.file.name}</span>
+        {transfer.state === 'completed' && <Icon name="check" size="xs" className="text-status-ok" />}
       </div>
-      <div className="mt-1 h-[3px] bg-surface-input rounded overflow-hidden">
-        <div className={`h-full ${barColor} transition-[width]`} style={{ width: `${pct}%` }} />
+      {/* The bar is decorative: the status line below says the same in words. */}
+      <div aria-hidden="true">
+        <Progress
+          value={pct / 100}
+          tone={transfer.state === 'failed' ? 'danger' : 'accent'}
+          label={transfer.file.name}
+          className="mt-1.5"
+        />
       </div>
-      <div className="mt-1 flex justify-between items-center text-[10px] text-txt-tertiary gap-2">
+      <div className={`mt-1.5 flex justify-between items-center text-2xs gap-2 ${transfer.state === 'failed' ? 'text-status-danger' : 'text-txt-tertiary'}`}>
         <span className="truncate">
           {transfer.state === 'completed'
             ? t('uploads:transfers.status.done')
@@ -170,26 +173,26 @@ function TransferRow({ transfer, onPause, onResume, onAbort, onDismiss }: Transf
         </span>
         <span className="flex gap-2 flex-shrink-0">
           {transfer.state === 'active' && (
-            <button onClick={onPause} className="hover:text-txt-primary transition-colors">
+            <button onClick={onPause} className="text-txt-tertiary hover:text-txt-primary transition-colors">
               {t('common:actions.pause')}
             </button>
           )}
           {transfer.state === 'paused' && (
-            <button onClick={onResume} className="hover:text-txt-primary transition-colors">
+            <button onClick={onResume} className="text-txt-tertiary hover:text-txt-primary transition-colors">
               {t('common:actions.resume')}
             </button>
           )}
           {(transfer.state === 'active' ||
             transfer.state === 'paused' ||
             transfer.state === 'queued') && (
-            <button onClick={onAbort} className="hover:text-accent-rose transition-colors">
+            <button onClick={onAbort} className="hover:text-status-danger transition-colors">
               {t('common:actions.abort')}
             </button>
           )}
           {(transfer.state === 'completed' ||
             transfer.state === 'failed' ||
             transfer.state === 'aborted') && (
-            <button onClick={onDismiss} className="hover:text-txt-primary transition-colors">
+            <button onClick={onDismiss} className="text-txt-tertiary hover:text-txt-primary transition-colors">
               {t('common:actions.dismiss')}
             </button>
           )}

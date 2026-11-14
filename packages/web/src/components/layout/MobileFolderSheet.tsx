@@ -5,6 +5,7 @@ import { useSpaceStore } from '../../stores/spaceStore';
 import { useContextMenuStore } from '../../stores/contextMenuStore';
 import { useDragToClose } from '../../hooks/useDragToClose';
 import { getSpaceGradient } from '../../utils/gradients';
+import { Icon } from '../ui/Icon';
 
 const FOLDER_COLORS = [
   { name: 'Mint', value: 'rgb(var(--accent-mint))' },
@@ -49,7 +50,7 @@ export function MobileFolderSheet({ folder, onClose, onSelectSpace, onUpdateFold
         key: 'rename',
         type: 'action',
         label: t('spaces:sidebar.folder.rename'),
-        icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>,
+        icon: <Icon name="pencil" size="sm" />,
         onClick: () => setIsRenaming(true),
       },
       {
@@ -57,16 +58,16 @@ export function MobileFolderSheet({ folder, onClose, onSelectSpace, onUpdateFold
         type: 'custom',
         render: () => (
           <div className="px-5 py-3">
-            <p className="text-[11px] text-txt-tertiary mb-2">{t('spaces:sidebar.folder.color')}</p>
+            <p className="text-2xs text-txt-tertiary mb-2">{t('spaces:sidebar.folder.color')}</p>
             <div className="flex gap-2">
               <button
-                className={`w-6 h-6 rounded-full border-2 ${!folder.color ? 'border-white/40' : 'border-transparent'} bg-white/10`}
+                className={`w-6 h-6 rounded-full border-2 ${!folder.color ? 'border-txt-secondary' : 'border-transparent'} bg-interactive-active`}
                 onClick={() => { onUpdateFolder(folder.id, { color: null }); useContextMenuStore.getState().close(); }}
               />
               {FOLDER_COLORS.map(c => (
                 <button
                   key={c.name}
-                  className={`w-6 h-6 rounded-full border-2 ${folder.color === c.value ? 'border-white/40' : 'border-transparent'}`}
+                  className={`w-6 h-6 rounded-full border-2 ${folder.color === c.value ? 'border-txt-secondary' : 'border-transparent'}`}
                   style={{ background: c.value }}
                   onClick={() => { onUpdateFolder(folder.id, { color: c.value }); useContextMenuStore.getState().close(); }}
                 />
@@ -81,7 +82,7 @@ export function MobileFolderSheet({ folder, onClose, onSelectSpace, onUpdateFold
         type: 'action',
         label: t('spaces:sidebar.folder.ungroup'),
         danger: true,
-        icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>,
+        icon: <Icon name="x" size="sm" />,
         onClick: () => { onUngroup(folder.id); onClose(); },
       },
     ]);
@@ -96,9 +97,9 @@ export function MobileFolderSheet({ folder, onClose, onSelectSpace, onUpdateFold
 
   return (
     <>
-      <div className="fixed inset-0 z-[300] bg-black/50" onClick={onClose} />
+      <div className="fixed inset-0 z-modal bg-surface-overlay" onClick={onClose} />
       <div
-        className={`fixed bottom-0 left-0 right-0 z-[301] rounded-t-2xl glass-modal max-h-[calc(60*var(--app-vh))] flex flex-col ${
+        className={`fixed bottom-0 left-0 right-0 z-modal rounded-t-2xl glass-modal max-h-[calc(60*var(--app-vh))] flex flex-col ${
           hasInteracted ? '' : 'animate-slide-up-sheet'
         }`}
         style={{ paddingBottom: 'var(--safe-bottom)', ...dragStyle }}
@@ -145,7 +146,7 @@ export function MobileFolderSheet({ folder, onClose, onSelectSpace, onUpdateFold
               <button
                 key={space.id}
                 onClick={() => { onSelectSpace(space.id); onClose(); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-interactive-hover text-left transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-2.5 min-h-11 rounded-lg hover:bg-interactive-hover active:bg-interactive-active text-left transition-colors duration-fast"
               >
                 <div
                   className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shrink-0"
@@ -154,7 +155,7 @@ export function MobileFolderSheet({ folder, onClose, onSelectSpace, onUpdateFold
                   {iconUrl ? (
                     <img src={iconUrl} alt={space.name} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-xs font-bold text-white">{space.name.charAt(0).toUpperCase()}</span>
+                    <span className="text-xs font-semibold text-white">{space.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
                 <span className="text-sm text-txt-primary truncate">{space.name}</span>

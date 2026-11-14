@@ -85,7 +85,7 @@ function PointerMark({ participant, point, visible, pingKey, own }: PointerMarkP
           />
         </svg>
         <span
-          className="absolute left-[15px] top-[15px] px-1.5 py-px rounded-md rounded-tl-sm text-[11px] leading-4 font-semibold text-black/80 whitespace-nowrap shadow"
+          className="absolute left-[15px] top-[15px] px-1.5 py-px rounded rounded-tl-sm text-2xs font-semibold text-black/80 whitespace-nowrap"
           style={{ backgroundColor: color }}
         >
           {displayName}

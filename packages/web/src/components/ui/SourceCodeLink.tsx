@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Icon } from './Icon';
 
 interface SourceCodeLinkProps {
   /** URL to the Corresponding Source of the running version (AGPL § 13). */
@@ -32,26 +33,12 @@ export function SourceCodeLink({ sourceCodeUrl, version, commit, className }: So
       href={sourceCodeUrl}
       target="_blank"
       rel="noreferrer noopener"
-      className={`inline-flex items-center gap-1.5 text-xs text-txt-tertiary hover:text-txt-secondary transition-colors${
+      className={`inline-flex items-center gap-1.5 text-xs text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast${
         className ? ` ${className}` : ''
       }`}
       title={t('sourceCode.title')}
     >
-      <svg
-        width="12"
-        height="12"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        className="flex-shrink-0"
-      >
-        <polyline points="16 18 22 12 16 6" />
-        <polyline points="8 6 2 12 8 18" />
-      </svg>
+      <Icon name="code" size="xs" />
       <span>{label}</span>
     </a>
   );

@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { VoiceControlBar } from './VoiceControlBar';
 import { useUIStore } from '../../stores/uiStore';
 import { useVoiceStore } from '../../stores/voiceStore';
+import { useVoiceStripStore } from './voiceStripStore';
 
 vi.mock('../../audio/AudioManager', () => ({
   AudioManager: { getInstance: () => ({}) },
@@ -32,6 +33,7 @@ beforeEach(() => {
     spaceMutedUserIds: new Set(),
     spaceDeafenedUserIds: new Set(),
   });
+  useVoiceStripStore.setState({ hidden: false, available: false });
 });
 
 describe('VoiceControlBar fullscreen hit testing', () => {
@@ -83,5 +85,34 @@ describe('VoiceControlBar fullscreen visibility', () => {
 
     // Docked, hover is the right model: the panel has sidebars to leave to.
     expect(screen.getByTestId('voice-control-overlay')).toHaveClass('group-hover/voice:opacity-100');
+  });
+});
+
+describe('VoiceControlBar participants toggle', () => {
+  it('is absent while no focused view has a strip', () => {
+    render(<VoiceControlBar revealed />);
+
+    expect(screen.queryByRole('button', { name: /members/i })).toBeNull();
+  });
+
+  it('sits in the bar beside chat and hides and shows the strip', () => {
+    useVoiceStripStore.setState({ available: true });
+    render(<VoiceControlBar revealed />);
+
+    const hide = screen.getByRole('button', { name: /hide members/i });
+    expect(hide).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /toggle chat/i }).nextElementSibling).toBe(hide);
+
+    fireEvent.click(hide);
+    expect(useVoiceStripStore.getState().hidden).toBe(true);
+    expect(screen.getByRole('button', { name: /show members/i })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('claims the toggle while mounted, so the grid draws no floating one', () => {
+    const { unmount } = render(<VoiceControlBar revealed />);
+    expect(useVoiceStripStore.getState().hosts).toBe(1);
+
+    unmount();
+    expect(useVoiceStripStore.getState().hosts).toBe(0);
   });
 });

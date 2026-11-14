@@ -132,6 +132,12 @@
       "partialInstance": "instância de {{username}} (limite: {{limit}})",
       "partialList": "Não foi possível guardar o arquivo em cache em {{instances}}. Essas pessoas ainda podem vê-lo pela sua instância.",
       "listPair": "{{first}} e {{second}}"
+    },
+    "preview": {
+      "show": "Mostrar conteúdo",
+      "hide": "Ocultar conteúdo",
+      "failed": "Não foi possível carregar o arquivo. Baixe-o.",
+      "truncated": "Mostrando o início do arquivo. Baixe-o para ver o restante."
     }
   },
   "gif": {
@@ -229,5 +235,11 @@
     "action": "Cutucar",
     "received": "{{actor}} cutucou {{target}}",
     "disconnected": "Não foi possível cutucar: sem conexão com o servidor"
+  },
+  "code": {
+    "showAll_one": "Mostrar tudo, {{count}} linha",
+    "showAll_many": "Mostrar tudo, {{count}} linhas",
+    "showAll_other": "Mostrar tudo, {{count}} linhas",
+    "collapse": "Recolher"
   }
 }

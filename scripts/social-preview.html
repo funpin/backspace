@@ -7,7 +7,7 @@
   /*
    * Rendered standalone at exactly 1280x640 by gen-social-preview.mjs — see
    * that script for how {{MARK_SVG}}, {{FABIO_XM_DATA_URI}} and
-   * {{DM_SANS_DATA_URI}} get substituted before Chrome opens this file.
+   * {{ONEST_DATA_URI}} get substituted before Chrome opens this file.
    * Everything here is self-contained on purpose: no external font or
    * image fetches, because Chrome over file:// does not perform them.
    */
@@ -19,9 +19,9 @@
     font-display: block;
   }
   @font-face {
-    font-family: "DM Sans";
-    src: url("{{DM_SANS_DATA_URI}}") format("woff2");
-    font-weight: 100 1000;
+    font-family: "Onest";
+    src: url("{{ONEST_DATA_URI}}") format("woff2");
+    font-weight: 100 900;
     font-style: normal;
     font-display: block;
   }
@@ -37,7 +37,7 @@
   body {
     /* Flat Aether Drift dark ground, matching the app's base surface —
        no gradient, no site-only navy. */
-    background: #0b0b10;
+    background: #0c0c0e;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -64,7 +64,7 @@
 
   .wordmark {
     margin-top: 40px;
-    font-family: "Fabio XM", "DM Sans", sans-serif;
+    font-family: "Fabio XM", "Onest", sans-serif;
     font-weight: 500;
     font-size: 88px;
     line-height: 1;
@@ -74,7 +74,7 @@
 
   .tagline {
     margin-top: 24px;
-    font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: "Onest", -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 460;
     font-size: 32px;
     line-height: 1.4;

@@ -72,9 +72,10 @@ describe('UserProfilePopoutLayer', () => {
 
     expect(screen.getByTestId('app-root')).not.toContainElement(card);
     expect(card.parentElement).toBe(document.body);
-    // Same z-index, so the later element in the document draws on top.
-    expect(dialog).toHaveClass('z-[200]');
-    expect(card).toHaveClass('z-[200]');
+    // z-modal and z-popover are the same layer (200 in tailwind.config.js), so
+    // the later element in the document draws on top.
+    expect(dialog).toHaveClass('z-modal');
+    expect(card).toHaveClass('z-popover');
     expect(dialog.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
@@ -85,7 +86,7 @@ describe('UserProfilePopoutLayer', () => {
       </MemoryRouter>,
     );
     act(() => { useUIStore.getState().openUserProfile(ADA, '', ANCHOR); });
-    const backdrop = document.querySelector('body > .fixed.inset-0.z-\\[145\\]');
+    const backdrop = document.querySelector('body > .fixed.inset-0.z-popover:not([data-user-profile-popout])');
     expect(backdrop).toBeInstanceOf(HTMLElement);
     if (!(backdrop instanceof HTMLElement)) return;
     fireEvent.click(backdrop);

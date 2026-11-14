@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Avatar } from '../ui/Avatar';
 import { SourceCodeLink } from '../ui/SourceCodeLink';
+import { Icon } from '../ui/Icon';
 import { api } from '../../api/client';
 import type { InstanceInfoResponse } from '@backspace/shared';
 import { useUIStore } from '../../stores/uiStore';
@@ -76,21 +77,21 @@ export function SidebarSubLinks() {
         <button
           key={section.id}
           onClick={() => ctx.scrollToSection(section.id)}
-          className={`w-full flex items-center gap-1.5 text-left pl-6 pr-2 py-1 text-xs rounded-md transition-colors ${
+          className={`w-full h-7 flex items-center gap-1.5 text-left pl-6 pr-2 text-xs rounded-lg transition-colors duration-fast ${
             ctx.activeSection === section.id
               ? 'text-txt-primary'
-              : 'text-txt-tertiary hover:text-txt-secondary'
+              : 'text-txt-tertiary hover:text-txt-primary'
           }`}
           aria-current={ctx.activeSection === section.id ? 'true' : undefined}
         >
           <span className="flex-1 min-w-0 truncate">{section.label}</span>
           {section.badgeCount !== undefined && section.badgeCount > 0 && (
-            <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-accent-amber/15 text-accent-amber">
+            <span className="shrink-0 text-2xs font-medium px-1.5 rounded-full bg-status-warn/15 text-status-warn tabular-nums">
               {section.badgeCount}
             </span>
           )}
           {section.badgeDot === true && (
-            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-accent-amber" />
+            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-status-warn" />
           )}
         </button>
         )
@@ -153,9 +154,12 @@ export function UserSettingsModal() {
     closeModal();
   };
 
-  const tabClass = (target: UserSettingsTab) =>
-    `w-full min-w-0 truncate text-left px-3 py-2 rounded-md text-sm transition-colors ${
-      tab === target ? 'bg-interactive-selected text-txt-primary font-medium' : 'text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover'
+  // 34px rows on the desktop column; the phone list keeps 44px touch targets.
+  const tabClass = (target: UserSettingsTab, layout: 'desktop' | 'mobile') =>
+    `w-full min-w-0 truncate text-left px-3 rounded-lg text-sm transition-colors duration-fast ${
+      layout === 'desktop' ? 'h-[34px]' : 'h-11'
+    } ${
+      tab === target ? 'bg-surface-elevated text-txt-primary font-medium' : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
     }`;
 
   const handleTabClick = (target: UserSettingsTab) => {
@@ -166,18 +170,18 @@ export function UserSettingsModal() {
   const renderNav = (layout: 'desktop' | 'mobile'): ReactNode =>
     GROUP_ORDER.filter((group) => group !== 'admin' || isAdmin).map((group, index) => (
       <Fragment key={group}>
-        {index > 0 && <div className="border-t border-white/[0.04] my-2 mx-2" />}
-        <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-3 py-1">{t(GROUP_HEADINGS[group])}</div>
+        {index > 0 && <div className="border-t border-border-hard my-2 mx-2" />}
+        <div className="text-xs font-medium text-txt-tertiary px-3 py-1">{t(GROUP_HEADINGS[group])}</div>
         {USER_SETTINGS_TABS.filter((entry) => entry.group === group).map((entry) => (
           entry.id === 'instance' && layout === 'desktop' ? (
             <Fragment key={entry.id}>
               <button
                 onClick={() => handleTabClick(entry.id)}
-                className={`${tabClass(entry.id)} flex items-center gap-1.5`}
+                className={`${tabClass(entry.id, layout)} flex items-center gap-1.5`}
                 aria-current={tab === entry.id ? 'page' : undefined}
               >
                 <span className="flex-1 min-w-0 truncate">{t(entry.label)}</span>
-                {updateBadge && <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-accent-amber" />}
+                {updateBadge && <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-status-warn" />}
               </button>
               {tab === 'instance' && <SidebarSubLinks />}
             </Fragment>
@@ -185,7 +189,7 @@ export function UserSettingsModal() {
             <button
               key={entry.id}
               onClick={() => handleTabClick(entry.id)}
-              className={tabClass(entry.id)}
+              className={tabClass(entry.id, layout)}
               aria-current={tab === entry.id ? 'page' : undefined}
             >
               {t(entry.label)}
@@ -213,9 +217,9 @@ export function UserSettingsModal() {
       <SettingsSectionsProvider>
       <div className="flex h-full">
         {/* Desktop Sidebar */}
-        <div className="hidden desktop:flex w-52 flex-shrink-0 flex-col p-4 gap-3">
+        <div className="hidden desktop:flex w-56 flex-shrink-0 flex-col p-4 gap-3 border-r border-border-hard">
           {/* User card */}
-          <div className="glass-bubble rounded-lg p-3 flex items-center gap-3">
+          <div className="rounded-xl bg-surface-elevated p-3 flex items-center gap-3">
             <Avatar
               src={user?.avatar}
               name={user?.displayName || user?.username || ''}
@@ -230,15 +234,15 @@ export function UserSettingsModal() {
           </div>
 
           {/* Nav list */}
-          <div className="glass-bubble rounded-lg p-2 flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col space-y-0.5">
             {renderNav('desktop')}
 
             <div className="flex-1" />
 
-            <div className="border-t border-white/[0.04] my-2 mx-2" />
+            <div className="border-t border-border-hard my-2 mx-2" />
             <button
               onClick={handleLogout}
-              className="w-full text-left px-3 py-2 rounded-md text-sm text-txt-danger hover:bg-accent-rose/10 transition-colors"
+              className="w-full h-[34px] text-left px-3 rounded-lg text-sm text-status-danger hover:bg-status-danger/10 transition-colors duration-fast"
             >
               {t('settings:nav.logOut')}
             </button>
@@ -255,7 +259,7 @@ export function UserSettingsModal() {
         {isMobile && mobileView === 'tabs' && (
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {/* Mobile user card */}
-            <div className="glass-bubble rounded-lg p-3 flex items-center gap-3">
+            <div className="rounded-xl bg-surface-elevated p-3 flex items-center gap-3">
               <Avatar
                 src={user?.avatar}
                 name={user?.displayName || user?.username || ''}
@@ -269,13 +273,13 @@ export function UserSettingsModal() {
               </div>
             </div>
 
-            <div className="glass-bubble rounded-lg p-2 space-y-0.5">
+            <div className="space-y-0.5">
               {renderNav('mobile')}
 
-              <div className="border-t border-white/[0.04] my-2 mx-2" />
+              <div className="border-t border-border-hard my-2 mx-2" />
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-3 py-2 rounded-md text-sm text-txt-danger hover:bg-accent-rose/10 transition-colors"
+                className="w-full h-11 text-left px-3 rounded-lg text-sm text-status-danger hover:bg-status-danger/10 transition-colors duration-fast"
               >
                 {t('settings:nav.logOut')}
               </button>
@@ -297,12 +301,10 @@ export function UserSettingsModal() {
               {isMobile && (
                 <button
                   onClick={() => setMobileView('tabs')}
-                  className="flex items-center gap-1.5 text-txt-tertiary hover:text-txt-secondary mb-4 text-sm"
+                  className="flex items-center gap-1.5 min-h-11 text-txt-secondary hover:text-txt-primary mb-2 text-sm transition-colors duration-fast"
                   aria-label={t('settings:nav.backToMenu')}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-                  </svg>
+                  <Icon name="arrow-left" size="sm" />
                   {t('common:labels.settings')}
                 </button>
               )}

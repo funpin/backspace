@@ -46,14 +46,17 @@ Do NOT update docs for standard UI/UX fixes or minor logic bugs. Only structural
 
 ---
 
-## Design System — "Aether Drift"
+## Design System — "Kamen"
 
-Prototype (source of truth): `Backspace-design-prototype.html` (open in browser)
-Full spec: `docs/systems/design-system.md`
+Brandbook (source of truth): `docs/brand/brandbook.md`; visual: `docs/brand/brandbook.html`; screen mock: `docs/brand/directions.html`
+Full spec: `docs/systems/design-system.md`. Rollout order: `docs/brand/implementation-plan.md`
 
-**Core:** Warm matte surfaces with subtle frosted glass accents. Calm over flashy. Warm over cool.
-**Two-material system:** Solid matte panels for content (75%), frosted glass for persistent controls (25%).
-**Colors:** Warm dark surfaces (#13131a chat, #1a1a23 sidebars), pastel accents (mint, peach, lavender, sky, amber, rose, coral), brand primary lavender (`#7c6cf6`).
+**Core:** Neutral graphite surfaces with no hue; colour only where it carries meaning. Calm, uncluttered, one scale per property.
+**Two-material system:** Solid matte panels for content, dense glass for what floats above it.
+**Colors:** Graphite surfaces (#0c0c0e chat, #121214 sidebars, #1b1b1f tiles), an accent theme the user picks (default lavender, fill `#6e5bef`): `accent-primary` fill with `on-accent` text, `accent-tone` on dark surfaces, `accent-secondary` for unread/mentions/links. Status colours (`status-ok/warn/danger`) are never themed.
+**Scales:** radius 6 / 10 / 14 / 16 (`rounded` / `-lg` / `-xl` / `-2xl`), text `2xs` 11 · `xs` 12 · `compact` 13 · `sm` 14 · `lg` 16 · `xl` 20 · `2xl` 24, layers `z-raised/float/popover/modal/toast/confirm`, motion `duration-fast/base/slow` with `ease-out` / `ease-pop`. No arbitrary `rounded-[…]`, `text-[…px]`, `z-[…]` in new code.
+**Icons:** Lucide, outline, 1.75 stroke, through `components/ui/Icon.tsx` (stage 2 of the rollout).
+**Font:** Onest for Latin and Cyrillic; platform stack for Chinese.
 
 ### Surface Tiers
 | Tier | Class | When to Use |
@@ -70,14 +73,14 @@ Full spec: `docs/systems/design-system.md`
 ### Input Tiers (defined in `globals.css`)
 | Class | When to Use | Focus |
 |-------|-------------|-------|
-| `.input-standard` | Form fields in modals, settings, auth | `ring-2` primary |
-| `.input-search` | Search bars, filter inputs | `ring-1` primary |
+| `.input-standard` | Form fields in modals, settings, auth | `accent-tone` edge + soft ring |
+| `.input-search` | Search bars, filter inputs | `accent-tone` edge + soft ring |
 | `.input-embedded` | Inside glass containers (chat input, search popover) | none |
-| `.input-danger` | Destructive confirmations | `ring-2` rose |
+| `.input-danger` | Destructive confirmations | `status-danger` edge + soft ring |
 
 No resting border — sunken `surface-input` background provides differentiation.
 
-**Glass material:** `backdrop-filter: blur(20px) saturate(120%)`, `rgba(20,20,26,0.52)`, border `rgba(255,255,255,0.07)`. Modal backdrops: `bg-black/50`.
+**Glass material:** `backdrop-filter: blur(16px) saturate(120%)`, `rgba(27,27,31,0.78)`, one `--glass-shadow` (1px edge plus a drop shadow). Modal backdrops: `bg-surface-overlay`.
 
 ---
 
@@ -157,7 +160,7 @@ Before modifying any subsystem, read its spec from `docs/systems/`. After making
 | [client-federation.md](docs/systems/client-federation.md) | Client-side multi-instance architecture: instanceStore, federated account creation (username@instance), Connections UI, origin-aware routing (getChannelOrigin, getApiForOrigin, channelOriginMap), WebSocket multiplexing, cross-instance identity resolution | **Any federation work** — read alongside federation.md. Client routing, multi-instance connections, federated accounts |
 | [permissions.md](docs/systems/permissions.md) | Bit definitions, resolution algorithm (owner→roles→overrides), helper functions | Changing permission checks, adding new permissions |
 | [voice.md](docs/systems/voice.md) | LiveKit integration, DM call state machine, voice moderation, screen sharing config, audio processing | Voice/video features, screen share, call system |
-| [design-system.md](docs/systems/design-system.md) | Aether Drift spec: glass materials, surface/input tiers, colors, animations, layout | Any UI/component work, styling changes |
+| [design-system.md](docs/systems/design-system.md) | Kamen spec: accent themes, status colours, scales, glass materials, surface/input tiers, animations, layout | Any UI/component work, styling changes |
 | [auth.md](docs/systems/auth.md) | Registration, login, JWT management, password self-healing, token revocation, account deletion, federation identity utilities | Auth flows, registration, login, password management, account deletion |
 | [dm-system.md](docs/systems/dm-system.md) | DM lifecycle (1-on-1 + group), soft-close/reopen, ownership transfer, federation relay, deterministic federatedId, system messages | DM features, group DM management, DM federation |
 | [spaces.md](docs/systems/spaces.md) | Space lifecycle, invites, discovery, membership, bans, ownership transfer, layout/folders, channel management | Space CRUD, invites, discovery, membership, channel management |

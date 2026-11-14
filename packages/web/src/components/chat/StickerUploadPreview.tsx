@@ -2,6 +2,13 @@ import { useId, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormatters } from '../../i18n/formatters';
 import { MAX_STICKER_NAME_LENGTH } from '@backspace/shared/src/stickers';
+import { Icon } from '../ui/Icon';
+import { IconButton } from '../ui/IconButton';
+
+/** The drop target for a sticker image: a dashed tile that takes the theme's tone while a file is over it. */
+const DROPZONE = 'w-full min-h-48 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-4 transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone disabled:cursor-wait';
+const DROPZONE_REST = 'border-border-soft bg-surface-input hover:border-accent-tone/60';
+const DROPZONE_ACTIVE = 'border-accent-tone bg-accent-tone/[0.16]';
 
 export interface UploadItem {
   id: string;
@@ -58,14 +65,10 @@ export function StickerUploadPreview({
               event.stopPropagation();
               choose(Array.from(event.dataTransfer.files), 'replace');
             }}
-            className={`sticker-dropzone ${dragging ? 'sticker-dropzone-active' : ''}`}
+            className={`${DROPZONE} ${dragging ? DROPZONE_ACTIVE : DROPZONE_REST}`}
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-primary/10 text-accent-primary">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="5" />
-                <path d="m3 16 5-5 5 5 3-3 5 5" />
-                <circle cx="15.5" cy="8.5" r="1.5" />
-              </svg>
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-tone/[0.16] text-accent-tone">
+              <Icon name="image-plus" size="lg" />
             </span>
             <span className="text-sm font-medium">{t('stickers.dropImage')}</span>
             <span className="text-xs text-txt-tertiary">{t('stickers.pasteHint')}</span>
@@ -92,7 +95,7 @@ export function StickerUploadPreview({
                 event.stopPropagation();
                 choose(Array.from(event.dataTransfer.files), 'replace');
               }}
-              className={`sticker-dropzone ${dragging ? 'sticker-dropzone-active' : ''} sticker-checkerboard`}
+              className={`${DROPZONE} ${dragging ? DROPZONE_ACTIVE : DROPZONE_REST} sticker-checkerboard`}
             >
               <img
                 key={singleItem.preview}
@@ -112,7 +115,7 @@ export function StickerUploadPreview({
                 <button
                   type="button"
                   disabled={busy}
-                  className="text-txt-link hover:underline"
+                  className="font-medium text-accent-tone hover:underline disabled:opacity-40"
                   onClick={() => openPicker('append')}
                 >
                   + {t('stickers.addMore')}
@@ -120,7 +123,7 @@ export function StickerUploadPreview({
                 <button
                   type="button"
                   disabled={busy}
-                  className="text-txt-link hover:underline"
+                  className="font-medium text-accent-tone hover:underline disabled:opacity-40"
                   onClick={() => openPicker('replace')}
                 >
                   {t('stickers.replace')}
@@ -153,7 +156,7 @@ export function StickerUploadPreview({
               <button
                 type="button"
                 disabled={busy}
-                className="text-xs text-accent-primary hover:underline font-medium"
+                className="text-xs font-medium text-accent-tone hover:underline disabled:opacity-40"
                 onClick={() => openPicker('append')}
               >
                 + {t('stickers.addMore')}
@@ -162,8 +165,8 @@ export function StickerUploadPreview({
 
             <div className="space-y-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
               {items.map((item, index) => (
-                <div key={item.id} className="flex items-center gap-2.5 rounded-lg border border-border-soft bg-surface-base/50 p-2">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border-soft bg-surface-elevated sticker-checkerboard">
+                <div key={item.id} className="flex items-center gap-2.5 rounded-lg bg-surface-elevated p-2">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded bg-surface-input sticker-checkerboard">
                     <img
                       src={item.preview}
                       alt={t('stickers.preview')}
@@ -176,9 +179,9 @@ export function StickerUploadPreview({
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="mb-1 flex items-center justify-between gap-1 text-[11px] text-txt-tertiary">
+                    <div className="mb-1 flex items-center justify-between gap-1 text-2xs text-txt-secondary">
                       <span className="truncate" title={item.file.name}>{item.file.name}</span>
-                      <span className="shrink-0">{formatBytes(item.file.size)}</span>
+                      <span className="shrink-0 tabular-nums">{formatBytes(item.file.size)}</span>
                     </div>
                     <input
                       value={item.name}
@@ -189,19 +192,16 @@ export function StickerUploadPreview({
                       onChange={event => updateName(item.id, event.target.value)}
                       className="input-search h-7 w-full text-xs px-2 py-1"
                     />
-                    {item.error && <p className="mt-1 text-[11px] leading-4 text-txt-danger">{item.error}</p>}
+                    {item.error && <p className="mt-1 text-2xs text-status-danger">{item.error}</p>}
                   </div>
-                  <button
-                    type="button"
+                  <IconButton
+                    icon="x"
+                    size="sm"
+                    noTitle
+                    label={t('stickers.removeNamed', { name: item.name || item.file.name })}
                     disabled={busy}
                     onClick={() => removeItem(item.id)}
-                    className="sticker-icon-button shrink-0 text-txt-tertiary hover:text-txt-danger"
-                    aria-label={t('stickers.removeNamed', { name: item.name || item.file.name })}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                      <path d="m6 6 12 12M6 18 18 6" />
-                    </svg>
-                  </button>
+                  />
                 </div>
               ))}
             </div>
@@ -229,13 +229,13 @@ export function StickerUploadPreview({
                 event.stopPropagation();
                 choose(Array.from(event.dataTransfer.files), 'append');
               }}
-              className={`flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed py-2.5 text-xs text-txt-tertiary transition-colors hover:border-accent-primary/50 hover:text-txt-primary ${
-                dragging ? 'border-accent-primary bg-accent-primary/5 text-accent-primary' : 'border-border-soft'
+              className={`flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed py-2.5 text-xs transition-colors duration-fast ${
+                dragging
+                  ? 'border-accent-tone bg-accent-tone/[0.16] text-accent-tone'
+                  : 'border-border-soft text-txt-tertiary hover:border-accent-tone/60 hover:text-txt-primary'
               }`}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
+              <Icon name="plus" size="xs" />
               <span>{t('stickers.dropMore')}</span>
             </div>
           </div>

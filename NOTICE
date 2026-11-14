@@ -12,23 +12,16 @@ below. Each remains under its own license.
 Fonts
 ================================================================================
 
-DM Sans
-  Files:    packages/web/public/fonts/DMSans-Variable.woff2
-            packages/web/public/fonts/DMSans-Variable-Italic.woff2
+Onest
+  Files:    packages/web/public/fonts/Onest-latin.woff2
+            packages/web/public/fonts/Onest-latin-ext.woff2
+            packages/web/public/fonts/Onest-cyrillic.woff2
+            packages/web/public/fonts/Onest-cyrillic-ext.woff2
   License:  SIL Open Font License, Version 1.1
-  Notice:   Copyright 2014 The DM Sans Project Authors
-            (https://github.com/googlefonts/dm-fonts)
+  Notice:   Copyright 2021 The Onest Project Authors
+            (https://github.com/googlefonts/onest)
   The full license text is shipped alongside the font files at
-  packages/web/public/fonts/OFL.txt.
-
-Inter
-  Files:    packages/web/public/fonts/InterVariable.woff2
-            packages/web/public/fonts/InterVariable-Italic.woff2
-  License:  SIL Open Font License, Version 1.1
-  Notice:   Copyright 2016 The Inter Project Authors
-            (https://github.com/rsms/inter)
-  The full license text is shipped alongside the font files at
-  packages/web/public/fonts/Inter-OFL.txt.
+  packages/web/public/fonts/Onest-OFL.txt.
 
 ================================================================================
 Sound effects
