@@ -9,6 +9,8 @@ import { useContextMenuStore } from '../../stores/contextMenuStore';
 import { Avatar } from '../ui/Avatar';
 import { AvatarStack } from '../ui/AvatarStack';
 import { Mascot } from '../ui/Mascot';
+import { Icon } from '../ui/Icon';
+import { Badge } from '../ui/Tag';
 import { resolveAssetUrl } from '../../utils/assetUrls';
 import { useNavigate } from 'react-router-dom';
 import { parseFederatedUsername, isFederationGlobeApplicable, isMine, userDisplayName } from '../../utils/identity';
@@ -62,7 +64,7 @@ function MobileFriendBubble({
           'bg-status-dnd'
         }`} />
       </div>
-      <span className="text-[10px] text-txt-secondary truncate w-full text-center">
+      <span className="text-2xs text-txt-secondary truncate w-full text-center">
         {displayName}
       </span>
     </button>
@@ -117,7 +119,7 @@ function MobileDmRow({
       data-context-menu
       onClick={() => onTap(dm.id)}
       onContextMenu={(e) => onContextMenu(e, dm.id, isGroup)}
-      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-interactive-hover text-left transition-colors"
+      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-interactive-hover active:bg-interactive-active text-left transition-colors duration-fast"
     >
       <div className="relative shrink-0">
         {isGroup ? (
@@ -148,27 +150,19 @@ function MobileDmRow({
               {name}
             </span>
             {groupHasFederatedMember && (
-              <svg
-                data-dm-row-globe
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="text-txt-tertiary/80 flex-shrink-0"
-                aria-hidden="true"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-              </svg>
+              <span data-dm-row-globe className="inline-flex text-txt-tertiary/80 flex-shrink-0">
+                <Icon name="globe" size="xs" />
+              </span>
             )}
           </span>
           {previewTime && (
-            <span className="text-[11px] text-txt-tertiary shrink-0">
+            <span className="text-2xs text-txt-tertiary shrink-0">
               {formatTimestamp(previewTime)}
             </span>
           )}
         </div>
         {!isGroup && mainUser && isFederationGlobeApplicable(mainUser) && (
-          <div className="text-[10px] leading-[1.3] text-txt-tertiary truncate opacity-60">
+          <div className="text-2xs text-txt-tertiary truncate opacity-60">
             @{parseFederatedUsername(mainUser.username).domain}
           </div>
         )}
@@ -178,7 +172,7 @@ function MobileDmRow({
           </p>
         )}
       </div>
-      {isUnread && <span className="w-2.5 h-2.5 rounded-full bg-accent-primary shrink-0" />}
+      {isUnread && <Badge className="shrink-0" />}
     </button>
   );
 }
@@ -228,7 +222,7 @@ export function MobileDmsScreen() {
         type: 'action',
         label: t('dm:list.leaveGroup'),
         danger: true,
-        icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>,
+        icon: <Icon name="log-out" size="sm" />,
         onClick: () => {
           const currentChId = useChatStore.getState().currentChannelId;
           if (currentChId === dmId) {
@@ -254,12 +248,12 @@ export function MobileDmsScreen() {
   return (
     <div className="flex flex-col h-full bg-surface-base">
       {/* Header */}
-      <header className="h-12 flex items-center justify-between px-4 border-b border-border-soft shrink-0">
-        <h1 className="text-base font-semibold text-txt-primary">{t('dm:list.title')}</h1>
+      <header className="h-12 flex items-center justify-between px-4 border-b border-border-hard shrink-0">
+        <h1 className="text-lg font-semibold text-txt-primary">{t('dm:list.title')}</h1>
         <div className="flex items-center gap-1">
           <button
             onClick={() => pushMobileScreen('friends')}
-            className="h-8 px-3 rounded-lg text-xs font-medium text-accent-primary hover:bg-interactive-hover transition-colors"
+            className="h-11 px-3 -mr-3 rounded-lg text-xs font-medium text-accent-tone hover:bg-interactive-hover transition-colors duration-fast"
           >
             {t('common:labels.friends')}
           </button>
@@ -268,7 +262,7 @@ export function MobileDmsScreen() {
 
       {/* Activity row — online friends */}
       {onlineFriends.length > 0 && (
-        <div className="px-4 py-3 border-b border-border-soft">
+        <div className="px-4 py-3 border-b border-border-hard">
           <div className="flex gap-3 overflow-x-auto no-scrollbar">
             {onlineFriends.map(friend => (
               <MobileFriendBubble
@@ -306,11 +300,9 @@ export function MobileDmsScreen() {
       {/* FAB — New DM */}
       <button
         onClick={() => openModal('newDm')}
-        className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-accent-primary text-white shadow-elevation-high flex items-center justify-center z-20 hover:bg-accent-primary-hover active:bg-accent-primary-active transition-colors"
+        className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-accent-primary text-on-accent shadow-elevation-high flex items-center justify-center z-float hover:bg-accent-primary-hover active:bg-accent-primary-active transition-colors duration-fast"
       >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-        </svg>
+        <Icon name="pencil" size="lg" />
       </button>
     </div>
   );

@@ -13,7 +13,7 @@ export function AppearancePanel() {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('settings:appearance.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('settings:appearance.title')}</h2>
       <AccentThemeSection />
       <LanguageSection />
       <InterfaceScaleSection />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Toggle } from '../ui/Toggle';
-import { LOCK_ICON } from '../ui/LockNote';
+import { Icon } from '../ui/Icon';
 
 interface PrivacySettingProps {
   label: string;
@@ -35,10 +35,8 @@ export function PrivacySetting({ label, description, note, isPrivate, busy, onTo
       </div>
 
       {isPrivate && (
-        <div className="flex items-start gap-2 p-2 bg-surface-input/50 rounded text-xs text-txt-tertiary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="flex-shrink-0 mt-0.5 text-txt-secondary">
-            <path d={LOCK_ICON} />
-          </svg>
+        <div className="flex items-start gap-2 px-3 py-2 bg-surface-input rounded-lg text-xs text-txt-secondary">
+          <Icon name="lock" size="sm" className="mt-px text-txt-secondary" />
           <span>{note}</span>
         </div>
       )}

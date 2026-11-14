@@ -33,15 +33,15 @@ export function PrivacyPanel() {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('settings:privacy.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('settings:privacy.title')}</h2>
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('settings:privacy.discovery.sectionTitle')}
         </div>
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <div className="flex items-center justify-between py-1">
             <div className="flex-1 mr-4">
-              <div className="text-sm text-txt-primary">{t('settings:privacy.discovery.label')}</div>
+              <div className="text-sm font-medium text-txt-primary">{t('settings:privacy.discovery.label')}</div>
               <div className="text-xs text-txt-tertiary mt-0.5">
                 {t('settings:privacy.discovery.description')}
               </div>
@@ -56,13 +56,13 @@ export function PrivacyPanel() {
 
       {/* Activity Status */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('settings:privacy.activity.sectionTitle')}
         </div>
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <div className="flex items-center justify-between py-1">
             <div className="flex-1 mr-4">
-              <div className="text-sm text-txt-primary">{t('settings:privacy.activity.label')}</div>
+              <div className="text-sm font-medium text-txt-primary">{t('settings:privacy.activity.label')}</div>
               <div className="text-xs text-txt-tertiary mt-0.5">
                 {t('settings:privacy.activity.description')}
               </div>

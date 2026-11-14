@@ -173,7 +173,7 @@ export function StoragePanel() {
   if (loadError && !stats) {
     return (
       <div className="space-y-3">
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{loadError}</div>
+        <div className="p-2 bg-status-danger/10 border border-status-danger/30 rounded text-status-danger text-sm">{loadError}</div>
         <button onClick={fetchStats} className="text-sm text-accent-primary hover:underline">{t('common:actions.retry')}</button>
       </div>
     );
@@ -192,42 +192,42 @@ export function StoragePanel() {
 
       {/* Storage Overview */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:storage.overview.label')}</div>
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:storage.overview.label')}</div>
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg bg-white/[0.02] p-3.5">
+          <div className="rounded-xl bg-surface-elevated p-3.5">
             <div className="text-xs text-txt-tertiary mb-0.5">{t('admin:storage.overview.totalFiles')}</div>
             <div className="text-lg font-semibold text-txt-primary">{f.formatNumber(stats.totalFiles)}</div>
             <div className="text-xs text-txt-tertiary">{f.formatBytes(stats.totalSize)}</div>
           </div>
-          <div className="rounded-lg bg-white/[0.02] p-3.5">
+          <div className="rounded-xl bg-surface-elevated p-3.5">
             <div className="text-xs text-txt-tertiary mb-0.5">{t('admin:storage.overview.referenced')}</div>
             <div className="text-lg font-semibold text-txt-primary">{f.formatNumber(stats.referencedFiles)}</div>
             <div className="text-xs text-txt-tertiary">{f.formatBytes(stats.referencedSize)}</div>
           </div>
-          <div className="rounded-lg bg-white/[0.02] p-3.5">
+          <div className="rounded-xl bg-surface-elevated p-3.5">
             <div className="text-xs text-txt-tertiary mb-0.5">{t('admin:storage.overview.orphanedFiles')}</div>
-            <div className={`text-lg font-semibold ${stats.orphanedFiles > 0 ? 'text-accent-amber' : 'text-txt-primary'}`}>
+            <div className={`text-lg font-semibold ${stats.orphanedFiles > 0 ? 'text-status-warn' : 'text-txt-primary'}`}>
               {f.formatNumber(stats.orphanedFiles)}
             </div>
             <div className="text-xs text-txt-tertiary">{f.formatBytes(stats.orphanedSize)}</div>
           </div>
-          <div className="rounded-lg bg-white/[0.02] p-3.5">
+          <div className="rounded-xl bg-surface-elevated p-3.5">
             <div className="text-xs text-txt-tertiary mb-0.5">{t('admin:storage.overview.unlinkedUploads')}</div>
-            <div className={`text-lg font-semibold ${stats.unlinkedAttachments > 0 ? 'text-accent-amber' : 'text-txt-primary'}`}>
+            <div className={`text-lg font-semibold ${stats.unlinkedAttachments > 0 ? 'text-status-warn' : 'text-txt-primary'}`}>
               {f.formatNumber(stats.unlinkedAttachments)}
             </div>
             <div className="text-xs text-txt-tertiary">{f.formatBytes(stats.unlinkedSize)}</div>
           </div>
-          <div className="rounded-lg bg-white/[0.02] p-3.5">
+          <div className="rounded-xl bg-surface-elevated p-3.5">
             <div className="text-xs text-txt-tertiary mb-0.5">{t('admin:storage.overview.danglingRecords')}</div>
-            <div className={`text-lg font-semibold ${stats.danglingAttachments > 0 ? 'text-accent-amber' : 'text-txt-primary'}`}>
+            <div className={`text-lg font-semibold ${stats.danglingAttachments > 0 ? 'text-status-warn' : 'text-txt-primary'}`}>
               {f.formatNumber(stats.danglingAttachments)}
             </div>
             <div className="text-xs text-txt-tertiary">{f.formatBytes(stats.danglingSize)}</div>
           </div>
-          <div className="rounded-lg bg-white/[0.02] p-3.5">
+          <div className="rounded-xl bg-surface-elevated p-3.5">
             <div className="text-xs text-txt-tertiary mb-0.5">{t('admin:storage.overview.staleUploads')}</div>
-            <div className={`text-lg font-semibold ${stats.staleTusSessions > 0 ? 'text-accent-amber' : 'text-txt-primary'}`}>
+            <div className={`text-lg font-semibold ${stats.staleTusSessions > 0 ? 'text-status-warn' : 'text-txt-primary'}`}>
               {f.formatNumber(stats.staleTusSessions)}
             </div>
             <div className="text-xs text-txt-tertiary">{f.formatBytes(stats.staleTusSize)}</div>
@@ -238,8 +238,8 @@ export function StoragePanel() {
       {/* File Type Breakdown */}
       {stats.breakdown.length > 0 && (
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:storage.breakdown.label')}</div>
-          <div className="rounded-lg bg-white/[0.02] p-3.5">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:storage.breakdown.label')}</div>
+          <div className="rounded-xl bg-surface-elevated p-3.5">
             <div className="space-y-1.5">
               {stats.breakdown.map((b) => (
                 <div key={b.type} className="flex items-center justify-between text-sm">
@@ -256,8 +256,8 @@ export function StoragePanel() {
 
       {/* Upload Limit */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:storage.uploadLimit.label')}</div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:storage.uploadLimit.label')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <label className="text-sm text-txt-secondary whitespace-nowrap">{t('admin:storage.uploadLimit.maxFileSize')}</label>
             <div className="flex items-center gap-3">
@@ -275,7 +275,7 @@ export function StoragePanel() {
                     key={u}
                     type="button"
                     onClick={() => handleUploadUnitChange(u)}
-                    className={`px-2.5 py-1 rounded text-[12px] font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                       uploadUnit === u
                         ? 'bg-accent-primary text-white'
                         : 'text-txt-tertiary hover:text-txt-primary'
@@ -299,8 +299,8 @@ export function StoragePanel() {
 
       {/* Cleanup Actions */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:storage.cleanup.label')}</div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5 space-y-3">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:storage.cleanup.label')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5 space-y-3">
           {!hasOrphans && (
             <div className="text-sm text-txt-tertiary">{t('admin:storage.cleanup.nothingFound')}</div>
           )}
@@ -310,14 +310,14 @@ export function StoragePanel() {
               <button
                 onClick={() => handleCleanup(true)}
                 disabled={cleaning}
-                className="px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] text-txt-secondary text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-white/[0.06] hover:bg-interactive-hover text-txt-secondary text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
               >
                 {cleaning ? t('common:states.scanning') : t('admin:storage.cleanup.preview')}
               </button>
               <button
                 onClick={() => handleCleanup(false)}
                 disabled={cleaning || !previewDone}
-                className="px-3 py-1.5 bg-accent-rose hover:bg-accent-rose/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-status-danger hover:bg-status-danger/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
               >
                 {cleaning ? t('admin:storage.cleanup.running') : t('admin:storage.cleanup.run')}
               </button>
@@ -327,8 +327,8 @@ export function StoragePanel() {
           {cleanupResult && (
             <div className={`p-2 rounded text-sm ${
               cleanupResult.dryRun
-                ? 'bg-accent-amber/10 border border-accent-amber/30 text-accent-amber'
-                : 'bg-status-online/10 border border-status-online/30 text-status-online'
+                ? 'bg-status-warn/10 border border-status-warn/30 text-status-warn'
+                : 'bg-status-ok/10 border border-status-ok/30 text-status-ok'
             }`}>
               <div className="font-medium mb-1">
                 {cleanupResult.dryRun ? t('admin:storage.cleanup.previewResult') : t('admin:storage.cleanup.complete')}
@@ -340,7 +340,7 @@ export function StoragePanel() {
                 )}
               </div>
               {cleanupResult.errors.length > 0 && (
-                <div className="mt-1 text-txt-danger">
+                <div className="mt-1 text-status-danger">
                   {t('admin:storage.cleanup.errors', { count: cleanupResult.errors.length, first: cleanupResult.errors[0] })}
                 </div>
               )}
@@ -351,8 +351,8 @@ export function StoragePanel() {
 
       {/* Stale Uploads */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:storage.stale.label')}</div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5 space-y-3">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:storage.stale.label')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5 space-y-3">
           <div className="text-xs text-txt-tertiary">
             <Trans
               t={t}
@@ -381,14 +381,14 @@ export function StoragePanel() {
             <button
               onClick={() => handleTusCleanup(true)}
               disabled={tusCleaning || tusMaxAgeHours <= 0}
-              className="px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] text-txt-secondary text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 bg-white/[0.06] hover:bg-interactive-hover text-txt-secondary text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
             >
               {tusCleaning ? t('common:states.scanning') : t('admin:storage.cleanup.preview')}
             </button>
             <button
               onClick={() => handleTusCleanup(false)}
               disabled={tusCleaning || !tusPreviewDone}
-              className="px-3 py-1.5 bg-accent-rose hover:bg-accent-rose/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 bg-status-danger hover:bg-status-danger/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
             >
               {tusCleaning ? t('admin:storage.cleanup.running') : t('admin:storage.cleanup.run')}
             </button>
@@ -397,8 +397,8 @@ export function StoragePanel() {
           {tusCleanupResult && (
             <div className={`p-2 rounded text-sm ${
               tusCleanupResult.dryRun
-                ? 'bg-accent-amber/10 border border-accent-amber/30 text-accent-amber'
-                : 'bg-status-online/10 border border-status-online/30 text-status-online'
+                ? 'bg-status-warn/10 border border-status-warn/30 text-status-warn'
+                : 'bg-status-ok/10 border border-status-ok/30 text-status-ok'
             }`}>
               <div className="font-medium mb-1">
                 {tusCleanupResult.dryRun ? t('admin:storage.cleanup.previewResult') : t('admin:storage.cleanup.complete')}
@@ -407,7 +407,7 @@ export function StoragePanel() {
                 {t('admin:storage.stale.sessionFiles', { count: tusCleanupResult.deletedFiles, size: f.formatBytes(tusCleanupResult.freedBytes) })}
               </div>
               {tusCleanupResult.errors.length > 0 && (
-                <div className="mt-1 text-txt-danger">
+                <div className="mt-1 text-status-danger">
                   {t('admin:storage.cleanup.errors', { count: tusCleanupResult.errors.length, first: tusCleanupResult.errors[0] })}
                 </div>
               )}
@@ -418,8 +418,8 @@ export function StoragePanel() {
 
       {/* Media Retention */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:storage.media.label')}</div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5 space-y-3">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:storage.media.label')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5 space-y-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <label className="text-sm text-txt-secondary whitespace-nowrap">{t('admin:storage.media.olderThan')}</label>
             <div className="flex items-center gap-3">
@@ -438,14 +438,14 @@ export function StoragePanel() {
             <button
               onClick={() => handleMediaCleanup(true)}
               disabled={mediaCleaning || mediaAgeDays < 1}
-              className="px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] text-txt-secondary text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 bg-white/[0.06] hover:bg-interactive-hover text-txt-secondary text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
             >
               {mediaCleaning ? t('common:states.scanning') : t('common:actions.preview')}
             </button>
             <button
               onClick={() => handleMediaCleanup(false)}
               disabled={mediaCleaning || !mediaPreviewDone}
-              className="px-3 py-1.5 bg-accent-rose hover:bg-accent-rose/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 bg-status-danger hover:bg-status-danger/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
             >
               {mediaCleaning ? t('admin:storage.media.running') : t('admin:storage.media.run')}
             </button>
@@ -454,8 +454,8 @@ export function StoragePanel() {
           {mediaCleanupResult && (
             <div className={`p-2 rounded text-sm ${
               mediaCleanupResult.dryRun
-                ? 'bg-accent-amber/10 border border-accent-amber/30 text-accent-amber'
-                : 'bg-status-online/10 border border-status-online/30 text-status-online'
+                ? 'bg-status-warn/10 border border-status-warn/30 text-status-warn'
+                : 'bg-status-ok/10 border border-status-ok/30 text-status-ok'
             }`}>
               <div className="font-medium mb-1">
                 {mediaCleanupResult.dryRun ? t('admin:storage.cleanup.previewResult') : t('admin:storage.cleanup.complete')}
@@ -464,7 +464,7 @@ export function StoragePanel() {
                 {t('admin:storage.media.files', { count: mediaCleanupResult.deletedFiles, size: f.formatBytes(mediaCleanupResult.freedBytes) })}
               </div>
               {mediaCleanupResult.errors.length > 0 && (
-                <div className="mt-1 text-txt-danger">
+                <div className="mt-1 text-status-danger">
                   {t('admin:storage.cleanup.errors', { count: mediaCleanupResult.errors.length, first: mediaCleanupResult.errors[0] })}
                 </div>
               )}

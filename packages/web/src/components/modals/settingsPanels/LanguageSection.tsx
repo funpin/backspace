@@ -17,27 +17,25 @@ export function LanguageSection() {
     : [...availableLanguages, ...supportedLanguages.filter((l) => l.code === current)];
 
   return (
-    <div>
-      <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+    <div className="border-t border-border-hard pt-4">
+      <div className="block text-xs font-medium text-txt-secondary mb-1.5">
         {t('common:language.label')}
       </div>
-      <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
-        <label htmlFor="language-select" className="block text-xs text-txt-tertiary mb-2">
-          {t('common:language.description')}
-        </label>
-        <select
-          id="language-select"
-          value={current}
-          onChange={(e) => { void setLanguage(e.target.value as SupportedLanguage); }}
-          className="input-standard w-full appearance-none"
-        >
-          {options.map((language) => (
-            <option key={language.code} value={language.code} lang={language.code}>
-              {language.nativeName}
-            </option>
-          ))}
-        </select>
-      </div>
+      <label htmlFor="language-select" className="block text-xs text-txt-tertiary mb-2">
+        {t('common:language.description')}
+      </label>
+      <select
+        id="language-select"
+        value={current}
+        onChange={(e) => { void setLanguage(e.target.value as SupportedLanguage); }}
+        className="input-standard w-full appearance-none"
+      >
+        {options.map((language) => (
+          <option key={language.code} value={language.code} lang={language.code}>
+            {language.nativeName}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

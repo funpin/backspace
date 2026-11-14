@@ -173,7 +173,7 @@ function SegmentedPicker<T extends string>({
       role="radiogroup"
       aria-label={label}
       onKeyDown={handleKeyDown}
-      className="inline-flex gap-0.5 rounded-lg bg-surface-input p-0.5"
+      className="inline-flex gap-0.5 rounded-lg bg-surface-input p-0.5 shadow-[inset_0_0_0_1px_var(--glass-border)]"
     >
       {segments.map((segment) => {
         const checked = segment.value === value;
@@ -190,12 +190,11 @@ function SegmentedPicker<T extends string>({
             }}
             onClick={() => onChange(segment.value)}
             // The selected segment has to read as raised off the sunken track
-            // against the hero's own surface, which is already lighter than the
-            // track: at the 8% the design called for it measured within three
-            // levels of the hero background and the selection showed only in
-            // the text colour.
-            className={`px-3 py-1 text-xs rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/60 ${
-              checked ? 'bg-white/[0.12] text-txt-primary' : 'text-txt-tertiary hover:text-txt-secondary'
+            // against the hero's own surface, which is the elevated tone
+            // itself: a segment in that same tone would show the selection only
+            // in the text colour, so it takes the one step above it.
+            className={`px-3 py-1 text-xs font-medium rounded-md transition-colors duration-fast ease-out outline-none focus-visible:ring-2 focus-visible:ring-accent-tone/60 ${
+              checked ? 'bg-border-soft text-txt-primary' : 'text-txt-secondary hover:text-txt-primary'
             }`}
           >
             {segment.label}
@@ -226,7 +225,7 @@ function PlatformName({ platform, id, hero }: { platform: Platform; id: string; 
       />
       <h3
         id={id}
-        className={`truncate text-txt-primary font-semibold ${hero ? 'text-2xl leading-tight' : 'text-base leading-snug'}`}
+        className={`truncate text-txt-primary font-semibold ${hero ? 'text-xl leading-tight' : 'text-base leading-snug'}`}
       >
         {t(NAME_KEYS[platform])}
       </h3>
@@ -259,12 +258,12 @@ function HeroTile({
     <section
       aria-labelledby={nameId}
       data-tile="hero"
-      className="rounded-2xl border border-accent-primary/30 bg-white/[0.05] p-5"
+      className="rounded-xl bg-surface-elevated shadow-[inset_0_0_0_1.5px_rgb(var(--accent-tone)/0.35)] p-5"
     >
       <div className="flex items-center justify-between gap-3">
         <PlatformName platform={platform} id={nameId} hero />
         <span className="glass-pill shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-txt-secondary">
-          <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-accent-mint" />
+          <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-status-ok" />
           {t(TAG_KEYS[platform])}
         </span>
       </div>
@@ -278,7 +277,9 @@ function HeroTile({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-4 py-2 text-sm font-medium text-white bg-accent-primary hover:bg-accent-primary-hover rounded-lg transition-colors"
+          // A link, not a button: it downloads a file. It wears the primary
+          // button of the kit, the one filled control on the page.
+          className="inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold whitespace-nowrap select-none bg-accent-primary text-on-accent hover:bg-accent-primary-hover active:bg-accent-primary-active active:scale-[0.96] transition-[background-color,transform] duration-fast ease-out"
         >
           {t(DOWNLOAD_KEYS[platform])}
         </a>
@@ -310,7 +311,7 @@ function QuietTile({
     <section
       aria-labelledby={nameId}
       data-tile="quiet"
-      className="min-w-0 rounded-2xl border border-white/[0.04] bg-white/[0.03] p-4"
+      className="min-w-0 rounded-xl border border-border-hard p-4"
     >
       <PlatformName platform={platform} id={nameId} hero={false} />
       <p className="mt-2 text-xs text-txt-tertiary">{t(COVERS_KEYS[platform])}</p>
@@ -319,7 +320,7 @@ function QuietTile({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-block text-sm font-medium text-accent-primary hover:text-accent-primary-hover transition-colors"
+        className="mt-3 inline-block text-sm font-medium text-accent-tone hover:text-txt-primary transition-colors duration-fast"
       >
         {t(DOWNLOAD_KEYS[platform])}
       </a>
@@ -462,7 +463,7 @@ export function DesktopDownloadPanel({ version }: { version: string | null }) {
 
   return (
     <div className="ddl-panel">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('desktopDownload.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('desktopDownload.title')}</h2>
 
       {detected && (
         <div className="mb-5 space-y-3">
@@ -499,7 +500,7 @@ export function DesktopDownloadPanel({ version }: { version: string | null }) {
           href={links?.allReleasesUrl ?? RELEASES_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-txt-secondary hover:text-txt-primary transition-colors"
+          className="text-xs text-txt-secondary hover:text-txt-primary transition-colors duration-fast"
         >
           {t('desktopDownload.allReleases')}
         </a>

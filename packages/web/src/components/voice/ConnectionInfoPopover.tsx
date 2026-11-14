@@ -36,9 +36,9 @@ function formatLossPercent(pct: number): string {
 }
 
 const BAND_COLORS: Record<HealthBand, string> = {
-  good: 'text-status-online',
-  warn: 'text-status-idle',
-  bad: 'text-txt-danger',
+  good: 'text-status-ok',
+  warn: 'text-status-warn',
+  bad: 'text-status-danger',
 };
 
 function pingColor(ms: number): string {
@@ -73,26 +73,26 @@ function trackLabel(direction: 'send' | 'recv', source: string, participantName:
 }
 
 const Row = ({ label, value, colorClass }: { label: string; value: string; colorClass?: string }) => (
-  <div className="flex items-center justify-between py-[3px]">
-    <span className="text-[12px] text-txt-tertiary">{label}</span>
-    <span className={`text-[12px] font-medium ${colorClass ?? 'text-txt-secondary'}`}>{value}</span>
+  <div className="flex items-center justify-between py-0.5">
+    <span className="text-xs text-txt-tertiary">{label}</span>
+    <span className={`text-xs font-medium tabular-nums ${colorClass ?? 'text-txt-secondary'}`}>{value}</span>
   </div>
 );
 
-const Divider = () => <div className="border-t border-border-soft my-1" />;
-
-const SectionHeader = ({ title }: { title: string }) => (
-  <div className="text-[10px] font-bold text-txt-tertiary uppercase tracking-wider pt-1 pb-[2px]">
-    {title}
-  </div>
+/** A section of the popover: a top rule in border-hard, then the quiet header. */
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <section className="border-t border-border-hard mt-2 pt-2">
+    <h3 className="text-xs font-medium text-txt-tertiary pb-1">{title}</h3>
+    {children}
+  </section>
 );
 
 function AudioTrackRow({ track }: { track: AudioTrackStat }) {
   const label = trackLabel(track.direction, track.source, track.participantName);
   return (
-    <div className="flex items-center justify-between py-[3px]">
-      <span className="text-[12px] text-txt-tertiary truncate mr-2">{label}</span>
-      <span className="text-[12px] font-medium text-txt-secondary whitespace-nowrap">
+    <div className="flex items-center justify-between py-0.5">
+      <span className="text-xs text-txt-tertiary truncate mr-2">{label}</span>
+      <span className="text-xs font-medium text-txt-secondary whitespace-nowrap">
         {formatBitrate(track.bitrate)}
         {track.codec && <span className="text-txt-tertiary ml-2">{track.codec}</span>}
       </span>
@@ -105,21 +105,21 @@ function VideoTrackRow({ track }: { track: VideoTrackStat }) {
   const resolution = (track.width && track.height) ? `${track.width}\u00d7${track.height}` : null;
 
   return (
-    <div className="py-[3px]">
+    <div className="py-0.5">
       <div className="flex items-center justify-between">
-        <span className="text-[12px] text-txt-tertiary truncate mr-2">{label}</span>
-        <span className="text-[12px] font-medium text-txt-secondary whitespace-nowrap">
+        <span className="text-xs text-txt-tertiary truncate mr-2">{label}</span>
+        <span className="text-xs font-medium text-txt-secondary whitespace-nowrap">
           {formatBitrate(track.bitrate)}
           {track.codec && <span className="text-txt-tertiary ml-2">{track.codec}</span>}
         </span>
       </div>
       {(resolution || track.fps !== null || track.qualityLimitation || track.simulcastLayer || track.encoderImpl) && (
         <div className="flex items-center justify-between pl-3">
-          <span className="text-[11px] text-txt-tertiary">
+          <span className="text-2xs text-txt-tertiary">
             {resolution && `${resolution}`}
             {track.fps !== null && ` @${track.fps}`}
           </span>
-          <span className="text-[11px] text-txt-tertiary">
+          <span className="text-2xs text-txt-tertiary">
             {track.direction === 'send' && (() => {
               const parts: string[] = [];
               if (track.encoderImpl) parts.push(track.encoderImpl);
@@ -176,67 +176,64 @@ export function ConnectionInfoPopover({ open, onClose, anchorRef }: ConnectionIn
     <div
       ref={popoverRef}
       style={style}
-      className="w-[300px] glass rounded-lg overflow-hidden"
+      className="w-[300px] glass rounded-xl overflow-hidden"
     >
       <div className="px-3 py-2 border-b border-border-hard">
-        <span className="text-[14px] font-bold text-txt-primary">{t('voice:connectionInfo.title')}</span>
+        <span className="text-sm font-semibold text-txt-primary">{t('voice:connectionInfo.title')}</span>
       </div>
 
       <div className="px-3 py-2 max-h-[calc(calc(100*var(--app-vh))-32px)] overflow-y-auto scrollbar-thin">
         {!room ? (
-          <div className="text-[12px] text-txt-tertiary py-2 text-center">{t('voice:connectionInfo.notConnected')}</div>
+          <div className="text-xs text-txt-tertiary py-2 text-center">{t('voice:connectionInfo.notConnected')}</div>
         ) : !stats ? (
           <>
             <PingGraph />
-            <div className="text-[12px] text-txt-tertiary py-2 text-center">{t('voice:connectionInfo.gathering')}</div>
+            <div className="text-xs text-txt-tertiary py-2 text-center">{t('voice:connectionInfo.gathering')}</div>
           </>
         ) : (
           <>
             {/* History first: the rows under it are the last two seconds only. */}
             <PingGraph />
             {/* Network */}
-            <SectionHeader title={t('voice:connectionInfo.section.network')} />
-            <Row
-              label={t('voice:connectionInfo.network.ping')}
-              value={stats.network.ping !== null ? formatMilliseconds(stats.network.ping) : '\u2014'}
-              colorClass={stats.network.ping !== null ? pingColor(stats.network.ping) : undefined}
-            />
-            <Row
-              label={t('voice:connectionInfo.network.packetLoss')}
-              value={stats.network.packetLoss !== null ? formatLossPercent(stats.network.packetLoss) : '\u2014'}
-              colorClass={stats.network.packetLoss !== null ? lossColor(stats.network.packetLoss) : undefined}
-            />
-            <Row
-              label={t('voice:connectionInfo.network.jitter')}
-              value={stats.network.jitter !== null ? formatMilliseconds(stats.network.jitter) : '\u2014'}
-              colorClass={stats.network.jitter !== null ? jitterColor(stats.network.jitter) : undefined}
-            />
-            <Row label={t('voice:connectionInfo.network.server')} value={stats.network.serverAddress ?? '\u2014'} />
-            <Row
-              label={t('voice:connectionInfo.network.protocol')}
-              value={
-                stats.network.protocol
-                  ? `${stats.network.protocol}${stats.network.candidateType ? ` (${stats.network.candidateType})` : ''}`
-                  : '\u2014'
-              }
-            />
+            <Section title={t('voice:connectionInfo.section.network')}>
+              <Row
+                label={t('voice:connectionInfo.network.ping')}
+                value={stats.network.ping !== null ? formatMilliseconds(stats.network.ping) : '\u2014'}
+                colorClass={stats.network.ping !== null ? pingColor(stats.network.ping) : undefined}
+              />
+              <Row
+                label={t('voice:connectionInfo.network.packetLoss')}
+                value={stats.network.packetLoss !== null ? formatLossPercent(stats.network.packetLoss) : '\u2014'}
+                colorClass={stats.network.packetLoss !== null ? lossColor(stats.network.packetLoss) : undefined}
+              />
+              <Row
+                label={t('voice:connectionInfo.network.jitter')}
+                value={stats.network.jitter !== null ? formatMilliseconds(stats.network.jitter) : '\u2014'}
+                colorClass={stats.network.jitter !== null ? jitterColor(stats.network.jitter) : undefined}
+              />
+              <Row label={t('voice:connectionInfo.network.server')} value={stats.network.serverAddress ?? '\u2014'} />
+              <Row
+                label={t('voice:connectionInfo.network.protocol')}
+                value={
+                  stats.network.protocol
+                    ? `${stats.network.protocol}${stats.network.candidateType ? ` (${stats.network.candidateType})` : ''}`
+                    : '\u2014'
+                }
+              />
+            </Section>
 
             {/* Audio Tracks */}
             {stats.audioTracks.length > 0 && (
-              <>
-                <Divider />
-                <SectionHeader title={t('voice:connectionInfo.section.audio')} />
+              <Section title={t('voice:connectionInfo.section.audio')}>
                 {stats.audioTracks.map((t) => (
                   <AudioTrackRow key={t.key} track={t} />
                 ))}
-              </>
+              </Section>
             )}
 
             {/* Video Tracks */}
             {stats.videoTracks.length > 0 && (
-              <>
-                <Divider />
-                <SectionHeader title={t('voice:connectionInfo.section.video')} />
+              <Section title={t('voice:connectionInfo.section.video')}>
                 {outboundScreen && (
                   <>
                     <Row label={t('voice:connectionInfo.video.requestedCodec')} value={requestedCodec.toUpperCase()} />
@@ -261,7 +258,7 @@ export function ConnectionInfoPopover({ open, onClose, anchorRef }: ConnectionIn
                 {stats.videoTracks.map((t) => (
                   <VideoTrackRow key={t.key} track={t} />
                 ))}
-              </>
+              </Section>
             )}
           </>
         )}

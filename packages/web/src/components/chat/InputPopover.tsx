@@ -8,6 +8,7 @@ import { GifPicker } from './GifPicker';
 import { useUIStore } from '../../stores/uiStore';
 import { MobilePickerSheet } from './MobilePickerSheet';
 import { PickerEscapeScope } from './pickerEscape';
+import { Icon } from '../ui/Icon';
 
 export type InputPopoverTab = 'emoji' | 'gif' | 'sticker';
 
@@ -28,14 +29,6 @@ interface SharedTabProps {
   onTabChange: (tab: InputPopoverTab) => void;
 }
 
-function HeartIcon({ className = 'w-4 h-4' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-    </svg>
-  );
-}
-
 function TabBar({ activeTab, availableTabs, onTabChange }: SharedTabProps) {
   if (availableTabs.length <= 1) return null;
   return (
@@ -49,15 +42,15 @@ function TabBar({ activeTab, availableTabs, onTabChange }: SharedTabProps) {
             onClick={() => onTabChange(t.key)}
             title={t.label}
             aria-label={t.label}
-            className={`flex items-center justify-center rounded-md font-medium transition-colors ${
-              isSticker ? 'px-2.5 py-1' : 'px-3 py-1 text-[13px]'
+            className={`flex items-center justify-center h-7 rounded-lg font-medium transition-colors duration-fast ${
+              isSticker ? 'px-2.5' : 'px-3 text-compact'
             } ${
               activeTab === t.key
                 ? 'bg-interactive-selected text-txt-primary'
-                : 'text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover'
+                : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
             }`}
           >
-            {isSticker ? <HeartIcon className="w-4 h-4" /> : t.label}
+            {isSticker ? <Icon name="heart" size="sm" /> : t.label}
           </button>
         );
       })}
@@ -142,7 +135,7 @@ function DesktopPopover({
   return createPortal(
     <div
       ref={floatingRef}
-      className="fixed z-[300] animate-slide-up"
+      className="fixed z-popover animate-slide-up"
       style={{ top: -9999, left: -9999 }}
     >
       <div className={`glass rounded-xl overflow-hidden flex flex-col w-fit ${activeTab === 'sticker' ? 'max-h-[min(500px,calc(100*var(--app-dvh)-24px))]' : 'max-h-[435px]'}`}>

@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next';
 import { useKeybindStore, BINDABLE_ACTIONS, Keybind } from '../../../stores/keybindStore';
 import { isElectron, isElectronMac } from '../../../platform/platform';
 import { useKeybindPortalStatus } from '../../../hooks/useKeybindPortalStatus';
+import { Button } from '../../ui/Button';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -56,6 +57,9 @@ function codeToNumeric(code: string): number {
 // Keybind Row
 // ---------------------------------------------------------------------------
 
+/** A key combination as it is shown in a row: a sunken chip in the monospace face. */
+const KEY_CHIP = 'inline-flex items-center min-h-6 px-2 py-0.5 rounded bg-surface-input shadow-[inset_0_0_0_1px_var(--glass-border)] font-mono text-xs';
+
 interface KeybindRowProps {
   actionId: string;
   label: string;
@@ -72,47 +76,39 @@ function KeybindRow({ actionId, label, keybind, isRecording, recordingDisplay, o
   return (
     <div
       ref={rowRef}
-      className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
-        isRecording
-          ? 'ring-2 ring-accent-mint bg-surface-elevated'
-          : 'bg-white/[0.03] hover:bg-surface-elevated'
+      className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 rounded-lg bg-surface-elevated transition-shadow duration-fast ease-out ${
+        isRecording ? 'shadow-[inset_0_0_0_1.5px_rgb(var(--accent-tone))]' : ''
       }`}
     >
       <div className="flex-1 min-w-0">
-        <div className="text-sm text-txt-primary">{label}</div>
-        <div className="text-xs text-txt-tertiary mt-0.5">
+        <div className="text-sm font-medium text-txt-primary">{label}</div>
+        <div className="text-xs text-txt-tertiary mt-1">
           {isRecording ? (
-            <span className="text-accent-mint animate-pulse">
+            <span className={`${KEY_CHIP} text-accent-tone animate-pulse`}>
               {recordingDisplay || t('keybinds.row.recordingPrompt')}
             </span>
           ) : keybind ? (
-            keybind.displayLabel
+            <span className={`${KEY_CHIP} text-txt-primary`}>{keybind.displayLabel}</span>
           ) : (
             t('keybinds.row.notBound')
           )}
         </div>
       </div>
-      <div className="flex items-center gap-1.5 ml-3">
+      <div className="flex items-center gap-1.5">
         {!isRecording && (
           <>
-            <button
-              onClick={onStartRecording}
-              className="text-xs px-2.5 py-1 rounded text-txt-tertiary hover:text-txt-primary hover:bg-white/[0.06] transition-colors"
-            >
+            <Button variant="ghost" size="sm" onClick={onStartRecording}>
               {keybind ? t('common:actions.edit') : t('keybinds.row.record')}
-            </button>
+            </Button>
             {keybind && (
-              <button
-                onClick={onDelete}
-                className="text-xs px-2.5 py-1 rounded text-txt-tertiary hover:text-rose-400 hover:bg-rose-400/10 transition-colors"
-              >
+              <Button variant="danger" size="sm" onClick={onDelete}>
                 {t('common:actions.delete')}
-              </button>
+              </Button>
             )}
           </>
         )}
         {isRecording && (
-          <span className="text-[10px] text-txt-tertiary">{t('keybinds.row.escToCancel')}</span>
+          <span className="text-2xs text-txt-tertiary">{t('keybinds.row.escToCancel')}</span>
         )}
       </div>
     </div>
@@ -318,21 +314,20 @@ export function KeybindsPanel() {
   if (portal) {
     return (
       <div className="space-y-5">
-        <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('keybinds.title')}</h2>
-        <div className="rounded-lg bg-surface-elevated p-3.5 text-sm text-txt-secondary" role="status">
+        <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('keybinds.title')}</h2>
+        <div className="rounded-xl bg-surface-elevated p-3.5 text-sm text-txt-secondary" role="status">
           <p>{t('keybinds.portal.description')}</p>
           <p className="mt-2">{t(`keybinds.portal.${portal.state}`)}</p>
           {portal.state === 'unavailable' && (
-            <button type="button" onClick={() => window.backspace?.retryKeybindPortal?.()}
-              className="mt-3 rounded px-3 py-1.5 bg-white/[0.06] text-txt-primary hover:bg-white/[0.1]">
+            <Button variant="primary" className="mt-3" onClick={() => window.backspace?.retryKeybindPortal?.()}>
               {t('keybinds.portal.retry')}
-            </button>
+            </Button>
           )}
         </div>
         <dl className="space-y-1.5">
           {BINDABLE_ACTIONS.map((action) => (
-            <div key={action.id} className="rounded-lg bg-white/[0.03] px-4 py-3">
-              <dt className="text-sm text-txt-primary">{t(`keybinds.action.${action.id}`)}</dt>
+            <div key={action.id} className="rounded-lg bg-surface-elevated px-4 py-3">
+              <dt className="text-sm font-medium text-txt-primary">{t(`keybinds.action.${action.id}`)}</dt>
               <dd className="text-xs text-txt-tertiary mt-1">
                 {portal.shortcuts[action.id]
                   ? t('keybinds.portal.assigned', { shortcut: portal.shortcuts[action.id] })
@@ -347,34 +342,36 @@ export function KeybindsPanel() {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('keybinds.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('keybinds.title')}</h2>
       {/* macOS Accessibility Warning */}
       {isElectronMac() && accessibilityTrusted === false && (
-        <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3.5">
-          <div className="text-sm text-amber-200 font-medium">{t('keybinds.accessibility.title')}</div>
-          <div className="text-xs text-amber-200/70 mt-1">
+        <div className="rounded-xl bg-status-warn/10 border border-status-warn/20 p-3.5">
+          <div className="text-sm text-status-warn font-medium">{t('keybinds.accessibility.title')}</div>
+          <div className="text-xs text-txt-secondary mt-1">
             {t('keybinds.accessibility.description')}
           </div>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
+            className="mt-2.5"
             onClick={() => {
               window.backspace?.checkAccessibility().then(setAccessibilityTrusted);
             }}
-            className="mt-2 text-xs px-3 py-1.5 rounded bg-amber-500/20 text-amber-200 hover:bg-amber-500/30 transition-colors"
           >
             {t('keybinds.accessibility.grant')}
-          </button>
+          </Button>
         </div>
       )}
 
       {/* Linux hook error warning */}
       {isElectron() && hookError && (
-        <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3.5">
-          <div className="text-sm text-amber-200 font-medium">{t('keybinds.hookError.title')}</div>
-          <div className="text-xs text-amber-200/70 mt-1">
+        <div className="rounded-xl bg-status-warn/10 border border-status-warn/20 p-3.5">
+          <div className="text-sm text-status-warn font-medium">{t('keybinds.hookError.title')}</div>
+          <div className="text-xs text-txt-secondary mt-1">
             <Trans
               t={t}
               i18nKey="keybinds.hookError.description"
-              components={{ code: <code className="bg-black/20 px-1 rounded" /> }}
+              components={{ code: <code className="bg-surface-input px-1 rounded font-mono" /> }}
             />
           </div>
         </div>
@@ -389,7 +386,7 @@ export function KeybindsPanel() {
 
       {/* Keybind rows */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('keybinds.section.voice')}
         </div>
         <div className="space-y-1.5">
@@ -414,7 +411,7 @@ export function KeybindsPanel() {
 
       {/* Conflict dialog */}
       {conflict && (
-        <div className="rounded-lg bg-surface-elevated border border-white/[0.06] p-3.5">
+        <div className="rounded-xl bg-surface-elevated shadow-[inset_0_0_0_1px_var(--glass-border)] p-3.5">
           <div className="text-sm text-txt-primary">
             <Trans
               t={t}
@@ -427,18 +424,12 @@ export function KeybindsPanel() {
             />
           </div>
           <div className="flex gap-2 mt-2.5">
-            <button
-              onClick={confirmConflict}
-              className="text-xs px-3 py-1.5 rounded bg-accent-mint/20 text-accent-mint hover:bg-accent-mint/30 transition-colors"
-            >
+            <Button variant="primary" size="sm" onClick={confirmConflict}>
               {t('keybinds.conflict.overwrite')}
-            </button>
-            <button
-              onClick={cancelConflict}
-              className="text-xs px-3 py-1.5 rounded bg-white/[0.06] text-txt-secondary hover:bg-white/[0.1] transition-colors"
-            >
+            </Button>
+            <Button variant="ghost" size="sm" onClick={cancelConflict}>
               {t('common:actions.cancel')}
-            </button>
+            </Button>
           </div>
         </div>
       )}

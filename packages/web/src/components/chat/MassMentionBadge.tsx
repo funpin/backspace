@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import type { MassMentionKeyword } from '@backspace/shared/src/mentions';
 import { useSpaceStore } from '../../stores/spaceStore';
 
-/** `@everyone` / `@here`, and a role with no colour of its own. */
-const ACCENT_COLOR = '#7c6cf6';
+/** `@everyone` / `@here`, and a role with no colour of its own: the theme's secondary colour. */
+const THEME_CLASS = 'text-accent-secondary bg-accent-secondary/15';
 /** A role token this client cannot place in the channel's space. */
-const UNRESOLVED_COLOR = '#a0a0aa';
+const UNRESOLVED_CLASS = 'text-txt-secondary bg-surface-elevated';
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 type MassMentionBadgeProps =
@@ -28,21 +28,25 @@ export const MassMentionBadge = React.memo(function MassMentionBadge({ keyword, 
   });
 
   let label: string;
-  let color: string;
+  let toneClass = THEME_CLASS;
+  // A role's own colour belongs to the space and is drawn as given.
+  let roleColor: string | null = null;
   if (keyword !== undefined) {
     label = keyword;
-    color = ACCENT_COLOR;
   } else if (role) {
     // The @everyone role is stored with its "@" in the name.
     label = role.name.replace(/^@/, '');
-    color = HEX_COLOR.test(role.color) ? role.color : ACCENT_COLOR;
+    if (HEX_COLOR.test(role.color)) roleColor = role.color;
   } else {
     label = t('message.mention.unknownRole');
-    color = UNRESOLVED_COLOR;
+    toneClass = UNRESOLVED_CLASS;
   }
 
   return (
-    <span className="inline-flex items-center rounded-[3px] px-[2px] font-medium" style={{ color, backgroundColor: color + '1a' }}>
+    <span
+      className={`inline-flex items-center rounded px-0.5 font-medium ${roleColor ? '' : toneClass}`.trimEnd()}
+      style={roleColor ? { color: roleColor, backgroundColor: `color-mix(in srgb, ${roleColor} 15%, transparent)` } : undefined}
+    >
       @{label}
     </span>
   );

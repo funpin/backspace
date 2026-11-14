@@ -109,7 +109,7 @@ export function ReactionPickerPopover({
       ref={popoverRef}
       role="dialog"
       aria-label={t('actions.addReaction')}
-      className={`fixed z-[300] ${coords.flipAbove ? 'animate-slide-down' : 'animate-slide-up'}`}
+      className={`fixed z-popover ${coords.flipAbove ? 'animate-slide-down' : 'animate-slide-up'}`}
       style={{
         top: coords.top,
         left: coords.left,

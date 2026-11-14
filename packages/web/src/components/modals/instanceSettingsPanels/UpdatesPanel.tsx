@@ -42,7 +42,7 @@ function CommandBlock({ command }: { command: string }) {
       <button
         type="button"
         onClick={copy}
-        className="shrink-0 px-3 py-2 text-xs font-medium rounded-lg text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] transition-colors"
+        className="shrink-0 px-3 py-2 text-xs font-medium rounded-lg text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover transition-colors"
       >
         {copied ? t('common:actions.copied') : t('common:actions.copy')}
       </button>
@@ -111,13 +111,13 @@ export function UpdatesPanel() {
     return (
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-txt-primary">{t('admin:updates.title')}</h2>
-        <div className="rounded-lg bg-accent-rose/10 border border-accent-rose/20 p-3.5 text-sm text-txt-secondary">
+        <div className="rounded-lg bg-status-danger/10 border border-status-danger/20 p-3.5 text-sm text-txt-secondary">
           {loadError || t('admin:updates.loadFailed')}
         </div>
         <button
           type="button"
           onClick={() => void load(false)}
-          className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
+          className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover rounded-lg transition-colors"
         >
           {t('common:actions.tryAgain')}
         </button>
@@ -154,17 +154,17 @@ export function UpdatesPanel() {
           still on hand: keep showing it and surface the failure inline rather
           than discarding a perfectly good view for an error page. */}
       {loadError !== '' && (
-        <div className="rounded-lg bg-accent-rose/10 border border-accent-rose/20 p-3.5 text-sm text-txt-secondary">
+        <div className="rounded-lg bg-status-danger/10 border border-status-danger/20 p-3.5 text-sm text-txt-secondary">
           {loadError}
         </div>
       )}
 
       {/* What is running now */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('admin:updates.running.label')}
         </div>
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+        <div className="rounded-lg bg-surface-elevated border border-border-soft p-3.5">
           <div className="text-sm text-txt-primary font-medium">
             {t('common:appName')} {status.current.version}
           </div>
@@ -178,7 +178,7 @@ export function UpdatesPanel() {
       {/* What to do about it */}
       {updateAvailable && status.latest !== null ? (
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">
             {t('admin:updates.available.label')}
           </div>
           <div className="rounded-lg bg-accent-primary/[0.06] border border-accent-primary/25 p-3.5 space-y-3">
@@ -259,9 +259,9 @@ export function UpdatesPanel() {
           </div>
         </div>
       ) : (
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+        <div className="rounded-lg bg-surface-elevated border border-border-soft p-3.5">
           {status.state === 'up-to-date' && (
-            <div className="text-sm text-accent-mint">{t('admin:updates.upToDate')}</div>
+            <div className="text-sm text-status-ok">{t('admin:updates.upToDate')}</div>
           )}
           {status.state === 'unknown' && status.reason === 'disabled' && (
             <>
@@ -302,7 +302,7 @@ export function UpdatesPanel() {
           type="button"
           onClick={() => void load(true)}
           disabled={checking || !status.checkEnabled}
-          className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-50"
+          className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover rounded-lg transition-colors disabled:opacity-50"
         >
           {checking ? t('admin:updates.checking') : t('admin:updates.checkAgain')}
         </button>

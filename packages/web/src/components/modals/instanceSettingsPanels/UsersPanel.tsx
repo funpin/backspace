@@ -250,7 +250,7 @@ export function UsersPanel() {
 
       {/* Error */}
       {error && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{error}</div>
+        <div className="p-2 bg-status-danger/10 border border-status-danger/30 rounded text-status-danger text-sm">{error}</div>
       )}
 
       {/* Loading */}
@@ -273,7 +273,7 @@ export function UsersPanel() {
 
             return (
               <div key={user.id}>
-                <div className={`flex items-center gap-3 rounded-lg bg-white/[0.02] p-3.5 ${hasTempPassword ? 'rounded-b-none' : ''}`}>
+                <div className={`flex items-center gap-3 rounded-xl bg-surface-elevated p-3.5 ${hasTempPassword ? 'rounded-b-none' : ''}`}>
                   {/* Avatar */}
                   <div className={isDeleted ? 'opacity-50' : ''}>
                     <Avatar
@@ -296,21 +296,21 @@ export function UsersPanel() {
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {user.isAdmin && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-accent-amber/20 text-accent-amber">
+                        <span className="px-1.5 py-0.5 text-2xs font-medium rounded bg-status-warn/20 text-status-warn">
                           {t('admin:users.badge.admin')}
                         </span>
                       )}
                       {isFederated && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-accent-sky/20 text-accent-sky truncate max-w-[120px]">
+                        <span className="px-1.5 py-0.5 text-2xs font-medium rounded bg-accent-sky/20 text-accent-sky truncate max-w-[120px]">
                           {user.homeInstance}
                         </span>
                       )}
                       {isDeleted && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-accent-rose/20 text-accent-rose">
+                        <span className="px-1.5 py-0.5 text-2xs font-medium rounded bg-status-danger/20 text-status-danger">
                           {t('admin:users.badge.deleted')}
                         </span>
                       )}
-                      <span className="text-[10px] text-txt-tertiary">
+                      <span className="text-2xs text-txt-tertiary">
                         {formatDate(user.createdAt)}
                       </span>
                     </div>
@@ -326,10 +326,10 @@ export function UsersPanel() {
                         title={adminButtonTitle(user, isFederated)}
                         className={`p-1.5 rounded transition-colors ${
                           user.isAdmin
-                            ? 'text-accent-amber hover:bg-accent-amber/10'
+                            ? 'text-status-warn hover:bg-status-warn/10'
                             : isFederated
                               ? 'text-txt-tertiary/30 cursor-not-allowed'
-                              : 'text-txt-tertiary hover:text-txt-secondary hover:bg-white/[0.06]'
+                              : 'text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover'
                         }`}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -345,7 +345,7 @@ export function UsersPanel() {
                         className={`p-1.5 rounded transition-colors ${
                           isFederated
                             ? 'text-txt-tertiary/30 cursor-not-allowed'
-                            : 'text-txt-tertiary hover:text-txt-secondary hover:bg-white/[0.06]'
+                            : 'text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover'
                         }`}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -361,7 +361,7 @@ export function UsersPanel() {
                         className={`p-1.5 rounded transition-colors ${
                           isSelf
                             ? 'text-txt-tertiary/30 cursor-not-allowed'
-                            : 'text-txt-tertiary hover:text-accent-rose hover:bg-accent-rose/10'
+                            : 'text-txt-tertiary hover:text-status-danger hover:bg-status-danger/10'
                         }`}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -374,7 +374,7 @@ export function UsersPanel() {
 
                 {/* Inline temp password display */}
                 {hasTempPassword && (
-                  <div className="p-3 bg-status-online/10 border border-status-online/30 border-t-0 rounded-b-lg">
+                  <div className="p-3 bg-status-ok/10 border border-status-ok/30 border-t-0 rounded-b-lg">
                     <div className="flex items-center justify-between gap-2">
                       <div className="text-xs text-txt-secondary">{t('admin:users.tempPassword.label')}</div>
                       <button
@@ -385,17 +385,17 @@ export function UsersPanel() {
                       </button>
                     </div>
                     <div className="mt-1.5 flex items-center gap-2">
-                      <code className="px-2 py-1 bg-black/30 rounded text-sm font-mono text-status-online select-all">
+                      <code className="px-2 py-1 bg-black/30 rounded text-sm font-mono text-status-ok select-all">
                         {tempPassword.password}
                       </code>
                       <button
                         onClick={() => navigator.clipboard.writeText(tempPassword.password)}
-                        className="px-2 py-1 bg-white/[0.06] hover:bg-white/[0.1] text-txt-secondary text-xs rounded transition-colors"
+                        className="px-2 py-1 bg-white/[0.06] hover:bg-interactive-hover text-txt-secondary text-xs rounded transition-colors"
                       >
                         {t('common:actions.copy')}
                       </button>
                     </div>
-                    <div className="text-[10px] text-txt-tertiary mt-1">
+                    <div className="text-2xs text-txt-tertiary mt-1">
                       {t('admin:users.tempPassword.note')}
                     </div>
                   </div>
@@ -412,7 +412,7 @@ export function UsersPanel() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="px-3 py-1 text-sm text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3 py-1 text-sm text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {t('common:actions.previous')}
           </button>
@@ -422,7 +422,7 @@ export function UsersPanel() {
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="px-3 py-1 text-sm text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3 py-1 text-sm text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {t('common:actions.next')}
           </button>

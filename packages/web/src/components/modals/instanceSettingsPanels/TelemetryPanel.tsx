@@ -121,13 +121,13 @@ export function TelemetryPanel() {
       return (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-txt-primary">{t('telemetry:panel.title')}</h2>
-          <div className="rounded-lg bg-accent-rose/10 border border-accent-rose/20 p-3.5 text-sm text-txt-secondary">
+          <div className="rounded-lg bg-status-danger/10 border border-status-danger/20 p-3.5 text-sm text-txt-secondary">
             {loadError}
           </div>
           <button
             type="button"
             onClick={() => void loadStatus()}
-            className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
+            className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover rounded-lg transition-colors"
           >
             {t('common:actions.tryAgain')}
           </button>
@@ -165,7 +165,7 @@ export function TelemetryPanel() {
         aria-hidden and carries no text, so nothing here is the only copy of
         anything - statusLabel below still says the state in words.
       */}
-      <div className="rounded-lg bg-white/[0.02] overflow-hidden">
+      <div className="rounded-lg bg-surface-elevated overflow-hidden">
         <div className="aspect-[5/2] bg-surface-base">
           <HelloScene mood={moodFor(telemetry.enabled)} preserveAspectRatio="xMidYMid slice" />
         </div>
@@ -199,10 +199,10 @@ export function TelemetryPanel() {
       </div>
 
       {/* What it has done so far */}
-      <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5 space-y-1">
+      <div className="rounded-lg bg-surface-elevated border border-border-soft p-3.5 space-y-1">
         <div className="text-xs text-txt-tertiary">{lastDayLabel}</div>
         {telemetry.lastError !== null && (
-          <div className="text-xs text-txt-danger">
+          <div className="text-xs text-status-danger">
             {t('telemetry:panel.status.error', {
               date: formatDay(telemetry.lastError.day, f),
               status: telemetry.lastError.status,
@@ -218,17 +218,17 @@ export function TelemetryPanel() {
 
       {/* The real payload, not a description of one */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('telemetry:panel.previewTitle')}
         </div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5 space-y-2">
+        <div className="rounded-xl bg-surface-elevated p-3.5 space-y-2">
           <PayloadPreview preview={preview} defaultOpen />
-          {previewError && <p className="text-xs text-txt-danger">{previewError}</p>}
+          {previewError && <p className="text-xs text-status-danger">{previewError}</p>}
           <button
             type="button"
             onClick={() => void loadPreview()}
             disabled={refreshing}
-            className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover rounded-lg transition-colors disabled:opacity-50"
           >
             {t('telemetry:panel.refreshPreview')}
           </button>

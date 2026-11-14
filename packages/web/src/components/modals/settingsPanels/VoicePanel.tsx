@@ -29,19 +29,19 @@ export function VoicePanel() {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('settings:voice.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('settings:voice.title')}</h2>
 
       <AudioInputSection />
       <AudioOutputSection />
 
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('settings:voice.volume.sectionTitle')}
         </div>
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <div className="py-1">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-txt-primary">{t('settings:voice.volume.soundEffects.label')}</div>
+              <div className="text-sm font-medium text-txt-primary">{t('settings:voice.volume.soundEffects.label')}</div>
               <div className="text-xs text-txt-tertiary tabular-nums">{f.formatPercent(soundEffectVolume)}</div>
             </div>
             <input
@@ -50,15 +50,15 @@ export function VoicePanel() {
               max={200}
               value={soundEffectVolume}
               onChange={(e) => setSoundEffectVolume(Number(e.target.value))}
-              className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-surface-base [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md"
+              className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-interactive-muted [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-txt-primary [&::-webkit-slider-thumb]:shadow-md"
               style={{
-                background: `linear-gradient(to right, rgb(var(--accent-primary)) 0%, rgb(var(--accent-primary)) ${soundEffectVolume / 2}%, rgb(var(--interactive-muted)) ${soundEffectVolume / 2}%, rgb(var(--interactive-muted)) 100%)`,
+                background: `linear-gradient(to right, rgb(var(--accent-tone)) 0%, rgb(var(--accent-tone)) ${soundEffectVolume / 2}%, rgb(var(--interactive-muted)) ${soundEffectVolume / 2}%, rgb(var(--interactive-muted)) 100%)`,
               }}
             />
           </div>
           <div className="flex items-center justify-between py-2">
             <div className="flex-1 mr-4">
-              <div className="text-sm text-txt-primary">{t('settings:voice.volume.messageSound.label')}</div>
+              <div className="text-sm font-medium text-txt-primary">{t('settings:voice.volume.messageSound.label')}</div>
               <div className="text-xs text-txt-tertiary">
                 {t('settings:voice.volume.messageSound.description')}
               </div>
@@ -70,13 +70,13 @@ export function VoicePanel() {
 
       {!isMobile && (
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">
             {t('settings:voice.pip.sectionTitle')}
           </div>
-          <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+          <div className="rounded-xl bg-surface-elevated p-3.5">
             <div className="flex items-center justify-between py-2">
               <div className="flex-1 mr-4">
-                <div className="text-sm text-txt-primary">{t('settings:voice.pip.showOnSwitch.label')}</div>
+                <div className="text-sm font-medium text-txt-primary">{t('settings:voice.pip.showOnSwitch.label')}</div>
                 <div className="text-xs text-txt-tertiary">{t('settings:voice.pip.showOnSwitch.description')}</div>
               </div>
               <Toggle
@@ -92,13 +92,13 @@ export function VoicePanel() {
       <VideoSection />
 
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('settings:voice.processing.sectionTitle')}
         </div>
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <div className="flex items-center justify-between py-2">
             <div className="flex-1 mr-4">
-              <div className="text-sm text-txt-primary">{t('settings:voice.processing.noiseSuppression.label')}</div>
+              <div className="text-sm font-medium text-txt-primary">{t('settings:voice.processing.noiseSuppression.label')}</div>
               <div className="text-xs text-txt-tertiary">{t('settings:voice.processing.noiseSuppression.description')}</div>
             </div>
             <Toggle enabled={rnnoiseEnabled} onChange={setRnnoiseEnabled} />
@@ -106,7 +106,7 @@ export function VoicePanel() {
 
           <div className="flex items-center justify-between py-2">
             <div className="flex-1 mr-4">
-              <div className="text-sm text-txt-primary">{t('settings:voice.processing.echoCancellation.label')}</div>
+              <div className="text-sm font-medium text-txt-primary">{t('settings:voice.processing.echoCancellation.label')}</div>
               <div className="text-xs text-txt-tertiary">{t('settings:voice.processing.echoCancellation.description')}</div>
             </div>
             <Toggle enabled={echoCancellation} onChange={setEchoCancellation} />
@@ -114,7 +114,7 @@ export function VoicePanel() {
 
           <div className="flex items-center justify-between py-2">
             <div className="flex-1 mr-4">
-              <div className="text-sm text-txt-primary">{t('settings:voice.processing.autoGain.label')}</div>
+              <div className="text-sm font-medium text-txt-primary">{t('settings:voice.processing.autoGain.label')}</div>
               <div className="text-xs text-txt-tertiary">{t('settings:voice.processing.autoGain.description')}</div>
             </div>
             <Toggle enabled={autoGainControl} onChange={setAutoGainControl} />

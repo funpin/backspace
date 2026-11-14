@@ -37,18 +37,18 @@ function formatExpiry(invite: InviteLinkSummary): string {
 
 function inviteStatusDotColor(status: InviteStatus): string {
   switch (status) {
-    case 'active':    return 'bg-status-online';
-    case 'expired':   return 'bg-accent-rose';
-    case 'exhausted': return 'bg-accent-amber';
+    case 'active':    return 'bg-status-ok';
+    case 'expired':   return 'bg-status-danger';
+    case 'exhausted': return 'bg-status-warn';
     case 'revoked':   return 'bg-txt-tertiary';
   }
 }
 
 function inviteStatusPillColor(status: InviteStatus): string {
   switch (status) {
-    case 'expired':   return 'bg-accent-rose/15 text-accent-rose';
-    case 'exhausted': return 'bg-accent-amber/15 text-accent-amber';
-    case 'revoked':   return 'bg-white/5 text-txt-tertiary';
+    case 'expired':   return 'bg-status-danger/15 text-status-danger';
+    case 'exhausted': return 'bg-status-warn/15 text-status-warn';
+    case 'revoked':   return 'bg-surface-elevated text-txt-tertiary';
     case 'active':    return ''; // never rendered for active
   }
 }
@@ -164,13 +164,13 @@ function FilterDropdown({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-txt-tertiary hover:text-txt-secondary bg-white/[0.04] hover:bg-white/[0.06] rounded transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1 text-2xs text-txt-tertiary hover:text-txt-secondary bg-surface-elevated hover:bg-interactive-hover rounded transition-colors"
       >
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="opacity-60">
           <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
         {t('common:actions.filter')}
-        <span className="text-[10px]">▾</span>
+        <span className="text-2xs">▾</span>
       </button>
 
       {open && (
@@ -179,7 +179,7 @@ function FilterDropdown({
           <div className="absolute right-0 top-full mt-1 z-50 glass rounded-lg p-1.5 w-48">
             {view === 'archived' && (
               <>
-                <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-2 py-1">
+                <div className="text-xs font-medium text-txt-secondary px-2 py-1">
                   {t('admin:invites.filter.status')}
                 </div>
                 {archivedStatusOptions.map((s) => (
@@ -189,9 +189,9 @@ function FilterDropdown({
                     onClick={() => handleArchivedStatusToggle(s)}
                     className={`w-full flex items-center gap-2 px-2 py-1.5 text-xs rounded ${
                       archivedStatusFilter.has(s)
-                        ? 'text-txt-primary bg-white/[0.04]'
+                        ? 'text-txt-primary bg-surface-elevated'
                         : 'text-txt-tertiary'
-                    } hover:bg-white/[0.06] transition-colors`}
+                    } hover:bg-interactive-hover transition-colors`}
                   >
                     <div className={`w-2 h-2 rounded-full ${inviteStatusDotColor(s)}`} />
                     <span>{inviteStatusLabel(s)}</span>
@@ -200,7 +200,7 @@ function FilterDropdown({
                 <div className="h-px bg-white/[0.06] my-1" />
               </>
             )}
-            <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-2 py-1">
+            <div className="text-xs font-medium text-txt-secondary px-2 py-1">
               {t('common:actions.sortBy')}
             </div>
             {view === 'active'
@@ -213,7 +213,7 @@ function FilterDropdown({
                       activeSort === opt.key
                         ? 'text-accent-lavender bg-accent-lavender/[0.08]'
                         : 'text-txt-primary'
-                    } hover:bg-white/[0.06] transition-colors`}
+                    } hover:bg-interactive-hover transition-colors`}
                   >
                     {opt.label}
                   </button>
@@ -227,7 +227,7 @@ function FilterDropdown({
                       archivedSort === opt.key
                         ? 'text-accent-lavender bg-accent-lavender/[0.08]'
                         : 'text-txt-primary'
-                    } hover:bg-white/[0.06] transition-colors`}
+                    } hover:bg-interactive-hover transition-colors`}
                   >
                     {opt.label}
                   </button>
@@ -474,7 +474,7 @@ function CreateInviteModal({ onClose, onCreated }: CreateInviteModalProps) {
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
         </div>
-        <p className="text-[13px] text-txt-secondary leading-snug min-w-0">
+        <p className="text-compact text-txt-secondary leading-snug min-w-0">
           {t('admin:invites.createModal.description')}
         </p>
       </div>
@@ -488,7 +488,7 @@ function CreateInviteModal({ onClose, onCreated }: CreateInviteModalProps) {
       >
         {/* Name */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">{t('admin:invites.form.name')}</div>
+          <div className="text-xs font-medium text-txt-secondary mb-2">{t('admin:invites.form.name')}</div>
           <input
             ref={nameInputRef}
             type="text"
@@ -503,7 +503,7 @@ function CreateInviteModal({ onClose, onCreated }: CreateInviteModalProps) {
 
         {/* Max uses */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">{t('admin:invites.form.maxUses')}</div>
+          <div className="text-xs font-medium text-txt-secondary mb-2">{t('admin:invites.form.maxUses')}</div>
           <div className="flex items-center gap-4 flex-wrap">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input
@@ -544,7 +544,7 @@ function CreateInviteModal({ onClose, onCreated }: CreateInviteModalProps) {
 
         {/* Expiry */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">{t('admin:invites.form.expires')}</div>
+          <div className="text-xs font-medium text-txt-secondary mb-2">{t('admin:invites.form.expires')}</div>
           <ExpirySelector
             value={expiryId}
             customDateTime={customDateTime}
@@ -696,7 +696,7 @@ function EditInviteModal({ invite, onClose, onUpdated }: EditInviteModalProps) {
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
         </div>
-        <p className="text-[13px] text-txt-secondary leading-snug min-w-0">
+        <p className="text-compact text-txt-secondary leading-snug min-w-0">
           {t('admin:invites.editModal.description')}
         </p>
       </div>
@@ -710,7 +710,7 @@ function EditInviteModal({ invite, onClose, onUpdated }: EditInviteModalProps) {
       >
         {/* Name */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">{t('admin:invites.form.name')}</div>
+          <div className="text-xs font-medium text-txt-secondary mb-2">{t('admin:invites.form.name')}</div>
           <input
             ref={nameInputRef}
             type="text"
@@ -724,7 +724,7 @@ function EditInviteModal({ invite, onClose, onUpdated }: EditInviteModalProps) {
 
         {/* Max uses */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">
+          <div className="text-xs font-medium text-txt-secondary mb-2">
             {t('admin:invites.form.maxUses')} <span className="normal-case font-normal text-txt-tertiary">{t('admin:invites.editModal.used', { used: invite.usedCount })}</span>
           </div>
           <div className="flex items-center gap-4 flex-wrap">
@@ -767,7 +767,7 @@ function EditInviteModal({ invite, onClose, onUpdated }: EditInviteModalProps) {
 
         {/* Expiry */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">{t('admin:invites.form.expires')}</div>
+          <div className="text-xs font-medium text-txt-secondary mb-2">{t('admin:invites.form.expires')}</div>
           <ExpirySelector
             value={expiryId}
             customDateTime={customDateTime}
@@ -920,7 +920,7 @@ function ReinstateInviteModal({ invite, onClose, onReinstated }: ReinstateInvite
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
         </div>
-        <p className="text-[13px] text-txt-secondary leading-snug min-w-0">{subtitle}</p>
+        <p className="text-compact text-txt-secondary leading-snug min-w-0">{subtitle}</p>
       </div>
 
       <form
@@ -932,14 +932,14 @@ function ReinstateInviteModal({ invite, onClose, onReinstated }: ReinstateInvite
       >
         {/* Amber callout — only for revoked variant to reinforce the "new URL" consequence */}
         {isRevoked && (
-          <div className="p-3 rounded-lg bg-accent-amber/10 border border-accent-amber/20 text-[13px] text-accent-amber">
+          <div className="p-3 rounded-lg bg-status-warn/10 border border-status-warn/20 text-compact text-status-warn">
             {t('admin:invites.reinstateModal.newLinkWarning')}
           </div>
         )}
 
         {/* Max uses */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">
+          <div className="text-xs font-medium text-txt-secondary mb-2">
             {t('admin:invites.form.maxUses')} <span className="normal-case font-normal text-txt-tertiary">{t('admin:invites.reinstateModal.maxUsesMeta', { max: invite.maxUses ?? '∞', used: invite.usedCount })}</span>
           </div>
           <div className="flex items-center gap-4 flex-wrap">
@@ -982,7 +982,7 @@ function ReinstateInviteModal({ invite, onClose, onReinstated }: ReinstateInvite
 
         {/* Expiry */}
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">{t('admin:invites.form.expires')}</div>
+          <div className="text-xs font-medium text-txt-secondary mb-2">{t('admin:invites.form.expires')}</div>
           <ExpirySelector
             value={expiryId}
             customDateTime={customDateTime}
@@ -1080,7 +1080,7 @@ function RedemptionsModal({ invite, onClose }: RedemptionsModalProps) {
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
           </svg>
         </div>
-        <p className="text-[13px] text-txt-secondary leading-snug min-w-0">
+        <p className="text-compact text-txt-secondary leading-snug min-w-0">
           {t('admin:invites.redemptions.description')}
         </p>
       </div>
@@ -1090,10 +1090,10 @@ function RedemptionsModal({ invite, onClose }: RedemptionsModalProps) {
           horizontal margin + padding compensates the body's `p-4` so the
           background can extend edge-to-edge. */}
       <div
-        className="sticky top-0 z-10 -mx-4 px-4 pb-3 space-y-3 bg-[var(--glass-modal-bg)] backdrop-blur-md"
+        className="sticky top-0 z-raised -mx-4 px-4 pb-3 space-y-3 bg-[var(--glass-modal-bg)] backdrop-blur-md"
       >
         {invite.status === 'revoked' && (
-          <div className="bg-accent-rose/10 border border-accent-rose/30 rounded p-2.5 text-xs text-accent-rose leading-relaxed">
+          <div className="bg-status-danger/10 border border-status-danger/30 rounded p-2.5 text-xs text-status-danger leading-relaxed">
             {invite.revokedAt
               ? t('admin:invites.redemptions.revokedNoticeDated', { date: f.formatNumericDate(invite.revokedAt) })
               : t('admin:invites.redemptions.revokedNotice')}
@@ -1267,13 +1267,13 @@ function InviteRow({ invite, expanded, onToggleExpand, onMutate }: InviteRowProp
   return (
     <>
       <div
-        className={`bg-white/[0.02] rounded-md transition-colors ${
-          expanded ? 'border border-white/[0.06]' : ''
+        className={`bg-surface-elevated rounded-lg transition-colors ${
+          expanded ? 'border border-border-soft' : ''
         }`}
       >
         {/* Collapsed clickable header */}
         <div
-          className="flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-white/[0.02] rounded-md"
+          className="flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-interactive-hover rounded-lg"
           onClick={onToggleExpand}
         >
           <div className="flex items-center gap-2.5 min-w-0">
@@ -1285,13 +1285,13 @@ function InviteRow({ invite, expanded, onToggleExpand, onMutate }: InviteRowProp
               >
                 {invite.name}
               </div>
-              <div className="text-[11px] text-txt-tertiary truncate">{subtitle}</div>
+              <div className="text-2xs text-txt-tertiary truncate">{subtitle}</div>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0 ml-2">
             {!isActive && (
               <span
-                className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded ${inviteStatusPillColor(invite.status)}`}
+                className={`inline-flex items-center text-2xs font-medium px-1.5 py-0.5 rounded ${inviteStatusPillColor(invite.status)}`}
               >
                 {inviteStatusLabel(invite.status)}
               </span>
@@ -1303,14 +1303,14 @@ function InviteRow({ invite, expanded, onToggleExpand, onMutate }: InviteRowProp
         {/* Expanded body */}
         {expanded && (
           <div className="px-3 pb-3">
-            <div className="border-t border-white/[0.05] pt-3">
+            <div className="border-t border-border-soft pt-3">
               {/* Row 1: USED · (EXPIRES | terminal-status AT) · CREATED */}
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div>
-                  <div className="text-[10px] text-txt-tertiary uppercase tracking-wider mb-0.5">{t('admin:invites.row.used')}</div>
+                  <div className="text-2xs text-txt-tertiary mb-0.5">{t('admin:invites.row.used')}</div>
                   <div
                     className={`text-xs ${
-                      usageNearLimit ? 'text-accent-amber font-medium' : 'text-txt-secondary'
+                      usageNearLimit ? 'text-status-warn font-medium' : 'text-txt-secondary'
                     }`}
                   >
                     {usageLabel}
@@ -1318,19 +1318,19 @@ function InviteRow({ invite, expanded, onToggleExpand, onMutate }: InviteRowProp
                 </div>
                 {isActive ? (
                   <div>
-                    <div className="text-[10px] text-txt-tertiary uppercase tracking-wider mb-0.5">{t('admin:invites.row.expires')}</div>
+                    <div className="text-2xs text-txt-tertiary mb-0.5">{t('admin:invites.row.expires')}</div>
                     <div className="text-xs text-txt-secondary">{formatExpiry(invite)}</div>
                   </div>
                 ) : (
                   <div>
-                    <div className="text-[10px] text-txt-tertiary uppercase tracking-wider mb-0.5">
+                    <div className="text-2xs text-txt-tertiary mb-0.5">
                       {archivedTerminalLabel}
                     </div>
                     <div className="text-xs text-txt-secondary">{archivedTerminalValue}</div>
                   </div>
                 )}
                 <div>
-                  <div className="text-[10px] text-txt-tertiary uppercase tracking-wider mb-0.5">{t('admin:invites.row.created')}</div>
+                  <div className="text-2xs text-txt-tertiary mb-0.5">{t('admin:invites.row.created')}</div>
                   <div className="text-xs text-txt-secondary">{f.formatRelativeTime(invite.createdAt)}</div>
                 </div>
               </div>
@@ -1338,19 +1338,19 @@ function InviteRow({ invite, expanded, onToggleExpand, onMutate }: InviteRowProp
               {/* Row 2: CREATED BY · TOKEN · LAST REDEEMED */}
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div>
-                  <div className="text-[10px] text-txt-tertiary uppercase tracking-wider mb-0.5">{t('admin:invites.row.createdByLabel')}</div>
+                  <div className="text-2xs text-txt-tertiary mb-0.5">{t('admin:invites.row.createdByLabel')}</div>
                   <div className="text-xs text-txt-secondary truncate" title={createdByLabel}>
                     {createdByLabel}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-txt-tertiary uppercase tracking-wider mb-0.5">{t('admin:invites.row.token')}</div>
+                  <div className="text-2xs text-txt-tertiary mb-0.5">{t('admin:invites.row.token')}</div>
                   <div className="text-xs font-mono text-txt-secondary" title={invite.token}>
                     {tokenDisplay}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-txt-tertiary uppercase tracking-wider mb-0.5">{t('admin:invites.row.lastRedeemed')}</div>
+                  <div className="text-2xs text-txt-tertiary mb-0.5">{t('admin:invites.row.lastRedeemed')}</div>
                   <div className="text-xs text-txt-secondary">{lastRedeemedDisplay}</div>
                 </div>
               </div>
@@ -1376,14 +1376,14 @@ function InviteRow({ invite, expanded, onToggleExpand, onMutate }: InviteRowProp
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setConfirmRevoke(true); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-accent-rose/10 text-txt-danger hover:bg-accent-rose/20 rounded transition-colors"
+                      className="px-3 py-1.5 text-xs font-medium bg-status-danger/10 text-status-danger hover:bg-status-danger/20 rounded transition-colors"
                     >
                       {t('admin:invites.row.revoke')}
                     </button>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setShowRedemptions(true); }}
-                      className="text-[11px] text-txt-tertiary hover:text-txt-secondary underline decoration-dotted transition-colors ml-1"
+                      className="text-2xs text-txt-tertiary hover:text-txt-secondary underline decoration-dotted transition-colors ml-1"
                     >
                       {t('admin:invites.row.viewRedemptions')}
                     </button>
@@ -1393,21 +1393,21 @@ function InviteRow({ invite, expanded, onToggleExpand, onMutate }: InviteRowProp
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setShowReinstate(true); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-status-online/10 text-status-online hover:bg-status-online/20 rounded transition-colors"
+                      className="px-3 py-1.5 text-xs font-medium bg-status-ok/10 text-status-ok hover:bg-status-ok/20 rounded transition-colors"
                     >
                       {t('admin:invites.row.reinstate')}
                     </button>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-accent-rose/10 text-txt-danger hover:bg-accent-rose/20 rounded transition-colors"
+                      className="px-3 py-1.5 text-xs font-medium bg-status-danger/10 text-status-danger hover:bg-status-danger/20 rounded transition-colors"
                     >
                       {t('admin:invites.row.deletePermanently')}
                     </button>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setShowRedemptions(true); }}
-                      className="text-[11px] text-txt-tertiary hover:text-txt-secondary underline decoration-dotted transition-colors ml-1"
+                      className="text-2xs text-txt-tertiary hover:text-txt-secondary underline decoration-dotted transition-colors ml-1"
                     >
                       {t('admin:invites.row.viewRedemptions')}
                     </button>
@@ -1631,8 +1631,8 @@ export function RegistrationPanel() {
 
       {/* Public registration */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:registration.public.label')}</div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:registration.public.label')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <label className="flex items-center justify-between cursor-pointer gap-4">
             <div className="flex-1">
               <div className="text-sm font-medium text-txt-primary">{t('admin:registration.public.toggleLabel')}</div>
@@ -1650,8 +1650,8 @@ export function RegistrationPanel() {
 
       {/* Federated registration */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('admin:registration.federated.label')}</div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('admin:registration.federated.label')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <label className="flex items-center justify-between cursor-pointer gap-4">
             <div className="flex-1">
               <div className="text-sm font-medium text-txt-primary">{t('admin:registration.federated.toggleLabel')}</div>
@@ -1668,10 +1668,10 @@ export function RegistrationPanel() {
       </div>
 
       {/* Invite Links */}
-      <div className="border-t border-white/[0.06] pt-5">
+      <div className="border-t border-border-soft pt-5">
         {/* Row 1: heading + create button */}
         <div className="flex items-center justify-between mb-3">
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider">{t('admin:invites.label')}</div>
+          <div className="text-xs font-medium text-txt-secondary">{t('admin:invites.label')}</div>
           <button
             type="button"
             onClick={() => setShowCreate(true)}
@@ -1683,7 +1683,7 @@ export function RegistrationPanel() {
 
         {/* Row 2: tab strip (left) + FilterDropdown (right) */}
         <div className="flex items-center justify-between mb-3">
-          <div className="flex bg-white/[0.04] rounded-md p-0.5">
+          <div className="flex bg-surface-elevated rounded-lg p-0.5">
             <button
               type="button"
               onClick={() => handleTabSwitch('active')}
@@ -1691,7 +1691,7 @@ export function RegistrationPanel() {
                 tab === 'active' ? 'bg-white/[0.08] text-txt-primary' : 'text-txt-tertiary hover:text-txt-secondary'
               }`}
             >
-              {t('admin:invites.tabs.active')} <span className="text-[10px] text-txt-tertiary ml-0.5">{activeCount}</span>
+              {t('admin:invites.tabs.active')} <span className="text-2xs text-txt-tertiary ml-0.5">{activeCount}</span>
             </button>
             <button
               type="button"
@@ -1700,7 +1700,7 @@ export function RegistrationPanel() {
                 tab === 'archived' ? 'bg-white/[0.08] text-txt-primary' : 'text-txt-tertiary hover:text-txt-secondary'
               }`}
             >
-              {t('admin:invites.tabs.archived')} <span className="text-[10px] text-txt-tertiary ml-0.5">{archivedCount}</span>
+              {t('admin:invites.tabs.archived')} <span className="text-2xs text-txt-tertiary ml-0.5">{archivedCount}</span>
             </button>
           </div>
           <FilterDropdown
@@ -1721,7 +1721,7 @@ export function RegistrationPanel() {
             {tab === 'active' ? t('admin:invites.emptyActive') : t('admin:invites.emptyArchived')}
           </div>
         ) : displayInvites.length === 0 ? (
-          <div className="text-[11px] text-txt-tertiary py-3 text-center">
+          <div className="text-2xs text-txt-tertiary py-3 text-center">
             {t('admin:invites.noMatch')}
           </div>
         ) : (
@@ -1743,11 +1743,11 @@ export function RegistrationPanel() {
 
       {/* Status messages */}
       {saveError && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{saveError}</div>
+        <div className="p-2 bg-status-danger/10 border border-status-danger/30 rounded text-status-danger text-sm">{saveError}</div>
       )}
       {/* Save / Reset bar */}
       {hasChanges && (
-        <div className="sticky bottom-0 z-10 pointer-events-none">
+        <div className="sticky bottom-0 z-raised pointer-events-none">
           <div className="flex justify-center pt-3 pb-1">
             <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 animate-slide-up pointer-events-auto">
               <button

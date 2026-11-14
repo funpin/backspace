@@ -86,7 +86,7 @@ describe('UserProfilePopoutLayer', () => {
       </MemoryRouter>,
     );
     act(() => { useUIStore.getState().openUserProfile(ADA, '', ANCHOR); });
-    const backdrop = document.querySelector('body > .fixed.inset-0.z-\\[145\\]');
+    const backdrop = document.querySelector('body > .fixed.inset-0.z-popover:not([data-user-profile-popout])');
     expect(backdrop).toBeInstanceOf(HTMLElement);
     if (!(backdrop instanceof HTMLElement)) return;
     fireEvent.click(backdrop);

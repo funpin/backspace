@@ -4,10 +4,10 @@ import { useUIStore } from '../../stores/uiStore';
 import { useChannelUser } from '../../utils/channelUser';
 import { spaceMemberName } from '../../utils/identity';
 
-/** Resolved mention without a role colour (a DM, or a member with no role). */
-const ACCENT_COLOR = '#7c6cf6';
+/** Resolved mention without a role colour (a DM, or a member with no role): the theme's secondary colour. */
+const THEME_CLASS = 'text-accent-secondary bg-accent-secondary/15';
 /** A mention this client cannot place in the channel. */
-const UNRESOLVED_COLOR = '#a0a0aa';
+const UNRESOLVED_CLASS = 'text-txt-secondary bg-surface-elevated';
 
 interface MentionBadgeProps {
   userId: string;
@@ -33,7 +33,7 @@ export const MentionBadge = React.memo(function MentionBadge({ userId, channelId
 
   const displayName = resolved ? spaceMemberName(resolved.member, resolved.user) : t('message.mention.unknownUser');
   // Role colour and owner rose exist only in space channels (nameColor is null in a DM).
-  const color = resolved ? resolved.nameColor ?? ACCENT_COLOR : UNRESOLVED_COLOR;
+  const roleColor = resolved?.nameColor ?? null;
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!resolved) return;
@@ -44,14 +44,18 @@ export const MentionBadge = React.memo(function MentionBadge({ userId, channelId
     openUserProfile(resolved.user, resolved.origin, e.currentTarget.getBoundingClientRect(), undefined, memberContext);
   };
 
-  // Build inline styles: role-colored text with tinted background
-  const bgColor = color + '1a'; // ~10% opacity hex
-  const baseClass = 'inline-flex items-center rounded-[3px] px-[2px] font-medium';
+  // A role colour belongs to the space, so it is drawn as given on a tint of
+  // itself; every other mention takes its colour from the theme.
+  const toneClass = roleColor ? '' : resolved ? THEME_CLASS : UNRESOLVED_CLASS;
+  const baseClass = `inline-flex items-center rounded px-0.5 font-medium ${toneClass}`.trimEnd();
+  const style: React.CSSProperties | undefined = roleColor
+    ? { color: roleColor, backgroundColor: `color-mix(in srgb, ${roleColor} 15%, transparent)` }
+    : undefined;
 
   // Plain text inside another control, and when there is no profile to open.
   if (!interactive || !resolved) {
     return (
-      <span className={baseClass} style={{ color, backgroundColor: bgColor }}>
+      <span className={baseClass} style={style}>
         @{displayName}
       </span>
     );
@@ -63,8 +67,8 @@ export const MentionBadge = React.memo(function MentionBadge({ userId, channelId
     <button
       type="button"
       onClick={handleClick}
-      className={`${baseClass} cursor-pointer transition-colors hover:brightness-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/60`}
-      style={{ color, backgroundColor: bgColor }}
+      className={`${baseClass} cursor-pointer transition-colors duration-fast hover:brightness-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone/60`}
+      style={style}
     >
       @{displayName}
     </button>

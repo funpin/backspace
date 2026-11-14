@@ -134,14 +134,13 @@ export function ReactionPill({ emoji, reactions, origin, onToggle }: ReactionPil
         onBlur={hide}
         aria-pressed={mine}
         aria-describedby={descriptionId}
-        className={`glass-pill flex items-center gap-1 rounded-[6px] cursor-pointer transition-all duration-[120ms] ease-out focus-visible:ring-2 focus-visible:ring-accent-primary/60 ${
-          mine ? 'glass-pill-mine' : ''
-        }`}
-        style={{ padding: '2px 8px', fontSize: '13px', lineHeight: 1 }}
+        className={`glass-pill flex items-center gap-1.5 px-2 rounded-lg cursor-pointer transition-[background-color,transform] duration-fast ease-pop active:scale-[1.18] focus-visible:ring-2 focus-visible:ring-accent-tone/60 ${
+          imageUrl ? 'min-h-[26px] py-0.5' : 'h-[26px]'
+        } ${mine ? 'glass-pill-mine' : ''}`}
       >
         {imageUrl ? <img src={imageUrl} alt={t('chat:stickers.sticker')} className="w-7 h-7 object-contain" />
-          : <span style={{ fontSize: '14px', lineHeight: 1 }}>{emoji}</span>}
-        <span className={`font-semibold ${mine ? 'text-accent-mint' : 'text-txt-secondary'}`} style={{ fontSize: '12px' }}>
+          : <span className="text-sm leading-none">{emoji}</span>}
+        <span className={`text-xs leading-none font-semibold tabular-nums ${mine ? 'text-accent-tone' : 'text-txt-secondary'}`}>
           {fmt.formatNumber(reactions.length)}
         </span>
       </button>
@@ -153,13 +152,13 @@ export function ReactionPill({ emoji, reactions, origin, onToggle }: ReactionPil
           style={style}
           className={`glass flex items-center pointer-events-none animate-fade-in ${imageUrl
             ? 'flex-col w-[224px] max-w-[calc(100*var(--app-vw)-24px)] rounded-xl overflow-hidden'
-            : 'rounded-md px-2.5 py-1.5 gap-2 max-w-[360px]'}`}
+            : 'rounded-lg px-2.5 py-1.5 gap-2 max-w-[360px]'}`}
         >
           {imageUrl ? <div className="w-full p-4">
             <img src={imageUrl} alt={t('chat:stickers.preview')} className="w-full h-40 object-contain" />
           </div>
-            : <span className="text-[16px] leading-none flex-shrink-0">{emoji}</span>}
-          <span className={`text-[13px] leading-[18px] text-txt-secondary [overflow-wrap:anywhere] ${imageUrl ? 'w-full border-t border-border-soft px-3 py-2.5 text-center' : ''}`}>
+            : <span className="text-lg leading-none flex-shrink-0">{emoji}</span>}
+          <span className={`text-compact text-txt-secondary [overflow-wrap:anywhere] ${imageUrl ? 'w-full border-t border-border-soft px-3 py-2.5 text-center' : ''}`}>
             {before}
             <span className="font-medium text-txt-primary">{names}</span>
             {after}

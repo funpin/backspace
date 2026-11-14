@@ -7,6 +7,8 @@ import { useSpaceStore } from '../../stores/spaceStore';
 import { useNavigate } from 'react-router-dom';
 import { useInstanceUpdateBadge } from '../../hooks/useInstanceUpdateBadge';
 import { useHubUpdateState } from '../../hooks/useHubUpdateState';
+import { Icon } from '../ui/Icon';
+import { Badge } from '../ui/Tag';
 
 export function MobileBottomNav() {
   const { t } = useTranslation('mobile');
@@ -64,31 +66,19 @@ export function MobileBottomNav() {
     {
       id: 'spaces' as const,
       label: t('nav.spaces'),
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-        </svg>
-      ),
+      icon: 'layout-grid' as const,
       badge: hasUnreadSpaces ? ('dot' as const) : null,
     },
     {
       id: 'dms' as const,
       label: t('nav.dms'),
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-        </svg>
-      ),
+      icon: 'message-circle' as const,
       badge: unreadDmCount > 0 ? unreadDmCount : null,
     },
     {
       id: 'you' as const,
       label: t('nav.you'),
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-        </svg>
-      ),
+      icon: 'user' as const,
       badge: (pendingIncoming.length > 0 || updateBadge || hubUpdated) ? ('dot' as const) : null,
     },
   ];
@@ -101,28 +91,33 @@ export function MobileBottomNav() {
         height: 'calc(56px + var(--safe-bottom))',
       }}
     >
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => handleTab(tab.id)}
-          className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 relative transition-colors ${
-            mobileScreen === tab.id ? 'text-accent-primary' : 'text-txt-secondary'
-          }`}
-        >
-          <div className="relative">
-            {tab.icon}
-            {tab.badge === 'dot' && (
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-notification rounded-full" />
+      {tabs.map((tab) => {
+        const active = mobileScreen === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => handleTab(tab.id)}
+            className={`flex flex-col items-center justify-center gap-0.5 flex-1 self-stretch py-2 relative transition-colors duration-fast ${
+              active ? 'text-txt-primary' : 'text-txt-tertiary'
+            }`}
+          >
+            {/* The 3px mark of the open tab, on the bar's top edge. */}
+            {active && (
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-full bg-accent-tone" aria-hidden="true" />
             )}
-            {typeof tab.badge === 'number' && (
-              <span className="absolute -top-1 -right-2 min-w-[16px] h-4 px-1 bg-notification text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                {tab.badge > 99 ? '99+' : tab.badge}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-medium">{tab.label}</span>
-        </button>
-      ))}
+            <div className="relative">
+              <Icon name={tab.icon} size="lg" />
+              {tab.badge === 'dot' && (
+                <Badge className="absolute -top-0.5 -right-0.5" />
+              )}
+              {typeof tab.badge === 'number' && (
+                <Badge count={tab.badge} className="absolute -top-1 -right-2" />
+              )}
+            </div>
+            <span className="text-2xs font-medium">{tab.label}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 }

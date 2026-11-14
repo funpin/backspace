@@ -4,8 +4,8 @@ import React from 'react';
 export function StatusDot({ status }: { status: string }) {
   const colorClass =
     status === 'connected' ? 'bg-status-online' :
-    status === 'connecting' ? 'bg-accent-amber' :
-    'bg-txt-tertiary';
+    status === 'connecting' ? 'bg-status-warn' :
+    'bg-status-offline';
 
   return <div className={`w-2 h-2 rounded-full shrink-0 ${colorClass}`} />;
 }
