@@ -12,6 +12,23 @@ import { describeError } from '../i18n/errors';
 import { isAlreadyMemberError, isJoinRequestPendingError, isNotRequestableError, JoinRequestRequiredError } from '../utils/joinErrors';
 import { sendInviteJoinRequest, type InviteRequestOutcome } from '../utils/inviteJoinRequest';
 import { FallbackNotice } from './modals/RemotePasswordStep';
+import { Button } from './ui/Button';
+import { Icon } from './ui/Icon';
+
+/**
+ * A router link that looks like a `Button`: the primary and secondary
+ * variants at the large size, full width. `Button` renders a `<button>`, and
+ * these targets are routes, so the classes are spelt out here.
+ */
+const LINK_BUTTON_BASE =
+  'flex w-full h-10 px-4 items-center justify-center rounded-lg text-sm transition-[background-color,color] duration-fast ease-out';
+const LINK_BUTTON_PRIMARY =
+  `${LINK_BUTTON_BASE} bg-accent-primary text-on-accent font-semibold hover:bg-accent-primary-hover active:bg-accent-primary-active`;
+const LINK_BUTTON_SECONDARY =
+  `${LINK_BUTTON_BASE} bg-surface-elevated text-txt-primary font-medium shadow-[inset_0_0_0_1px_var(--glass-border)] hover:bg-border-soft`;
+
+/** The centred panel every state of the page sits in. */
+const PANEL = 'my-auto flex-shrink-0 w-full max-w-[480px] bg-surface-channel border border-border-hard rounded-2xl p-8 relative z-raised';
 
 type JoinPhase = 'preview' | 'connect' | 'fallback' | 'other-instance' | 'already-member' | 'request-sent';
 
@@ -265,8 +282,8 @@ export function JoinPage() {
     return (
       <div className="h-full overflow-y-auto flex flex-col items-center bg-surface-base relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--accent-primary)/0.06)_0%,transparent_50%)]" />
-        <div className="my-auto flex-shrink-0 text-center relative z-10">
-          <svg className="animate-spin w-10 h-10 text-accent-primary mx-auto mb-4" viewBox="0 0 24 24" fill="none">
+        <div className="my-auto flex-shrink-0 text-center relative z-raised">
+          <svg className="animate-spin w-10 h-10 text-accent-tone mx-auto mb-4" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
@@ -281,28 +298,20 @@ export function JoinPage() {
     return (
       <div className="h-full overflow-y-auto flex flex-col items-center bg-surface-base relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--accent-primary)/0.06)_0%,transparent_50%)]" />
-        <div className="my-auto flex-shrink-0 w-full max-w-[480px] bg-surface-elevated rounded-md p-8 shadow-elevation-high relative z-10 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent-rose/10 flex items-center justify-center">
-            <svg className="w-8 h-8 text-accent-rose" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
+        <div className={`${PANEL} text-center`}>
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-status-danger/[0.14] text-status-danger flex items-center justify-center">
+            <Icon name="triangle-alert" size="lg" />
           </div>
-          <h1 className="text-xl font-bold text-txt-primary mb-2">{t('auth:join.invalid.title')}</h1>
+          <h1 className="text-2xl font-semibold text-txt-primary mb-2">{t('auth:join.invalid.title')}</h1>
           <p className="text-txt-secondary text-sm mb-6">
             {previewError || t('auth:join.invalid.description')}
           </p>
           {token ? (
-            <button
-              onClick={() => navigate('/channels/@me')}
-              className="px-6 py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors"
-            >
+            <Button variant="primary" size="lg" fullWidth onClick={() => navigate('/channels/@me')}>
               {t('auth:join.invalid.backToApp')}
-            </button>
+            </Button>
           ) : (
-            <Link
-              to="/login"
-              className="inline-block px-6 py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors"
-            >
+            <Link to="/login" className={LINK_BUTTON_PRIMARY}>
               {t('common:actions.logIn')}
             </Link>
           )}
@@ -315,7 +324,7 @@ export function JoinPage() {
   return (
     <div className="h-full overflow-y-auto flex flex-col items-center bg-surface-base relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--accent-primary)/0.06)_0%,transparent_50%)]" />
-      <div className="my-auto flex-shrink-0 w-full max-w-[480px] bg-surface-elevated rounded-md p-8 shadow-elevation-high relative z-10">
+      <div className={PANEL}>
         {/* Space preview */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-4">
@@ -328,14 +337,14 @@ export function JoinPage() {
               palette="space"
             />
           </div>
-          <p className="text-xs text-txt-tertiary uppercase tracking-wide mb-1">{action === 'request' ? t('auth:join.invitedToRequest') : t('auth:join.invitedTo')}</p>
-          <h1 className="text-2xl font-bold text-txt-primary">{preview.spaceName}</h1>
+          <p className="text-xs font-medium text-txt-tertiary mb-1">{action === 'request' ? t('auth:join.invitedToRequest') : t('auth:join.invitedTo')}</p>
+          <h1 className="text-2xl font-semibold text-txt-primary">{preview.spaceName}</h1>
           {preview.description && (
             <p className="text-txt-secondary text-sm mt-2">{preview.description}</p>
           )}
           <div className="flex items-center justify-center gap-4 mt-3 text-xs text-txt-tertiary">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-txt-tertiary/40" />
+            <span className="flex items-center gap-1 tabular-nums">
+              <Icon name="users" size="xs" />
               {t('auth:join.memberCount', { count: preview.memberCount })}
             </span>
             <span>{preview.instanceName}</span>
@@ -343,7 +352,7 @@ export function JoinPage() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+          <div className="mb-4 px-3 py-2.5 bg-status-danger/10 rounded-lg text-status-danger text-sm">
             {error}
           </div>
         )}
@@ -357,7 +366,7 @@ export function JoinPage() {
             {token && user ? (
               /* Authenticated user — show identity card + join */
               <div className="space-y-3">
-                <div className="flex items-center gap-3 bg-surface-input rounded-lg p-3">
+                <div className="flex items-center gap-3 bg-surface-elevated rounded-xl p-3">
                   <Avatar
                     src={user.avatar || null}
                     name={user.displayName || user.username}
@@ -381,21 +390,17 @@ export function JoinPage() {
                     className="input-standard w-full py-2 text-sm resize-none"
                   />
                 )}
-                <button
-                  onClick={handleJoin}
-                  disabled={isJoining}
-                  className="w-full py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <Button variant="primary" size="lg" fullWidth onClick={handleJoin} disabled={isJoining}>
                   {action === 'request'
                     ? (isJoining ? t('auth:join.request.sending') : t('auth:join.request.askAs', { name: user.displayName || user.username }))
                     : (isJoining ? t('auth:join.joining') : t('auth:join.joinAs', { name: user.displayName || user.username }))}
-                </button>
+                </Button>
                 <p className="text-center text-xs text-txt-tertiary">
                   {t('auth:join.notYou')}{' '}
                   <button
                     type="button"
                     onClick={() => { logout(); navigate(`/login${redirectParam}`); }}
-                    className="text-accent-primary hover:underline"
+                    className="text-txt-link hover:underline"
                   >
                     {t('auth:join.switchAccount')}
                   </button>
@@ -403,7 +408,7 @@ export function JoinPage() {
                   <button
                     type="button"
                     onClick={() => { setPhase('other-instance'); setError(''); }}
-                    className="text-accent-primary hover:underline"
+                    className="text-txt-link hover:underline"
                   >
                     {t('auth:join.otherInstance')}
                   </button>
@@ -411,42 +416,29 @@ export function JoinPage() {
               </div>
             ) : token ? (
               /* Token exists but user still loading */
-              <button
-                disabled
-                className="w-full py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <Button variant="primary" size="lg" fullWidth disabled>
                 {t('common:states.loading')}
-              </button>
+              </Button>
             ) : (
               /* Unauthenticated user */
               <div className="space-y-3">
-                <Link
-                  to={`/login${redirectParam}`}
-                  className="block w-full py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors text-center"
-                >
+                <Link to={`/login${redirectParam}`} className={LINK_BUTTON_PRIMARY}>
                   {action === 'request' ? t('auth:join.request.loginToAsk') : t('auth:join.loginToJoin')}
                 </Link>
-                <Link
-                  to={`/register${redirectParam}`}
-                  className="block w-full py-2.5 bg-surface-input hover:bg-surface-elevated text-txt-primary font-medium rounded transition-colors text-center"
-                >
+                <Link to={`/register${redirectParam}`} className={LINK_BUTTON_SECONDARY}>
                   {t('auth:join.createAccount')}
                 </Link>
 
                 {/* Divider */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-border-soft" />
+                  <div className="flex-1 h-px bg-border-hard" />
                   <span className="text-xs text-txt-tertiary">{t('common:labels.or')}</span>
-                  <div className="flex-1 h-px bg-border-soft" />
+                  <div className="flex-1 h-px bg-border-hard" />
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => { setPhase('other-instance'); setError(''); }}
-                  className="block w-full py-2.5 bg-surface-input hover:bg-surface-elevated text-txt-primary font-medium rounded transition-colors text-center"
-                >
+                <Button variant="secondary" size="lg" fullWidth onClick={() => { setPhase('other-instance'); setError(''); }}>
                   {t('auth:join.otherInstance')}
-                </button>
+                </Button>
               </div>
             )}
           </>
@@ -455,7 +447,7 @@ export function JoinPage() {
         {/* Phase: other-instance — domain input for federation redirect */}
         {phase === 'other-instance' && (
           <form onSubmit={handleOtherInstanceRedirect}>
-            <label className="block text-xs font-bold text-txt-secondary uppercase mb-1.5">
+            <label className="block text-xs font-medium text-txt-secondary mb-1.5">
               {t('auth:join.domain.label')}
             </label>
             <div className="flex gap-2 mb-1.5">
@@ -467,24 +459,16 @@ export function JoinPage() {
                 className="input-standard flex-1 py-2.5"
                 autoFocus
               />
-              <button
-                type="submit"
-                disabled={!otherDomain.trim()}
-                className="px-4 py-2 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded transition-colors disabled:opacity-50"
-              >
+              <Button type="submit" variant="primary" size="lg" disabled={!otherDomain.trim()}>
                 {t('auth:join.domain.go')}
-              </button>
+              </Button>
             </div>
             <p className="text-xs text-txt-tertiary mb-4">
               {t('auth:join.domain.redirectNote')}
             </p>
-            <button
-              type="button"
-              onClick={() => { setPhase('preview'); setOtherDomain(''); setError(''); }}
-              className="px-4 py-2.5 text-txt-tertiary hover:text-txt-secondary text-sm transition-colors"
-            >
+            <Button variant="ghost" size="lg" onClick={() => { setPhase('preview'); setOtherDomain(''); setError(''); }}>
               {t('common:actions.back')}
-            </button>
+            </Button>
           </form>
         )}
 
@@ -493,7 +477,7 @@ export function JoinPage() {
           <form onSubmit={handleConnect}>
             <input type="text" autoComplete="username" value={user?.username || ''} readOnly tabIndex={-1} className="sr-only" />
             {/* Identity card */}
-            <div className="flex items-center gap-3 bg-surface-input rounded-lg p-3 mb-3">
+            <div className="flex items-center gap-3 bg-surface-elevated rounded-xl p-3 mb-3">
               <Avatar
                 src={user?.avatar || null}
                 name={user?.displayName || user?.username || '?'}
@@ -514,7 +498,7 @@ export function JoinPage() {
               />
             </p>
             <div className="mb-4">
-              <label className="block text-xs font-bold text-txt-secondary uppercase mb-1.5">
+              <label className="block text-xs font-medium text-txt-secondary mb-1.5">
                 {t('common:labels.password')}
               </label>
               <input
@@ -532,22 +516,14 @@ export function JoinPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => { setPhase('preview'); setPassword(''); setError(''); }}
-                className="px-4 py-2.5 text-txt-tertiary hover:text-txt-secondary text-sm transition-colors"
-              >
+              <Button variant="ghost" size="lg" onClick={() => { setPhase('preview'); setPassword(''); setError(''); }}>
                 {t('common:actions.back')}
-              </button>
-              <button
-                type="submit"
-                disabled={isJoining || !password}
-                className="flex-1 py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              </Button>
+              <Button type="submit" variant="primary" size="lg" disabled={isJoining || !password} className="flex-1">
                 {isJoining
                   ? t('auth:join.connect.submitting')
                   : action === 'request' ? t('auth:join.connect.submitRequest') : t('auth:join.connect.submit')}
-              </button>
+              </Button>
             </div>
           </form>
         )}
@@ -572,7 +548,7 @@ export function JoinPage() {
             <FallbackNotice reason={fallbackReason} host={hostDisplay} className="mb-3" />
             <div className="mb-4 space-y-3">
               <div>
-                <label className="block text-xs font-bold text-txt-secondary uppercase mb-1.5">{t('common:labels.username')}</label>
+                <label className="block text-xs font-medium text-txt-secondary mb-1.5">{t('common:labels.username')}</label>
                 <input
                   type="text"
                   value={fallbackUsername}
@@ -584,7 +560,7 @@ export function JoinPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-txt-secondary uppercase mb-1.5">{t('auth:join.fallback.passwordLabel')}</label>
+                <label className="block text-xs font-medium text-txt-secondary mb-1.5">{t('auth:join.fallback.passwordLabel')}</label>
                 <input
                   type="password"
                   value={fallbackPassword}
@@ -598,22 +574,20 @@ export function JoinPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => { setPhase('connect'); setFallbackPassword(''); setError(''); }}
-                className="px-4 py-2.5 text-txt-tertiary hover:text-txt-secondary text-sm transition-colors"
-              >
+              <Button variant="ghost" size="lg" onClick={() => { setPhase('connect'); setFallbackPassword(''); setError(''); }}>
                 {t('common:actions.back')}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
+                variant="primary"
+                size="lg"
                 disabled={isJoining || !fallbackUsername || !fallbackPassword}
-                className="flex-1 py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1"
               >
                 {isJoining
                   ? t('auth:join.fallback.submitting')
                   : action === 'request' ? t('auth:join.fallback.submitRequest') : t('auth:join.fallback.submit')}
-              </button>
+              </Button>
             </div>
           </form>
         )}
@@ -629,10 +603,8 @@ function RequestSentCard({ spaceName, outcome, onDone }: { spaceName: string; ou
   const { t } = useTranslation(['auth']);
   return (
     <div className="text-center" role="status">
-      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-accent-mint/10 flex items-center justify-center">
-        <svg className="w-6 h-6 text-accent-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
+      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-status-ok/[0.14] text-status-ok flex items-center justify-center">
+        <Icon name="check" size="lg" />
       </div>
       <p className="text-txt-primary font-medium mb-1">
         {outcome === 'sent'
@@ -640,12 +612,9 @@ function RequestSentCard({ spaceName, outcome, onDone }: { spaceName: string; ou
           : t('auth:join.requestSent.pendingTitle', { space: spaceName })}
       </p>
       <p className="text-txt-tertiary text-xs mb-4">{t('auth:join.requestSent.body')}</p>
-      <button
-        onClick={onDone}
-        className="px-6 py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors"
-      >
+      <Button variant="primary" size="lg" fullWidth onClick={onDone}>
         {t('auth:join.invalid.backToApp')}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -659,19 +628,14 @@ function AlreadyMemberCard({ spaceName, spaceId, navigate }: { spaceName: string
 
   return (
     <div className="text-center">
-      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-accent-mint/10 flex items-center justify-center">
-        <svg className="w-6 h-6 text-accent-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
+      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-status-ok/[0.14] text-status-ok flex items-center justify-center">
+        <Icon name="check" size="lg" />
       </div>
       <p className="text-txt-primary font-medium mb-1">{t('auth:join.alreadyMember.title', { space: spaceName })}</p>
       <p className="text-txt-tertiary text-xs mb-4">{t('auth:join.alreadyMember.redirecting')}</p>
-      <button
-        onClick={() => navigate(`/channels/${spaceId}`)}
-        className="px-6 py-2.5 bg-accent-primary hover:bg-accent-primary/80 text-white font-medium rounded transition-colors"
-      >
+      <Button variant="primary" size="lg" fullWidth onClick={() => navigate(`/channels/${spaceId}`)}>
         {t('auth:join.alreadyMember.go', { space: spaceName })}
-      </button>
+      </Button>
     </div>
   );
 }

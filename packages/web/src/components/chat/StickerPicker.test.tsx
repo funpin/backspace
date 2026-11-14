@@ -183,7 +183,7 @@ describe('sticker controls', () => {
     expect(onClose).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole('button', { name: 'Rename Happy' }));
-    fireEvent.click(screen.getByText('Cancel', { selector: 'button' }));
+    fireEvent.click(screen.getByText('Cancel').closest('button')!);
     expect(screen.queryByRole('form')).not.toBeInTheDocument();
     expect(api.stickers.rename).not.toHaveBeenCalled();
   });

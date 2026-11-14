@@ -17,6 +17,9 @@ import { useFederationStore } from '../../stores/federationStore';
 import { isElectron } from '../../platform/platform';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { StatusDot } from '../ui/StatusDot';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
+import { Tabs } from '../ui/Controls';
 import { RemotePasswordStep, type RemotePasswordPhase } from './RemotePasswordStep';
 import { ReauthForm } from './ReauthForm';
 import { useFormatters, type Formatters } from '../../i18n/formatters';
@@ -33,21 +36,25 @@ function safeHost(origin: string): string {
 
 // ─── Registry status helpers ────────────────────────────────────────────────
 
+/** An exclusive choice: the chosen one takes the tone's edge and tint, the rest a quiet edge. */
+const CHOICE_ON = 'bg-accent-tone/[0.16] shadow-[inset_0_0_0_1.5px_rgb(var(--accent-tone))]';
+const CHOICE_OFF = 'shadow-[inset_0_0_0_1px_var(--glass-border)] hover:bg-interactive-hover';
+
 function registryStatusColor(status: string): string {
   switch (status) {
-    case 'connected': return 'bg-status-online/15 text-status-online';
-    case 'disconnected': return 'bg-white/5 text-txt-tertiary';
-    case 'unreachable': return 'bg-accent-amber/15 text-accent-amber';
-    case 'auth_expired': return 'bg-accent-rose/15 text-accent-rose';
-    default: return 'bg-white/5 text-txt-tertiary';
+    case 'connected': return 'bg-status-ok/15 text-status-ok';
+    case 'disconnected': return 'bg-surface-input text-txt-tertiary';
+    case 'unreachable': return 'bg-status-warn/15 text-status-warn';
+    case 'auth_expired': return 'bg-status-danger/15 text-status-danger';
+    default: return 'bg-surface-input text-txt-tertiary';
   }
 }
 
 function registryStatusDotColor(status: string): string {
   switch (status) {
-    case 'connected': return 'bg-status-online';
-    case 'unreachable': return 'bg-accent-amber';
-    case 'auth_expired': return 'bg-accent-rose';
+    case 'connected': return 'bg-status-ok';
+    case 'unreachable': return 'bg-status-warn';
+    case 'auth_expired': return 'bg-status-danger';
     default: return 'bg-txt-tertiary';
   }
 }
@@ -153,7 +160,7 @@ function AddInstanceFlow({ onDone }: { onDone: () => void }) {
   if (step === 'done') return null;
 
   return (
-    <div className="mt-3 p-3 bg-surface-channel rounded-lg space-y-3">
+    <div className="mt-1 p-3 rounded-xl bg-surface-elevated space-y-3">
       {/* Step 1: Enter URL */}
       {step === 'url' && (
         <>
@@ -168,20 +175,13 @@ function AddInstanceFlow({ onDone }: { onDone: () => void }) {
               className="input-standard flex-1"
               disabled={isLoading}
             />
-            <button
-              onClick={handleProbe}
-              disabled={isLoading || !url.trim()}
-              className="px-4 py-2 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded transition-colors disabled:opacity-50"
-            >
+            <Button variant="primary" onClick={handleProbe} disabled={isLoading || !url.trim()}>
               {isLoading ? t('federation:connections.add.probing') : t('federation:connections.add.connect')}
-            </button>
+            </Button>
           </div>
-          <button
-            onClick={onDone}
-            className="text-xs text-txt-tertiary hover:text-txt-secondary transition-colors"
-          >
+          <Button variant="ghost" size="sm" onClick={onDone}>
             {t('common:actions.cancel')}
-          </button>
+          </Button>
         </>
       )}
 
@@ -199,8 +199,11 @@ function AddInstanceFlow({ onDone }: { onDone: () => void }) {
             onConnect={handleConnect}
             onLogin={handleFallbackLogin}
           />
-          <div className="flex gap-2">
-            <button
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="chevron-left"
               onClick={() => {
                 if (authPhase === 'fallback') {
                   setAuthPhase('password');
@@ -210,23 +213,19 @@ function AddInstanceFlow({ onDone }: { onDone: () => void }) {
                 }
                 setError('');
               }}
-              className="text-xs text-txt-tertiary hover:text-txt-secondary transition-colors"
             >
               {t('common:actions.back')}
-            </button>
-            <button
-              onClick={onDone}
-              className="text-xs text-txt-tertiary hover:text-txt-secondary transition-colors"
-            >
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onDone}>
               {t('common:actions.cancel')}
-            </button>
+            </Button>
           </div>
         </>
       )}
 
       {/* The URL step's own error; the password step renders its own */}
       {step === 'url' && error && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs">
+        <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
           {error}
         </div>
       )}
@@ -271,48 +270,40 @@ function RegistryFilterBar({
   ];
 
   return (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex bg-white/[0.04] rounded-md p-0.5">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setFilter(tab.key)}
-            className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-              filter === tab.key ? 'bg-white/[0.08] text-txt-primary' : 'text-txt-tertiary hover:text-txt-secondary'
-            }`}
-          >
-            {tab.label} <span className="text-[10px] text-txt-tertiary ml-0.5">{tab.count}</span>
-          </button>
-        ))}
-      </div>
+    <div className="flex items-center justify-between gap-2 mb-1">
+      <Tabs
+        items={tabs.map((tab) => ({ value: tab.key, label: tab.label, count: tab.count }))}
+        value={filter}
+        onChange={setFilter}
+        label={t('federation:connections.title')}
+      />
 
       <div className="relative">
         <button
           type="button"
           onClick={() => setSortOpen(!sortOpen)}
-          className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-txt-tertiary hover:text-txt-secondary bg-white/[0.04] hover:bg-white/[0.06] rounded transition-colors"
+          className="flex items-center gap-1.5 h-7 px-2.5 text-compact font-medium text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover rounded-lg transition-colors duration-fast"
         >
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="opacity-60">
-            <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
           </svg>
           {t('common:actions.sort')}
-          <span className="text-[10px]">&#9662;</span>
+          <Icon name="chevron-down" size="xs" />
         </button>
 
         {sortOpen && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />
-            <div className="absolute right-0 top-full mt-1 z-50 glass rounded-lg p-1.5 w-44">
-              <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-2 py-1">{t('common:actions.sortBy')}</div>
+            <div className="fixed inset-0 z-popover" onClick={() => setSortOpen(false)} />
+            <div className="absolute right-0 top-full mt-1 z-popover glass rounded-xl p-1.5 w-44">
+              <div className="text-xs font-medium text-txt-tertiary px-2 py-1">{t('common:actions.sortBy')}</div>
               {sortOptions.map((opt) => (
                 <button
                   key={opt.key}
                   type="button"
                   onClick={() => { setSortBy(opt.key); setSortOpen(false); }}
-                  className={`w-full text-left px-2 py-1.5 text-xs rounded ${
-                    sortBy === opt.key ? 'text-accent-lavender bg-accent-lavender/[0.08]' : 'text-txt-primary'
-                  } hover:bg-white/[0.06] transition-colors`}
+                  className={`w-full h-[34px] text-left px-2.5 text-sm rounded-lg ${
+                    sortBy === opt.key ? 'text-accent-tone bg-accent-tone/[0.16]' : 'text-txt-primary hover:bg-interactive-hover'
+                  } transition-colors duration-fast`}
                 >
                   {opt.label}
                 </button>
@@ -418,19 +409,19 @@ function DeleteIdentityDialog({
   ];
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center animate-fade-in">
+    <div className="fixed inset-0 z-confirm flex items-center justify-center animate-fade-in">
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-surface-overlay"
         onClick={loading ? undefined : onClose}
       />
-      <div className="relative max-w-md w-full mx-4 glass-modal rounded-xl p-6 animate-slide-up">
-        <h3 className="text-base font-semibold text-txt-primary mb-1">{t('federation:connections.deleteIdentity.title')}</h3>
-        <p className="text-xs text-txt-tertiary mb-4">
+      <div className="relative max-w-md w-full mx-4 glass-modal rounded-2xl p-5 animate-slide-up">
+        <h3 className="text-lg font-semibold text-txt-primary mb-1">{t('federation:connections.deleteIdentity.title')}</h3>
+        <p className="text-sm text-txt-secondary mb-4">
           <Trans
             t={t}
             i18nKey="federation:connections.deleteIdentity.description"
             values={{ name: label }}
-            components={{ name: <span className="text-txt-secondary font-medium" /> }}
+            components={{ name: <span className="text-txt-primary font-medium" /> }}
           />
         </p>
 
@@ -441,14 +432,12 @@ function DeleteIdentityDialog({
             type="button"
             onClick={() => setMode('leave')}
             disabled={loading}
-            className={`w-full text-left p-3 rounded-lg border transition-colors ${
-              mode === 'leave'
-                ? 'bg-white/[0.03] border-white/[0.08]'
-                : 'bg-transparent border-white/[0.04] hover:border-white/[0.06]'
+            className={`w-full text-left p-3 rounded-lg transition-colors duration-fast ${
+              mode === 'leave' ? CHOICE_ON : CHOICE_OFF
             } disabled:opacity-50`}
           >
             <div className="text-sm font-medium text-txt-primary">{t('federation:connections.deleteIdentity.leave.title')}</div>
-            <div className="text-[11px] text-txt-tertiary mt-0.5">
+            <div className="text-xs text-txt-tertiary mt-0.5">
               {t('federation:connections.deleteIdentity.leave.description')}
             </div>
           </button>
@@ -458,14 +447,12 @@ function DeleteIdentityDialog({
             type="button"
             onClick={() => setMode('soft')}
             disabled={loading}
-            className={`w-full text-left p-3 rounded-lg border transition-colors ${
-              mode === 'soft'
-                ? 'bg-white/[0.03] border-white/[0.08]'
-                : 'bg-transparent border-white/[0.04] hover:border-white/[0.06]'
+            className={`w-full text-left p-3 rounded-lg transition-colors duration-fast ${
+              mode === 'soft' ? CHOICE_ON : CHOICE_OFF
             } disabled:opacity-50`}
           >
             <div className="text-sm font-medium text-txt-primary">{t('federation:connections.deleteIdentity.soft.title')}</div>
-            <div className="text-[11px] text-txt-tertiary mt-0.5">
+            <div className="text-xs text-txt-tertiary mt-0.5">
               {t('federation:connections.deleteIdentity.soft.description')}
             </div>
           </button>
@@ -475,16 +462,14 @@ function DeleteIdentityDialog({
             type="button"
             onClick={() => setMode('full')}
             disabled={loading}
-            className={`w-full text-left p-3 rounded-lg border transition-colors ${
-              mode === 'full'
-                ? 'bg-accent-rose/[0.04] border-accent-rose/20'
-                : 'bg-transparent border-white/[0.04] hover:border-white/[0.06]'
+            className={`w-full text-left p-3 rounded-lg transition-colors duration-fast ${
+              mode === 'full' ? CHOICE_ON : CHOICE_OFF
             } disabled:opacity-50`}
           >
-            <div className={`text-sm font-medium ${mode === 'full' ? 'text-txt-danger' : 'text-txt-primary'}`}>
+            <div className={`text-sm font-medium ${mode === 'full' ? 'text-status-danger' : 'text-txt-primary'}`}>
               {t('federation:connections.deleteIdentity.full.title')}
             </div>
-            <div className="text-[11px] text-txt-tertiary mt-0.5">
+            <div className="text-xs text-txt-tertiary mt-0.5">
               {t('federation:connections.deleteIdentity.full.description')}
             </div>
           </button>
@@ -492,7 +477,7 @@ function DeleteIdentityDialog({
 
         {/* Scope selector */}
         <div className="mb-4">
-          <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">{t('federation:connections.deleteIdentity.scope.heading')}</div>
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('federation:connections.deleteIdentity.scope.heading')}</div>
           <div className="flex gap-1.5">
             {scopeOptions.map((opt) => (
               <button
@@ -500,10 +485,8 @@ function DeleteIdentityDialog({
                 type="button"
                 onClick={() => setScope(opt.key)}
                 disabled={loading}
-                className={`flex-1 px-2 py-1.5 text-[11px] font-medium rounded transition-colors ${
-                  scope === opt.key
-                    ? 'bg-accent-lavender/15 text-accent-lavender'
-                    : 'bg-white/[0.04] text-txt-tertiary hover:text-txt-secondary'
+                className={`flex-1 h-8 px-2 text-compact font-medium rounded-lg transition-colors duration-fast disabled:opacity-50 ${
+                  scope === opt.key ? `${CHOICE_ON} text-accent-tone` : `${CHOICE_OFF} text-txt-secondary hover:text-txt-primary`
                 }`}
               >
                 {opt.label}
@@ -520,7 +503,7 @@ function DeleteIdentityDialog({
               return (
                 <label
                   key={entry.origin}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded hover:bg-interactive-hover transition-colors cursor-pointer"
+                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-interactive-hover transition-colors duration-fast cursor-pointer"
                 >
                   <input
                     type="checkbox"
@@ -534,7 +517,7 @@ function DeleteIdentityDialog({
                       });
                     }}
                     disabled={loading}
-                    className="accent-accent-lavender w-3.5 h-3.5 shrink-0"
+                    className="accent-accent-tone w-3.5 h-3.5 shrink-0"
                   />
                   <span className="text-xs text-txt-secondary truncate">{safeHost(entry.origin)}</span>
                 </label>
@@ -544,25 +527,21 @@ function DeleteIdentityDialog({
         )}
 
         {/* Actions */}
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="flex-1 py-2.5 text-sm font-medium text-txt-secondary bg-interactive-hover hover:bg-interactive-selected rounded-lg transition-colors disabled:opacity-50"
-          >
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={onClose} disabled={loading}>
             {t('common:actions.cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="danger-solid"
             onClick={handleConfirm}
             disabled={loading || (scope === 'select' && selectedOrigins.size === 0)}
-            className="flex-1 py-2.5 bg-accent-rose hover:bg-accent-rose/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
               ? t('federation:connections.deleteIdentity.deleting')
               : mode === 'leave'
                 ? t('federation:connections.deleteIdentity.disconnect')
                 : t('federation:connections.deleteIdentity.confirm')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>,
@@ -634,10 +613,10 @@ function RegistryRow({
 
   return (
     <>
-      <div className={`bg-white/[0.02] rounded-md transition-colors ${isDisconnected ? 'opacity-70' : ''} ${expanded ? 'border border-white/[0.06]' : ''}`}>
+      <div className={`rounded-xl bg-surface-elevated transition-colors ${isDisconnected ? 'opacity-70' : ''}`}>
         {/* Compact row */}
         <div
-          className="flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-white/[0.02] rounded-md"
+          className="flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-interactive-hover rounded-xl transition-colors duration-fast"
           onClick={onToggleExpand}
         >
           <div className="flex items-center gap-2.5 min-w-0">
@@ -645,47 +624,47 @@ function RegistryRow({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-txt-primary truncate">{name}</span>
-                <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded ${registryStatusColor(entry.status)}`}>
+                <span className={`inline-flex items-center h-5 px-[7px] text-2xs font-semibold rounded ${registryStatusColor(entry.status)}`}>
                   {registryStatusLabel(t, entry.status)}
                 </span>
               </div>
-              <div className="text-[11px] text-txt-tertiary truncate">
+              <div className="text-xs text-txt-tertiary truncate">
                 {safeHost(entry.origin)}
                 {entry.username && (
                   <span className="ml-1">{t('federation:connections.row.asUser', { username: entry.username })}</span>
                 )}
               </div>
-              <div className="text-[10px] text-txt-tertiary">{metadataText}</div>
+              <div className="text-2xs text-txt-tertiary">{metadataText}</div>
             </div>
           </div>
-          <span className="text-txt-tertiary text-xs shrink-0 ml-2">{expanded ? '▾' : '▸'}</span>
+          <span className="text-txt-tertiary shrink-0 ml-2"><Icon name={expanded ? 'chevron-down' : 'chevron-right'} size="sm" /></span>
         </div>
 
         {/* Expanded details */}
         {expanded && (
           <div className="px-3 pb-3">
-            <div className="border-t border-white/[0.05] pt-3">
+            <div className="border-t border-border-soft pt-3">
               {/* Stats grid */}
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div>
-                  <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider mb-0.5">{t('federation:connections.row.remoteUserId')}</div>
+                  <div className="text-xs font-medium text-txt-tertiary mb-0.5">{t('federation:connections.row.remoteUserId')}</div>
                   <div className="text-xs text-txt-secondary truncate" title={entry.remoteUserId || t('common:states.unknown')}>
                     {entry.remoteUserId ? entry.remoteUserId.slice(0, 12) + '...' : t('common:states.unknown')}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider mb-0.5">{t('federation:connections.row.addedLabel')}</div>
+                  <div className="text-xs font-medium text-txt-tertiary mb-0.5">{t('federation:connections.row.addedLabel')}</div>
                   <div className="text-xs text-txt-secondary">{formatters.formatMediumDate(entry.addedAt)}</div>
                 </div>
                 <div>
                   {isDisconnected && entry.disconnectedAt ? (
                     <>
-                      <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider mb-0.5">{t('federation:connections.row.disconnectedLabel')}</div>
+                      <div className="text-xs font-medium text-txt-tertiary mb-0.5">{t('federation:connections.row.disconnectedLabel')}</div>
                       <div className="text-xs text-txt-secondary">{formatters.formatMediumDate(entry.disconnectedAt)}</div>
                     </>
                   ) : (
                     <>
-                      <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider mb-0.5">{t('federation:connections.row.lastConnectedLabel')}</div>
+                      <div className="text-xs font-medium text-txt-tertiary mb-0.5">{t('federation:connections.row.lastConnectedLabel')}</div>
                       <div className="text-xs text-txt-secondary">
                         {entry.lastConnectedAt ? formatters.formatMediumDate(entry.lastConnectedAt) : t('common:time.never')}
                       </div>
@@ -696,7 +675,7 @@ function RegistryRow({
 
               {/* Error message */}
               {entry.errorMessage && (
-                <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs mb-3">
+                <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger mb-3">
                   {describeRegistryError(t, entry.errorMessage)}
                 </div>
               )}
@@ -716,17 +695,16 @@ function RegistryRow({
               <div className="flex items-center gap-2 flex-wrap">
                 {isConnected && (
                   <>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); handleDisconnect(); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-white/[0.06] hover:bg-white/[0.1] text-txt-secondary rounded transition-colors"
-                    >
+                    <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); handleDisconnect(); }}>
                       {t('federation:connections.row.disconnect')}
-                    </button>
+                    </Button>
+                    {/* A plain button, not Button: the disabled primitive drops
+                        pointer events, and this title is the only place that
+                        says why the action is unavailable. */}
                     <button
                       type="button"
                       disabled
-                      className="px-3 py-1.5 text-xs font-medium bg-accent-rose/10 text-txt-danger rounded opacity-50 cursor-not-allowed"
+                      className="h-7 px-2.5 text-compact font-medium text-status-danger rounded-lg opacity-40 cursor-not-allowed"
                       title={t('federation:connections.row.deleteIdentityDisabled')}
                     >
                       {t('federation:connections.row.deleteIdentity')}
@@ -737,65 +715,37 @@ function RegistryRow({
                 {isDisconnected && (
                   <>
                     {liveInstance && (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handleReconnect(); }}
-                        className="px-3 py-1.5 text-xs font-medium bg-accent-lavender/15 text-accent-lavender hover:bg-accent-lavender/25 rounded transition-colors"
-                      >
+                      <Button variant="primary" size="sm" onClick={(e) => { e.stopPropagation(); handleReconnect(); }}>
                         {t('federation:connections.row.reconnect')}
-                      </button>
+                      </Button>
                     )}
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setShowReauth((v) => !v); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-accent-amber/15 text-accent-amber hover:bg-accent-amber/25 rounded transition-colors"
-                    >
+                    <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); setShowReauth((v) => !v); }}>
                       {t('federation:connections.row.reauthenticate')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setShowDeleteIdentity(true); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-accent-rose/10 text-txt-danger hover:bg-accent-rose/20 rounded transition-colors"
-                    >
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); setShowDeleteIdentity(true); }}>
                       {t('federation:connections.row.deleteIdentity')}
-                    </button>
+                    </Button>
                   </>
                 )}
 
                 {hasIssue && (
                   <>
                     {entry.status === 'unreachable' && liveInstance && (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handleReconnect(); }}
-                        className="px-3 py-1.5 text-xs font-medium bg-accent-lavender/15 text-accent-lavender hover:bg-accent-lavender/25 rounded transition-colors"
-                      >
+                      <Button variant="primary" size="sm" onClick={(e) => { e.stopPropagation(); handleReconnect(); }}>
                         {t('federation:connections.row.reconnect')}
-                      </button>
+                      </Button>
                     )}
                     {entry.status === 'auth_expired' && (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setShowReauth((v) => !v); }}
-                        className="px-3 py-1.5 text-xs font-medium bg-accent-amber/15 text-accent-amber hover:bg-accent-amber/25 rounded transition-colors"
-                      >
+                      <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); setShowReauth((v) => !v); }}>
                         {t('federation:connections.row.reauthenticate')}
-                      </button>
+                      </Button>
                     )}
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setShowForceRemoveConfirm(true); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-white/[0.06] hover:bg-white/[0.1] text-txt-secondary rounded transition-colors"
-                    >
+                    <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); setShowForceRemoveConfirm(true); }}>
                       {t('federation:connections.row.forceRemove')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setShowDeleteIdentity(true); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-accent-rose/10 text-txt-danger hover:bg-accent-rose/20 rounded transition-colors"
-                    >
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); setShowDeleteIdentity(true); }}>
                       {t('federation:connections.row.deleteIdentity')}
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>
@@ -895,12 +845,12 @@ function PendingSubscriptionRow({ subscription }: { subscription: PeeringSubscri
   };
 
   return (
-    <div className="bg-white/[0.02] rounded-md px-3 py-2.5 flex items-center justify-between gap-3">
+    <div className="rounded-xl bg-surface-elevated px-3 py-2.5 flex items-center justify-between gap-3">
       <div className="min-w-0">
         <div className="text-sm text-txt-primary truncate">
           {actionVerbPhrase(t, subscription.triggerReason, subscription.triggerTarget)}
         </div>
-        <div className="text-[11px] text-txt-tertiary truncate">
+        <div className="text-xs text-txt-tertiary truncate">
           <Trans
             t={t}
             i18nKey="federation:connections.pending.onPeer"
@@ -908,18 +858,13 @@ function PendingSubscriptionRow({ subscription }: { subscription: PeeringSubscri
             components={{ peer: <span className="text-txt-secondary" /> }}
           />
           {subscription.peerInstanceName && (
-            <span className="ml-1 text-txt-tertiary/70">({host})</span>
+            <span className="ml-1 text-txt-tertiary">({host})</span>
           )}
         </div>
       </div>
-      <button
-        type="button"
-        onClick={handleCancel}
-        disabled={busy}
-        className="px-3 py-1.5 text-xs font-medium bg-white/[0.06] hover:bg-white/[0.1] text-txt-secondary rounded transition-colors shrink-0 disabled:opacity-50"
-      >
+      <Button variant="secondary" size="sm" onClick={handleCancel} disabled={busy} className="shrink-0">
         {busy ? t('federation:connections.pending.cancelling') : t('common:actions.cancel')}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -932,13 +877,13 @@ function PendingPeeringSubscriptionsSection() {
 
   return (
     <div>
-      <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+      <div className="text-xs font-medium text-txt-secondary mb-1.5">
         {t('federation:connections.pending.title')}
       </div>
       <p className="text-xs text-txt-tertiary mb-2">
         {t('federation:connections.pending.description')}
       </p>
-      <div className="rounded-lg bg-white/[0.02] p-3 space-y-2">
+      <div className="space-y-2">
         {subscriptions.map((s) => (
           <PendingSubscriptionRow key={s.id} subscription={s} />
         ))}
@@ -957,46 +902,29 @@ function notificationAccentClasses(kind: PeeringNotification['kind']): {
   switch (kind) {
     case 'approved':
       return {
-        surface: 'bg-status-online/[0.06] border border-status-online/15',
-        iconBg: 'bg-status-online/15',
-        iconColor: 'text-status-online',
+        surface: 'bg-status-ok/[0.06]',
+        iconBg: 'bg-status-ok/15',
+        iconColor: 'text-status-ok',
       };
     case 'denied':
       return {
-        surface: 'bg-accent-rose/[0.06] border border-accent-rose/15',
-        iconBg: 'bg-accent-rose/15',
-        iconColor: 'text-txt-danger',
+        surface: 'bg-status-danger/[0.06]',
+        iconBg: 'bg-status-danger/15',
+        iconColor: 'text-status-danger',
       };
     case 'expired':
       return {
-        surface: 'bg-accent-amber/[0.06] border border-accent-amber/15',
-        iconBg: 'bg-accent-amber/15',
-        iconColor: 'text-accent-amber',
+        surface: 'bg-status-warn/[0.06]',
+        iconBg: 'bg-status-warn/15',
+        iconColor: 'text-status-warn',
       };
   }
 }
 
 function NotificationIcon({ kind, className }: { kind: PeeringNotification['kind']; className: string }) {
   // approved: check, denied: cross, expired: clock
-  if (kind === 'approved') {
-    return (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-      </svg>
-    );
-  }
-  if (kind === 'denied') {
-    return (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
-    </svg>
-  );
+  const name = kind === 'approved' ? 'check' : kind === 'denied' ? 'x' : 'clock';
+  return <Icon name={name} size="sm" className={className} />;
 }
 
 function PeeringNotificationCard({
@@ -1049,32 +977,23 @@ function PeeringNotificationCard({
   });
 
   return (
-    <div className={`rounded-md px-3 py-2.5 ${accent.surface}`}>
+    <div className={`rounded-xl px-3 py-2.5 ${accent.surface}`}>
       <div className="flex items-start gap-2.5">
         <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${accent.iconBg}`}>
           <NotificationIcon kind={notification.kind} className={accent.iconColor} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-sm text-txt-primary">{primaryText}</div>
-          <div className="text-[11px] text-txt-tertiary mt-0.5">{contextText}</div>
+          <div className="text-xs text-txt-tertiary mt-0.5">{contextText}</div>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             {showRetry && (
-              <button
-                type="button"
-                onClick={() => onRetry(notification)}
-                className="px-3 py-1.5 text-xs font-medium bg-status-online/15 text-status-online hover:bg-status-online/25 rounded transition-colors"
-              >
+              <Button variant="primary" size="sm" onClick={() => onRetry(notification)}>
                 {t('federation:connections.outcomes.retry', { action: actionLabel(t, notification.triggerReason) })}
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
-              onClick={handleDismiss}
-              disabled={busy}
-              className="px-3 py-1.5 text-xs font-medium bg-white/[0.06] hover:bg-white/[0.1] text-txt-secondary rounded transition-colors disabled:opacity-50"
-            >
+            <Button variant="ghost" size="sm" onClick={handleDismiss} disabled={busy}>
               {busy ? t('federation:connections.outcomes.dismissing') : t('common:actions.dismiss')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -1140,18 +1059,13 @@ function RecentPeeringOutcomesSection() {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider">
+        <div className="text-xs font-medium text-txt-secondary">
           {t('federation:connections.outcomes.title')}
         </div>
         {notifications.length > 1 && (
-          <button
-            type="button"
-            onClick={handleDismissAll}
-            disabled={bulkBusy}
-            className="text-[11px] text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
-          >
+          <Button variant="ghost" size="sm" onClick={handleDismissAll} disabled={bulkBusy}>
             {bulkBusy ? t('federation:connections.outcomes.dismissing') : t('common:actions.dismissAll')}
-          </button>
+          </Button>
         )}
       </div>
       <div className="space-y-2">
@@ -1242,14 +1156,14 @@ export function ConnectedInstances() {
       <PendingPeeringSubscriptionsSection />
 
       <div>
-      <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+      <div className="text-xs font-medium text-txt-secondary mb-1.5">
         {t('federation:connections.title')}
       </div>
       <p className="text-xs text-txt-tertiary mb-2">{t('federation:connections.description')}</p>
 
-      <div className="rounded-lg bg-white/[0.02] p-3 space-y-2">
+      <div className="space-y-2">
         {/* Home instance (always pinned, non-filterable) */}
-        <div className="flex items-center justify-between p-3 bg-surface-channel rounded-lg">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-surface-elevated">
           <div className="flex items-center gap-2 min-w-0">
             <StatusDot status="connected" />
             <div className="min-w-0">
@@ -1267,12 +1181,9 @@ export function ConnectedInstances() {
           <div className="flex items-center gap-2 shrink-0 ml-2">
             <span className="text-xs text-txt-tertiary">{t('federation:connections.home.local')}</span>
             {isElectron() && (
-              <button
-                onClick={() => window.backspace?.clearInstanceUrl()}
-                className="px-2 py-1 text-xs text-txt-secondary hover:text-txt-primary hover:bg-white/[0.04] rounded transition-colors"
-              >
+              <Button variant="ghost" size="sm" onClick={() => window.backspace?.clearInstanceUrl()}>
                 {t('common:actions.change')}
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -1319,7 +1230,7 @@ export function ConnectedInstances() {
         ) : (
           <button
             onClick={() => setShowAddForm(true)}
-            className="w-full p-2 text-sm text-txt-secondary hover:text-txt-primary hover:bg-surface-channel/50 rounded-lg border border-dashed border-white/[0.06] hover:border-white/[0.12] transition-colors"
+            className="w-full h-[34px] text-sm text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover rounded-lg border border-dashed border-border-soft transition-colors duration-fast"
           >
             {t('federation:connections.addButton')}
           </button>

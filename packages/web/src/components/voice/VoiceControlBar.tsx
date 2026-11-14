@@ -9,11 +9,14 @@ import { hasPermissionBit, PermissionBits } from '../../utils/permissions';
 import { handleMuteAction, handleDeafenAction, handleCameraAction, handleScreenShareAction, handleDisconnectAction } from '../../utils/voiceActions';
 import { VOICE_CHROME_ATTR } from '../../hooks/usePointerReveal';
 import { IconButton } from '../ui/IconButton';
+import { useVoiceStripStore } from './voiceStripStore';
 
 /** A moderator's restriction: the press does nothing, so the button says so in the warning colour. */
 const RESTRICTED = '!bg-status-warn/[0.14] !text-status-warn cursor-not-allowed';
 /** A panel this button opened is showing. */
 const OPENED = '!bg-interactive-active !text-txt-primary';
+/** A toggle that is on: the light pressed ground of the brandbook (§12, participants). */
+const PRESSED = '!bg-white/[0.14] !text-txt-primary';
 
 /**
  * `revealed` is the fullscreen idle state, owned by MainContent because it
@@ -48,6 +51,12 @@ export function VoiceControlBar({ revealed = false }: { revealed?: boolean }) {
   // popover (quality controls + the red stop action).
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const shareBtnRef = useRef<HTMLButtonElement>(null);
+  // The participant strip under a focused picture: this bar carries its
+  // toggle, so the grid draws no floating one while the bar is mounted.
+  const stripAvailable = useVoiceStripStore((s) => s.available);
+  const stripHidden = useVoiceStripStore((s) => s.hidden);
+  const setStripHidden = useVoiceStripStore((s) => s.setHidden);
+  useEffect(() => useVoiceStripStore.getState().claimToggle(), []);
 
   // An open share menu pins the bar: the popover hangs off it, so letting the
   // idle timer pull it away would take the menu with it.
@@ -181,6 +190,18 @@ export function VoiceControlBar({ revealed = false }: { revealed?: boolean }) {
           onClick={toggleVoiceChat}
           label={t('voice:controls.toggleChat')}
         />
+
+        {/* Participants strip toggle — only while a focused view has a strip */}
+        {stripAvailable && (
+          <IconButton
+            size="lg"
+            icon="users"
+            className={stripHidden ? undefined : PRESSED}
+            aria-pressed={!stripHidden}
+            onClick={() => setStripHidden(!stripHidden)}
+            label={stripHidden ? t('voice:grid.showMembers') : t('voice:grid.hideMembers')}
+          />
+        )}
 
         {/* Fullscreen Toggle */}
         <IconButton

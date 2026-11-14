@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { User, DmChannel } from '@backspace/shared';
 import { Avatar } from '../ui/Avatar';
+import { Icon } from '../ui/Icon';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { useSelfIdentity } from '../../stores/authStore';
 import { useUIStore } from '../../stores/uiStore';
@@ -55,7 +56,7 @@ function DmSearchUserRow({ user, isSelected, selectedRef, onClick }: {
     <div
       ref={isSelected ? selectedRef : undefined}
       onClick={onClick}
-      className={`flex items-center gap-2.5 px-2 py-1.5 mx-1 rounded cursor-pointer transition-colors ${
+      className={`flex items-center gap-2.5 px-2 py-1.5 mx-1 rounded-lg cursor-pointer transition-colors duration-fast ${
         isSelected ? 'bg-interactive-selected' : 'hover:bg-interactive-hover'
       }`}
     >
@@ -67,11 +68,11 @@ function DmSearchUserRow({ user, isSelected, selectedRef, onClick }: {
         userId={canonical.homeUserId ?? canonical.id}
       />
       <div className="flex-1 min-w-0 flex items-center gap-1.5">
-        <span className="text-[14px] text-txt-primary truncate">
+        <span className="text-sm text-txt-primary truncate">
           {displayName}
         </span>
         {canonical.displayName && (
-          <span className="text-[12px] text-txt-tertiary truncate">
+          <span className="text-xs text-txt-tertiary truncate">
             @{canonical.username}
           </span>
         )}
@@ -104,7 +105,7 @@ function DmSearchDmRow({ item, isSelected, selectedRef, onClick }: {
     <div
       ref={isSelected ? selectedRef : undefined}
       onClick={onClick}
-      className={`flex items-center gap-2.5 px-2 py-1.5 mx-1 rounded cursor-pointer transition-colors ${
+      className={`flex items-center gap-2.5 px-2 py-1.5 mx-1 rounded-lg cursor-pointer transition-colors duration-fast ${
         isSelected ? 'bg-interactive-selected' : 'hover:bg-interactive-hover'
       }`}
     >
@@ -124,7 +125,7 @@ function DmSearchDmRow({ item, isSelected, selectedRef, onClick }: {
           user={partner ?? undefined}
         />
       )}
-      <span className="text-[14px] text-txt-primary truncate">{item.displayName}</span>
+      <span className="text-sm text-txt-primary truncate">{item.displayName}</span>
     </div>
   );
 }
@@ -350,13 +351,13 @@ export function DmSearchBar() {
       style={{ ...style, width: dropdownWidth > 0 ? dropdownWidth : undefined }}
       className="animate-fade-in"
     >
-      <div className="glass rounded-lg shadow-xl max-h-[360px] overflow-y-auto scrollbar-thin py-1">
+      <div className="glass rounded-xl max-h-[360px] overflow-y-auto scrollbar-thin py-1">
         {error && (
-          <div className="px-3 py-2 text-txt-danger text-[13px]">{error}</div>
+          <div className="px-3 py-2 text-status-danger text-xs">{error}</div>
         )}
 
         {allItems.length === 0 && !isSearching && query.trim().length === 0 && dmItems.length === 0 && (
-          <div className="px-3 py-4 text-center text-txt-tertiary text-[13px]">
+          <div className="px-3 py-4 text-center text-txt-tertiary text-compact">
             {t('dm:search.emptyHint')}
           </div>
         )}
@@ -365,7 +366,7 @@ export function DmSearchBar() {
         {dmItems.length > 0 && (
           <>
             {query.trim().length >= 2 && (
-              <div className="px-3 pt-1.5 pb-1 text-[11px] font-bold text-txt-tertiary uppercase tracking-wider">
+              <div className="px-3 pt-2 pb-1 text-xs font-medium text-txt-tertiary">
                 {t('dm:search.conversations')}
               </div>
             )}
@@ -388,11 +389,11 @@ export function DmSearchBar() {
         {/* Users section */}
         {(filteredUserResults.length > 0 || (isSearching && query.trim().length >= 2)) && (
           <>
-            <div className="px-3 pt-1.5 pb-1 text-[11px] font-bold text-txt-tertiary uppercase tracking-wider">
+            <div className="px-3 pt-2 pb-1 text-xs font-medium text-txt-tertiary">
               {t('dm:search.users')}
             </div>
             {isSearching && filteredUserResults.length === 0 && (
-              <div className="px-3 py-2 text-center text-txt-tertiary text-[13px]">{t('dm:search.searching')}</div>
+              <div className="px-3 py-2 text-center text-txt-tertiary text-compact">{t('dm:search.searching')}</div>
             )}
             {filteredUserResults.map((item, i) => {
               const globalIndex = dmItems.length + i;
@@ -412,7 +413,7 @@ export function DmSearchBar() {
 
         {/* No results */}
         {!isSearching && query.trim().length >= 2 && allItems.length === 0 && (
-          <div className="px-3 py-4 text-center text-txt-tertiary text-[13px]">{t('dm:search.noResults')}</div>
+          <div className="px-3 py-4 text-center text-txt-tertiary text-compact">{t('dm:search.noResults')}</div>
         )}
       </div>
       {/* i18n-check: allow-literal — what follows is the createPortal argument list, not JSX text */}
@@ -423,10 +424,8 @@ export function DmSearchBar() {
   return (
     <div ref={anchorRef} className="flex-1 min-w-0">
       {active ? (
-        <div className="flex-1 h-8 bg-surface-input rounded-[4px] flex items-center px-2 gap-1.5 border border-white/[0.06] shadow-input">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary flex-shrink-0">
-            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-          </svg>
+        <div className="flex-1 h-8 bg-surface-input rounded-lg flex items-center px-2 gap-1.5 ring-1 ring-accent-tone">
+          <Icon name="search" size="sm" className="text-txt-tertiary" />
           <input
             ref={inputRef}
             type="text"
@@ -434,14 +433,14 @@ export function DmSearchBar() {
             onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
             onKeyDown={handleKeyDown}
             placeholder={t('dm:search.placeholder')}
-            className="input-embedded flex-1 min-w-0 text-[13px] font-medium py-[5px]"
+            className="input-embedded flex-1 min-w-0 text-compact py-1"
           />
         </div>
       ) : (
         <button
           onClick={open}
           title={t('dm:search.trigger')}
-          className="w-full h-8 bg-surface-input text-txt-tertiary text-[13px] font-medium px-2 rounded-[4px] text-left border border-white/[0.06] shadow-input hover:border-white/[0.1] transition-colors truncate"
+          className="w-full h-8 bg-surface-input text-txt-tertiary text-compact px-2.5 rounded-lg text-left hover:text-txt-secondary transition-colors duration-fast truncate"
         >
           {t('dm:search.trigger')}
         </button>

@@ -6,7 +6,7 @@ import {
   PhoneOff, Pin, Play, Plus, RefreshCw, Reply, ScreenShare, ScreenShareOff, Search, Send, Settings, Shield, Smile,
   Sticker, Trash2, TriangleAlert, Upload, User, UserMinus, UserPlus, Users, Video, VideoOff, Volume2, VolumeX,
   Wifi, WifiOff, X,
-  ArrowDown, ArrowUp, BadgeCheck, Bookmark, Bot, Calendar, Camera, CheckCheck, Circle, CircleCheck, CircleMinus, CirclePlus, CircleX, Clock, Cloud, CloudOff, Code, CornerUpLeft, Database, Ear, EarOff, File, FileUp, Filter, Flag, FolderPlus, Gamepad2, Gift, GripVertical, Hand, HardDrive, Heart, History, House, ImagePlus, Inbox, Key, Link2, List, LogIn, Mail, Megaphone, Menu, MessageCircle, MessagesSquare, MonitorOff, MonitorUp, Moon, MousePointer2, Music, Network, PanelLeft, PanelRight, Pause, PictureInPicture2, Power, Radio, RotateCcw, Save, Server, Share2, ShieldCheck, Signal, SlidersHorizontal, Smartphone, Sparkles, Square, Star, Sun, Tag, ThumbsUp, Unlink, Unlock, UserCheck, UserX, Volume1, Zap, ZoomIn, ZoomOut, Expand, Shrink, Move, Languages, Bug, Wrench, Rocket, PartyPopper, Angry, Frown, Laugh, Meh, LoaderCircle,
+  ArrowDown, ArrowUp, BadgeCheck, Bookmark, Bot, Calendar, Camera, CheckCheck, Circle, CircleCheck, CircleMinus, CirclePlus, CircleX, Clock, Cloud, CloudOff, Code, CornerUpLeft, Database, Ear, EarOff, File, FileUp, Filter, Flag, FolderPlus, Gamepad2, Gift, GripVertical, Hand, HardDrive, Heart, History, House, ImagePlus, Inbox, Key, Link2, List, LogIn, Mail, Megaphone, Menu, MessageCircle, MessagesSquare, MonitorOff, MonitorUp, Moon, MousePointer2, Music, Network, PanelLeft, PanelRight, Pause, PictureInPicture2, Power, Radio, RotateCcw, Save, Server, Share2, ShieldCheck, Signal, SlidersHorizontal, Smartphone, Sparkles, Square, Star, Sun, Tag, ThumbsUp, Unlink, Unlock, UserCheck, UserX, Volume1, Zap, ZoomIn, ZoomOut, Expand, Shrink, Move, Languages, Bug, Wrench, Rocket, PartyPopper, Angry, Frown, Laugh, Meh, LoaderCircle, SwitchCamera, ChartNoAxesColumn,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -102,6 +102,8 @@ const ICONS = {
   bot: Bot,
   calendar: Calendar,
   camera: Camera,
+  'switch-camera': SwitchCamera,
+  chart: ChartNoAxesColumn,
   'check-check': CheckCheck,
   circle: Circle,
   'circle-check': CircleCheck,

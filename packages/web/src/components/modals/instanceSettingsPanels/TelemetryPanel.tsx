@@ -5,6 +5,8 @@ import { useUIStore } from '../../../stores/uiStore';
 import { useFormatters, type Formatters } from '../../../i18n/formatters';
 import { describeError } from '../../../i18n/errors';
 import { Toggle } from '../../ui/Toggle';
+import { Button } from '../../ui/Button';
+import { Icon } from '../../ui/Icon';
 import { PayloadPreview } from '../../telemetry/PayloadPreview';
 import { HiButton } from '../../telemetry/answers/HiButton';
 import { HelloScene, type SceneMood } from '../../telemetry/scene/HelloScene';
@@ -120,17 +122,17 @@ export function TelemetryPanel() {
     if (loadError) {
       return (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-txt-primary">{t('telemetry:panel.title')}</h2>
-          <div className="rounded-lg bg-status-danger/10 border border-status-danger/20 p-3.5 text-sm text-txt-secondary">
+          <h2 className="text-xl font-semibold text-txt-primary">{t('telemetry:panel.title')}</h2>
+          <div className="rounded-xl bg-status-danger/10 border border-status-danger/30 p-3.5 text-sm text-status-danger">
             {loadError}
           </div>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            icon="refresh-cw"
             onClick={() => void loadStatus()}
-            className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover rounded-lg transition-colors"
           >
             {t('common:actions.tryAgain')}
-          </button>
+          </Button>
         </div>
       );
     }
@@ -150,7 +152,7 @@ export function TelemetryPanel() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold text-txt-primary">{t('telemetry:panel.title')}</h2>
+        <h2 className="text-xl font-semibold text-txt-primary">{t('telemetry:panel.title')}</h2>
         <div className="text-xs text-txt-tertiary mt-1">{t('telemetry:panel.intro')}</div>
       </div>
 
@@ -165,7 +167,7 @@ export function TelemetryPanel() {
         aria-hidden and carries no text, so nothing here is the only copy of
         anything - statusLabel below still says the state in words.
       */}
-      <div className="rounded-lg bg-surface-elevated overflow-hidden">
+      <div className="rounded-xl bg-surface-elevated overflow-hidden">
         <div className="aspect-[5/2] bg-surface-base">
           <HelloScene mood={moodFor(telemetry.enabled)} preserveAspectRatio="xMidYMid slice" />
         </div>
@@ -199,7 +201,7 @@ export function TelemetryPanel() {
       </div>
 
       {/* What it has done so far */}
-      <div className="rounded-lg bg-surface-elevated border border-border-soft p-3.5 space-y-1">
+      <div className="rounded-xl bg-surface-elevated p-3.5 space-y-1">
         <div className="text-xs text-txt-tertiary">{lastDayLabel}</div>
         {telemetry.lastError !== null && (
           <div className="text-xs text-status-danger">
@@ -224,14 +226,15 @@ export function TelemetryPanel() {
         <div className="rounded-xl bg-surface-elevated p-3.5 space-y-2">
           <PayloadPreview preview={preview} defaultOpen />
           {previewError && <p className="text-xs text-status-danger">{previewError}</p>}
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="refresh-cw"
             onClick={() => void loadPreview()}
             disabled={refreshing}
-            className="px-3 py-1.5 text-sm text-txt-secondary hover:text-txt-primary bg-surface-elevated hover:bg-interactive-hover rounded-lg transition-colors disabled:opacity-50"
           >
             {t('telemetry:panel.refreshPreview')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -239,9 +242,10 @@ export function TelemetryPanel() {
         href={DOC_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block text-xs text-accent-primary hover:underline"
+        className="inline-flex items-center gap-1.5 text-xs text-txt-link hover:underline"
       >
         {t('telemetry:panel.learnMore')}
+        <Icon name="external-link" size="xs" />
       </a>
     </div>
   );

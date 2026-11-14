@@ -11,11 +11,26 @@ interface UsernameProps {
 /**
  * The globe that marks a person from another instance, sized to the text it
  * follows (0.85em). Callers wrap it in a `Tooltip` naming the full username.
+ * Lucide's `globe`, drawn inline because `Icon` has fixed pixel sizes and this
+ * one scales with the surrounding text.
  */
 export function FederationGlobeIcon() {
   return (
-    <svg width="0.85em" height="0.85em" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary/70 flex-shrink-0 inline-block align-[-0.05em]">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+    <svg
+      width="0.85em"
+      height="0.85em"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="text-txt-tertiary flex-shrink-0 inline-block align-[-0.05em]"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+      <path d="M2 12h20" />
     </svg>
   );
 }

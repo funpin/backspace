@@ -7,6 +7,8 @@ import { describeError } from '../../i18n/errors';
 import { useNavigate } from 'react-router-dom';
 import type { User } from '@backspace/shared';
 import { Avatar } from '../ui/Avatar';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { Username } from '../ui/Username';
 import { ProfileBio } from '../ui/ProfileBio';
 import { useUIStore, type ProfileMemberContext } from '../../stores/uiStore';
@@ -234,9 +236,9 @@ export function UserProfileModal() {
   ];
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center animate-fade-in">
-      <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
-      <div className="relative max-w-lg w-full mx-4 max-h-[calc(calc(100*var(--app-vh))-2rem)] flex flex-col glass-modal rounded-lg animate-slide-up overflow-hidden">
+    <div className="fixed inset-0 z-modal flex items-center justify-center animate-fade-in">
+      <div className="absolute inset-0 bg-surface-overlay" onClick={closeModal} />
+      <div className="relative max-w-lg w-full mx-4 max-h-[calc(calc(100*var(--app-vh))-2rem)] flex flex-col glass-modal rounded-2xl animate-slide-up overflow-hidden">
         {/* Banner */}
         <div
           className="h-[100px] flex-shrink-0 relative"
@@ -248,11 +250,10 @@ export function UserProfileModal() {
           {/* Close button */}
           <button
             onClick={closeModal}
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
+            aria-label={t('common:actions.close')}
+            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white grid place-items-center transition-colors duration-fast"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-              <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-            </svg>
+            <Icon name="x" size="sm" />
           </button>
         </div>
 
@@ -271,12 +272,12 @@ export function UserProfileModal() {
 
           <div className="mb-3">
             <ProfileSpaceNickname member={memberContext} />
-            <span className="text-[20px] font-bold leading-tight">{displayName}</span>
-            <div className="text-[14px] text-txt-tertiary mt-0.5">
-              <Username username={user.username} showAt className="text-[14px] text-txt-tertiary" />
+            <span className="text-xl font-semibold leading-tight text-txt-primary">{displayName}</span>
+            <div className="text-sm text-txt-tertiary mt-0.5">
+              <Username username={user.username} showAt className="text-sm text-txt-tertiary" />
             </div>
             {user.customStatus && (
-              <div className="text-[13px] text-txt-secondary italic mt-1">
+              <div className="text-compact text-txt-secondary italic mt-1">
                 {replaceEmojiShortcodes(user.customStatus)}
               </div>
             )}
@@ -284,24 +285,24 @@ export function UserProfileModal() {
         </div>
 
         {/* Tab bar */}
-        <div className="px-5 flex-shrink-0 border-b border-white/[0.06]">
+        <div className="px-5 flex-shrink-0 border-b border-border-hard">
           <div className="flex gap-1">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-3 py-2 text-[13px] font-medium rounded-t-lg transition-colors relative ${
+                className={`px-3 py-2 text-compact font-medium transition-colors duration-fast relative ${
                   activeTab === tab.key
                     ? 'text-txt-primary'
-                    : 'text-txt-tertiary hover:text-txt-secondary'
+                    : 'text-txt-secondary hover:text-txt-primary'
                 }`}
               >
                 {tab.label}
                 {tab.count !== undefined && !loadingMutuals && (
-                  <span className="ml-1 text-[11px] text-txt-tertiary">({tab.count})</span>
+                  <span className="ml-1.5 text-txt-tertiary tabular-nums">{tab.count}</span>
                 )}
                 {activeTab === tab.key && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent-primary rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-tone rounded-full" />
                 )}
               </button>
             ))}
@@ -315,7 +316,7 @@ export function UserProfileModal() {
               {/* Bio */}
               {user.bio && (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wide font-semibold text-txt-tertiary">
+                  <span className="text-xs font-medium text-txt-tertiary">
                     {t('social:profile.aboutMe')}
                   </span>
                   <ProfileBio bio={user.bio} />
@@ -326,10 +327,10 @@ export function UserProfileModal() {
 
               {/* Member Since */}
               <div>
-                <span className="text-[11px] uppercase tracking-wide font-semibold text-txt-tertiary">
+                <span className="text-xs font-medium text-txt-tertiary">
                   {t('social:profile.memberSince')}
                 </span>
-                <div className="text-[13px] text-txt-secondary mt-1">
+                <div className="text-sm text-txt-secondary mt-1">
                   {f.formatLongDate(user.createdAt)}
                 </div>
               </div>
@@ -347,7 +348,7 @@ export function UserProfileModal() {
                   </svg>
                 </div>
               ) : mutualFriends.length === 0 ? (
-                <div className="text-center py-8 text-txt-tertiary text-[13px]">
+                <div className="text-center py-8 text-txt-tertiary text-compact">
                   {t('social:mutuals.noFriends')}
                 </div>
               ) : (
@@ -358,7 +359,7 @@ export function UserProfileModal() {
                       <button
                         key={friend.id}
                         onClick={() => handleViewFriend(friend)}
-                        className="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] transition-colors text-left"
+                        className="flex items-center gap-2.5 p-2.5 rounded-xl bg-surface-elevated hover:bg-interactive-hover transition-colors duration-fast text-left"
                       >
                         <Avatar
                           src={friend.avatar}
@@ -369,17 +370,15 @@ export function UserProfileModal() {
                           avatarColor={friend.avatarColor}
                         />
                         <div className="min-w-0">
-                          <div className="text-[13px] font-medium text-txt-primary truncate">
+                          <div className="text-compact font-medium text-txt-primary truncate">
                             {fname}
                           </div>
-                          <div className="text-[11px] text-txt-tertiary">
+                          <div className="text-2xs text-txt-tertiary">
                             {presenceLabel(t, friend.status)}
                           </div>
                           {friend._instanceOrigin && (
-                            <div className="flex items-center gap-1 text-[10px] text-txt-tertiary/70 truncate">
-                              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                              </svg>
+                            <div className="flex items-center gap-1 text-2xs text-txt-tertiary truncate">
+                              <Icon name="globe" size="xs" />
                               <span className="truncate">{(() => { try { return new URL(friend._instanceOrigin).host; } catch { return '?'; } })()}</span>
                             </div>
                           )}
@@ -402,7 +401,7 @@ export function UserProfileModal() {
                   </svg>
                 </div>
               ) : mutualSpaces.length === 0 ? (
-                <div className="text-center py-8 text-txt-tertiary text-[13px]">
+                <div className="text-center py-8 text-txt-tertiary text-compact">
                   {t('social:mutuals.noSpaces')}
                 </div>
               ) : (
@@ -413,7 +412,7 @@ export function UserProfileModal() {
                     <button
                       key={`${space.id}:${space._instanceOrigin}`}
                       onClick={() => handleGoToSpace(space.id)}
-                      className="flex items-center gap-3 w-full p-2.5 rounded-lg hover:bg-white/[0.06] transition-colors text-left"
+                      className="flex items-center gap-3 w-full p-2.5 rounded-lg hover:bg-interactive-hover transition-colors duration-fast text-left"
                     >
                       <div className="relative shrink-0">
                         {space.icon ? (
@@ -424,29 +423,25 @@ export function UserProfileModal() {
                           />
                         ) : (
                           <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-[13px] font-semibold text-white"
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-compact font-semibold text-white"
                             style={{ background: getSpaceGradient(space.id, space.name, space.avatarColor).gradient }}
                           >
                             {space.name.charAt(0).toUpperCase()}
                           </div>
                         )}
                         {space._instanceOrigin && (
-                          <div className="absolute -bottom-0.5 -right-0.5 w-[14px] h-[14px] rounded-full bg-[#1a1a23] flex items-center justify-center">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary/80">
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                            </svg>
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-surface-channel flex items-center justify-center">
+                            <Icon name="globe" size="xs" className="text-txt-tertiary" />
                           </div>
                         )}
                       </div>
                       <div className="min-w-0 flex flex-col">
-                        <span className="text-[13px] font-medium text-txt-primary truncate">
+                        <span className="text-compact font-medium text-txt-primary truncate">
                           {space.name}
                         </span>
                         {space._instanceOrigin && (
-                          <span className="text-[10px] text-txt-tertiary/70 truncate flex items-center gap-1">
-                            <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                            </svg>
+                          <span className="text-2xs text-txt-tertiary truncate flex items-center gap-1">
+                            <Icon name="globe" size="xs" />
                             {(() => { try { return new URL(space._instanceOrigin).host; } catch { return '?'; } })()}
                           </span>
                         )}
@@ -463,46 +458,44 @@ export function UserProfileModal() {
         {/* Action buttons. Your own profile offers none: nobody messages or
             befriends themselves. */}
         {friendship.state !== 'self' && (
-          <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.06] flex gap-2">
-            <button
+          <div className="flex-shrink-0 px-5 py-3 border-t border-border-hard flex gap-2">
+            {/* One primary per row: an inbound request's Accept takes it. */}
+            <Button
+              variant={friendship.state === 'inbound_pending' ? 'secondary' : 'primary'}
+              icon="message-square"
               onClick={handleSendMessage}
-              className="flex-1 py-2 rounded-lg text-[13px] font-medium text-white bg-accent-primary hover:bg-accent-primary/80 transition-colors"
+              className="flex-1"
             >
               {t('social:profile.sendMessage')}
-            </button>
+            </Button>
 
             {friendship.state === 'none' && (
-              <button onClick={handleAddFriend} disabled={friendActionLoading}
-                className="flex-1 py-2 rounded-lg text-[13px] font-medium text-txt-primary border border-white/[0.08] bg-white/[0.06] hover:bg-white/[0.10] transition-colors disabled:opacity-50">
+              <Button variant="secondary" icon="user-plus" onClick={handleAddFriend} disabled={friendActionLoading} className="flex-1">
                 {friendActionLoading ? '...' : t('social:profile.addFriend')}
-              </button>
+              </Button>
             )}
 
             {friendship.state === 'outbound_pending' && (
-              <button onClick={handleCancelRequest} disabled={friendActionLoading}
-                className="flex-1 py-2 rounded-lg text-[13px] font-medium text-amber-400 border border-amber-400/30 hover:bg-amber-400/10 transition-colors disabled:opacity-50">
+              <Button variant="ghost" onClick={handleCancelRequest} disabled={friendActionLoading} className="flex-1">
                 {friendActionLoading ? '...' : t('social:request.cancel')}
-              </button>
+              </Button>
             )}
 
             {friendship.state === 'inbound_pending' && (
               <>
-                <button onClick={handleAcceptRequest} disabled={friendActionLoading}
-                  className="flex-1 py-2 rounded-lg text-[13px] font-medium text-white bg-accent-primary hover:bg-accent-primary/80 transition-colors disabled:opacity-50">
-                  {friendActionLoading ? '...' : t('common:actions.accept')}
-                </button>
-                <button onClick={handleDeclineRequest} disabled={friendActionLoading}
-                  className="py-2 px-3 rounded-lg text-[13px] font-medium text-txt-tertiary border border-white/[0.06] hover:bg-white/[0.06] transition-colors disabled:opacity-50">
+                <Button variant="ghost" onClick={handleDeclineRequest} disabled={friendActionLoading}>
                   {friendActionLoading ? '...' : t('social:request.ignore')}
-                </button>
+                </Button>
+                <Button variant="primary" onClick={handleAcceptRequest} disabled={friendActionLoading} className="flex-1">
+                  {friendActionLoading ? '...' : t('common:actions.accept')}
+                </Button>
               </>
             )}
 
             {friendship.state === 'friends' && (
-              <button onClick={handleRemoveFriend} disabled={friendActionLoading}
-                className="flex-1 py-2 rounded-lg text-[13px] font-medium text-txt-danger border border-txt-danger/30 hover:bg-txt-danger/10 transition-colors disabled:opacity-50">
+              <Button variant="danger" icon="user-minus" onClick={handleRemoveFriend} disabled={friendActionLoading} className="flex-1">
                 {friendActionLoading ? '...' : t('social:friend.remove')}
-              </button>
+              </Button>
             )}
           </div>
         )}

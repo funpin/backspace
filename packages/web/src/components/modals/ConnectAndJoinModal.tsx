@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { DirectoryEntry } from '@backspace/shared';
 import { Modal } from '../ui/Modal';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { Button } from '../ui/Button';
 import { useUIStore } from '../../stores/uiStore';
 import { useInstanceStore, connectToInstance, resumableOrigin, type RemoteLoginReason } from '../../stores/instanceStore';
 import { useDirectoryStore, type ConnectAndJoinResult } from '../../stores/directoryStore';
@@ -78,8 +79,6 @@ function initialProbeState(entry: DirectoryEntry): ProbeState {
   if (canResumeSessionOn(entry.origin)) return { status: 'resuming' };
   return { status: 'probing' };
 }
-
-const textButtonClass = 'text-sm text-txt-tertiary hover:text-txt-secondary transition-colors';
 
 function ConnectAndJoinDialog({ entry }: { entry: DirectoryEntry }) {
   const { t } = useTranslation(['spaces', 'federation', 'common']);
@@ -230,20 +229,20 @@ function ConnectAndJoinDialog({ entry }: { entry: DirectoryEntry }) {
     >
       {(probe.status === 'probing' || probe.status === 'resuming') && (
         <div role="status" className="py-8 flex flex-col items-center gap-3 text-txt-tertiary">
-          <LoadingSpinner size={28} className="text-accent-primary" />
+          <LoadingSpinner size={28} className="text-accent-tone" />
           <span className="text-sm">{t('spaces:explore.connect.probing', { host })}</span>
         </div>
       )}
 
       {probe.status === 'failed' && (
         <div className="space-y-4">
-          <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+          <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-sm text-status-danger">
             {probe.message}
           </div>
           <div className="flex justify-end">
-            <button type="button" onClick={closeModal} className={textButtonClass}>
+            <Button variant="ghost" onClick={closeModal}>
               {t('common:actions.close')}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -273,22 +272,18 @@ function ConnectAndJoinDialog({ entry }: { entry: DirectoryEntry }) {
                   className="space-y-2"
                 >
                   {messageField}
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full px-4 py-2 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded transition-colors disabled:opacity-50"
-                  >
+                  <Button variant="primary" type="submit" disabled={isLoading} fullWidth>
                     {isLoading ? t('spaces:explore.sendingRequest') : t('spaces:explore.sendRequest')}
-                  </button>
+                  </Button>
                 </form>
               ) : !error && (
                 <div role="status" className="py-2 flex items-center gap-3 text-txt-tertiary">
-                  <LoadingSpinner size={20} className="text-accent-primary" />
+                  <LoadingSpinner size={20} className="text-accent-tone" />
                   <span className="text-sm">{t('spaces:explore.connect.connecting')}</span>
                 </div>
               )}
               {error && (
-                <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs">
+                <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
                   {error}
                 </div>
               )}
@@ -310,20 +305,19 @@ function ConnectAndJoinDialog({ entry }: { entry: DirectoryEntry }) {
             />
           )}
 
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-2">
             {phase === 'fallback' && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 onClick={() => { setPhase('password'); setError(''); }}
                 disabled={isLoading}
-                className={textButtonClass}
               >
                 {t('common:actions.back')}
-              </button>
+              </Button>
             )}
-            <button type="button" onClick={closeModal} disabled={isLoading} className={textButtonClass}>
+            <Button variant="ghost" onClick={closeModal} disabled={isLoading}>
               {t('common:actions.cancel')}
-            </button>
+            </Button>
           </div>
         </div>
       )}

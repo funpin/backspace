@@ -7,6 +7,8 @@ import { useChatStore } from '../../stores/chatStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { Avatar } from '../ui/Avatar';
+import { Icon } from '../ui/Icon';
+import { Tag } from '../ui/Tag';
 import type { ParticipantInfo } from '../../hooks/useLiveKit';
 import { useVoiceParticipantMeta } from '../../hooks/useVoiceParticipantMeta';
 import { useActiveDmCall } from '../../hooks/useActiveDmCall';
@@ -402,7 +404,7 @@ export function PictureInPicture() {
   return (
     <div
       ref={containerRef}
-      className={`fixed z-[40] overflow-hidden rounded-lg shadow-2xl ring-1 ring-white/10 bg-surface-base select-none ${
+      className={`fixed z-float overflow-hidden rounded-xl glass-bubble select-none ${
         isDragging ? 'cursor-grabbing' : 'cursor-grab'
       }`}
       style={{
@@ -439,14 +441,12 @@ export function PictureInPicture() {
                 user={resolvedUser ?? undefined}
               />
               {speakingParticipantIds.has(displayParticipant.identity) && (
-                <div className="absolute -inset-1 rounded-full ring-2 ring-status-online animate-pulse" />
+                <div className="absolute -inset-1 rounded-full ring-2 ring-status-ok animate-pulse" />
               )}
             </div>
           ) : (
             <div className="flex items-center gap-2 text-txt-tertiary">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11 5L6 9H2V15H6L11 19V5ZM15.54 8.46C16.48 9.4 17 10.67 17 12S16.48 14.6 15.54 15.54L14.12 14.12C14.69 13.55 15 12.79 15 12S14.69 10.45 14.12 9.88L15.54 8.46Z" />
-              </svg>
+              <Icon name="volume-2" size="lg" />
               <span className="text-sm font-medium">{channelName}</span>
             </div>
           )}
@@ -455,8 +455,8 @@ export function PictureInPicture() {
 
       {/* LIVE badge */}
       {isScreen && (
-        <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-accent-rose rounded text-[11px] font-bold text-white uppercase tracking-wide">
-          {t('badges.live')}
+        <div className="absolute top-2 left-2 flex">
+          <Tag tone="live">{t('badges.live')}</Tag>
         </div>
       )}
 
@@ -464,29 +464,26 @@ export function PictureInPicture() {
       <button
         data-pip-action="close"
         onClick={handleClose}
-        className="absolute top-2 right-2 w-6 h-6 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white/80 hover:text-white transition-colors"
+        className="absolute top-2 right-2 w-6 h-6 bg-black/60 backdrop-blur-md hover:bg-black/80 rounded flex items-center justify-center text-white/80 hover:text-white transition-colors duration-fast"
       >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-        </svg>
+        <Icon name="x" size="xs" />
       </button>
 
-      {/* Bottom overlay with name */}
-      <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 to-transparent">
-        <div className="flex items-center gap-1.5">
+      {/* Caption: a compact chip in the bottom-left corner, clear of the
+          expand hint, with no gradient over the picture's bottom edge. */}
+      <div className="absolute bottom-2 left-2 max-w-[calc(100%-2.75rem)] px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-white text-xs font-semibold truncate">{displayName}</span>
           {displayParticipant && speakingParticipantIds.has(displayParticipant.identity) && (
-            <div className="w-2 h-2 rounded-full bg-status-online flex-shrink-0 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-status-ok flex-shrink-0 animate-pulse" />
           )}
         </div>
-        <div className="text-white/50 text-[10px] truncate">{channelName}</div>
+        <div className="text-white/50 text-2xs truncate">{channelName}</div>
       </div>
 
       {/* Expand icon hint (bottom-right) */}
       <div className="absolute bottom-2 right-2 w-5 h-5 flex items-center justify-center text-white/40">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M21 11V3h-8l3.29 3.29-10 10L3 13v8h8l-3.29-3.29 10-10z" />
-        </svg>
+        <Icon name="maximize" size="xs" />
       </div>
     </div>
   );

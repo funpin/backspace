@@ -19,13 +19,17 @@ function formatElapsed(startMs: number, t: TFunction<'common'>): string {
   return t('time.elapsed', { duration });
 }
 
-/** Returns the accent border color class for an activity type */
+/**
+ * Returns the edge colour class for an activity type. Streaming is on air and
+ * takes the live colour; the other kinds share the theme's tone, so the edge
+ * marks "doing something" without inventing a colour per kind.
+ */
 export function getActivityAccentClass(type: Activity['type']): string {
   switch (type) {
-    case 'playing': return 'border-l-accent-mint';
-    case 'listening': return 'border-l-accent-sky';
-    case 'watching': return 'border-l-accent-lavender';
-    case 'streaming': return 'border-l-accent-rose';
+    case 'playing': return 'border-l-accent-tone';
+    case 'listening': return 'border-l-accent-tone';
+    case 'watching': return 'border-l-accent-tone';
+    case 'streaming': return 'border-l-status-danger';
     default: return '';
   }
 }

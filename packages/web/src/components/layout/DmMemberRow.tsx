@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { User } from '@backspace/shared';
 import { ProfileAvatar } from '../ui/ProfileAvatar';
 import { Tooltip } from '../ui/Tooltip';
+import { Icon } from '../ui/Icon';
 import { parseFederatedUsername, isFederationGlobeApplicable } from '../../utils/identity';
 import { useCanonicalUserView } from '../../utils/userViewLookup';
 import { replaceEmojiShortcodes, useEmojiShortcodeNames } from '../../utils/emojiShortcodes';
@@ -41,40 +42,15 @@ export interface DmMemberRowProps {
   onMenuAction: (action: DmMemberRowAction, member: User) => void;
 }
 
-// ── Inline icons ─────────────────────────────────────────────────────────────
+// ── Icons ────────────────────────────────────────────────────────────────────
 
-function GlobeIcon({ size = 12 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary/80 flex-shrink-0">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-    </svg>
-  );
+function GlobeIcon() {
+  return <span className="text-txt-tertiary inline-flex"><Icon name="globe" size="xs" /></span>;
 }
 
 function CrownIcon() {
-  // Simple inline crown — matches the warm-amber accent used elsewhere for owner emphasis.
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="text-accent-amber flex-shrink-0"
-      aria-hidden="true"
-    >
-      <path d="M5 16l-2-9 5 4 4-7 4 7 5-4-2 9H5zm0 2h14v2H5v-2z" />
-    </svg>
-  );
-}
-
-function KebabIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <circle cx="12" cy="5" r="1.6" />
-      <circle cx="12" cy="12" r="1.6" />
-      <circle cx="12" cy="19" r="1.6" />
-    </svg>
-  );
+  // The owner mark takes the theme's tone, like other accents on a dark ground.
+  return <span className="text-accent-tone inline-flex"><Icon name="crown" size="xs" /></span>;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -183,7 +159,7 @@ export function DmMemberRow({
       data-dm-member-row
       data-user-id={canonical.id}
       onContextMenu={handleContextMenu}
-      className="group flex items-center gap-2.5 px-2 py-1.5 rounded-[6px] hover:bg-interactive-hover transition-colors select-none"
+      className="group flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-interactive-hover transition-colors duration-fast select-none"
     >
       <div className="flex-shrink-0">
         <ProfileAvatar
@@ -200,7 +176,7 @@ export function DmMemberRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
           <span
-            className={`text-[13.5px] leading-[1.2] font-medium truncate ${
+            className={`text-sm font-medium truncate ${
               isOffline ? 'text-txt-tertiary' : 'text-txt-primary'
             }`}
           >
@@ -223,13 +199,13 @@ export function DmMemberRow({
         </div>
 
         {showGlobe && domain && (
-          <div className="text-[10px] leading-[1.3] text-txt-tertiary truncate opacity-60">
+          <div className="text-2xs text-txt-tertiary truncate">
             @{domain}
           </div>
         )}
 
         {!isOffline && canonical.customStatus && (
-          <div className="text-[11px] leading-[1.3] text-txt-tertiary truncate">
+          <div className="text-2xs text-txt-tertiary truncate">
             {replaceEmojiShortcodes(canonical.customStatus)}
           </div>
         )}
@@ -245,13 +221,13 @@ export function DmMemberRow({
             // Right-click on the kebab still opens the same menu at cursor.
             handleContextMenu(e);
           }}
-          className={`flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-[4px] text-txt-tertiary hover:text-txt-primary hover:bg-interactive-active transition-opacity ${
+          className={`flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover transition-opacity duration-fast ${
             alwaysShowKebab
               ? 'opacity-100'
               : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
           }`}
         >
-          <KebabIcon />
+          <Icon name="ellipsis-vertical" size="sm" />
         </button>
       )}
     </div>

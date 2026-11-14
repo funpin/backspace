@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProfileAvatar } from '../ui/ProfileAvatar';
+import { Icon } from '../ui/Icon';
 import { useVoiceStore } from '../../stores/voiceStore';
 import { useVoiceParticipantMeta } from '../../hooks/useVoiceParticipantMeta';
 import { useVoiceParticipantStatus } from '../../hooks/useVoiceParticipantStatus';
@@ -56,14 +57,16 @@ export function VoiceUser({ tile, large }: VoiceUserProps) {
 
   const handleContextMenu = useVoiceUserContextMenu(participant);
 
+  const { effectivelyMuted, effectivelyDeafened, restrictedMute, restrictedDeafen } = status;
+
   return (
     <div
       data-context-menu
-      className={`relative bg-surface-base rounded-xl overflow-hidden flex items-center justify-center group transition-all duration-200 ${
+      className={`relative h-full w-full bg-surface-base rounded-xl overflow-hidden flex items-center justify-center group transition-shadow duration-fast ${
         isSpeaking
-          ? 'ring-[3px] ring-status-online shadow-[0_0_12px_rgba(134,239,172,0.25)]'
-          : 'ring-1 ring-white/[0.06] hover:ring-white/10'
-      } h-full w-full`}
+          ? 'ring-2 ring-status-ok'
+          : 'ring-1 ring-border-hard hover:ring-border-soft'
+      }`}
       onContextMenu={handleContextMenu}
     >
       {hasVideo ? (
@@ -86,85 +89,41 @@ export function VoiceUser({ tile, large }: VoiceUserProps) {
               origin={userOrigin}
             />
             {isSpeaking && (
-              <div className="absolute -inset-1.5 rounded-full ring-[3px] ring-status-online animate-pulse" />
+              <div className="absolute -inset-1.5 rounded-full ring-2 ring-status-ok animate-pulse" />
             )}
           </div>
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span
-              className={`font-semibold text-white truncate ${large ? 'text-base' : 'text-[13px]'}`}
-            >
-              {displayName}
-            </span>
-            {isLocal && (
-              <span className="text-[10px] text-white/40 font-medium">
-                {t('voice:badges.you')}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            {(() => {
-              const { effectivelyMuted, effectivelyDeafened, restrictedMute, restrictedDeafen } = status;
-              return (
-                <>
-                  {effectivelyMuted && (
-                    <div className={`w-5 h-5 ${restrictedMute ? 'bg-accent-amber/90' : 'bg-accent-rose/90'} rounded-full flex items-center justify-center`}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 2C10.9 2 10 2.9 10 4V12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12V4C14 2.9 13.1 2 12 2Z" />
-                        <line
-                          x1="3"
-                          y1="3"
-                          x2="21"
-                          y2="21"
-                          stroke="white"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                    </div>
-                  )}
-                  {effectivelyDeafened && (
-                    <div className={`w-5 h-5 ${restrictedDeafen ? 'bg-accent-amber/90' : 'bg-accent-rose/90'} rounded-full flex items-center justify-center`}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h2v-7H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-2v7h2c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z" />
-                        <line
-                          x1="3"
-                          y1="3"
-                          x2="21"
-                          y2="21"
-                          stroke="white"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                    </div>
-                  )}
-                  {!isLocal && participant.isCameraOn && (
-                    <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                        <path d="M17 10.5V7c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-                        {unwatchedCameras.has(participant.userId) && (
-                          <line x1="1" y1="1" x2="23" y2="23" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                        )}
-                      </svg>
-                    </div>
-                  )}
-                  {!isLocal && participantMutes.get(participant.userId) && (
-                    <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center" title={t('voice:badges.locallyMuted')}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                        <path d="M3 9v6h4l5 5V4L7 9H3z" />
-                        <line x1="17" y1="7" x2="23" y2="13" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                        <line x1="23" y1="7" x2="17" y2="13" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                      </svg>
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
-        </div>
+      {/* Caption: a compact chip in the bottom-left corner, so the rest of
+          the picture's bottom edge stays undimmed. */}
+      <div className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] h-[26px] px-2 rounded-lg bg-black/60 backdrop-blur-md flex items-center gap-1.5 min-w-0">
+        <span className="font-semibold text-white truncate text-compact">
+          {displayName}
+        </span>
+        {isLocal && (
+          <span className="text-2xs text-white/50 font-medium flex-shrink-0">
+            {t('voice:badges.you')}
+          </span>
+        )}
+        {effectivelyMuted && (
+          <Icon name="mic-off" size="xs" className={restrictedMute ? 'text-status-warn' : 'text-status-danger'} />
+        )}
+        {effectivelyDeafened && (
+          <Icon name="headphone-off" size="xs" className={restrictedDeafen ? 'text-status-warn' : 'text-status-danger'} />
+        )}
+        {!isLocal && participant.isCameraOn && (
+          <Icon
+            name={unwatchedCameras.has(participant.userId) ? 'video-off' : 'video'}
+            size="xs"
+            className="text-white/70"
+          />
+        )}
+        {!isLocal && participantMutes.get(participant.userId) && (
+          <span className="flex text-white/70" title={t('voice:badges.locallyMuted')}>
+            <Icon name="volume-x" size="xs" />
+          </span>
+        )}
       </div>
     </div>
   );

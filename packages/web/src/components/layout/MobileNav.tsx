@@ -14,7 +14,7 @@ export function MobileNav() {
       {/* Hamburger button in header */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-3 left-3 z-[120] p-2 rounded-lg bg-surface-channel text-txt-primary desktop:hidden"
+        className="fixed top-3 left-3 z-popover p-3 rounded-lg bg-surface-channel text-txt-primary desktop:hidden"
       >
         <Icon name={sidebarOpen ? 'x' : 'menu'} size="lg" />
       </button>
@@ -22,7 +22,7 @@ export function MobileNav() {
       {/* Backdrop when sidebar is open on mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-surface-overlay z-[35] desktop:hidden"
+          className="fixed inset-0 bg-surface-overlay z-float desktop:hidden"
           onClick={toggleSidebar}
         />
       )}

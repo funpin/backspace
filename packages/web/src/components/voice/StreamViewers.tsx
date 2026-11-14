@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '../ui/Avatar';
+import { Icon } from '../ui/Icon';
 import { useVoiceStore } from '../../stores/voiceStore';
 import { useVoiceParticipantMeta } from '../../hooks/useVoiceParticipantMeta';
 import { streamViewers } from '../../utils/streamViewers';
@@ -24,14 +25,6 @@ const VIEWERS_CLOSE_DELAY_MS = 150;
 const MAX_FACES = 3;
 const MAX_FACES_LARGE = 6;
 
-function EyeIcon({ size }: { size: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="flex-shrink-0">
-      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-    </svg>
-  );
-}
-
 /**
  * One face of the group. Hovering it lifts it out of the row and names its
  * owner; `quiet` holds the name back while the full list is open over it.
@@ -51,7 +44,7 @@ function ViewerFace({ participant, size, quiet }: { participant: ParticipantInfo
       data-viewer-identity={participant.identity}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="stream-viewer-face relative flex rounded-full ring-2 ring-black/70 transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-110 hover:z-10"
+      className="stream-viewer-face relative flex rounded-full ring-2 ring-black/70 transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-110 hover:z-raised"
     >
       <Avatar src={avatar} name={displayName} size={size} userId={participant.homeUserId ?? participant.userId} user={user ?? undefined} />
       {named && createPortal(
@@ -59,7 +52,7 @@ function ViewerFace({ participant, size, quiet }: { participant: ParticipantInfo
           ref={floatingRef}
           role="tooltip"
           style={style}
-          className="stream-viewer-name px-2 py-1 text-xs font-medium text-txt-primary glass rounded-md whitespace-nowrap pointer-events-none z-50"
+          className="stream-viewer-name px-2 py-1 text-xs font-medium text-txt-primary glass rounded-lg whitespace-nowrap pointer-events-none z-popover"
         >
           {displayName}
         </div>,
@@ -143,7 +136,8 @@ export function StreamViewerCount({ sharer, compact, large }: { sharer: Particip
   // "+1" would take the room of the face it stands for, so one extra viewer is simply shown.
   const faces = count > maxFaces + 1 ? viewers.slice(0, maxFaces) : viewers;
   const overflow = count - faces.length;
-  const faceSize = large ? 28 : 22;
+  // The caption chip is 26px tall; a 20px face with its 2px ring fits inside it.
+  const faceSize = 20;
 
   return (
     <>
@@ -163,9 +157,9 @@ export function StreamViewerCount({ sharer, compact, large }: { sharer: Particip
         // leave the list open behind the pin it just toggled.
         onFocus={(e) => { if (e.currentTarget.matches(':focus-visible')) enter(); }}
         onBlur={leave}
-        className={`flex items-center flex-shrink-0 rounded-full text-white/80 hover:text-white transition-colors ${compact ? 'gap-1 text-[10px] font-semibold tabular-nums' : 'gap-1.5'}`}
+        className={`flex items-center flex-shrink-0 rounded-full text-white/80 hover:text-white transition-colors duration-fast ${compact ? 'gap-1 text-2xs font-semibold tabular-nums' : 'gap-1.5'}`}
       >
-        <EyeIcon size={compact ? 11 : 13} />
+        <Icon name="eye" size="xs" />
         {compact ? count : (
           <span className="flex items-center pl-0.5">
             {faces.map((viewer, index) => (
@@ -179,7 +173,7 @@ export function StreamViewerCount({ sharer, compact, large }: { sharer: Particip
                 onMouseEnter={enter}
                 onMouseLeave={leave}
                 style={{ height: faceSize, minWidth: faceSize }}
-                className="relative -ml-2 px-1.5 flex items-center justify-center rounded-full ring-2 ring-black/70 bg-surface-elevated text-[10px] leading-none font-semibold tabular-nums text-txt-secondary"
+                className="relative -ml-2 px-1.5 flex items-center justify-center rounded-full ring-2 ring-black/70 bg-surface-elevated text-2xs leading-none font-semibold tabular-nums text-txt-secondary"
               >
                 {`+${overflow}`}
               </span>
@@ -197,7 +191,7 @@ export function StreamViewerCount({ sharer, compact, large }: { sharer: Particip
           onMouseEnter={enter}
           onMouseLeave={leave}
           onClick={(e) => e.stopPropagation()}
-          className="glass rounded-lg min-w-[180px] max-w-[260px] z-50"
+          className="glass rounded-xl min-w-[180px] max-w-[260px] z-popover"
         >
           <StreamViewersList sharer={sharer} title={t('voice:stream.viewers')} empty={t('voice:stream.noViewers')} />
         </div>,
@@ -215,7 +209,7 @@ function ViewerRow({ participant }: { participant: ParticipantInfo }) {
       <Avatar src={avatar} name={displayName} size={20} userId={participant.homeUserId ?? participant.userId} user={user ?? undefined} />
       <span className="text-sm text-txt-secondary truncate">{displayName}</span>
       {participant.isLocal && (
-        <span className="text-[10px] text-txt-tertiary font-medium flex-shrink-0">{t('voice:badges.you')}</span>
+        <span className="text-2xs text-txt-tertiary font-medium flex-shrink-0">{t('voice:badges.you')}</span>
       )}
     </li>
   );
@@ -237,7 +231,7 @@ function StreamViewersList({ sharer, title, empty }: { sharer: ParticipantInfo; 
   const viewers = useStreamViewers(sharer);
   return (
     <div className="p-3" data-testid="stream-viewers-list">
-      <div className="text-xs text-txt-tertiary mb-2 font-medium uppercase tracking-wider">
+      <div className="text-xs text-txt-tertiary mb-2 font-medium">
         {title}
         {viewers.length > 0 && <span className="ml-1.5 tabular-nums">{viewers.length}</span>}
       </div>

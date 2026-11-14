@@ -149,12 +149,12 @@ describe('OuterSpaceSection', () => {
     expect(screen.queryByTestId('outer-space-loading')).not.toBeInTheDocument();
   });
 
-  it('unreachable: amber notice with the errors copy', () => {
+  it('unreachable: warning notice with the errors copy', () => {
     setDirectory({ status: 'unreachable' });
     renderSection();
     const notice = screen.getByText(UNREACHABLE);
     expect(notice).toBeInTheDocument();
-    expect(notice.className).toContain('accent-amber');
+    expect(notice.className).toContain('status-warn');
   });
 
   it('unreachable after a failed load more: the list stays and the notice sits under it', () => {
@@ -165,11 +165,11 @@ describe('OuterSpaceSection', () => {
     expect(card.compareDocumentPosition(notice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it('error: rose notice', () => {
+  it('error: danger notice', () => {
     setDirectory({ status: 'error' });
     renderSection();
     const notice = screen.getByText('Something went wrong.');
-    expect(notice.className).toContain('accent-rose');
+    expect(notice.className).toContain('status-danger');
   });
 
   it('ok, zero entries, with a query: the no-matches copy', () => {

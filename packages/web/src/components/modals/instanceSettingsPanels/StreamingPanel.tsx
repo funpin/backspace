@@ -6,6 +6,9 @@ import { useSettingsStore } from '../../../stores/settingsStore';
 import { useUIStore } from '../../../stores/uiStore';
 import type { InstanceStreamingLimits } from '@backspace/shared';
 import { Toggle } from '../../ui/Toggle';
+import { Button } from '../../ui/Button';
+import { Icon } from '../../ui/Icon';
+import { Options } from '../../ui/Controls';
 import {
   STANDARD_RESOLUTIONS, STANDARD_FRAMERATES,
   ALL_RESOLUTIONS, RESOLUTION_LABELS,
@@ -91,7 +94,7 @@ export function StreamingPanel() {
       // The panel's own failure treatment, the one its save errors use: a
       // load that failed is an error, not an empty state.
       return (
-        <div className="p-2 bg-status-danger/10 border border-status-danger/30 rounded text-status-danger text-sm flex flex-wrap items-center gap-3">
+        <div className="p-2.5 bg-status-danger/10 border border-status-danger/30 rounded-lg text-status-danger text-sm flex flex-wrap items-center gap-3">
           <span>{t('common:states.loadSettingsFailed')}</span>
           <button
             type="button"
@@ -212,13 +215,13 @@ export function StreamingPanel() {
     setDraft({ ...draft, allowedFramerates: Array.from(current).sort((a, b) => a - b) });
   };
 
-  const pillBase = 'px-3 py-1.5 rounded text-compact font-medium transition-colors cursor-pointer select-none';
-  const pillOn = 'bg-accent-primary text-white';
-  const pillOff = 'bg-surface-elevated text-txt-secondary hover:bg-interactive-hover';
+  const pillBase = 'h-8 px-3.5 rounded-lg text-compact font-medium transition-[background-color,color,transform] duration-fast ease-out active:scale-[0.95] cursor-pointer select-none';
+  const pillOn = 'bg-accent-primary text-on-accent';
+  const pillOff = 'bg-surface-elevated text-txt-secondary shadow-[inset_0_0_0_1px_var(--glass-border)] hover:text-txt-primary';
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary">{t('admin:streaming.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary">{t('admin:streaming.title')}</h2>
       <div className="text-xs text-txt-tertiary">
         {t('admin:streaming.description')}
       </div>
@@ -229,10 +232,10 @@ export function StreamingPanel() {
         <p className="text-xs text-txt-tertiary mb-2">{t('admin:streaming.bandwidth.description')}</p>
         <div className="rounded-xl bg-surface-elevated p-3.5 space-y-4">
           {/* Allow Custom Bitrate */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-sm text-txt-primary">{t('admin:streaming.bandwidth.customBitrate.label')}</div>
-              <div className="text-xs text-txt-tertiary">{t('admin:streaming.bandwidth.customBitrate.description')}</div>
+              <div className="text-sm font-medium text-txt-primary">{t('admin:streaming.bandwidth.customBitrate.label')}</div>
+              <div className="text-xs text-txt-tertiary mt-0.5">{t('admin:streaming.bandwidth.customBitrate.description')}</div>
             </div>
             <Toggle
               enabled={draft.allowCustomBitrate}
@@ -240,7 +243,7 @@ export function StreamingPanel() {
             />
           </div>
           {/* Bitrate Range */}
-          <div>
+          <div className="pt-3 border-t border-border-soft">
             <div className="text-xs text-txt-secondary mb-1.5">
               {t('admin:streaming.bandwidth.range')}
             </div>
@@ -254,9 +257,9 @@ export function StreamingPanel() {
                   step={100}
                   value={Math.min(draft.minBitrateKbps, 100000)}
                   onChange={(e) => setDraft({ ...draft, minBitrateKbps: Number(e.target.value) })}
-                  className="w-full h-1.5 accent-accent-primary cursor-pointer appearance-none bg-interactive-muted rounded-full
+                  className="w-full h-1.5 accent-accent-tone cursor-pointer appearance-none bg-interactive-muted rounded-full
                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
-                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-txt-primary [&::-webkit-slider-thumb]:shadow-md
                     [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-0"
                 />
                 <div className="flex items-center gap-1.5">
@@ -284,9 +287,9 @@ export function StreamingPanel() {
                   step={500}
                   value={Math.min(draft.maxBitrateKbps, 100000)}
                   onChange={(e) => setDraft({ ...draft, maxBitrateKbps: Number(e.target.value) })}
-                  className="w-full h-1.5 accent-accent-primary cursor-pointer appearance-none bg-interactive-muted rounded-full
+                  className="w-full h-1.5 accent-accent-tone cursor-pointer appearance-none bg-interactive-muted rounded-full
                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
-                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-txt-primary [&::-webkit-slider-thumb]:shadow-md
                     [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-0"
                 />
                 <div className="flex items-center gap-1.5">
@@ -309,9 +312,9 @@ export function StreamingPanel() {
           </div>
 
           {/* Bitrate Step — presets + custom input */}
-          <div className="pt-2 border-t border-border-soft">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-2xs text-txt-tertiary">{t('admin:streaming.bandwidth.step')}</span>
+          <div className="pt-3 border-t border-border-soft">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs text-txt-secondary">{t('admin:streaming.bandwidth.step')}</span>
               <input
                 type="number"
                 min={50}
@@ -326,21 +329,12 @@ export function StreamingPanel() {
               />
               <span className="text-2xs text-txt-tertiary">{t('admin:streaming.units.kbpsLabel')}</span>
             </div>
-            <div className="flex flex-wrap gap-1">
-              {[100, 250, 500, 1000, 2500, 5000].map((step) => (
-                <button
-                  key={step}
-                  onClick={() => setDraft({ ...draft, bitrateStepKbps: step })}
-                  className={`px-2 py-0.5 rounded text-2xs font-medium transition-colors cursor-pointer select-none ${
-                    draft.bitrateStepKbps === step
-                      ? 'bg-accent-primary text-white'
-                      : 'bg-surface-elevated text-txt-secondary hover:bg-interactive-hover'
-                  }`}
-                >
-                  {formatKbps(step)}
-                </button>
-              ))}
-            </div>
+            <Options
+              label={t('admin:streaming.bandwidth.step')}
+              items={[100, 250, 500, 1000, 2500, 5000].map((step) => ({ value: step, label: formatKbps(step) }))}
+              value={draft.bitrateStepKbps}
+              onChange={(step) => setDraft({ ...draft, bitrateStepKbps: step })}
+            />
           </div>
         </div>
       </div>
@@ -396,10 +390,8 @@ export function StreamingPanel() {
         )) && (
         <div className="p-3 bg-status-warn/10 border border-status-warn/30 rounded-lg">
           <div className="flex items-start gap-2">
-            <svg className="w-4 h-4 text-status-warn mt-0.5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-            </svg>
-            <div className="text-xs text-status-warn/90 leading-relaxed">
+            <Icon name="triangle-alert" size="sm" className="text-status-warn mt-0.5" />
+            <div className="text-xs text-status-warn leading-relaxed">
               <span className="font-semibold">{t('admin:streaming.highEndWarning.title')}</span>{' '}
               {t('admin:streaming.highEndWarning.description')}
             </div>
@@ -416,7 +408,7 @@ export function StreamingPanel() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <div className="text-xs text-txt-secondary">{t('admin:streaming.matrix.scaleAll')}</div>
-              <div className="text-xs text-txt-tertiary font-mono">&times;{scaleValue.toFixed(2)}</div>
+              <div className="text-xs text-txt-tertiary font-mono tabular-nums">&times;{scaleValue.toFixed(2)}</div>
             </div>
             <input
               type="range"
@@ -428,9 +420,9 @@ export function StreamingPanel() {
               onChange={(e) => handleScaleChange(Number(e.target.value))}
               onPointerUp={handleScaleEnd}
               onPointerCancel={handleScaleEnd}
-              className="w-full h-1.5 accent-accent-primary cursor-pointer appearance-none bg-interactive-muted rounded-full
+              className="w-full h-1.5 accent-accent-tone cursor-pointer appearance-none bg-interactive-muted rounded-full
                 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
-                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-txt-primary [&::-webkit-slider-thumb]:shadow-md
                 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-0"
             />
             <div className="text-2xs text-txt-tertiary mt-0.5">{t('admin:streaming.matrix.scaleHint')}</div>
@@ -438,12 +430,12 @@ export function StreamingPanel() {
 
           {/* Matrix grid */}
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="w-full text-xs tabular-nums">
               <thead>
                 <tr>
-                  <th className="text-left text-txt-tertiary font-normal pb-1.5 pr-2"></th>
+                  <th className="text-left text-xs font-medium text-txt-tertiary pb-1.5 pr-2"></th>
                   {enabledFramerates.map((fps) => (
-                    <th key={fps} className="text-center text-txt-tertiary font-normal pb-1.5 px-1 min-w-[52px]">{t('admin:streaming.units.fps', { value: fps })}</th>
+                    <th key={fps} className="text-center text-xs font-medium text-txt-tertiary pb-1.5 px-1 min-w-[52px]">{t('admin:streaming.units.fps', { value: fps })}</th>
                   ))}
                 </tr>
               </thead>
@@ -482,9 +474,9 @@ export function StreamingPanel() {
                           ) : (
                             <button
                               onClick={() => setEditingCell(key)}
-                              className={`w-full px-1.5 py-0.5 rounded text-center transition-colors
+                              className={`w-full px-1.5 py-1 rounded text-center transition-colors duration-fast
                                 ${exceedsCap ? 'bg-status-warn/10 text-status-warn' : ''}
-                                ${overridden && !exceedsCap ? 'bg-accent-primary/10 text-accent-primary' : ''}
+                                ${overridden && !exceedsCap ? 'bg-accent-tone/[0.16] text-accent-tone' : ''}
                                 ${!overridden && !exceedsCap ? 'text-txt-secondary hover:bg-interactive-hover' : ''}
                               `}
                               title={overridden ? t('admin:streaming.matrix.cellDefault', { value: formatKbps(getDefaultKbps(key)) }) : t('admin:streaming.matrix.cellEdit')}
@@ -514,7 +506,10 @@ export function StreamingPanel() {
 
           {/* Reset all button */}
           {Object.entries(matrixDraft).some(([key, val]) => val !== getDefaultKbps(key)) && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="rotate-ccw"
               onClick={() => {
                 const reset: Record<string, number> = {};
                 for (const [key] of Object.entries(matrixDraft)) {
@@ -522,10 +517,9 @@ export function StreamingPanel() {
                 }
                 setMatrixDraft(reset);
               }}
-              className="text-2xs text-accent-primary hover:text-accent-lavender transition-colors"
             >
               {t('admin:streaming.matrix.resetAll')}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -534,10 +528,8 @@ export function StreamingPanel() {
       {Object.entries(matrixDraft).some(([, val]) => val > draft.maxBitrateKbps) && (
         <div className="p-3 bg-status-warn/10 border border-status-warn/30 rounded-lg">
           <div className="flex items-start gap-2">
-            <svg className="w-4 h-4 text-status-warn mt-0.5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-            </svg>
-            <div className="text-xs text-status-warn/90 leading-relaxed">
+            <Icon name="triangle-alert" size="sm" className="text-status-warn mt-0.5" />
+            <div className="text-xs text-status-warn leading-relaxed">
               <span className="font-semibold">{t('admin:streaming.capWarning.title')}</span>{' '}
               {t('admin:streaming.capWarning.description', { max: formatKbps(draft.maxBitrateKbps) })}
             </div>
@@ -547,25 +539,25 @@ export function StreamingPanel() {
 
       {/* Save / Reset */}
       {saveError && (
-        <div className="p-2 bg-status-danger/10 border border-status-danger/30 rounded text-status-danger text-sm">{saveError}</div>
+        <div className="p-2.5 bg-status-danger/10 border border-status-danger/30 rounded-lg text-status-danger text-sm">{saveError}</div>
       )}
       {hasChanges && (
         <div className="sticky bottom-0 z-raised pointer-events-none">
           <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 animate-slide-up pointer-events-auto">
-              <button
+            <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 animate-slide-up pointer-events-auto">
+              <Button
+                variant="ghost" size="sm"
                 onClick={handleReset}
-                className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
               >
                 {t('common:actions.reset')}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary" size="sm"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
               >
                 {saving ? t('common:states.saving') : t('common:actions.save')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

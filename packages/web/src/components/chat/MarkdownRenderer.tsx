@@ -1,8 +1,11 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Highlight, themes } from 'prism-react-renderer';
 import type { Components } from 'react-markdown';
+import { IconButton } from '../ui/IconButton';
+import { Tag } from '../ui/Tag';
 import { MassMentionBadge } from './MassMentionBadge';
 import { MentionBadge } from './MentionBadge';
 import { remarkEmojiShortcodes } from '../../utils/remarkEmojiShortcodes';
@@ -68,14 +71,15 @@ function urlTransform(url: string): string {
   return defaultUrlTransform(url);
 }
 
-// ─── Custom Theme (Aether Drift) ──────────────────────────────────────────
-// Based on One Dark, tuned to match Aether Drift's elevated surface aesthetic.
+// ─── Code Theme ────────────────────────────────────────────────────────────
+// One Dark token colours on the block's own ground: the frame draws the
+// surface, so the highlighter paints no background of its own.
 
-const aetherTheme = {
+const codeTheme = {
   ...themes.oneDark,
   plain: {
     ...themes.oneDark.plain,
-    backgroundColor: 'rgb(var(--bg-elevated))',
+    backgroundColor: 'transparent',
     color: 'rgb(var(--text-message))',
   },
 };
@@ -84,36 +88,101 @@ const aetherTheme = {
 
 const REMARK_PLUGINS = [remarkGfm, remarkDefaultCodeLang, remarkEmojiShortcodes];
 
+/**
+ * A language's own label colour (docs/brand/brandbook.md §3.4). The colour
+ * belongs to the language, not to the interface, so it stays the same under
+ * every accent theme. Languages without one get the neutral label.
+ */
+const LANGUAGE_COLORS: Readonly<Record<string, string>> = {
+  js: '#e8c44a',
+  javascript: '#e8c44a',
+  ts: '#6fb5ff',
+  typescript: '#6fb5ff',
+  json: '#7fd6a0',
+};
+
+/** How long the copy button shows its confirmation. */
+const COPIED_FEEDBACK_MS = 1500;
+
+function CodeBlockCopyButton({ code }: { code: string }) {
+  const { t } = useTranslation('common');
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (timerRef.current !== null) clearTimeout(timerRef.current);
+  }, []);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null;
+        setCopied(false);
+      }, COPIED_FEEDBACK_MS);
+    }).catch(() => {
+      // The clipboard is unavailable (insecure context or denied permission);
+      // the button stays as it was so nothing claims a copy that did not happen.
+    });
+  };
+
+  return (
+    <IconButton
+      icon={copied ? 'check' : 'copy'}
+      label={copied ? t('actions.copied') : t('actions.copy')}
+      size="sm"
+      onClick={handleCopy}
+    />
+  );
+}
+
+function CodeBlockHeader({ language, code }: { language: string; code: string }) {
+  const color = LANGUAGE_COLORS[language.toLowerCase()];
+  return (
+    <div className="flex items-center justify-between gap-2 pl-3 pr-1 pt-1">
+      {language === 'text' ? <span /> : color ? <Tag color={color}>{language}</Tag> : <Tag>{language}</Tag>}
+      <CodeBlockCopyButton code={code} />
+    </div>
+  );
+}
+
+const CODE_FRAME = 'mt-1 rounded-xl bg-surface-input shadow-[inset_0_0_0_1px_var(--glass-border)] overflow-hidden';
+const CODE_PRE = 'px-3 pt-1 pb-2.5 text-compact font-mono overflow-x-auto';
+
 function CodeBlock({ language, code }: { language: string; code: string }) {
   // 'text' means a bare fenced block with no language — render without highlighting
   if (language === 'text') {
     return (
-      <pre className="mt-1 p-3 bg-surface-elevated border border-white/[0.06] rounded text-[0.875rem] leading-[1.125rem] font-mono overflow-x-auto whitespace-pre">
-        <code>{code}</code>
-      </pre>
+      <div className={CODE_FRAME}>
+        <CodeBlockHeader language={language} code={code} />
+        <pre className={`${CODE_PRE} whitespace-pre`}>
+          <code>{code}</code>
+        </pre>
+      </div>
     );
   }
 
   return (
-    <Highlight theme={aetherTheme} code={code} language={language}>
-      {({ style, tokens, getLineProps, getTokenProps }) => (
-        <pre
-          className="mt-1 rounded border border-white/[0.06] text-[0.875rem] leading-[1.125rem] font-mono overflow-x-auto"
-          style={{ ...style, padding: '0.625rem 0.75rem', margin: 0 }}
-        >
-          {tokens.map((line, i) => {
-            const lineProps = getLineProps({ line });
-            return (
-              <div key={i} {...lineProps} style={{ ...lineProps.style, minHeight: '1.125rem' }}>
-                {line.map((token, key) => (
-                  <span key={key} {...getTokenProps({ token })} />
-                ))}
-              </div>
-            );
-          })}
-        </pre>
-      )}
-    </Highlight>
+    <div className={CODE_FRAME}>
+      <CodeBlockHeader language={language} code={code} />
+      <Highlight theme={codeTheme} code={code} language={language}>
+        {({ style, tokens, getLineProps, getTokenProps }) => (
+          <pre className={CODE_PRE} style={{ ...style, margin: 0 }}>
+            {tokens.map((line, i) => {
+              const lineProps = getLineProps({ line });
+              return (
+                <div key={i} {...lineProps} style={{ ...lineProps.style, minHeight: '18px' }}>
+                  {line.map((token, key) => (
+                    <span key={key} {...getTokenProps({ token })} />
+                  ))}
+                </div>
+              );
+            })}
+          </pre>
+        )}
+      </Highlight>
+    </div>
   );
 }
 
@@ -180,7 +249,7 @@ function buildComponents(): Components {
       // Inline code
       return (
         <code
-          className="px-[6px] py-px bg-[#111115] border border-border-soft rounded text-[13.5px] font-mono text-accent-lavender"
+          className="rounded bg-surface-elevated px-1.5 py-px text-[12.5px] font-mono"
           {...rest}
         >
           {children}
@@ -192,7 +261,7 @@ function buildComponents(): Components {
     pre: ({ children }) => <>{children}</>,
 
     // Bold / Italic / Strikethrough
-    strong: ({ children }) => <strong className="font-bold text-txt-primary">{children}</strong>,
+    strong: ({ children }) => <strong className="font-semibold text-txt-primary">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     del: ({ children }) => <del className="line-through text-txt-secondary">{children}</del>,
 
@@ -209,9 +278,9 @@ function buildComponents(): Components {
     li: ({ children }) => <li>{children}</li>,
 
     // Headings — Discord renders these with slightly larger/bolder text
-    h1: ({ children }) => <div className="text-[1.5rem] font-bold text-txt-primary mt-2 mb-1">{children}</div>,
-    h2: ({ children }) => <div className="text-[1.25rem] font-bold text-txt-primary mt-2 mb-1">{children}</div>,
-    h3: ({ children }) => <div className="text-[1.1rem] font-bold text-txt-primary mt-1 mb-0.5">{children}</div>,
+    h1: ({ children }) => <div className="text-2xl font-semibold text-txt-primary mt-2 mb-1">{children}</div>,
+    h2: ({ children }) => <div className="text-xl font-semibold text-txt-primary mt-2 mb-1">{children}</div>,
+    h3: ({ children }) => <div className="text-lg font-semibold text-txt-primary mt-1 mb-0.5">{children}</div>,
 
     // Horizontal rules
     hr: () => <hr className="border-border-soft my-2" />,
@@ -222,7 +291,7 @@ function buildComponents(): Components {
         <img
           src={src}
           alt={alt ?? ''}
-          className="max-w-full max-h-[300px] rounded-md"
+          className="max-w-full max-h-[300px] rounded-xl"
           loading="lazy"
           referrerPolicy="no-referrer"
           crossOrigin="anonymous"
@@ -233,12 +302,12 @@ function buildComponents(): Components {
     // Tables (GFM)
     table: ({ children }) => (
       <div className="overflow-x-auto my-1">
-        <table className="border-collapse text-[0.875rem]">{children}</table>
+        <table className="border-collapse text-sm">{children}</table>
       </div>
     ),
     thead: ({ children }) => <thead className="border-b border-border-soft">{children}</thead>,
     tbody: ({ children }) => <tbody>{children}</tbody>,
-    tr: ({ children }) => <tr className="border-b border-white/[0.06]">{children}</tr>,
+    tr: ({ children }) => <tr className="border-b border-border-soft">{children}</tr>,
     th: ({ children }) => <th className="px-3 py-1.5 text-left text-txt-primary font-semibold">{children}</th>,
     td: ({ children }) => <td className="px-3 py-1.5">{children}</td>,
   };

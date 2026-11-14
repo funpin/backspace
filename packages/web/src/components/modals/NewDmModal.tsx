@@ -24,14 +24,14 @@ function NewDmUserRow({
   return (
     <button
       onClick={() => onSelect(user)}
-      className="w-full flex items-center gap-3 px-3 py-2 rounded-[4px] hover:bg-interactive-hover transition-colors text-left"
+      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-interactive-hover transition-colors duration-fast text-left"
     >
       <Avatar src={canonical.avatar} name={displayName} size={36} status={canonical.status as any} userId={canonical.homeUserId ?? canonical.id} avatarColor={canonical.avatarColor} />
       <div className="flex-1 min-w-0">
-        <div className="text-[14px] font-medium text-txt-primary truncate">
+        <div className="text-sm font-medium text-txt-primary truncate">
           {displayName}
         </div>
-        <div className="text-[12px] text-txt-tertiary truncate">@{canonical.username}</div>
+        <div className="text-xs text-txt-tertiary truncate">@{canonical.username}</div>
       </div>
     </button>
   );
@@ -107,20 +107,20 @@ export function NewDmModal() {
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder={t('dm:newDm.searchPlaceholder')}
-          className="input-search w-full py-2 text-[14px]"
+          className="input-search w-full"
         />
 
         {error && (
-          <p className="text-txt-danger text-[13px]">{error}</p>
+          <p className="text-xs text-status-danger">{error}</p>
         )}
 
-        <div className="max-h-[300px] overflow-y-auto space-y-[2px]">
+        <div className="max-h-[300px] overflow-y-auto space-y-0.5">
           {isSearching && (
-            <div className="py-4 text-center text-txt-tertiary text-[14px]">{t('dm:search.searching')}</div>
+            <div className="py-4 text-center text-txt-tertiary text-sm">{t('dm:search.searching')}</div>
           )}
 
           {!isSearching && query.trim().length >= 2 && results.length === 0 && (
-            <div className="py-4 text-center text-txt-tertiary text-[14px]">{t('dm:newDm.noUsers')}</div>
+            <div className="py-4 text-center text-txt-tertiary text-sm">{t('dm:newDm.noUsers')}</div>
           )}
 
           {results.map((user) => (

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useInstanceStore, RemoteLoginRequiredError, type RemoteLoginReason } from '../../stores/instanceStore';
 import { describeError } from '../../i18n/errors';
 import { FallbackForm, safeHost } from './RemotePasswordStep';
+import { Button } from '../ui/Button';
 
 /**
  * The field a finished request hands the keyboard back to: the first input
@@ -160,14 +161,9 @@ export function ReauthForm({ origin, username, onDone, onCancel, className = '' 
   };
 
   const cancelButton = (
-    <button
-      type="button"
-      onClick={handleCancel}
-      disabled={loading}
-      className="px-2 py-1.5 text-xs text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
-    >
+    <Button variant="ghost" size="sm" onClick={handleCancel} disabled={loading}>
       {t('common:actions.cancel')}
-    </button>
+    </Button>
   );
 
   return (
@@ -190,7 +186,7 @@ export function ReauthForm({ origin, username, onDone, onCancel, className = '' 
               field and the error under it keep the same edges in a narrow chip
               panel and in the width of a settings row. */}
           <div className="max-w-sm">
-            <label htmlFor={fieldId} className="block text-xs text-txt-tertiary mb-1">
+            <label htmlFor={fieldId} className="block text-xs font-medium text-txt-secondary mb-1.5">
               {t('federation:connections.row.homePasswordLabel')}
             </label>
             <input
@@ -204,19 +200,15 @@ export function ReauthForm({ origin, username, onDone, onCancel, className = '' 
               autoComplete="current-password"
             />
             {error && (
-              <p role="alert" className="mt-1.5 px-2 py-1.5 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs break-words">
+              <p role="alert" className="mt-1.5 px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger break-words">
                 {error}
               </p>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="submit"
-              disabled={loading || !password}
-              className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-xs font-medium rounded transition-colors disabled:opacity-50"
-            >
+            <Button variant="primary" size="sm" type="submit" disabled={loading || !password}>
               {loading ? t('federation:connections.add.connecting') : t('federation:connections.add.connect')}
-            </button>
+            </Button>
             {cancelButton}
           </div>
         </form>
@@ -235,7 +227,7 @@ export function ReauthForm({ origin, username, onDone, onCancel, className = '' 
               than under either of them, as the dialogs that share this form
               place it. */}
           {error && (
-            <p role="alert" className="px-2 py-1.5 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs break-words">
+            <p role="alert" className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger break-words">
               {error}
             </p>
           )}

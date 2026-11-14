@@ -4,6 +4,7 @@ import type { DirectoryEntry } from '@backspace/shared';
 import { useDirectoryStore, type DirectoryFailure, type DirectoryStatus } from '../../stores/directoryStore';
 import { useInstanceStore } from '../../stores/instanceStore';
 import { dedupeAgainstConnected, innerOrigins } from '../../utils/directory';
+import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { Mascot } from '../ui/Mascot';
 import { SpaceCard, outerEntryToSpace } from './SpaceCard';
@@ -90,7 +91,7 @@ export function OuterSpaceSection({ query, onConnect }: OuterSpaceSectionProps) 
     <section>
       <div className="mb-3" data-testid="outer-space-header">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-txt-tertiary">
+          <span className="text-xs font-medium text-txt-tertiary">
             {t('spaces:explore.outer.title')}
           </span>
           {isLoading && hasEntries && (
@@ -99,7 +100,7 @@ export function OuterSpaceSection({ query, onConnect }: OuterSpaceSectionProps) 
             </span>
           )}
         </div>
-        <p className="text-[13px] text-txt-tertiary">{t('spaces:explore.outer.subtitle')}</p>
+        <p className="text-compact text-txt-tertiary">{t('spaces:explore.outer.subtitle')}</p>
       </div>
 
       {isLoading && !hasEntries ? (
@@ -133,25 +134,22 @@ export function OuterSpaceSection({ query, onConnect }: OuterSpaceSectionProps) 
           )}
 
           {notice === 'unreachable' && (
-            <div className="p-2.5 bg-accent-amber/10 border border-accent-amber/30 rounded text-[13px] text-accent-amber">
+            <div className="p-2.5 bg-status-warn/10 rounded-lg text-compact text-status-warn">
               {t('errors:directory_unreachable')}
             </div>
           )}
 
           {notice === 'error' && (
-            <div className="p-3 bg-accent-rose/10 border border-accent-rose/30 rounded text-sm text-txt-danger">
+            <div className="p-2.5 bg-status-danger/10 rounded-lg text-compact text-status-danger">
               {t('errors:generic')}
             </div>
           )}
 
           {status === 'ok' && hasMore && (
             <div className="flex justify-center">
-              <button
-                onClick={() => { void loadMore(); }}
-                className="px-4 py-2 bg-interactive-muted hover:bg-interactive-hover text-txt-secondary text-sm font-medium rounded transition-colors"
-              >
+              <Button variant="secondary" onClick={() => { void loadMore(); }}>
                 {t('spaces:explore.outer.showMore')}
-              </button>
+              </Button>
             </div>
           )}
         </div>

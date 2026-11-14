@@ -70,7 +70,7 @@ export function StreamHostSubtitle({ className = '' }: { className?: string }) {
   const { origin } = useStreamHostLimits();
   if (!origin) return null;
   return (
-    <div className={`text-[11px] text-txt-tertiary break-all ${className}`}>
+    <div className={`text-2xs text-txt-tertiary break-all ${className}`}>
       {t('voice:streamSettings.hostLimits', { host: hostOf(origin) })}
     </div>
   );
@@ -82,7 +82,7 @@ export function StreamSummary({ className = '' }: { className?: string }) {
   const config = useVoiceStore((s) => s.screenShareConfig);
   const result = buildScreenShareOptions(config);
   return (
-    <span className={`text-[12px] text-txt-tertiary ${className}`}>
+    <span className={`text-xs text-txt-tertiary tabular-nums ${className}`}>
       {t('voice:streamSettings.summary', {
         bitrate: formatBitrate(result.publish.videoEncoding.maxBitrate),
         degradation: formatDegradation(result.overdrive.degradationPreference),
@@ -117,9 +117,11 @@ export function systemAudioSwitch(
   }
 }
 
-const pillBase = 'px-2.5 py-1.5 rounded-full text-[13px] font-medium transition-colors cursor-pointer select-none text-center';
-const pillSelected = 'bg-accent-primary text-white';
-const pillUnselected = 'bg-surface-elevated text-txt-secondary hover:bg-interactive-hover';
+// The chips of the kit's Options (resolution, frame rate, codec), kept as
+// pressed buttons rather than radios so their roles and states stay as they are.
+const pillBase = 'h-8 px-2.5 rounded-lg text-compact font-medium transition-[background-color,color,transform] duration-fast ease-out active:scale-[0.95] cursor-pointer select-none text-center';
+const pillSelected = 'bg-accent-primary text-on-accent';
+const pillUnselected = 'bg-surface-elevated text-txt-secondary shadow-[inset_0_0_0_1px_var(--glass-border)] hover:text-txt-primary';
 
 export function StreamQualityControls() {
   const { t } = useTranslation(['voice', 'common']);
@@ -159,7 +161,7 @@ export function StreamQualityControls() {
     <div className="flex flex-col gap-3">
       {/* Resolution */}
       <div>
-        <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider mb-1.5">
+        <div className="text-xs text-txt-tertiary font-medium mb-1.5">
           {t('voice:streamSettings.resolution')}
         </div>
         <div className="grid grid-cols-3 gap-1.5">
@@ -178,7 +180,7 @@ export function StreamQualityControls() {
 
       {/* Frame Rate */}
       <div>
-        <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider mb-1.5">
+        <div className="text-xs text-txt-tertiary font-medium mb-1.5">
           {t('voice:streamSettings.frameRate')}
         </div>
         <div className="grid grid-cols-3 gap-1.5">
@@ -197,7 +199,7 @@ export function StreamQualityControls() {
 
       {/* Content Mode */}
       <div>
-        <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider mb-1.5">
+        <div className="text-xs text-txt-tertiary font-medium mb-1.5">
           {t('voice:streamSettings.contentMode')}
         </div>
         <div className="flex gap-1.5">
@@ -216,7 +218,7 @@ export function StreamQualityControls() {
 
       {/* Codec */}
       <div>
-        <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider mb-1.5">
+        <div className="text-xs text-txt-tertiary font-medium mb-1.5">
           {t('voice:streamSettings.codec')}
         </div>
         <div className="flex gap-1.5">
@@ -238,7 +240,7 @@ export function StreamQualityControls() {
 
       {/* Bitrate — Auto | Custom pills like every other row; the slider only exists in Custom */}
       <div>
-        <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider mb-1.5">
+        <div className="text-xs text-txt-tertiary font-medium mb-1.5">
           {t('voice:streamSettings.bitrate')}
         </div>
         {hostLimits.allowCustomBitrate ? (
@@ -271,14 +273,14 @@ export function StreamQualityControls() {
                   step={hostLimits.bitrateStepKbps}
                   value={effective.customBitrateKbps}
                   onChange={(e) => setConfig({ customBitrateKbps: Number(e.target.value) })}
-                  className="flex-1 min-w-0 h-1.5 accent-accent-primary cursor-pointer appearance-none bg-interactive-muted rounded-full
+                  className="flex-1 min-w-0 h-1.5 accent-accent-tone cursor-pointer appearance-none bg-interactive-muted rounded-full
                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5
-                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent-tone
                     [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-0
                     [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:rounded-full
-                    [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                    [&::-moz-range-thumb]:bg-accent-tone [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
                 />
-                <span className="text-[12px] font-medium text-txt-primary min-w-[64px] flex-shrink-0 text-right">
+                <span className="text-xs font-medium text-txt-primary min-w-16 flex-shrink-0 text-right tabular-nums">
                   {formatKbps(effective.customBitrateKbps)}
                 </span>
               </div>
@@ -286,10 +288,10 @@ export function StreamQualityControls() {
           </>
         ) : (
           <div>
-            <div className="text-[12px] text-txt-secondary font-medium">
+            <div className="text-xs text-txt-secondary font-medium tabular-nums">
               {formatKbps(autoKbps)}
             </div>
-            <div className="text-[10px] text-txt-tertiary mt-0.5">
+            <div className="text-2xs text-txt-tertiary mt-0.5">
               {hostOrigin
                 ? t('voice:streamSettings.customBitrateDisabledByHost', { host: hostOf(hostOrigin) })
                 : t('voice:streamSettings.customBitrateDisabled')}
@@ -302,28 +304,28 @@ export function StreamQualityControls() {
       <div>
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1 pt-1">
-            <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider">
+            <div className="text-xs text-txt-tertiary font-medium">
               {t('voice:streamSettings.systemAudio')}
             </div>
             {audioSwitch.cannotAddLive && (
-              <div className="text-[10px] text-txt-tertiary mt-0.5">
+              <div className="text-2xs text-txt-tertiary mt-0.5">
                 {t('voice:streamSettings.systemAudioLiveUnavailable')}
               </div>
             )}
             {audioSwitch.adding && (
-              <div className="text-[10px] text-txt-tertiary mt-0.5" role="status">
+              <div className="text-2xs text-txt-tertiary mt-0.5" role="status">
                 {t('voice:streamSettings.systemAudioAdding')}
               </div>
             )}
             {audioNote && !audioSwitch.adding && (
               <div
-                className={`text-[10px] mt-0.5 ${audioNote.tone === 'warning' ? 'text-accent-amber/80' : 'text-txt-tertiary'}`}
+                className={`text-2xs mt-0.5 ${audioNote.tone === 'warning' ? 'text-status-warn' : 'text-txt-tertiary'}`}
               >
                 {t(SYSTEM_AUDIO_NOTE_I18N_KEYS[audioNote.key])}
               </div>
             )}
             {audioRouters.length > 0 && (
-              <div className="text-[10px] mt-0.5 text-accent-amber/80" role="note">
+              <div className="text-2xs mt-0.5 text-status-warn" role="note">
                 {t('voice:streamSettings.audioRouterWarning', {
                   count: audioRouters.length,
                   apps: fmt.formatList(audioRouters),

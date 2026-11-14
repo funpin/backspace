@@ -284,16 +284,6 @@
       "count": 1
     }
   },
-  "packages/web/src/components/layout/ChannelSidebar.tsx": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 2
-    }
-  },
-  "packages/web/src/components/layout/DmListItem.tsx": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 1
-    }
-  },
   "packages/web/src/components/layout/DmSearchBar.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -423,11 +413,6 @@
   "packages/web/src/components/voice/VoiceChannel.test.tsx": {
     "@typescript-eslint/no-explicit-any": {
       "count": 3
-    }
-  },
-  "packages/web/src/components/voice/VoiceControlBar.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "packages/web/src/components/voice/VoiceGrid.test.tsx": {

@@ -8,6 +8,7 @@ import { useSpaceStore, getChannelOrigin } from '../../stores/spaceStore';
 import { wsSend } from '../../hooks/useWebSocket';
 import { hasPermissionBit, PermissionBits } from '../../utils/permissions';
 import { viewerCanActOnUserInSpace } from '../../utils/roleHierarchy';
+import { Icon } from '../ui/Icon';
 
 /**
  * Build moderation context menu items for a voice user.
@@ -128,22 +129,20 @@ export function VolumeSliderItem({ userId }: { userId: string }) {
 
   return (
     <div className="p-3">
-      <div className="text-xs text-txt-tertiary mb-2 font-medium uppercase tracking-wider">
+      <div className="text-xs text-txt-tertiary mb-2 font-medium">
         {t('voice:participantMenu.userVolume')}
       </div>
       <div className="flex items-center gap-2">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary flex-shrink-0">
-          <path d="M3 9v6h4l5 5V4L7 9H3z" />
-        </svg>
+        <Icon name="volume-1" size="sm" className="text-txt-tertiary" />
         <input
           type="range"
           min="0"
           max="200"
           value={volume}
           onChange={(e) => setParticipantVolume(userId, parseInt(e.target.value))}
-          className="flex-1 min-w-0 accent-accent-primary h-1"
+          className="flex-1 min-w-0 accent-accent-tone h-1"
         />
-        <span className="text-xs text-txt-secondary min-w-[32px] flex-shrink-0 text-right">
+        <span className="text-xs text-txt-secondary min-w-8 flex-shrink-0 text-right tabular-nums">
           {f.formatPercent(volume)}
         </span>
       </div>

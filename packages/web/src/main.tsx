@@ -47,25 +47,27 @@ class ErrorBoundary extends React.Component<
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#0b0b10',
-          color: '#efefef',
+          backgroundColor: '#0c0c0e',
+          color: '#ededf0',
           flexDirection: 'column',
           gap: '16px',
           padding: '24px',
         }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>{i18n.t('common:crash.title')}</h1>
-          <p style={{ color: '#a0a0aa', maxWidth: '480px', textAlign: 'center' }}>{this.state.error?.message}</p>
+          <h1 style={{ fontSize: '24px', fontWeight: 600 }}>{i18n.t('common:crash.title')}</h1>
+          <p style={{ color: '#a0a0a8', maxWidth: '480px', textAlign: 'center' }}>{this.state.error?.message}</p>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
               onClick={() => this.setState({ hasError: false, error: null })}
               style={{
-                padding: '8px 24px',
-                backgroundColor: '#7c6cf6',
-                color: 'white',
+                height: '34px',
+                padding: '0 16px',
+                backgroundColor: '#6e5bef',
+                color: '#ffffff',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '10px',
                 cursor: 'pointer',
                 fontSize: '14px',
+                fontWeight: 600,
               }}
             >
               {i18n.t('common:actions.tryAgain')}
@@ -73,13 +75,16 @@ class ErrorBoundary extends React.Component<
             <button
               onClick={() => window.location.reload()}
               style={{
-                padding: '8px 24px',
-                backgroundColor: 'transparent',
-                color: '#a0a0aa',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
+                height: '34px',
+                padding: '0 16px',
+                backgroundColor: '#1b1b1f',
+                color: '#ededf0',
+                border: 'none',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.075)',
+                borderRadius: '10px',
                 cursor: 'pointer',
                 fontSize: '14px',
+                fontWeight: 500,
               }}
             >
               {i18n.t('common:crash.reload')}
@@ -91,16 +96,16 @@ class ErrorBoundary extends React.Component<
               onToggle={(e) => this.setState({ showStack: (e.target as HTMLDetailsElement).open })}
               style={{ maxWidth: '600px', width: '100%', marginTop: '8px' }}
             >
-              <summary style={{ color: '#a0a0aa', cursor: 'pointer', fontSize: '13px' }}>
+              <summary style={{ color: '#a0a0a8', cursor: 'pointer', fontSize: '13px' }}>
                 {i18n.t('common:crash.details')}
               </summary>
               <pre style={{
                 marginTop: '8px',
                 padding: '12px',
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                borderRadius: '8px',
+                backgroundColor: '#1b1b1f',
+                borderRadius: '10px',
                 fontSize: '11px',
-                color: '#a0a0aa',
+                color: '#a0a0a8',
                 overflow: 'auto',
                 maxHeight: '200px',
                 whiteSpace: 'pre-wrap',

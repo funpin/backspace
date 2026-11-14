@@ -6,6 +6,8 @@ import { describeError } from '../../../i18n/errors';
 import { useSettingsStore } from '../../../stores/settingsStore';
 import { useUIStore } from '../../../stores/uiStore';
 import { Toggle } from '../../ui/Toggle';
+import { Button } from '../../ui/Button';
+import { Icon } from '../../ui/Icon';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { api, HttpError } from '../../../api/client';
 import { onFederationPeersChanged, onFederationPeerResetDetected } from '../../../hooks/useWebSocket';
@@ -77,8 +79,8 @@ function FederationGlobalSettings() {
       <p className="text-xs text-txt-tertiary mb-2">
         {t('federation:admin.relay.description')}
       </p>
-      <div className="rounded-xl bg-surface-elevated p-3.5 space-y-4">
-        <label className="flex items-center justify-between cursor-pointer">
+      <div className="rounded-xl bg-surface-elevated px-3.5 py-1 divide-y divide-border-soft">
+        <label className="flex items-center justify-between gap-3 py-3 cursor-pointer">
           <div>
             <div className="text-sm font-medium text-txt-primary">{t('federation:admin.relay.enable.label')}</div>
             <div className="text-xs text-txt-tertiary mt-0.5">{t('federation:admin.relay.enable.description')}</div>
@@ -86,7 +88,7 @@ function FederationGlobalSettings() {
           <Toggle enabled={draft.federationRelayEnabled} onChange={(v) => setDraft({ ...draft, federationRelayEnabled: v })} />
         </label>
 
-        <label className="flex items-center justify-between cursor-pointer">
+        <label className="flex items-center justify-between gap-3 py-3 cursor-pointer">
           <div>
             <div className="text-sm font-medium text-txt-primary">{t('federation:admin.relay.autoAccept.label')}</div>
             <div className="text-xs text-txt-tertiary mt-0.5">{t('federation:admin.relay.autoAccept.description')}</div>
@@ -94,7 +96,7 @@ function FederationGlobalSettings() {
           <Toggle enabled={draft.autoAcceptPeering} onChange={(v) => setDraft({ ...draft, autoAcceptPeering: v })} />
         </label>
 
-        <div>
+        <div className="py-3">
           <div className="text-sm font-medium text-txt-primary mb-1">{t('federation:admin.relay.ttl.label')}</div>
           <div className="text-xs text-txt-tertiary mb-2">{t('federation:admin.relay.ttl.description')}</div>
           <input
@@ -112,7 +114,7 @@ function FederationGlobalSettings() {
           />
         </div>
 
-        <div>
+        <div className="py-3">
           <div className="text-sm font-medium text-txt-primary mb-1">{t('federation:admin.relay.rotation.label')}</div>
           <div className="text-xs text-txt-tertiary mb-2">{t('federation:admin.relay.rotation.description')}</div>
           <input
@@ -132,23 +134,23 @@ function FederationGlobalSettings() {
       </div>
 
       {saveError && (
-        <div className="mt-2 p-2 bg-status-danger/10 border border-status-danger/30 rounded text-status-danger text-sm">{saveError}</div>
+        <div className="mt-2 p-2.5 bg-status-danger/10 border border-status-danger/30 rounded-lg text-status-danger text-sm">{saveError}</div>
       )}
 
       {hasChanges && (
         <div className="sticky bottom-0 z-raised pointer-events-none">
           <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 animate-slide-up pointer-events-auto">
-              <button onClick={handleReset} className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors">
+            <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 animate-slide-up pointer-events-auto">
+              <Button variant="ghost" size="sm" onClick={handleReset}>
                 {t('common:actions.reset')}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary" size="sm"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
               >
                 {saving ? t('common:states.saving') : t('common:actions.save')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -198,20 +200,20 @@ function formatRelativeTime(t: FederationT, formatters: Formatters, timestamp: n
 function peerStatusColor(status: string): string {
   switch (status) {
     case 'active': return 'bg-status-ok/15 text-status-ok';
-    case 'pending': return 'bg-accent-lavender/15 text-accent-lavender';
+    case 'pending': return 'bg-status-warn/15 text-status-warn';
     case 'unreachable': return 'bg-status-warn/15 text-status-warn';
     case 'rejected': return 'bg-status-danger/15 text-status-danger';
     case 'awaiting_approval': return 'bg-status-warn/15 text-status-warn';
     case 'needs_attention': return 'bg-status-danger/15 text-status-danger';
-    case 'revoked': return 'bg-surface-elevated text-txt-tertiary';
-    default: return 'bg-surface-elevated text-txt-tertiary';
+    case 'revoked': return 'bg-border-soft text-txt-secondary';
+    default: return 'bg-border-soft text-txt-secondary';
   }
 }
 
 function peerStatusDotColor(status: string): string {
   switch (status) {
     case 'active': return 'bg-status-ok';
-    case 'pending': return 'bg-accent-lavender';
+    case 'pending': return 'bg-status-warn';
     case 'unreachable': return 'bg-status-warn';
     case 'rejected': return 'bg-status-danger';
     case 'awaiting_approval': return 'bg-status-warn';
@@ -314,47 +316,45 @@ function FilterDropdown({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2.5 py-1 text-2xs text-txt-tertiary hover:text-txt-secondary bg-surface-elevated hover:bg-interactive-hover rounded transition-colors"
+        className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-compact font-medium text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover transition-colors duration-fast"
       >
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="opacity-60">
-          <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
+        <Icon name="filter" size="sm" />
         {t('common:actions.filter')}
-        <span className="text-2xs">▾</span>
+        <Icon name="chevron-down" size="xs" />
       </button>
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 z-50 glass rounded-lg p-1.5 w-48">
+          <div className="fixed inset-0 z-float" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-1 z-popover glass rounded-xl p-1.5 w-48">
             {view === 'active' && (
               <>
-                <div className="text-xs font-medium text-txt-secondary px-2 py-1">{t('federation:admin.filter.statusHeading')}</div>
+                <div className="text-xs font-medium text-txt-tertiary px-2 py-1">{t('federation:admin.filter.statusHeading')}</div>
                 {(['active', 'unreachable', 'pending', 'rejected', 'awaiting_approval', 'needs_attention'] as StatusFilter[]).map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => toggleStatus(s)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 text-xs rounded ${
-                      statusFilter.has(s) ? 'text-txt-primary bg-surface-elevated' : 'text-txt-tertiary'
-                    } hover:bg-interactive-hover transition-colors`}
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 text-compact rounded-lg ${
+                      statusFilter.has(s) ? 'text-txt-primary bg-interactive-selected' : 'text-txt-tertiary'
+                    } hover:bg-interactive-hover transition-colors duration-fast`}
                   >
                     <div className={`w-2 h-2 rounded-full ${peerStatusDotColor(s)}`} />
                     <span>{filterStatusLabel(t, s)}</span>
                   </button>
                 ))}
-                <div className="h-px bg-white/[0.06] my-1" />
+                <div className="h-px bg-border-soft my-1" />
               </>
             )}
-            <div className="text-xs font-medium text-txt-secondary px-2 py-1">{t('common:actions.sortBy')}</div>
+            <div className="text-xs font-medium text-txt-tertiary px-2 py-1">{t('common:actions.sortBy')}</div>
             {sortOptions.map((opt) => (
               <button
                 key={opt.key}
                 type="button"
                 onClick={() => { setSortBy(opt.key); setOpen(false); }}
-                className={`w-full text-left px-2 py-1.5 text-xs rounded ${
-                  sortBy === opt.key ? 'text-accent-lavender bg-accent-lavender/[0.08]' : 'text-txt-primary'
-                } hover:bg-interactive-hover transition-colors`}
+                className={`w-full text-left px-2 py-1.5 text-compact rounded-lg ${
+                  sortBy === opt.key ? 'text-accent-tone bg-accent-tone/[0.16]' : 'text-txt-primary'
+                } hover:bg-interactive-hover transition-colors duration-fast`}
               >
                 {opt.label}
               </button>
@@ -390,24 +390,24 @@ function PeerListControls({
   const { t } = useTranslation(['federation', 'common']);
   return (
     <div className="flex items-center justify-between mb-3">
-      <div className="flex bg-surface-elevated rounded-lg p-0.5">
+      <div className="inline-flex gap-0.5 p-[3px] rounded-xl bg-surface-input shadow-[inset_0_0_0_1px_var(--glass-border)]">
         <button
           type="button"
           onClick={() => setView('active')}
-          className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-            view === 'active' ? 'bg-white/[0.08] text-txt-primary' : 'text-txt-tertiary hover:text-txt-secondary'
+          className={`h-7 px-3 rounded-lg text-compact font-medium transition-colors duration-fast ease-out ${
+            view === 'active' ? 'bg-surface-elevated text-txt-primary' : 'text-txt-secondary hover:text-txt-primary'
           }`}
         >
-          {t('federation:admin.views.active')} <span className="text-2xs text-txt-tertiary ml-0.5">{activeCount}</span>
+          {t('federation:admin.views.active')} <span className="ml-1 text-txt-tertiary tabular-nums">{activeCount}</span>
         </button>
         <button
           type="button"
           onClick={() => setView('revoked')}
-          className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-            view === 'revoked' ? 'bg-white/[0.08] text-txt-primary' : 'text-txt-tertiary hover:text-txt-secondary'
+          className={`h-7 px-3 rounded-lg text-compact font-medium transition-colors duration-fast ease-out ${
+            view === 'revoked' ? 'bg-surface-elevated text-txt-primary' : 'text-txt-secondary hover:text-txt-primary'
           }`}
         >
-          {t('federation:admin.views.revoked')} <span className="text-2xs text-txt-tertiary ml-0.5">{revokedCount}</span>
+          {t('federation:admin.views.revoked')} <span className="ml-1 text-txt-tertiary tabular-nums">{revokedCount}</span>
         </button>
       </div>
       <FilterDropdown
@@ -514,14 +514,13 @@ function PeerRow({ peer, view, expanded, onToggleExpand, onAction, onRecheck, on
         });
 
   return (
-    <div className={`bg-surface-elevated rounded-lg transition-colors ${isGone ? 'opacity-70' : ''} ${expanded ? 'border border-border-soft' : ''}`}>
+    <div className={`rounded-lg border transition-colors duration-fast ${isGone ? 'opacity-70' : ''} ${expanded ? 'border-border-soft' : 'border-transparent'}`}>
       {/* Compact row */}
       <div
-        className="flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-interactive-hover rounded-lg"
+        className="flex items-center justify-between min-h-[44px] px-3 py-1.5 cursor-pointer hover:bg-interactive-hover rounded-lg transition-colors duration-fast"
         onClick={onToggleExpand}
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className={`w-2 h-2 rounded-full shrink-0 ${isGone ? 'bg-txt-tertiary' : peerStatusDotColor(peer.status)}`} />
           <div className="min-w-0">
             <div className={`text-sm font-medium truncate ${isGone ? 'text-txt-tertiary line-through' : 'text-txt-primary'}`}>
               {host}
@@ -532,10 +531,11 @@ function PeerRow({ peer, view, expanded, onToggleExpand, onAction, onRecheck, on
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-2">
-          <span className={`inline-flex items-center text-2xs font-medium px-1.5 py-0.5 rounded ${peerStatusColor(peer.status)}`}>
+          <span className={`inline-flex items-center gap-1.5 h-5 px-[7px] rounded text-2xs font-semibold whitespace-nowrap ${peerStatusColor(peer.status)}`}>
+            <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
             {peerStatusLabel(t, peer.status)}
           </span>
-          <span className="text-txt-tertiary text-xs">{expanded ? '▾' : '▸'}</span>
+          <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size="sm" className="text-txt-tertiary" />
         </div>
       </div>
 
@@ -557,20 +557,18 @@ function PeerRow({ peer, view, expanded, onToggleExpand, onAction, onRecheck, on
             {isRevoked ? (
               /* Revoked peer actions */
               <div className="flex gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary" size="sm"
                   onClick={(e) => { e.stopPropagation(); onAction('reinitiate'); }}
-                  className="px-3 py-1.5 text-xs font-medium bg-status-ok/10 text-status-ok hover:bg-status-ok/20 rounded transition-colors"
                 >
                   {t('federation:admin.peer.reinitiate')}
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="danger" size="sm"
                   onClick={(e) => { e.stopPropagation(); onAction('delete'); }}
-                  className="px-3 py-1.5 text-xs font-medium bg-status-danger/10 text-status-danger hover:bg-status-danger/20 rounded transition-colors"
                 >
                   {t('federation:admin.peer.deletePermanently')}
-                </button>
+                </Button>
               </div>
             ) : (
               <>
@@ -578,7 +576,7 @@ function PeerRow({ peer, view, expanded, onToggleExpand, onAction, onRecheck, on
                 <div className="grid grid-cols-3 gap-3 mb-3">
                   <div>
                     <div className="text-2xs text-txt-tertiary mb-0.5">{t('federation:admin.peer.consecutiveFailures')}</div>
-                    <div className={`text-xs ${(peer.consecutiveFailures ?? 0) > 0 ? 'text-status-warn font-medium' : 'text-txt-secondary'}`}>
+                    <div className={`text-xs tabular-nums ${(peer.consecutiveFailures ?? 0) > 0 ? 'text-status-warn font-medium' : 'text-txt-secondary'}`}>
                       {formatters.formatNumber(peer.consecutiveFailures ?? 0)}
                     </div>
                   </div>
@@ -619,21 +617,16 @@ function PeerRow({ peer, view, expanded, onToggleExpand, onAction, onRecheck, on
                           disabled={intervalSaving}
                           autoFocus
                         />
-                        <button
-                          type="button"
-                          onClick={handleSaveInterval}
-                          disabled={intervalSaving}
-                          className="text-2xs text-accent-primary hover:text-accent-primary/80 disabled:opacity-50"
-                        >
+                        <Button variant="primary" size="sm" onClick={handleSaveInterval} disabled={intervalSaving}>
                           {intervalSaving ? '…' : t('common:actions.save')}
-                        </button>
-                        <button
-                          type="button"
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => { setEditingInterval(false); setIntervalDraft(peer.autoRotateIntervalDays); setIntervalError(''); }}
-                          className="text-2xs text-txt-tertiary hover:text-txt-secondary"
                         >
                           {t('common:actions.cancel')}
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <div className="text-xs text-txt-secondary">
@@ -654,49 +647,45 @@ function PeerRow({ peer, view, expanded, onToggleExpand, onAction, onRecheck, on
                 {/* Actions */}
                 <div className="flex items-center gap-2">
                   {peer.status === 'unreachable' && (
-                    <button
-                      type="button"
+                    <Button
+                      variant="secondary" size="sm"
                       onClick={(e) => { e.stopPropagation(); onRecheck(); }}
                       disabled={recheckLoading}
-                      className="px-3 py-1.5 text-xs font-medium bg-status-ok/10 text-status-ok hover:bg-status-ok/20 rounded transition-colors disabled:opacity-50"
                     >
                       {recheckLoading ? t('federation:admin.peer.checking') : t('federation:admin.peer.checkNow')}
-                    </button>
+                    </Button>
                   )}
                   {peer.status === 'needs_attention' ? (
-                    <button
-                      type="button"
+                    <Button
+                      variant="danger" size="sm"
                       onClick={(e) => { e.stopPropagation(); onAction('reset'); }}
-                      className="px-3 py-1.5 text-xs font-medium bg-status-danger/10 text-status-danger hover:bg-status-danger/20 rounded transition-colors"
                     >
                       {t('federation:admin.peer.resetPeering')}
-                    </button>
+                    </Button>
                   ) : (
                     <>
-                      <button
-                        type="button"
+                      <Button
+                        variant="secondary" size="sm"
                         onClick={(e) => { e.stopPropagation(); onAction('rotate'); }}
                         disabled={peer.rotationInProgress}
-                        className="px-3 py-1.5 text-xs font-medium bg-accent-lavender/10 text-accent-lavender hover:bg-accent-lavender/20 rounded transition-colors disabled:opacity-50"
                         title={peer.rotationInProgress ? t('federation:admin.peer.rotationInProgress') : undefined}
                       >
                         {t('federation:admin.peer.rotateSecret')}
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="danger" size="sm"
                         onClick={(e) => { e.stopPropagation(); onAction('revoke'); }}
-                        className="px-3 py-1.5 text-xs font-medium bg-status-danger/10 text-status-danger hover:bg-status-danger/20 rounded transition-colors"
                       >
                         {t('federation:admin.peer.revoke')}
-                      </button>
+                      </Button>
                       {!editingInterval && (
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={(e) => { e.stopPropagation(); setEditingInterval(true); setIntervalDraft(peer.autoRotateIntervalDays); }}
-                          className="text-2xs text-txt-tertiary hover:text-txt-secondary underline decoration-dotted transition-colors ml-1"
                         >
                           {t('federation:admin.peer.editInterval')}
-                        </button>
+                        </Button>
                       )}
                     </>
                   )}
@@ -803,7 +792,7 @@ function PendingApprovals({ onCountChange }: { onCountChange?: (count: number) =
             ? t('federation:admin.approvals.outboundTitle', { name, count: subCount })
             : name;
           return (
-            <div key={req.id} className="bg-surface-elevated rounded-lg px-3 py-2.5">
+            <div key={req.id} className="rounded-lg border border-border-soft px-3 py-2.5">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-txt-primary truncate">{titleText}</div>
@@ -829,26 +818,24 @@ function PendingApprovals({ onCountChange }: { onCountChange?: (count: number) =
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-3">
-                  <button
-                    type="button"
+                  <Button
+                    variant="primary" size="sm"
                     onClick={() => setConfirmAction({ type: 'approve', request: req })}
                     disabled={actionLoading === req.id}
-                    className="px-3 py-1.5 text-xs font-medium bg-status-ok/10 text-status-ok hover:bg-status-ok/20 rounded transition-colors disabled:opacity-50"
                   >
                     {t('federation:admin.approvals.approve')}
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="danger" size="sm"
                     onClick={() => setConfirmAction({ type: 'deny', request: req })}
                     disabled={actionLoading === req.id}
-                    className="px-3 py-1.5 text-xs font-medium bg-status-danger/10 text-status-danger hover:bg-status-danger/20 rounded transition-colors disabled:opacity-50"
                   >
                     {t('federation:admin.approvals.deny')}
-                  </button>
+                  </Button>
                 </div>
               </div>
               {errors[req.id] && (
-                <div className="mt-2 p-2 bg-status-danger/10 border border-status-danger/30 rounded text-status-danger text-2xs">
+                <div className="mt-2 p-2 bg-status-danger/10 border border-status-danger/30 rounded-lg text-status-danger text-xs">
                   {errors[req.id]}
                   <button
                     type="button"
@@ -1069,7 +1056,7 @@ function ResetCleanup() {
           {resetPeers.map((peer) => (
             <div
               key={peer.id}
-              className="bg-status-danger/10 border border-status-danger/30 rounded-lg p-3.5"
+              className="bg-status-danger/10 border border-status-danger/30 rounded-xl p-3.5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -1083,14 +1070,13 @@ function ResetCleanup() {
                     {t('federation:admin.resetCleanup.peerResetDescription')}
                   </p>
                 </div>
-                <button
-                  type="button"
+                <Button
+                  variant="primary" size="sm" className="shrink-0"
                   onClick={() => setConfirmAction({ kind: 'repeer', peer })}
                   disabled={actionLoading}
-                  className="shrink-0 px-3 py-1.5 text-xs font-medium bg-status-ok/10 text-status-ok hover:bg-status-ok/20 rounded transition-colors disabled:opacity-50"
                 >
                   {t('federation:admin.resetCleanup.repeer')}
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -1116,7 +1102,7 @@ function ResetCleanup() {
               </div>
               <div className="space-y-2">
                 {event.orphanedAccounts.map((account) => (
-                  <div key={account.id} className="bg-surface-elevated rounded-lg px-3 py-2.5">
+                  <div key={account.id} className="rounded-lg border border-border-soft px-3 py-2.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-sm font-medium text-txt-primary truncate">
@@ -1135,29 +1121,27 @@ function ResetCleanup() {
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-3">
-                        <button
-                          type="button"
+                        <Button
+                          variant="danger" size="sm"
                           onClick={() =>
                             setConfirmAction({ kind: 'remove', account, origin: event.origin })
                           }
                           disabled={actionLoading}
-                          className="px-3 py-1.5 text-xs font-medium bg-status-danger/10 text-status-danger hover:bg-status-danger/20 rounded transition-colors disabled:opacity-50"
                         >
                           {t('common:actions.remove')}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <button
-                type="button"
+              <Button
+                variant="secondary" size="sm" className="mt-2"
                 onClick={() => handleDismiss(event.origin)}
                 disabled={actionLoading}
-                className="mt-2 px-3 py-1.5 text-xs font-medium text-txt-tertiary hover:text-txt-secondary bg-surface-elevated hover:bg-interactive-hover rounded transition-colors disabled:opacity-50"
               >
                 {t('federation:admin.resetCleanup.dismissKeep')}
-              </button>
+              </Button>
             </div>
           ))}
         </div>
@@ -1382,7 +1366,7 @@ export function FederationPanel({ onApprovalCountChange }: { onApprovalCountChan
 
   return (
     <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-      <h2 className="text-lg font-semibold text-txt-primary">{t('federation:admin.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary">{t('federation:admin.title')}</h2>
       <div className="text-xs text-txt-tertiary">
         {t('federation:admin.description')}
       </div>
@@ -1397,14 +1381,9 @@ export function FederationPanel({ onApprovalCountChange }: { onApprovalCountChan
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <div className="text-xs font-medium text-txt-secondary">{t('federation:admin.peers.title')}</div>
-          <button
-            type="button"
-            onClick={fetchPeers}
-            disabled={peersLoading}
-            className="text-2xs text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
-          >
+          <Button variant="ghost" size="sm" icon="refresh-cw" onClick={fetchPeers} disabled={peersLoading}>
             {peersLoading ? t('common:states.loading') : t('common:actions.refresh')}
-          </button>
+          </Button>
         </div>
 
         <div className="rounded-xl bg-surface-elevated p-3.5">
@@ -1422,14 +1401,14 @@ export function FederationPanel({ onApprovalCountChange }: { onApprovalCountChan
           )}
 
           {peersError && (
-            <div className="p-2 bg-status-danger/10 border border-status-danger/30 rounded text-status-danger text-xs mb-2">
+            <div className="p-2 bg-status-danger/10 border border-status-danger/30 rounded-lg text-status-danger text-xs mb-2">
               {peersError}
               <button type="button" onClick={fetchPeers} className="ml-2 underline">{t('common:actions.retry')}</button>
             </div>
           )}
 
           {sortedPeers.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {sortedPeers.map((peer) => (
                 <PeerRow
                   key={peer.id}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useVoiceStore, type TileInsetCorner } from '../../stores/voiceStore';
 import type { GridCell } from '../../utils/voiceGridLayout';
+import { Icon } from '../ui/Icon';
 
 interface TileInsetProps {
   /** A cell with an inset: one participant's screen and camera sharing a tile. */
@@ -129,7 +130,7 @@ export function TileInset({ cell }: TileInsetProps) {
       ref={rootRef}
       data-testid="tile-inset"
       data-no-pan
-      className={`absolute z-10 w-[22%] min-w-[96px] max-w-[280px] aspect-video rounded-lg overflow-hidden bg-surface-channel ring-1 ring-white/15 shadow-lg group/inset touch-none ${CORNER_CLASSES[corner]} ${dragOffset ? 'cursor-grabbing' : ''}`}
+      className={`absolute z-raised w-[22%] min-w-24 max-w-[280px] aspect-video rounded-lg overflow-hidden bg-surface-channel ring-1 ring-white/15 group/inset touch-none ${CORNER_CLASSES[corner]} ${dragOffset ? 'cursor-grabbing' : ''}`}
       style={dragOffset ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` } : undefined}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -161,9 +162,7 @@ export function TileInset({ cell }: TileInsetProps) {
           />
         ) : (
           <span className="w-full h-full flex items-center justify-center text-txt-tertiary">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z" />
-            </svg>
+            <Icon name="monitor" size="lg" />
           </span>
         )}
       </button>
@@ -173,11 +172,9 @@ export function TileInset({ cell }: TileInsetProps) {
         onPointerDown={(e) => e.stopPropagation()}
         aria-label={t('voice:grid.splitCamera')}
         title={t('voice:grid.splitCamera')}
-        className="absolute top-1 right-1 w-6 h-6 rounded-md bg-black/60 hover:bg-black/80 text-white/70 hover:text-white flex items-center justify-center transition-opacity opacity-0 group-hover/inset:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+        className="absolute top-1 right-1 w-6 h-6 rounded bg-black/60 hover:bg-black/80 text-white/70 hover:text-white flex items-center justify-center backdrop-blur-sm transition-[opacity,color,background-color] duration-fast opacity-0 group-hover/inset:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M14 4l2.29 2.29-2.88 2.88 1.42 1.42 2.88-2.88L20 10V4zm-4 0H4v6l2.29-2.29 4.71 4.7V20h2v-8.41l-5.29-5.3z" />
-        </svg>
+        <Icon name="expand" size="xs" />
       </button>
     </div>
   );

@@ -3,6 +3,7 @@ import { StickerPicker } from './StickerPicker';
 import React, { useRef, useEffect, useState } from 'react';
 import Picker from '@emoji-mart/react';
 import { loadEmojiData } from '../../utils/emojiData';
+import { Icon } from '../ui/Icon';
 
 interface EmojiPickerProps {
   onEmojiSelect: (emoji: { native: string }) => void;
@@ -16,12 +17,13 @@ interface EmojiPickerProps {
   stickers?: boolean;
 }
 
-function HeartIcon({ className = 'w-4 h-4' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-    </svg>
-  );
+/** The two tabs above the picker: the chosen one is raised and takes the theme's tone. */
+function tabClass(selected: boolean): string {
+  return `inline-flex items-center justify-center h-7 rounded-lg text-compact font-medium transition-colors duration-fast ${
+    selected
+      ? 'bg-interactive-selected text-accent-tone'
+      : 'text-txt-secondary hover:bg-interactive-hover hover:text-txt-primary'
+  }`;
 }
 
 export function EmojiPicker({ onEmojiSelect, mobile = false, stickers = true }: EmojiPickerProps) {
@@ -62,11 +64,7 @@ export function EmojiPicker({ onEmojiSelect, mobile = false, stickers = true }: 
             type="button"
             aria-pressed={!showStickers}
             onClick={() => setShowStickers(false)}
-            className={`rounded-md px-3 py-1 text-[13px] font-medium transition-colors ${
-              !showStickers
-                ? 'bg-interactive-selected text-txt-primary'
-                : 'text-txt-tertiary hover:bg-interactive-hover hover:text-txt-secondary'
-            }`}
+            className={`${tabClass(!showStickers)} px-3`}
           >
             {t('composer.emoji')}
           </button>
@@ -76,13 +74,9 @@ export function EmojiPicker({ onEmojiSelect, mobile = false, stickers = true }: 
             aria-label={t('stickers.title')}
             title={t('stickers.title')}
             onClick={() => setShowStickers(true)}
-            className={`flex items-center justify-center rounded-md px-2.5 py-1 font-medium transition-colors ${
-              showStickers
-                ? 'bg-interactive-selected text-txt-primary'
-                : 'text-txt-tertiary hover:bg-interactive-hover hover:text-txt-secondary'
-            }`}
+            className={`${tabClass(showStickers)} w-7`}
           >
-            <HeartIcon className="w-4 h-4" />
+            <Icon name="sticker" size="sm" />
           </button>
         </div>
       )}

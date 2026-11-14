@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import type { MemberWithUser, Role } from '@backspace/shared';
 import { Modal } from '../ui/Modal';
 import { Avatar } from '../ui/Avatar';
-import { LockNote, LOCK_ICON } from '../ui/LockNote';
+import { LockNote } from '../ui/LockNote';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { usePermissionNames } from '../ui/OverrideEntry';
 import { useUIStore } from '../../stores/uiStore';
 import { useSpaceStore, getApiForOrigin, type TaggedSpace } from '../../stores/spaceStore';
@@ -310,7 +312,7 @@ function MemberRolesBody({
   return (
     <div className="flex flex-col h-full">
       {/* Header: who is being edited, plus the way back to the profile card */}
-      <div className="flex items-center gap-3 px-6 py-4 pr-16 border-b border-white/[0.06] flex-shrink-0">
+      <div className="flex items-center gap-3 px-6 py-4 pr-16 border-b border-border-hard flex-shrink-0">
         <Avatar
           src={canonical.avatar}
           name={displayName}
@@ -321,21 +323,18 @@ function MemberRolesBody({
         <h2 className="flex-1 min-w-0 text-lg font-semibold text-txt-primary truncate" title={displayName}>
           {t('spaces:memberRoles.title', { name: displayName })}
         </h2>
-        <button
-          onClick={handleViewProfile}
-          className="flex-shrink-0 px-3 py-1.5 text-sm font-medium rounded-full text-txt-secondary hover:bg-interactive-hover transition-colors"
-        >
+        <Button variant="ghost" onClick={handleViewProfile} className="flex-shrink-0">
           {t('spaces:memberRoles.viewProfile')}
-        </button>
+        </Button>
       </div>
 
       <div className="flex-1 min-h-0 flex">
         {/* Left pane: membership checkboxes; clicking a row edits that role */}
-        <div className="w-72 flex-shrink-0 border-r border-white/[0.06] overflow-y-auto scrollbar-thin p-4">
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="w-72 flex-shrink-0 border-r border-border-hard overflow-y-auto scrollbar-thin p-4">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:roles.listHeading')}
           </div>
-          <div className="rounded-lg bg-white/[0.02] p-2">
+          <div className="rounded-xl bg-surface-elevated p-1.5">
             <div className="space-y-0.5">
               {sortedRoles.map((role) => {
                 const isEveryone = role.id === spaceId;
@@ -347,7 +346,7 @@ function MemberRolesBody({
                   <div
                     key={role.id}
                     onClick={() => setSelectedRoleId(role.id)}
-                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded cursor-pointer transition-colors ${
+                    className={`flex items-center gap-2.5 px-2.5 h-[34px] rounded-lg cursor-pointer transition-colors duration-fast ${
                       selected ? 'bg-interactive-selected' : 'hover:bg-interactive-hover'
                     }`}
                   >
@@ -359,7 +358,7 @@ function MemberRolesBody({
                       disabled={isEveryone || lock !== undefined}
                       onChange={() => toggleMembership(role.id)}
                       onClick={(e) => e.stopPropagation()}
-                      className="w-3.5 h-3.5 rounded border-txt-tertiary accent-accent-primary flex-shrink-0 disabled:opacity-50"
+                      className="w-3.5 h-3.5 rounded border-txt-tertiary accent-accent-tone flex-shrink-0 disabled:opacity-50"
                     />
                     <div
                       className={`w-3 h-3 rounded-full flex-shrink-0${lock ? ' opacity-50' : ''}`}
@@ -395,7 +394,7 @@ function MemberRolesBody({
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: selectedRole.color }}
                 />
-                <h3 className="text-base font-semibold text-txt-primary truncate" title={roleName(selectedRole)}>
+                <h3 className="text-lg font-semibold text-txt-primary truncate" title={roleName(selectedRole)}>
                   {roleName(selectedRole)}
                 </h3>
               </div>
@@ -410,10 +409,10 @@ function MemberRolesBody({
 
               {PERMISSION_GROUPS.map((group) => (
                 <div key={group.id} className="mb-5">
-                  <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+                  <div className="text-xs font-medium text-txt-secondary mb-1.5">
                     {groupTitle(group.id)}
                   </div>
-                  <div className="rounded-lg bg-white/[0.02] p-3.5">
+                  <div className="rounded-xl bg-surface-elevated p-1.5">
                     <div className="space-y-1">
                       {group.perms.map((perm) => {
                         const isAdminBit = perm.bit === PermissionBits.ADMINISTRATOR;
@@ -426,24 +425,18 @@ function MemberRolesBody({
                         return (
                           <label
                             key={perm.key}
-                            className={`flex items-center justify-between gap-3 py-1.5 px-2 rounded group/perm ${
+                            className={`flex items-center justify-between gap-3 h-[34px] px-2.5 rounded-lg transition-colors duration-fast group/perm ${
                               isLocked ? 'cursor-default' : 'cursor-pointer hover:bg-interactive-hover'
                             }`}
                           >
-                            <span className={`text-sm ${isLocked ? 'opacity-50 ' : ''}${isAdminBit ? 'text-txt-danger font-medium' : 'text-txt-primary'}`}>
+                            <span className={`text-sm ${isLocked ? 'opacity-50 ' : ''}${isAdminBit ? 'text-status-danger font-medium' : 'text-txt-primary'}`}>
                               {name}
                             </span>
                             <span className="flex items-center gap-2 flex-shrink-0">
                               {isUnheld && (
-                                <svg
-                                  width="12" height="12" viewBox="0 0 24 24" fill="currentColor"
-                                  className="text-txt-tertiary"
-                                  role="img"
-                                  aria-label={t('spaces:roles.unheldPermission')}
-                                >
-                                  <title>{t('spaces:roles.unheldPermission')}</title>
-                                  <path d={LOCK_ICON} />
-                                </svg>
+                                <span title={t('spaces:roles.unheldPermission')} className="inline-flex text-txt-tertiary">
+                                  <Icon name="lock" size="xs" label={t('spaces:roles.unheldPermission')} />
+                                </span>
                               )}
                               <div
                                 role="switch"
@@ -460,7 +453,7 @@ function MemberRolesBody({
                                   e.preventDefault();
                                   if (!isLocked) togglePermission(perm.bit);
                                 }}
-                                className={`relative w-9 h-5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary ${
+                                className={`relative w-9 h-5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone ${
                                   isLocked ? 'cursor-default opacity-50' : 'cursor-pointer'
                                 } ${isOn ? 'bg-accent-primary' : 'bg-interactive-muted'}`}
                               >
@@ -486,7 +479,7 @@ function MemberRolesBody({
           )}
           {/* A failed save, in flow above the pill as in the roles tab. */}
           {error && (
-            <div ref={errorRef} role="alert" className="mt-1 p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+            <div ref={errorRef} role="alert" className="mt-1 px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
               {error}
             </div>
           )}
@@ -494,22 +487,15 @@ function MemberRolesBody({
           {/* Save pill: only while something changed. Sticky at the foot of
               the permissions pane, as in the roles tab. */}
           {hasChanges && (
-            <div className="sticky bottom-0 z-10 pointer-events-none">
+            <div className="sticky bottom-0 z-raised pointer-events-none">
               <div className="flex justify-center pt-3 pb-1">
-                <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 pointer-events-auto animate-slide-up">
-                  <button
-                    onClick={handleDiscard}
-                    className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-                  >
+                <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 pointer-events-auto animate-slide-up">
+                  <Button variant="ghost" size="sm" onClick={handleDiscard}>
                     {t('spaces:settings.discardChanges')}
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
-                  >
+                  </Button>
+                  <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
                     {saving ? t('common:states.saving') : t('common:actions.save')}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

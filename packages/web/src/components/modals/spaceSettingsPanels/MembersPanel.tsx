@@ -16,7 +16,9 @@ import {
   useViewerHeldPermissions,
 } from '../../../utils/roleHierarchy';
 import { useFormatters } from '../../../i18n/formatters';
-import { LOCK_ICON } from '../../ui/LockNote';
+import { Button } from '../../ui/Button';
+import { Icon } from '../../ui/Icon';
+import { Tag } from '../../ui/Tag';
 import { describeError } from '../../../i18n/errors';
 import type { MemberWithUser, Role } from '@backspace/shared';
 
@@ -92,9 +94,9 @@ function MembersPanelRow({
   return (
     <div>
       <div
-        className={`flex items-center justify-between p-2 rounded transition-colors ${
+        className={`flex items-center justify-between gap-3 min-h-11 px-2 py-1.5 rounded-lg transition-colors duration-fast ${
           expandable ? 'cursor-pointer hover:bg-interactive-hover' : ''
-        } ${isExpanded ? 'bg-interactive-hover' : ''}`}
+        } ${isExpanded ? 'bg-interactive-selected' : ''}`}
         onClick={() => {
           if (expandable) onToggleExpand(member.userId);
         }}
@@ -108,29 +110,26 @@ function MembersPanelRow({
             user={canonical}
           />
           <div className="min-w-0">
-            <div className="text-sm font-medium truncate">
+            <div className="text-sm font-medium text-txt-primary truncate">
               {displayName}
               {isFederationGlobeApplicable(canonical) && (
-                <span className="ml-1 text-[10px] text-txt-tertiary opacity-60">@{parseFederatedUsername(canonical.username).domain}</span>
+                <span className="ml-1 text-2xs font-normal text-txt-tertiary">@{parseFederatedUsername(canonical.username).domain}</span>
               )}
             </div>
-            <div className="flex items-center gap-1 flex-wrap">
+            <div className="flex items-center gap-1 flex-wrap mt-0.5">
               {isOwner && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-rose/20 text-txt-danger font-medium">
+                <Tag tone="accent">
+                  <Icon name="crown" size="xs" />
                   {t('spaces:settings.members.owner')}
-                </span>
+                </Tag>
               )}
               {member.roles?.filter((r) => r.id !== spaceId).map((r) => (
-                <span
-                  key={r.id}
-                  className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                  style={{ backgroundColor: `${r.color}20`, color: r.color }}
-                >
+                <Tag key={r.id} color={r.color}>
                   {r.name}
-                </span>
+                </Tag>
               ))}
               {!isOwner && (!member.roles || member.roles.filter((r) => r.id !== spaceId).length === 0) && (
-                <span className="text-[10px] text-txt-tertiary">{t('spaces:settings.members.noRoles')}</span>
+                <span className="text-2xs text-txt-tertiary">{t('spaces:settings.members.noRoles')}</span>
               )}
             </div>
           </div>
@@ -138,38 +137,36 @@ function MembersPanelRow({
 
         <div className="flex items-center gap-1 flex-shrink-0">
           {canBan && !isSelf && !isOwner && (
-            <button
+            <Button
+              variant="danger"
+              size="sm"
               onClick={(e) => { e.stopPropagation(); onPendingAction({ type: 'ban', userId: member.userId, displayName }); }}
-              className="px-2 py-1 text-xs text-txt-danger hover:bg-accent-rose/10 rounded transition-colors"
             >
               {t('spaces:settings.members.ban')}
-            </button>
+            </Button>
           )}
           {canKick && !isSelf && !isOwner && (
-            <button
+            <Button
+              variant="danger"
+              size="sm"
               onClick={(e) => { e.stopPropagation(); onPendingAction({ type: 'kick', userId: member.userId, displayName }); }}
-              className="px-2 py-1 text-xs text-txt-danger hover:bg-accent-rose/10 rounded transition-colors"
             >
               {t('spaces:settings.members.kick')}
-            </button>
+            </Button>
           )}
           {expandable && (
-            <svg
-              className={`w-4 h-4 text-txt-tertiary transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
+            <Icon
+              name="chevron-right"
+              size="sm"
+              className={`text-txt-tertiary transition-transform duration-base ease-out ${isExpanded ? 'rotate-90' : ''}`}
+            />
           )}
         </div>
       </div>
 
       {/* Role checkboxes — only shown when expanded */}
       {isExpanded && expandable && (
-        <div className="mt-1 mb-1 ml-10 space-y-1">
+        <div className="mt-1 mb-2 ml-12 space-y-1.5">
           {assignableRoles.map((role) => {
             const lock = roleLocks.get(role.id);
             const manageable = lock === undefined;
@@ -184,7 +181,7 @@ function MembersPanelRow({
                   checked={memberRoleIds.has(role.id)}
                   disabled={!manageable}
                   onChange={() => onRoleToggle(member.userId, role.id, memberRoleIds)}
-                  className="w-3.5 h-3.5 rounded border-txt-tertiary accent-accent-primary"
+                  className="w-3.5 h-3.5 rounded accent-accent-tone"
                 />
                 <span
                   className="text-xs font-medium"
@@ -196,10 +193,8 @@ function MembersPanelRow({
             );
           })}
           {lockKinds.length > 0 && (
-            <div className="flex items-start gap-2 pt-1 text-[12px] leading-snug text-txt-tertiary">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="flex-shrink-0 mt-[2px]">
-                <path d={LOCK_ICON} />
-              </svg>
+            <div className="flex items-start gap-2 pt-1 text-xs leading-snug text-txt-tertiary">
+              <Icon name="lock" size="xs" className="mt-px" />
               <span>
                 {lockKinds.map((kind) => <span key={kind} className="block">{lockReason[kind]}</span>)}
               </span>
@@ -207,18 +202,12 @@ function MembersPanelRow({
           )}
           {hasPendingChanges && (
             <div className="flex items-center gap-2 mt-1.5">
-              <button
-                onClick={() => onSaveRoles(member.userId)}
-                className="px-2 py-0.5 text-xs bg-accent-primary hover:bg-accent-primary/80 text-white rounded transition-colors"
-              >
-                {t('common:actions.save')}
-              </button>
-              <button
-                onClick={() => onCancelRoleChange(member.userId)}
-                className="px-2 py-0.5 text-xs text-txt-tertiary hover:text-txt-secondary transition-colors"
-              >
+              <Button variant="ghost" size="sm" onClick={() => onCancelRoleChange(member.userId)}>
                 {t('common:actions.cancel')}
-              </button>
+              </Button>
+              <Button variant="primary" size="sm" onClick={() => onSaveRoles(member.userId)}>
+                {t('common:actions.save')}
+              </Button>
             </div>
           )}
         </div>
@@ -330,17 +319,17 @@ export function MembersPanel({ spaceId }: MembersPanelProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('common:labels.members')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('common:labels.members')}</h2>
       {error && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{error}</div>
+        <div className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger">{error}</div>
       )}
       <p className="text-xs text-txt-tertiary">{t('spaces:settings.members.description')}</p>
 
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">
           {t('spaces:settings.members.listHeading', { total: f.formatNumber(members.length) })}
         </div>
-        <div className="rounded-lg bg-white/[0.02] p-2">
+        <div className="rounded-xl bg-surface-elevated p-1.5">
           <div className="space-y-0.5">
             {members.map((member) => (
               <MembersPanelRow

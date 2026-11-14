@@ -7,6 +7,8 @@ import { useSelfIdentity } from '../../stores/authStore';
 import { useSpaceStore, type TaggedSpace } from '../../stores/spaceStore';
 import { hostKeepsOwnerTitle, ownerGroupTitle } from '../../utils/memberGroups';
 import { Modal } from '../ui/Modal';
+import { Icon } from '../ui/Icon';
+import { Button } from '../ui/Button';
 
 /**
  * Sets or resets the owner title. Laid out like the space nickname dialog: a
@@ -64,13 +66,13 @@ function OwnerTitleEditor({ space, onClose }: { space: TaggedSpace; onClose: () 
         </p>
 
         {error && (
-          <div role="alert" className="mb-3 p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+          <div role="alert" className="mb-3 rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger">
             {error}
           </div>
         )}
 
         <div className="mb-4">
-          <label htmlFor="space-owner-title" className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+          <label htmlFor="space-owner-title" className="block text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:members.ownerTitle.label')}
           </label>
           <input
@@ -87,36 +89,18 @@ function OwnerTitleEditor({ space, onClose }: { space: TaggedSpace; onClose: () 
           />
         </div>
 
-        <div className="sticky bottom-0 z-10 pointer-events-none">
-          <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-3 py-2 flex items-center gap-3 pointer-events-auto">
-              {current !== null && (
-                <button
-                  type="button"
-                  onClick={() => void save(null)}
-                  disabled={saving}
-                  className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
-                >
-                  {t('spaces:members.ownerTitle.reset')}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={close}
-                disabled={saving}
-                className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
-              >
-                {t('common:actions.cancel')}
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
-              >
-                {saving ? t('common:states.saving') : t('common:actions.save')}
-              </button>
-            </div>
-          </div>
+        <div className="flex items-center justify-end gap-2 pt-1">
+          {current !== null && (
+            <Button variant="ghost" onClick={() => void save(null)} disabled={saving} className="mr-auto">
+              {t('spaces:members.ownerTitle.reset')}
+            </Button>
+          )}
+          <Button variant="ghost" onClick={close} disabled={saving}>
+            {t('common:actions.cancel')}
+          </Button>
+          <Button variant="primary" type="submit" disabled={saving}>
+            {saving ? t('common:states.saving') : t('common:actions.save')}
+          </Button>
         </div>
       </form>
     </Modal>
@@ -145,14 +129,12 @@ export function OwnerTitleHeading({ space, count, touch = false }: { space: Tagg
   return (
     <>
       <div className="flex items-center gap-1 px-2 mb-1">
-        <h3 title={title} className={`min-w-0 truncate text-[10.5px] font-bold text-txt-tertiary tracking-[0.06em] ${ownerTitle === null ? 'uppercase' : ''}`}>
+        <h3 title={title} className="min-w-0 truncate text-xs font-medium text-txt-tertiary">
           {title} — {formatNumber(count)}
         </h3>
         {canEdit && (
-          <button type="button" onClick={() => setEditing(true)} aria-label={t('members.ownerTitle.edit')} title={t('members.ownerTitle.edit')} className={`shrink-0 rounded text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover ${touch ? '-my-4 flex h-11 w-11 items-center justify-center active:bg-interactive-hover' : '-my-1 p-1'}`}>
-            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="m16 3 5 5M4 15 16 3l5 5L9 20l-6 1 1-6Z" />
-            </svg>
+          <button type="button" onClick={() => setEditing(true)} aria-label={t('members.ownerTitle.edit')} title={t('members.ownerTitle.edit')} className={`shrink-0 rounded text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover transition-colors duration-fast ${touch ? '-my-4 flex h-11 w-11 items-center justify-center active:bg-interactive-hover' : '-my-1 p-1'}`}>
+            <Icon name="pencil" size="xs" />
           </button>
         )}
       </div>

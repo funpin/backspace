@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Embed } from '@backspace/shared';
-import { GenericEmbed } from './embeds/GenericEmbed';
+import { GenericEmbed, embedRail } from './embeds/GenericEmbed';
 import { VideoEmbed } from './embeds/VideoEmbed';
 import { ImageEmbed } from './embeds/ImageEmbed';
 import { RichEmbed } from './embeds/RichEmbed';
@@ -19,15 +19,16 @@ export function EmbedRenderer({ embed }: EmbedRendererProps) {
       // i18n-check: allow-literal (switch/case punctuation between JSX returns, not text)
       return <ImageEmbed embed={embed} />;
 
-    case 'audio':
+    case 'audio': {
+      const rail = embedRail(embed.color);
       return (
-        <div className="mt-2 max-w-[400px] bg-surface-channel rounded-[4px] border-l-4 border-border-hard p-3">
+        <div className={`mt-2 max-w-[400px] bg-surface-elevated rounded-xl overflow-hidden p-3 ${rail.className}`} style={rail.style}>
           {embed.title && (
             <a
               href={embed.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[14px] text-sky-400 font-semibold hover:underline block mb-2 truncate"
+              className="text-sm text-txt-link font-semibold hover:underline block mb-2 truncate"
             >
               {embed.title}
             </a>
@@ -40,6 +41,7 @@ export function EmbedRenderer({ embed }: EmbedRendererProps) {
           />
         </div>
       );
+    }
 
     case 'rich':
       // i18n-check: allow-literal (switch/case punctuation between JSX returns, not text)

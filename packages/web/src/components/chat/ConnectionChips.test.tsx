@@ -117,15 +117,15 @@ describe('ConnectionChips', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(2);
   });
 
-  it('carries the state in the dot: rose for auth_expired, amber for unreachable', () => {
+  it('carries the state in the dot: danger for auth_expired, warn for unreachable', () => {
     seed([
       registryEntry('https://zwiss.example', 'auth_expired'),
       registryEntry('https://orbit.example', 'unreachable'),
     ]);
     render(<ConnectionChips onRecovered={onRecovered} />);
     const [expired, unreachable] = screen.getAllByRole('listitem');
-    expect(expired?.querySelector('.bg-accent-rose')).not.toBeNull();
-    expect(unreachable?.querySelector('.bg-accent-amber')).not.toBeNull();
+    expect(expired?.querySelector('.bg-status-danger')).not.toBeNull();
+    expect(unreachable?.querySelector('.bg-status-warn')).not.toBeNull();
     // The chip itself stays quiet: the pill tier, no warning tint on the whole chip.
     expect(expired).toHaveClass('glass-pill');
   });

@@ -1,4 +1,5 @@
 import React, { useId, type JSX, type ReactNode } from 'react';
+import { Icon } from '../ui/Icon';
 
 /** The design system's pastel accents (`--accent-*`, `tailwind.config.js`). */
 export type HubAccent = 'lavender' | 'mint' | 'peach' | 'sky' | 'amber' | 'rose' | 'coral';
@@ -25,7 +26,7 @@ const ACCENT_TILE: Record<HubAccent, string> = {
  * longer fit, then stack.
  */
 const ACTION_SHAPE =
-  'flex-auto inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded transition-colors';
+  'flex-auto inline-flex items-center justify-center gap-2 h-[34px] px-3.5 text-sm rounded-lg transition-colors duration-fast';
 
 /**
  * Card action styles by role.
@@ -36,9 +37,9 @@ const ACTION_SHAPE =
  * - `waiting`: a disabled state the user is waiting on ("Request sent").
  */
 export const HUB_ACTION = {
-  primary: `${ACTION_SHAPE} bg-accent-primary hover:bg-accent-primary-hover text-white disabled:opacity-50 disabled:cursor-default`,
-  quiet: `${ACTION_SHAPE} bg-interactive-hover hover:bg-interactive-active text-txt-primary`,
-  waiting: `${ACTION_SHAPE} bg-interactive-muted text-txt-tertiary cursor-default`,
+  primary: `${ACTION_SHAPE} font-semibold bg-accent-primary hover:bg-accent-primary-hover active:bg-accent-primary-active text-on-accent disabled:opacity-40 disabled:cursor-default`,
+  quiet: `${ACTION_SHAPE} font-medium bg-surface-elevated hover:bg-border-soft text-txt-primary shadow-[inset_0_0_0_1px_var(--glass-border)]`,
+  waiting: `${ACTION_SHAPE} font-medium bg-interactive-muted text-txt-tertiary cursor-default`,
 } as const;
 
 /**
@@ -49,21 +50,7 @@ export function HubLinkAction(props: { href: string; children: ReactNode }): JSX
   return (
     <a href={props.href} target="_blank" rel="noopener noreferrer" className={HUB_ACTION.quiet}>
       {props.children}
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        className="flex-shrink-0 text-txt-tertiary"
-      >
-        <path d="M7 17 17 7" />
-        <path d="M8 7h9v9" />
-      </svg>
+      <Icon name="external-link" size="sm" className="text-txt-tertiary" />
     </a>
   );
 }
@@ -91,7 +78,7 @@ export function HubCard(props: {
   return (
     <article
       aria-labelledby={titleId}
-      className="bg-surface-channel rounded-lg border border-border-soft p-4 flex flex-col gap-3"
+      className="bg-surface-channel rounded-xl border border-border-soft p-4 flex flex-col gap-3"
     >
       <div className="flex items-center gap-3">
         <div
@@ -100,13 +87,13 @@ export function HubCard(props: {
         >
           {icon}
         </div>
-        <h3 id={titleId} className="text-[15px] font-bold text-txt-primary min-w-0">
+        <h3 id={titleId} className="text-lg font-semibold text-txt-primary min-w-0">
           {title}
         </h3>
       </div>
 
       {body !== undefined && body !== null && (
-        <div data-hub-card-body className="text-[13px] text-txt-secondary flex-1">
+        <div data-hub-card-body className="text-compact text-txt-secondary flex-1">
           {body}
         </div>
       )}

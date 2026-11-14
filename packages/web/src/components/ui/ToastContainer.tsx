@@ -1,11 +1,12 @@
 import React from 'react';
+import { Button } from './Button';
 import { useUIStore } from '../../stores/uiStore';
 import { useVoiceStore } from '../../stores/voiceStore';
 
 const borderColors = {
-  info: 'border-l-accent-sky',
-  warning: 'border-l-accent-amber',
-  success: 'border-l-accent-mint',
+  info: 'border-l-accent-tone',
+  warning: 'border-l-status-warn',
+  success: 'border-l-status-ok',
 } as const;
 
 /**
@@ -79,16 +80,15 @@ export function ToastContainer() {
         left: '12px',
         right: '12px',
         bottom: resolveMobileBottomOffset(mobileStack.length > 0, topScreen, inVoice),
-        zIndex: 300,
       }
-    : { position: 'fixed', bottom: '24px', right: '24px', zIndex: 300 };
+    : { position: 'fixed', bottom: '24px', right: '24px' };
 
   return (
     <div
       className={
         isMobile
-          ? 'flex flex-col gap-2 pointer-events-none items-center'
-          : 'flex flex-col gap-2 pointer-events-none'
+          ? 'z-toast flex flex-col gap-2 pointer-events-none items-center'
+          : 'z-toast flex flex-col gap-2 pointer-events-none'
       }
       style={containerStyle}
     >
@@ -100,17 +100,18 @@ export function ToastContainer() {
         >
           <span className="flex-1 text-sm text-txt-primary leading-snug">{toast.message}</span>
           {toast.action && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 toast.action?.onClick();
                 removeToast(toast.id);
               }}
-              className="shrink-0 px-2 py-1 text-xs font-medium rounded-md text-accent-tone hover:bg-interactive-hover transition-colors"
+              className="shrink-0"
             >
               {toast.action.label}
-            </button>
+            </Button>
           )}
         </div>
       ))}

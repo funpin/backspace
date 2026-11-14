@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { PermissionBits, permissionsToString, stringToPermissions, isHiddenFromEveryone, overrideVersion } from '../../utils/permissions';
 import { OverrideEntry, type PermissionDef } from './OverrideEntry';
-import { LOCK_ICON } from './LockNote';
+import { Button } from './Button';
+import { Icon } from './Icon';
 import { describeError } from '../../i18n/errors';
 import { HttpError } from '../../api/client';
 import { userDisplayName } from '../../utils/identity';
@@ -428,20 +429,13 @@ export function PermissionsEditor({
   }, [members, stagedKeys, memberSearch, isAboveViewer]);
 
   const savePill = (
-    <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 pointer-events-auto animate-slide-up">
-      <button
-        onClick={handleDiscard}
-        className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-      >
+    <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 pointer-events-auto animate-slide-up">
+      <Button variant="ghost" size="sm" onClick={handleDiscard}>
         {t('spaces:settings.discardChanges')}
-      </button>
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
-      >
+      </Button>
+      <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
         {saving ? t('common:states.saving') : t('common:actions.save')}
-      </button>
+      </Button>
     </div>
   );
 
@@ -449,18 +443,18 @@ export function PermissionsEditor({
     <div className="space-y-4 relative pb-14">
       {/* Load error */}
       {loadError && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+        <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-status-danger text-sm">
           {loadError}
         </div>
       )}
 
       {/* Role Overrides */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">
+        <div className="text-xs font-medium text-txt-tertiary mb-2">
           {t('spaces:permissions.roleOverrides')}
         </div>
         {roleOverrides.length === 0 && (
-          <p className="text-[12.5px] text-txt-tertiary">{t('spaces:permissions.noRoleOverrides')}</p>
+          <p className="text-xs text-txt-tertiary">{t('spaces:permissions.noRoleOverrides')}</p>
         )}
         <div className="space-y-1.5">
           {roleOverrides.map(({ key, role }) => {
@@ -488,15 +482,13 @@ export function PermissionsEditor({
           {!showAddRole ? (
             <button
               onClick={() => setShowAddRole(true)}
-              className="flex items-center gap-1.5 text-[13px] text-txt-tertiary hover:text-txt-secondary transition-colors"
+              className="flex items-center gap-1.5 text-compact text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-              </svg>
+              <Icon name="plus" size="sm" />
               {t('spaces:permissions.addRole')}
             </button>
           ) : (
-            <div ref={roleDropdownRef} className="glass rounded-lg overflow-hidden">
+            <div ref={roleDropdownRef} className="glass rounded-xl overflow-hidden">
               <div className="p-1.5 max-h-48 overflow-y-auto scrollbar-thin">
                 {availableRoles.length === 0 ? (
                   <div className="px-2.5 py-1.5 text-xs text-txt-tertiary">{t('spaces:permissions.noMoreRoles')}</div>
@@ -505,7 +497,7 @@ export function PermissionsEditor({
                     <button
                       key={role.id}
                       onClick={() => handleAddRole(role.id)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 text-sm text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover rounded transition-colors"
+                      className="w-full flex items-center gap-2 h-[34px] px-2.5 text-sm text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover rounded-lg transition-colors duration-fast"
                     >
                       <span
                         className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -516,10 +508,10 @@ export function PermissionsEditor({
                   ))
                 )}
               </div>
-              <div className="border-t border-white/[0.04] p-1.5">
+              <div className="border-t border-border-hard p-1.5">
                 <button
                   onClick={() => setShowAddRole(false)}
-                  className="w-full text-xs text-txt-tertiary hover:text-txt-secondary px-2.5 py-1 transition-colors"
+                  className="w-full h-7 rounded-lg text-xs text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover px-2.5 transition-colors duration-fast"
                 >
                   {t('common:actions.cancel')}
                 </button>
@@ -531,11 +523,11 @@ export function PermissionsEditor({
 
       {/* Member Overrides */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-2">
+        <div className="text-xs font-medium text-txt-tertiary mb-2">
           {t('spaces:permissions.memberOverrides')}
         </div>
         {memberOverrides.length === 0 && (
-          <p className="text-[12.5px] text-txt-tertiary">{t('spaces:permissions.noMemberOverrides')}</p>
+          <p className="text-xs text-txt-tertiary">{t('spaces:permissions.noMemberOverrides')}</p>
         )}
         <div className="space-y-1.5">
           {memberOverrides.map(({ key, member }) => {
@@ -562,15 +554,13 @@ export function PermissionsEditor({
           {!showAddMember ? (
             <button
               onClick={() => setShowAddMember(true)}
-              className="flex items-center gap-1.5 text-[13px] text-txt-tertiary hover:text-txt-secondary transition-colors"
+              className="flex items-center gap-1.5 text-compact text-txt-tertiary hover:text-txt-secondary transition-colors duration-fast"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-              </svg>
+              <Icon name="plus" size="sm" />
               {t('spaces:permissions.addMember')}
             </button>
           ) : (
-            <div ref={memberDropdownRef} className="glass rounded-lg overflow-hidden">
+            <div ref={memberDropdownRef} className="glass rounded-xl overflow-hidden">
               <div className="p-1.5">
                 <input
                   type="text"
@@ -589,7 +579,7 @@ export function PermissionsEditor({
                     <button
                       key={member.userId}
                       onClick={() => handleAddMember(member.userId)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 text-sm text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover rounded transition-colors"
+                      className="w-full flex items-center gap-2 h-[34px] px-2.5 text-sm text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover rounded-lg transition-colors duration-fast"
                     >
                       <span className="truncate">{userDisplayName(member.user)}</span>
                       {member.user.displayName && (
@@ -599,10 +589,10 @@ export function PermissionsEditor({
                   ))
                 )}
               </div>
-              <div className="border-t border-white/[0.04] p-1.5">
+              <div className="border-t border-border-hard p-1.5">
                 <button
                   onClick={() => { setShowAddMember(false); setMemberSearch(''); }}
-                  className="w-full text-xs text-txt-tertiary hover:text-txt-secondary px-2.5 py-1 transition-colors"
+                  className="w-full h-7 rounded-lg text-xs text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover px-2.5 transition-colors duration-fast"
                 >
                   {t('common:actions.cancel')}
                 </button>
@@ -614,7 +604,7 @@ export function PermissionsEditor({
 
       {/* Error */}
       {saveError && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+        <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-status-danger text-sm">
           {saveError}
         </div>
       )}
@@ -622,16 +612,14 @@ export function PermissionsEditor({
       {/* Save/Discard pill, with the unhide note above it when a save would
           make this channel or category visible to everyone. */}
       {hasChanges && (
-        <div className="sticky bottom-0 z-10 pointer-events-none">
+        <div className="sticky bottom-0 z-raised pointer-events-none">
           {unhides ? (
             // Note and pill float over the scrolling rows as one glass group
             // (design-system.md, "Nested glass").
-            <div className="glass-bubble rounded-lg mt-3 mb-1 p-2 space-y-2 pointer-events-auto">
+            <div className="glass-bubble rounded-xl mt-3 mb-1 p-2 space-y-2 pointer-events-auto">
               {/* Laid out like the Overview privacy note. */}
               <div className="flex items-start gap-2 text-xs text-txt-tertiary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="flex-shrink-0 mt-0.5 text-txt-secondary">
-                  <path d={LOCK_ICON} />
-                </svg>
+                <Icon name="lock" size="sm" className="text-txt-secondary" />
                 <span>{unhideNote}</span>
               </div>
               <div className="flex justify-center">{savePill}</div>

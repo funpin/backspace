@@ -54,8 +54,9 @@ zoom, so viewport-constrained surfaces use `--app-vh`, `--app-dvh`, and `--app-v
 (one viewport unit divided by `--interface-scale`). Tailwind's `h-screen` and
 `min-h-screen` use the same units. Keep Electron's title-bar reservation in
 physical pixels using the shared `--titlebar-inset` (33px divided by the scale
-under Electron, zero in the browser). `App`, `SpaceSidebar` and `ImagePreview`
-must all use this property rather than separate fixed offsets.
+under Electron, zero in the browser). `App` and `ImagePreview` must both use
+this property rather than separate fixed offsets. The space strip sits in the
+layout grid below the title bar, so it needs no offset of its own.
 
 Safe-area and keyboard offsets use `--safe-top`, `--safe-bottom`, and
 `--keyboard-inset`, which divide the corresponding environment lengths by the
@@ -327,9 +328,21 @@ the amber-means-update rule above, not a bug.
 
 ## Layout
 
-3-column grid: 312px channel sidebar | main content | 240px members sidebar
-Glass server strip overlays left 72px of channel sidebar.
-Channel sidebar fully opaque with gradient at left edge feeding glass.
+3-column grid: 304px left column | main content | 240px members sidebar.
+The left column is the space strip (60px, matte `bg-surface-channel`, 40px
+`rounded-xl` tiles with an 8px gap, the home tile first) beside the channel
+list (244px); the strip is in the flow, not floating over the list. Headers are
+48px with a `border-hard` line; list rows are 34px, `rounded-lg`.
+
+One floating card (`.glass-bubble rounded-xl`, `z-float`, 288px, 8px from the
+edges) spans the strip and the channel list at the bottom: the voice
+connection block, a `border-hard` line, the user row. Both scroll areas pad
+their bottom by the card's height plus 16px so the card never covers the last
+item.
+
+The voice control bar holds the participants toggle; its state lives in
+`components/voice/voiceStripStore.ts`, and `VoiceGrid` draws its own toggle
+only when no bar is mounted (the mobile voice screen).
 
 Card lists (Explore's Inner and Outer Space sections, the Friends page's
 discover list) share one class, `.card-grid` in `globals.css`: one full-width

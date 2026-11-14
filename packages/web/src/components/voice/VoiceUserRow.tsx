@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '../ui/Avatar';
+import { Icon } from '../ui/Icon';
+import { Tag } from '../ui/Tag';
 
 export interface VoiceUserRowProps {
   userId: string;
@@ -43,11 +45,11 @@ export function VoiceUserRow({
   const { t } = useTranslation(['voice', 'common']);
   const avatarSize = size === 'compact' ? 20 : 24;
 
-  // Mic icon priority: server muted/deafened/permission muted (amber) > self-muted (danger)
+  // Mic icon priority: server muted/deafened/permission muted (warning) > self-muted
   const showServerMicIcon = isServerMuted || isServerDeafened || isPermissionMuted;
   const showSelfMicIcon = !showServerMicIcon && isMuted;
 
-  // Deafen icon priority: server deafened (amber) > self-deafened (danger)
+  // Deafen icon priority: server deafened (warning) > self-deafened
   const showServerDeafIcon = isServerDeafened;
   const showSelfDeafIcon = !isServerDeafened && isDeafened;
 
@@ -59,12 +61,13 @@ export function VoiceUserRow({
         size={avatarSize}
         userId={userId}
         avatarColor={avatarColor}
-        className={isSpeaking ? 'rounded-full ring-2 ring-status-online' : ''}
+        className={isSpeaking ? 'rounded-full ring-2 ring-status-ok' : ''}
       />
-      <span className="text-[13px] text-txt-secondary truncate flex-1 min-w-0">
+      <span className="text-compact text-txt-secondary truncate flex-1 min-w-0">
         {displayName}
       </span>
-      {/* Status badges */}
+      {/* Status marks: quiet tertiary for the person's own choices, the
+          warning colour for a moderator's restriction. */}
       <div className="flex items-center gap-1 flex-shrink-0">
         {connectionWarning && (
           <span
@@ -72,14 +75,13 @@ export function VoiceUserRow({
             title={connectionWarning}
             aria-label={connectionWarning}
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2 1 21h22L12 2Zm1 16h-2v-2h2v2Zm0-4h-2v-4h2v4Z" />
-            </svg>
+            <Icon name="triangle-alert" size="xs" />
           </span>
         )}
-        {/* Server muted / space deafened / permission muted — amber mic with slash */}
+        {/* Server muted / space deafened / permission muted */}
         {showServerMicIcon && (
           <span
+            className="flex text-status-warn"
             title={
               isPermissionMuted
                 ? t('voice:badges.mutedNoPermission')
@@ -88,58 +90,35 @@ export function VoiceUserRow({
                   : t('voice:badges.mutedSpaceDeafened')
             }
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-accent-amber">
-              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-              <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
+            <Icon name="mic-off" size="xs" />
           </span>
         )}
-        {/* Server deafened — amber headphone with slash */}
+        {/* Server deafened */}
         {showServerDeafIcon && (
-          <span title={t('voice:badges.spaceDeafened')}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-accent-amber">
-              <path d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h2v-7H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-2v7h2c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z" />
-              <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
+          <span className="flex text-status-warn" title={t('voice:badges.spaceDeafened')}>
+            <Icon name="headphone-off" size="xs" />
           </span>
         )}
-        {/* Self-muted — danger mic with slash */}
+        {/* Self-muted */}
         {showSelfMicIcon && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-txt-danger">
-            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-            <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-          </svg>
+          <Icon name="mic-off" size="xs" className="text-txt-tertiary" />
         )}
-        {/* Self-deafened — danger headphone with slash */}
+        {/* Self-deafened */}
         {showSelfDeafIcon && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-txt-danger">
-            <path d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h2v-7H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-2v7h2c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z" />
-            <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-          </svg>
+          <Icon name="headphone-off" size="xs" className="text-txt-tertiary" />
         )}
-        {/* Camera active */}
+        {/* Camera active; crossed out when the viewer does not watch it */}
         {isCameraOn && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary">
-            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-            {isUnwatchedCamera && (
-              <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-            )}
-          </svg>
+          <Icon name={isUnwatchedCamera ? 'video-off' : 'video'} size="xs" className="text-txt-tertiary" />
         )}
         {/* Screen sharing LIVE badge */}
         {isScreenSharing && (
-          <span className="bg-accent-rose text-white text-[9px] font-bold px-1 rounded leading-[14px]">{t('voice:badges.live')}</span>
+          <Tag tone="live">{t('voice:badges.live')}</Tag>
         )}
-        {/* Locally muted — volume X icon */}
+        {/* Locally muted */}
         {isLocallyMuted && (
-          <span title={t('voice:badges.locallyMuted')}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-txt-tertiary">
-              <path d="M3 9v6h4l5 5V4L7 9H3z" />
-              <line x1="17" y1="7" x2="23" y2="13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-              <line x1="23" y1="7" x2="17" y2="13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
+          <span className="flex text-txt-tertiary" title={t('voice:badges.locallyMuted')}>
+            <Icon name="volume-x" size="xs" />
           </span>
         )}
       </div>

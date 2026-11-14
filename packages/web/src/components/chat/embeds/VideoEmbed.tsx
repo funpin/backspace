@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Embed } from '@backspace/shared';
+import { Icon } from '../../ui/Icon';
 
 interface VideoEmbedProps {
   embed: Embed;
@@ -14,14 +15,14 @@ export function VideoEmbed({ embed }: VideoEmbedProps) {
   if (!embed.provider && !embed.embedUrl) {
     return (
       <div
-        className="mt-2 max-w-[400px] rounded-lg overflow-hidden bg-surface-input"
+        className="mt-2 max-w-[400px] rounded-xl overflow-hidden bg-surface-input"
         style={{ aspectRatio: '16/9' }}
       >
         <video
           src={embed.url}
           controls
           preload="none"
-          className="w-full h-full rounded-lg"
+          className="w-full h-full rounded-xl"
         />
       </div>
     );
@@ -33,7 +34,7 @@ export function VideoEmbed({ embed }: VideoEmbedProps) {
     : null;
 
   return (
-    <div className="mt-2 max-w-[400px] rounded-lg overflow-hidden bg-surface-channel border border-white/[0.06]">
+    <div className="mt-2 max-w-[400px] rounded-xl overflow-hidden bg-surface-elevated border border-border-soft">
       {/* 16:9 video area */}
       <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
         {isPlaying && embed.embedUrl ? (
@@ -62,15 +63,9 @@ export function VideoEmbed({ embed }: VideoEmbedProps) {
             ) : (
               <div className="absolute inset-0 bg-black/60" />
             )}
-            {/* Play button — glass-bubble style */}
-            <span className="glass-bubble relative z-10 flex items-center justify-center w-14 h-14 rounded-full group-hover:scale-110 transition-transform duration-150">
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-6 h-6 text-white ml-1"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
+            {/* Play control: a round of dark glass over the poster */}
+            <span className="glass-bubble relative z-raised flex items-center justify-center w-14 h-14 rounded-full text-white group-hover:scale-110 transition-transform duration-base ease-pop">
+              <Icon name="play" size="lg" />
             </span>
           </button>
         )}
@@ -80,7 +75,7 @@ export function VideoEmbed({ embed }: VideoEmbedProps) {
       {(embed.title || providerLabel) && (
         <div className="px-3 py-2">
           {providerLabel && (
-            <div className="text-[12px] text-txt-tertiary font-medium mb-0.5">
+            <div className="text-xs text-txt-tertiary font-medium mb-0.5">
               {providerLabel}
             </div>
           )}
@@ -89,7 +84,7 @@ export function VideoEmbed({ embed }: VideoEmbedProps) {
               href={embed.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[14px] text-sky-400 font-semibold hover:underline line-clamp-2"
+              className="text-sm text-txt-link font-semibold hover:underline line-clamp-2"
             >
               {embed.title}
             </a>

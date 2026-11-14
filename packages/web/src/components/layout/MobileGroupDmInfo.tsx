@@ -16,6 +16,8 @@ import { ImageCropModal } from '../ui/ImageCropModal';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { MobileScreenHeader } from './MobileScreenHeader';
 import { DmMemberRow, type DmMemberRowAction } from './DmMemberRow';
+import { Icon } from '../ui/Icon';
+import { Button } from '../ui/Button';
 
 const MAX_NAME_LENGTH = 50;
 const MAX_GROUP_MEMBERS = 10;
@@ -27,18 +29,7 @@ const MAX_GROUP_MEMBERS = 10;
  * decorative here.
  */
 function GroupGlobeIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="text-txt-tertiary/80 flex-shrink-0"
-      aria-hidden="true"
-    >
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-    </svg>
-  );
+  return <Icon name="globe" size="xs" className="text-txt-tertiary" />;
 }
 
 /** Sort helper — alphabetical by display-name fallback, lower-cased. */
@@ -397,15 +388,16 @@ export function MobileGroupDmInfo({ params }: MobileGroupDmInfoProps) {
   // (intentional duplication so a tap-target is always reachable above the
   // keyboard).
   const headerRight = editing ? (
-    <button
-      type="button"
+    <Button
+      size="lg"
+      variant="ghost"
       onClick={handleCancel}
-      className="px-2 py-1 text-sm text-txt-tertiary hover:text-txt-secondary"
+      className="h-11"
       data-mobile-edit-cancel
       aria-label={t('dm:groupInfo.cancelEdit')}
     >
       {t('common:actions.cancel')}
-    </button>
+    </Button>
   ) : null;
 
   // ── Render ─────────────────────────────────────────────────────────────
@@ -420,7 +412,7 @@ export function MobileGroupDmInfo({ params }: MobileGroupDmInfoProps) {
         style={editing ? { paddingBottom: keyboardOpen ? 72 : 96 } : undefined}
       >
         {/* HERO ────────────────────────────────────────────────────────── */}
-        <div className="flex flex-col items-center gap-3 px-4 pt-8 pb-6 border-b border-border-soft">
+        <div className="flex flex-col items-center gap-3 px-4 pt-8 pb-6 border-b border-border-hard">
           <div className="relative">
             <button
               type="button"
@@ -449,11 +441,9 @@ export function MobileGroupDmInfo({ params }: MobileGroupDmInfoProps) {
                 onClick={handleClearIcon}
                 data-mobile-group-icon-clear
                 aria-label={t('dm:groupSettings.removeIcon')}
-                className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-surface-elevated border border-border-hard flex items-center justify-center text-txt-tertiary hover:text-txt-danger hover:bg-accent-rose/10 transition-colors"
+                className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-surface-elevated shadow-[inset_0_0_0_1px_var(--glass-border)] flex items-center justify-center text-txt-tertiary hover:text-status-danger transition-colors duration-fast"
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-                </svg>
+                <Icon name="x" size="xs" />
               </button>
             )}
 
@@ -504,47 +494,49 @@ export function MobileGroupDmInfo({ params }: MobileGroupDmInfoProps) {
 
           {/* Edit toggle — owner-only, hidden during edit (Cancel header action takes its place). */}
           {isOwner && !editing && (
-            <button
-              type="button"
+            <Button
+              size="lg"
+              variant="secondary"
+              icon="pencil"
               onClick={() => setEditing(true)}
               data-mobile-group-edit
-              className="mt-1 px-4 py-1.5 rounded-full bg-surface-elevated hover:bg-interactive-hover text-txt-secondary text-xs font-medium transition-colors"
+              className="mt-1 h-11"
             >
               {t('common:actions.edit')}
-            </button>
+            </Button>
           )}
 
           {saveError && editing && (
-            <div className="w-full max-w-[280px] mt-1 p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs text-center">
+            <div className="w-full max-w-[280px] mt-1 px-3 py-2 rounded-lg bg-status-danger/10 text-status-danger text-xs text-center">
               {saveError}
             </div>
           )}
         </div>
 
         {/* ACTIONS ROW ──────────────────────────────────────────────────── */}
-        <div className="px-4 py-3 border-b border-border-soft">
-          <button
-            type="button"
+        <div className="px-4 py-3 border-b border-border-hard">
+          <Button
+            size="lg"
+            variant="secondary"
+            icon="user-plus"
+            fullWidth
             onClick={() => channelId && openModal('addDmMember', { dmChannelId: channelId })}
             disabled={!canAddMembers}
             data-mobile-group-add-member
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-accent-mint/10 hover:bg-accent-mint/20 text-accent-mint text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-11"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
             {t('dm:groupSettings.addMember')}
             {!canAddMembers && (
-              <span className="text-[11px] text-txt-tertiary">{t('dm:groupSettings.groupFullSuffix')}</span>
+              <span className="ml-1.5 text-2xs text-txt-tertiary">{t('dm:groupSettings.groupFullSuffix')}</span>
             )}
-          </button>
+          </Button>
         </div>
 
         {/* MEMBERS LIST ─────────────────────────────────────────────────── */}
         <div className="p-3">
           {ownerMember && (
             <div data-mobile-group-section="owner" className="mb-4">
-              <h3 className="text-[10.5px] font-bold text-txt-tertiary uppercase tracking-[0.06em] px-2 mb-1">
+              <h3 className="text-xs font-medium text-txt-tertiary px-2 mb-1">
                 {t('dm:roster.owner')}
               </h3>
               {renderMemberRow(ownerMember, true)}
@@ -553,7 +545,7 @@ export function MobileGroupDmInfo({ params }: MobileGroupDmInfoProps) {
 
           {onlineMembers.length > 0 && (
             <div data-mobile-group-section="online" className="mb-4">
-              <h3 className="text-[10.5px] font-bold text-txt-tertiary uppercase tracking-[0.06em] px-2 mb-1">
+              <h3 className="text-xs font-medium text-txt-tertiary px-2 mb-1">
                 {t('dm:roster.sectionCount', { label: t('common:states.online'), total: onlineMembers.length })}
               </h3>
               {onlineMembers.map((m) => renderMemberRow(m, false))}
@@ -562,7 +554,7 @@ export function MobileGroupDmInfo({ params }: MobileGroupDmInfoProps) {
 
           {offlineMembers.length > 0 && (
             <div data-mobile-group-section="offline" className="opacity-60">
-              <h3 className="text-[10.5px] font-bold text-txt-tertiary uppercase tracking-[0.06em] px-2 mb-1">
+              <h3 className="text-xs font-medium text-txt-tertiary px-2 mb-1">
                 {t('dm:roster.sectionCount', { label: t('common:states.offline'), total: offlineMembers.length })}
               </h3>
               {offlineMembers.map((m) => renderMemberRow(m, false))}
@@ -571,16 +563,19 @@ export function MobileGroupDmInfo({ params }: MobileGroupDmInfoProps) {
         </div>
 
         {/* DESTRUCTIVE FOOTER ────────────────────────────────────────────── */}
-        <div className="px-4 py-4 border-t border-border-soft">
-          <button
-            type="button"
+        <div className="px-4 py-4 border-t border-border-hard">
+          <Button
+            size="lg"
+            variant="danger"
+            icon="log-out"
+            fullWidth
             onClick={() => setConfirmLeave(true)}
             disabled={leaving}
             data-mobile-group-leave
-            className="w-full px-4 py-2.5 text-accent-rose hover:bg-accent-rose/10 text-sm font-medium rounded-md transition-colors disabled:opacity-50"
+            className="h-11"
           >
             {leaving ? t('dm:leave.inProgress') : t('dm:leave.title')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -589,27 +584,29 @@ export function MobileGroupDmInfo({ params }: MobileGroupDmInfoProps) {
       {editing && (
         <div
           data-mobile-group-edit-bar
-          className="fixed left-0 right-0 z-30 bg-surface-base border-t border-border-hard px-4 py-3 flex items-center justify-end gap-2"
+          className="fixed left-0 right-0 z-float bg-surface-base border-t border-border-hard px-4 py-2 flex items-center justify-end gap-2"
           style={{ bottom: bottomInset }}
         >
-          <button
-            type="button"
+          <Button
+            size="lg"
+            variant="ghost"
             onClick={handleCancel}
             disabled={saving}
-            className="px-3 py-1.5 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors disabled:opacity-50"
+            className="h-11"
             data-mobile-group-save-cancel
           >
             {t('common:actions.cancel')}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            size="lg"
+            variant="primary"
             onClick={handleSave}
             disabled={!isDirty || saving || !isOwner}
-            className="px-4 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-11"
             data-mobile-group-save
           >
             {saving ? t('common:states.saving') : t('common:actions.save')}
-          </button>
+          </Button>
         </div>
       )}
 

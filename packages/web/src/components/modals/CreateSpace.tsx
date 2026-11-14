@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { ImageCropModal } from '../ui/ImageCropModal';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useTransferStore } from '../../stores/transferStore';
@@ -126,7 +128,7 @@ export function CreateSpaceModal() {
     <Modal isOpen={isOpen} onClose={handleClose} title={t('spaces:create.title')} mobileStyle="sheet">
       <form onSubmit={handleSubmit}>
         {error && (
-          <div className="mb-3 p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+          <div className="mb-3 px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
             {error}
           </div>
         )}
@@ -137,17 +139,14 @@ export function CreateSpaceModal() {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingIcon}
-            className="relative w-20 h-20 rounded-full border-2 border-dashed border-border-soft hover:border-accent-primary transition-colors flex items-center justify-center overflow-hidden group"
+            className="relative w-20 h-20 rounded-full border-2 border-dashed border-border-soft hover:border-accent-tone transition-colors duration-fast flex items-center justify-center overflow-hidden group"
             style={!iconPreview ? { background: getSpaceGradient(undefined, name || 'S', avatarColor).gradient } : undefined}
           >
             {iconPreview ? (
               <>
                 <img src={iconPreview} alt={t('spaces:create.icon.previewAlt')} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                  <Icon name="camera" size="lg" className="text-white" />
                 </div>
               </>
             ) : (
@@ -159,8 +158,8 @@ export function CreateSpaceModal() {
                   </svg>
                 ) : (
                   <>
-                    <span className="text-2xl font-bold">{(name || 'S').charAt(0).toUpperCase()}</span>
-                    <span className="text-[9px] font-medium opacity-60">{t('spaces:create.icon.upload')}</span>
+                    <span className="text-2xl font-semibold">{(name || 'S').charAt(0).toUpperCase()}</span>
+                    <span className="text-2xs font-medium opacity-60">{t('spaces:create.icon.upload')}</span>
                   </>
                 )}
               </div>
@@ -177,7 +176,7 @@ export function CreateSpaceModal() {
             <button
               type="button"
               onClick={handleRemoveIcon}
-              className="ml-2 self-start mt-1 text-txt-tertiary hover:text-txt-danger text-xs transition-colors"
+              className="ml-2 self-start mt-1 text-txt-tertiary hover:text-status-danger text-xs transition-colors duration-fast"
             >
               {t('common:actions.remove')}
             </button>
@@ -186,7 +185,7 @@ export function CreateSpaceModal() {
 
         {/* Icon Color */}
         <div className="mb-4">
-          <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+          <label className="block text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:create.icon.colorLabel')}
           </label>
           <div className="flex gap-2 justify-center">
@@ -200,7 +199,7 @@ export function CreateSpaceModal() {
                   className="w-7 h-7 rounded-full border-2 transition-all hover:scale-110"
                   style={{
                     background: entry.gradient,
-                    borderColor: avatarColor === key ? 'white' : 'transparent',
+                    borderColor: avatarColor === key ? 'rgb(var(--text-primary))' : 'transparent',
                     boxShadow: avatarColor === key ? `0 0 0 2px ${entry.glow}40` : 'none',
                   }}
                   title={colorNames[key]}
@@ -212,7 +211,7 @@ export function CreateSpaceModal() {
 
         {/* Space Name */}
         <div className="mb-4">
-          <label className="block text-xs font-bold text-txt-secondary uppercase mb-2">
+          <label className="block text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:create.name.label')}
           </label>
           <input
@@ -227,17 +226,17 @@ export function CreateSpaceModal() {
 
         {/* Visibility */}
         <div className="mb-4">
-          <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider mb-2">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:create.visibilityLabel')}
           </div>
           <div className="space-y-1.5">
             {visibilityOptions.map((opt) => (
               <label
                 key={opt.value}
-                className={`flex items-start gap-3 p-2.5 rounded cursor-pointer transition-colors ${
+                className={`flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-colors duration-fast ${
                   visibility === opt.value
-                    ? 'bg-interactive-selected'
-                    : 'hover:bg-interactive-hover'
+                    ? 'bg-accent-tone/[0.16] shadow-[inset_0_0_0_1.5px_rgb(var(--accent-tone))]'
+                    : 'shadow-[inset_0_0_0_1px_var(--glass-border)] hover:bg-interactive-hover'
                 }`}
               >
                 <input
@@ -246,7 +245,7 @@ export function CreateSpaceModal() {
                   value={opt.value}
                   checked={visibility === opt.value}
                   onChange={() => setVisibility(opt.value)}
-                  className="mt-0.5 accent-accent-primary"
+                  className="mt-0.5 accent-accent-tone"
                 />
                 <div>
                   <div className="text-sm font-medium text-txt-primary">{opt.label}</div>
@@ -259,7 +258,7 @@ export function CreateSpaceModal() {
 
         {/* Description */}
         <div className="mb-4">
-          <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider mb-1.5">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:create.description.label')}
           </div>
           <textarea
@@ -269,29 +268,21 @@ export function CreateSpaceModal() {
             rows={3}
             className="input-standard w-full resize-none"
           />
-          <div className="text-[11px] text-txt-tertiary text-right">
+          <div className="mt-1 text-2xs text-txt-tertiary text-right tabular-nums">
             {t('spaces:create.description.counter', { length: description.length, max: DESCRIPTION_MAX_LENGTH })}
           </div>
         </div>
 
         {/* Actions */}
-        <div className="sticky bottom-0 z-10 pointer-events-none">
-          <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-3 py-2 flex items-center gap-3 pointer-events-auto">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-              >
+        <div className="sticky bottom-0 z-raised pointer-events-none">
+          <div className="flex justify-end pt-3 pb-1">
+            <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 pointer-events-auto">
+              <Button variant="ghost" onClick={handleClose}>
                 {t('common:actions.cancel')}
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading || uploadingIcon}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
-              >
+              </Button>
+              <Button variant="primary" type="submit" disabled={isLoading || uploadingIcon}>
                 {isLoading ? t('spaces:create.submitting') : t('spaces:create.submit')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

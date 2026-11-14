@@ -173,9 +173,9 @@ function ChipIdentity({ label, stateWord, expired, dimmed }: {
     <span className="inline-flex items-center gap-2 min-w-0">
       <span
         aria-hidden="true"
-        className={`w-1.5 h-1.5 rounded-full shrink-0 ${expired ? 'bg-accent-rose' : 'bg-accent-amber'}`}
+        className={`w-1.5 h-1.5 rounded-full shrink-0 ${expired ? 'bg-status-danger' : 'bg-status-warn'}`}
       />
-      <span className={`truncate transition-opacity ${dimmed ? 'text-txt-tertiary' : 'text-txt-secondary'}`}>
+      <span className={`truncate transition-colors duration-fast ${dimmed ? 'text-txt-tertiary' : 'text-txt-secondary'}`}>
         {label}
       </span>
       <span aria-hidden="true" className="text-txt-tertiary/60">·</span>
@@ -242,8 +242,8 @@ function ConnectionChip({ entry, retrying, expanded, onExpand, onCollapse, onRet
   if (expired && expanded) {
     return (
       <li className="w-full">
-        <div className="w-full max-w-[22rem] p-3 rounded-xl bg-surface-elevated border border-white/[0.06] shadow-elevation-low space-y-2.5">
-          <div className="text-[13px] leading-5">
+        <div className="w-full max-w-[22rem] p-3 rounded-xl bg-surface-elevated space-y-2.5">
+          <div className="text-compact">
             <ChipIdentity label={label} stateWord={stateWord} expired dimmed={false} />
           </div>
           <ReauthForm
@@ -258,7 +258,7 @@ function ConnectionChip({ entry, retrying, expanded, onExpand, onCollapse, onRet
   }
 
   return (
-    <li className="glass-pill text-[13px] leading-5 rounded-full pl-2.5 pr-3 py-1 inline-flex items-center gap-2 max-w-full">
+    <li className="glass-pill text-compact rounded-lg pl-2.5 pr-3 py-1 inline-flex items-center gap-2 max-w-full">
       <ChipIdentity label={label} stateWord={stateWord} expired={expired} dimmed={retrying} />
       {expired ? (
         <button
@@ -266,7 +266,7 @@ function ConnectionChip({ entry, retrying, expanded, onExpand, onCollapse, onRet
           type="button"
           onClick={() => onExpand(entry.origin)}
           aria-label={`${reconnectWord} ${label}`}
-          className="ml-1 text-accent-primary hover:text-accent-primary/80 font-medium transition-colors whitespace-nowrap"
+          className="ml-1 text-accent-tone hover:text-txt-primary font-medium transition-colors duration-fast whitespace-nowrap"
         >
           {reconnectWord}
         </button>
@@ -276,7 +276,7 @@ function ConnectionChip({ entry, retrying, expanded, onExpand, onCollapse, onRet
           onClick={() => onRetry(entry.origin)}
           disabled={retrying}
           aria-label={`${retryWord} ${label}`}
-          className="ml-1 text-accent-primary hover:text-accent-primary/80 font-medium transition-colors whitespace-nowrap disabled:text-txt-tertiary disabled:cursor-default"
+          className="ml-1 text-accent-tone hover:text-txt-primary font-medium transition-colors duration-fast whitespace-nowrap disabled:text-txt-tertiary disabled:cursor-default"
         >
           {retryWord}
         </button>

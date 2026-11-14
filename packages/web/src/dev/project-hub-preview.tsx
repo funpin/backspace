@@ -5,8 +5,8 @@
 // a community instance.
 //
 // `?state=<name>&width=desktop|phone` renders one state in one frame:
-//   desktop  a 1200px window: the home sidebar (312px, the rail's 72px left
-//            as padding, as AppLayout hosts it) next to the page with its top
+//   desktop  a 1200px window: the home sidebar (244px, the channel list
+//            without the space strip) next to the page with its top
 //            bar, the router at `/backspace`.
 //   phone    a 390px phone: `MobileBackspaceScreen`, the component
 //            MobileShell's `backspace` screen renders (header and page), with
@@ -334,7 +334,7 @@ async function clickJoin(): Promise<void> {
 function DesktopFrame({ state, links }: { state: HubState; links: ProjectLinks }) {
   return (
     <div style={{ width: FRAME_PX.desktop, height: 'calc(100 * var(--app-vh))', display: 'flex' }}>
-      <div className="flex w-[312px] flex-shrink-0">
+      <div className="flex w-[244px] flex-shrink-0">
         <ChannelSidebar />
       </div>
       <div className="flex-1 min-w-0 flex overflow-hidden">

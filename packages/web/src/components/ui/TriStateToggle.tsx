@@ -18,13 +18,13 @@ export function TriStateToggle({
 }) {
   const { t } = useTranslation(['spaces']);
   const btnClass = (v: TriState, active: boolean) => {
-    const base = 'w-6 h-6 flex items-center justify-center rounded-full transition-colors text-xs font-bold';
+    const base = 'w-6 h-6 flex items-center justify-center rounded-full transition-colors duration-fast text-xs font-semibold';
     const interaction = disabled ? 'cursor-not-allowed' : 'cursor-pointer';
     if (!active) return `${base} ${interaction} text-txt-tertiary${disabled ? '' : ' hover:text-txt-secondary'}`;
     switch (v) {
-      case 'deny': return `${base} ${interaction} bg-accent-rose/15 text-accent-rose`;
-      case 'neutral': return `${base} ${interaction} bg-white/[0.06] text-txt-tertiary`;
-      case 'allow': return `${base} ${interaction} bg-accent-primary/15 text-accent-primary`;
+      case 'deny': return `${base} ${interaction} bg-status-danger/15 text-status-danger`;
+      case 'neutral': return `${base} ${interaction} bg-interactive-active text-txt-tertiary`;
+      case 'allow': return `${base} ${interaction} bg-status-ok/15 text-status-ok`;
     }
   };
 

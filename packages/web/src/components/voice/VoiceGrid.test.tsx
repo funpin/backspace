@@ -6,6 +6,7 @@ import { pictureView } from './StageZoomControls';
 import { useVoiceStore } from '../../stores/voiceStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useStreamPointerStore } from '../../stores/streamPointerStore';
+import { useVoiceStripStore } from './voiceStripStore';
 
 vi.mock('../../audio/AudioManager', () => ({
   AudioManager: { getInstance: () => ({ playSound: vi.fn() }) },
@@ -86,6 +87,20 @@ describe('VoiceGrid participant strip', () => {
 
     await userEvent.click(screen.getByText(/show members/i));
     expect(screen.getByText(/hide members/i)).toBeInTheDocument();
+  });
+  it('leaves the toggle to the control bar while one is mounted', async () => {
+    const release = useVoiceStripStore.getState().claimToggle();
+    try {
+      render(<VoiceGrid participants={[participant('ada', true), participant('bob', false)]} />);
+
+      expect(screen.queryByText(/hide members/i)).toBeNull();
+      expect(useVoiceStripStore.getState().available).toBe(true);
+
+      act(() => useVoiceStripStore.getState().setHidden(true));
+      expect(screen.queryByTestId('voice-strip')).toBeNull();
+    } finally {
+      release();
+    }
   });
 });
 

@@ -23,6 +23,7 @@ import { useShownStatus } from '../../hooks/useShownStatus';
 import { viewerCanEditMemberRoles } from '../../utils/roleHierarchy';
 import { ProfileRoles } from './ProfileRoles';
 import { ProfileSpaceNickname } from './ProfileSpaceNickname';
+import { Button } from './Button';
 
 /** Gap between the card and the element it was opened from. */
 const ANCHOR_OFFSET = 8;
@@ -163,7 +164,7 @@ export function UserProfilePopout({ user: propUser, origin, onClose, anchor, pla
     >
       {/* Banner */}
       <div
-        className="h-[80px] rounded-t-[12px]"
+        className="h-20"
         style={bannerSrc
           ? { backgroundImage: `url(${bannerSrc})`, backgroundSize: 'cover', backgroundPosition: 'center' }
           : { background: bannerFallback }
@@ -184,19 +185,19 @@ export function UserProfilePopout({ user: propUser, origin, onClose, anchor, pla
           userId={user.homeUserId ?? user.id}
           user={user}
           onClick={handleAvatarClick}
-          ring={{ width: 4, color: 'rgba(20,20,26,0.85)' }}
+          ring={{ width: 4, color: 'rgb(var(--bg-elevated))' }}
           className="mt-[-44px] mb-3"
         />
 
         {/* Name & info */}
         <div>
           <ProfileSpaceNickname member={member} />
-          <span className="text-[16px] font-semibold leading-tight">{displayName}</span>
-          <div className="text-[13px] text-txt-tertiary">
-            <Username username={user.username} showAt className="text-[13px] text-txt-tertiary" />
+          <span className="text-lg font-semibold leading-tight text-txt-primary">{displayName}</span>
+          <div className="text-compact text-txt-tertiary">
+            <Username username={user.username} showAt className="text-compact text-txt-tertiary" />
           </div>
           {user.customStatus && (
-            <div className="text-[13px] text-txt-secondary italic mt-1">
+            <div className="text-compact text-txt-secondary italic mt-1">
               {replaceEmojiShortcodes(user.customStatus)}
             </div>
           )}
@@ -205,9 +206,9 @@ export function UserProfilePopout({ user: propUser, origin, onClose, anchor, pla
         {/* Bio */}
         {user.bio && (
           <>
-            <div className="border-t border-white/[0.06] my-3" />
+            <div className="border-t border-border-soft my-3" />
             <div>
-              <span className="text-[11px] uppercase tracking-wide font-semibold text-txt-tertiary">
+              <span className="text-xs font-medium text-txt-tertiary">
                 {t('social:profile.aboutMe')}
               </span>
               <ProfileBio bio={user.bio} />
@@ -217,25 +218,25 @@ export function UserProfilePopout({ user: propUser, origin, onClose, anchor, pla
 
         {roles.length > 0 && (
           <>
-            <div className="border-t border-white/[0.06] my-3" />
+            <div className="border-t border-border-soft my-3" />
             <ProfileRoles roles={roles} />
           </>
         )}
 
-        <div className="border-t border-white/[0.06] my-3" />
+        <div className="border-t border-border-soft my-3" />
 
         {/* Member since + Mutuals */}
         <div className="space-y-1.5">
           <div>
-            <span className="text-[11px] uppercase tracking-wide font-semibold text-txt-tertiary">
+            <span className="text-xs font-medium text-txt-tertiary">
               {t('social:profile.memberSince')}
             </span>
-            <span className="text-[12px] text-txt-secondary ml-2">
+            <span className="text-xs text-txt-secondary ml-2">
               {f.formatMediumDate(user.createdAt)}
             </span>
           </div>
           {mutualCounts && (mutualCounts.friends > 0 || mutualCounts.spaces > 0) && (
-            <div className="text-[12px] text-txt-tertiary">
+            <div className="text-xs text-txt-tertiary">
               {mutualCounts.friends > 0 && (
                 <span>{t('social:mutuals.friends', { count: mutualCounts.friends })}</span>
               )}
@@ -251,27 +252,18 @@ export function UserProfilePopout({ user: propUser, origin, onClose, anchor, pla
 
         {/* Actions. Nobody sends themselves a message. */}
         {!isYou && (
-          <button
-            onClick={handleSendMessage}
-            className="w-full mt-3 py-2 rounded-lg text-[13px] font-medium text-txt-primary bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] transition-colors"
-          >
+          <Button variant="secondary" fullWidth onClick={handleSendMessage} className="mt-3">
             {t('social:profile.sendMessage')}
-          </button>
+          </Button>
         )}
         {canEditRoles && (
-          <button
-            onClick={handleEditRoles}
-            className="w-full mt-1.5 py-2 rounded-lg text-[13px] font-medium text-txt-secondary hover:text-txt-primary bg-transparent hover:bg-white/[0.04] transition-colors"
-          >
+          <Button variant="ghost" fullWidth onClick={handleEditRoles} className="mt-1.5">
             {t('social:profile.editRoles')}
-          </button>
+          </Button>
         )}
-        <button
-          onClick={handleViewFullProfile}
-          className="w-full mt-1.5 py-2 rounded-lg text-[13px] font-medium text-txt-tertiary hover:text-txt-secondary bg-transparent hover:bg-white/[0.04] transition-colors"
-        >
+        <Button variant="ghost" fullWidth onClick={handleViewFullProfile} className="mt-1.5">
           {t('social:profile.viewFull')}
-        </button>
+        </Button>
       </div>
     </div>
   );

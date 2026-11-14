@@ -8,6 +8,7 @@ import { useUIStore } from '../../stores/uiStore';
 import { normalizeUserAssets } from '../../utils/assetUrls';
 import { useCanonicalUserView } from '../../utils/userViewLookup';
 import { Avatar } from '../ui/Avatar';
+import { Button } from '../ui/Button';
 
 function TransferMemberRow({
   member,
@@ -24,7 +25,7 @@ function TransferMemberRow({
   return (
     <button
       onClick={() => onSelect(member.userId)}
-      className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md hover:bg-white/[0.06] transition-colors"
+      className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-interactive-hover transition-colors duration-fast"
     >
       <Avatar
         src={canonical.avatar}
@@ -38,7 +39,7 @@ function TransferMemberRow({
           {displayName}
         </span>
         {canonical.displayName && (
-          <span className="text-[11px] text-txt-tertiary truncate max-w-full">
+          <span className="text-2xs text-txt-tertiary truncate max-w-full">
             {canonical.username}
           </span>
         )}
@@ -139,28 +140,28 @@ export function TransferOwnershipModal({ spaceId, onClose }: { spaceId: string; 
   };
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-confirm flex items-center justify-center bg-surface-overlay">
       <div
         ref={modalRef}
-        className="w-[380px] max-h-[480px] glass-modal rounded-xl flex flex-col animate-in fade-in zoom-in-95 duration-150"
+        className="w-[380px] max-w-full max-h-[480px] glass-modal rounded-2xl flex flex-col animate-slide-up"
       >
         {/* Header */}
-        <div className="px-4 pt-4 pb-3 border-b border-white/[0.06]">
-          <h3 className="text-base font-semibold text-txt-primary">{t('spaces:ownership.title')}</h3>
-          <p className="text-xs text-txt-tertiary mt-0.5">
+        <div className="px-5 pt-5 pb-3 border-b border-border-hard">
+          <h3 className="text-lg font-semibold text-txt-primary">{t('spaces:ownership.title')}</h3>
+          <p className="text-sm text-txt-secondary mt-1">
             <Trans
               t={t}
               i18nKey="spaces:ownership.description"
               values={{ name: space.name }}
-              components={{ name: <span className="font-medium text-txt-secondary" /> }}
+              components={{ name: <span className="font-medium text-txt-primary" /> }}
             />
           </p>
         </div>
 
         {selectedUserId && selectedMember ? (
           /* Confirm step */
-          <div className="p-4 flex flex-col gap-4">
-            <div className="p-3 rounded-lg bg-accent-amber/10 border border-accent-amber/20">
+          <div className="p-5 flex flex-col gap-4">
+            <div className="p-3 rounded-lg bg-status-warn/10">
               <p className="text-sm text-txt-secondary">
                 <Trans
                   t={t}
@@ -171,27 +172,19 @@ export function TransferOwnershipModal({ spaceId, onClose }: { spaceId: string; 
               </p>
               <p className="text-xs text-txt-tertiary mt-1.5">{t('spaces:ownership.regularMember')}</p>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setSelectedUserId(null)}
-                className="flex-1 py-2.5 text-sm font-medium text-txt-secondary bg-interactive-hover hover:bg-interactive-selected rounded-lg transition-colors disabled:opacity-50"
-                disabled={transferring}
-              >
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setSelectedUserId(null)} disabled={transferring}>
                 {t('common:actions.cancel')}
-              </button>
-              <button
-                onClick={handleTransfer}
-                disabled={transferring}
-                className="flex-1 py-2.5 bg-accent-amber hover:bg-accent-amber/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-              >
+              </Button>
+              <Button variant="danger-solid" onClick={handleTransfer} disabled={transferring}>
                 {transferring ? t('spaces:ownership.transferring') : t('spaces:ownership.confirm')}
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
           /* Member list */
           <>
-            <div className="px-3 pt-3">
+            <div className="px-5 pt-3">
               <input
                 type="text"
                 value={search}
@@ -201,7 +194,7 @@ export function TransferOwnershipModal({ spaceId, onClose }: { spaceId: string; 
                 autoFocus
               />
             </div>
-            <div className="flex-1 overflow-y-auto p-2 min-h-0">
+            <div className="flex-1 overflow-y-auto px-3 py-2 min-h-0">
               {loading ? (
                 <p className="text-xs text-txt-tertiary text-center py-4">{t('spaces:ownership.loading')}</p>
               ) : filteredMembers.length === 0 ? (

@@ -673,9 +673,9 @@ function Workbench({ scene, width }: { scene: Scene; width: number | null }) {
   return (
     <div style={{ height: 'calc(100 * var(--app-vh))', display: 'flex', width: width ?? undefined }}>
       {scene === 'home-sidebar' && (
-        // AppLayout's host for the two sidebars: 312px wide, the channel column's
-        // own `desktop:pl-[72px]` leaving room for the space strip, absent here.
-        <div className="flex w-[312px] flex-shrink-0">
+        // The channel list's width in AppLayout's left column; the space strip
+        // beside it is absent here.
+        <div className="flex w-[244px] flex-shrink-0">
           <ChannelSidebar />
         </div>
       )}

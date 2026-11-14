@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useFormatters } from '../../i18n/formatters';
 import { MAX_ZOOM, MIN_ZOOM, type StageZoomControls } from '../../hooks/useStageZoom';
 import { containedBox } from '../../utils/streamPointerProtocol';
+import { Icon } from '../ui/Icon';
 
 /** One press of + or −, and one arrow-key step of the slider. */
 const ZOOM_STEP = 0.25;
@@ -14,15 +15,10 @@ const MINIMAP_MIN_SIDE = 40;
 /** How often the minimap repaints its picture. It is a map, not a second player. */
 const MINIMAP_REPAINT_MS = 500;
 
-const BUTTON = 'h-7 flex items-center justify-center text-white/70 hover:text-white transition-colors';
-
-function MagnifierIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-    </svg>
-  );
-}
+// The bar sits on the picture, so its ground and text are the on-picture
+// dark glass and white, not surface tokens.
+const BUTTON = 'h-7 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-fast';
+const ON_PICTURE = 'bg-black/60 backdrop-blur-sm';
 
 /**
  * The zoom control of the focus bar. At 100 % it is one chip that says so, and
@@ -46,11 +42,11 @@ export function StageZoomBar({ zoom }: { zoom: StageZoomControls }) {
           e.stopPropagation();
           zoom.setScale(FIRST_ZOOM);
         }}
-        className={`${BUTTON} px-2.5 gap-1.5 bg-black/60 hover:bg-black/80 rounded-lg`}
+        className={`${BUTTON} ${ON_PICTURE} px-2.5 gap-1.5 hover:bg-black/80 rounded-lg`}
         aria-label={t('voice:grid.zoomIn')}
         title={t('voice:grid.zoomHint')}
       >
-        <MagnifierIcon />
+        <Icon name="zoom-in" size="sm" />
         <span className="text-xs font-medium tabular-nums">{percent}</span>
       </button>
     );
@@ -61,17 +57,16 @@ export function StageZoomBar({ zoom }: { zoom: StageZoomControls }) {
       data-testid="zoom-bar"
       data-no-pan
       onClick={stop}
-      className="h-7 flex items-center bg-black/60 rounded-lg pl-1 pr-0.5"
+      className={`h-7 flex items-center ${ON_PICTURE} rounded-lg pl-1 pr-0.5`}
     >
       <button
         type="button"
         onClick={() => zoom.setScale(scale - ZOOM_STEP)}
-        className={`${BUTTON} w-6 text-base leading-none`}
+        className={`${BUTTON} w-6 rounded hover:bg-white/10`}
         aria-label={t('voice:grid.zoomOut')}
         title={t('voice:grid.zoomOut')}
       >
-        {/* i18n-check: allow-literal a minus sign is the button's glyph in every language */}
-        −
+        <Icon name="minus" size="sm" />
       </button>
       <input
         type="range"
@@ -85,23 +80,22 @@ export function StageZoomBar({ zoom }: { zoom: StageZoomControls }) {
         onPointerDown={stop}
         aria-label={t('voice:grid.zoomLevel')}
         aria-valuetext={percent}
-        className="w-24 mx-1 h-1 accent-accent-primary cursor-pointer"
+        className="w-24 mx-1 h-1 accent-accent-tone cursor-pointer"
       />
       <button
         type="button"
         onClick={() => zoom.setScale(scale + ZOOM_STEP)}
-        className={`${BUTTON} w-6 text-base leading-none`}
+        className={`${BUTTON} w-6 rounded hover:bg-white/10`}
         aria-label={t('voice:grid.zoomIn')}
         title={t('voice:grid.zoomIn')}
       >
-        {/* i18n-check: allow-literal a plus sign is the button's glyph in every language */}
-        +
+        <Icon name="plus" size="sm" />
       </button>
       <button
         type="button"
         data-testid="zoom-reset"
         onClick={zoom.reset}
-        className={`${BUTTON} min-w-[3.25rem] px-1.5 rounded-md hover:bg-white/10 text-xs font-medium tabular-nums`}
+        className={`${BUTTON} min-w-[3.25rem] px-1.5 rounded hover:bg-white/10 text-xs font-medium tabular-nums`}
         aria-label={t('voice:grid.resetZoom')}
         title={t('voice:grid.resetZoom')}
       >
@@ -228,7 +222,7 @@ export function StageZoomMinimap({ zoom }: { zoom: StageZoomControls }) {
       aria-label={t('voice:grid.zoomMinimap')}
       title={t('voice:grid.zoomMinimap')}
       style={{ width, height }}
-      className="relative rounded-lg overflow-hidden bg-black ring-1 ring-white/20 shadow-lg cursor-crosshair touch-none"
+      className="relative rounded-lg overflow-hidden bg-black ring-1 ring-white/20 cursor-crosshair touch-none"
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => {
         e.stopPropagation();
@@ -240,7 +234,7 @@ export function StageZoomMinimap({ zoom }: { zoom: StageZoomControls }) {
       <canvas ref={canvasRef} width={width * 2} height={height * 2} className="block w-full h-full" />
       <div
         data-testid="zoom-minimap-frame"
-        className="absolute rounded-[3px] border-2 border-accent-primary pointer-events-none"
+        className="absolute rounded-sm border-2 border-accent-tone pointer-events-none"
         style={{
           left: `${frame.left * 100}%`,
           top: `${frame.top * 100}%`,

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Embed } from '@backspace/shared';
+import { Icon } from '../../ui/Icon';
 
 interface RichEmbedProps {
   embed: Embed;
@@ -31,7 +32,7 @@ export function RichEmbed({ embed }: RichEmbedProps) {
   if (!embed.embedUrl) return null;
 
   return (
-    <div className="mt-2 max-w-[400px] rounded-lg overflow-hidden bg-surface-channel border border-white/[0.06]">
+    <div className="mt-2 max-w-[400px] rounded-xl overflow-hidden bg-surface-elevated border border-border-soft">
       {isLoaded ? (
         <iframe
           src={embed.embedUrl}
@@ -56,31 +57,29 @@ export function RichEmbed({ embed }: RichEmbedProps) {
                 <img
                   src={embed.image}
                   alt=""
-                  className="w-full h-full object-cover rounded"
+                  className="w-full h-full object-cover rounded-lg"
                   referrerPolicy="no-referrer"
                 />
               </div>
             )}
             <div className="flex-1 min-w-0">
               {providerLabel && (
-                <div className="text-[12px] text-txt-tertiary font-medium mb-1">
+                <div className="text-xs text-txt-tertiary font-medium mb-1">
                   {providerLabel}
                 </div>
               )}
               {embed.title && (
-                <div className="text-[14px] text-sky-400 font-semibold group-hover:underline line-clamp-2">
+                <div className="text-sm text-txt-link font-semibold group-hover:underline line-clamp-2">
                   {embed.title}
                 </div>
               )}
               {embed.description && (
-                <div className="text-[13px] text-txt-secondary mt-1 line-clamp-2">
+                <div className="text-compact text-txt-secondary mt-1 line-clamp-2">
                   {embed.description}
                 </div>
               )}
-              <div className="text-[12px] text-txt-secondary group-hover:text-txt-primary transition-colors mt-2 flex items-center gap-1.5">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5" aria-hidden="true">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+              <div className="text-xs text-txt-secondary group-hover:text-txt-primary transition-colors duration-fast mt-2 flex items-center gap-1.5">
+                <Icon name="play" size="xs" />
                 {t('embed.loadAction')}
               </div>
             </div>

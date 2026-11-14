@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TelemetryPayload } from '@backspace/shared';
+import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { HiButton } from './answers/HiButton';
 import { SilenceButton } from './answers/SilenceButton';
@@ -21,18 +22,15 @@ interface HelloModalProps {
 type Stage = 'ask' | 'saving' | 'yes' | 'no';
 
 /**
- * The button that closes the ask once it has been answered. The two answers
- * themselves are HiButton and SilenceButton, each illustrated as its own
- * scene — a launch and a derelict. They share the row's height and flex basis
- * so the pair still lines up, and both keep a full-contrast label, a visible
- * focus ring and an unreduced hit area. Whatever a label says, it must name
- * the answer it gives: no button here may read as "carry on", because that
- * collects a yes from someone who never answered.
- */
-const CLOSE_BUTTON = 'w-full py-2.5 rounded-lg text-sm font-medium transition-colors bg-surface-elevated hover:bg-interactive-selected text-txt-primary';
-
-/**
- * The ask. The answer is saved before anything animates, so the
+ * The ask. Once it is answered a secondary `Button` closes it. The two
+ * answers themselves are HiButton and SilenceButton, each illustrated as its
+ * own scene — a launch and a derelict. They share the row's height and flex
+ * basis so the pair still lines up, and both keep a full-contrast label, a
+ * visible focus ring and an unreduced hit area. Whatever a label says, it must
+ * name the answer it gives: no button here may read as "carry on", because
+ * that collects a yes from someone who never answered.
+ *
+ * The answer is saved before anything animates, so the
  * scene only ever celebrates something that is already stored, and a failed
  * save leaves the admin on the ask with an explanation. Nothing closes on its
  * own: every state ends with the admin pressing something.
@@ -93,18 +91,18 @@ export function HelloModal({ open, onAnswer, onDismiss, preview, previewFailed =
             <>
               <h2 id={headingId} className="text-lg font-semibold text-txt-primary">{t('yes.title')}</h2>
               <p>{t('yes.body')}</p>
-              <button type="button" className={CLOSE_BUTTON} onClick={close}>
+              <Button variant="secondary" size="lg" fullWidth onClick={close}>
                 {t('yes.close')}
-              </button>
+              </Button>
             </>
           )}
           {stage === 'no' && (
             <>
               <h2 id={headingId} className="text-lg font-semibold text-txt-primary">{t('no.title')}</h2>
               <p>{t('no.body')}</p>
-              <button type="button" className={CLOSE_BUTTON} onClick={close}>
+              <Button variant="secondary" size="lg" fullWidth onClick={close}>
                 {t('no.close')}
-              </button>
+              </Button>
             </>
           )}
           {asking && (
@@ -115,7 +113,7 @@ export function HelloModal({ open, onAnswer, onDismiss, preview, previewFailed =
               <p className="text-txt-primary">{t('ask.previewLead')}</p>
               <PayloadPreview preview={preview} failed={previewFailed} />
               <p>{t('ask.p3')}</p>
-              {failed && <p role="alert" className="text-accent-rose">{t('ask.error')}</p>}
+              {failed && <p role="alert" className="text-status-danger">{t('ask.error')}</p>}
               <div className="flex gap-3">
                 <HiButton disabled={stage === 'saving'} onClick={() => { void answer(true); }}>
                   {t('ask.yes')}
@@ -129,7 +127,7 @@ export function HelloModal({ open, onAnswer, onDismiss, preview, previewFailed =
                 <button
                   type="button"
                   disabled={stage === 'saving'}
-                  className="underline hover:text-txt-secondary transition-colors disabled:opacity-50"
+                  className="underline hover:text-txt-secondary transition-colors duration-fast disabled:opacity-40"
                   onClick={close}
                 >
                   {t('ask.later')}

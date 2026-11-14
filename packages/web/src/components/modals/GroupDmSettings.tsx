@@ -4,6 +4,8 @@ import type { User } from '@backspace/shared';
 import { Modal } from '../ui/Modal';
 import { ImageCropModal } from '../ui/ImageCropModal';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { useUIStore } from '../../stores/uiStore';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { useSocialStore } from '../../stores/socialStore';
@@ -340,10 +342,10 @@ export function GroupDmSettings() {
 
   // ── Render helpers ─────────────────────────────────────────────────────
   const tabBtnClass = (t: Tab) =>
-    `w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+    `w-full text-left px-3 rounded-lg text-sm transition-colors duration-fast ${isMobile ? 'h-11' : 'h-[34px]'} ${
       tab === t
-        ? 'bg-interactive-selected text-txt-primary font-medium'
-        : 'text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover'
+        ? 'bg-surface-elevated text-txt-primary font-medium'
+        : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
     }`;
 
   const handleTabClick = (t: Tab) => {
@@ -356,7 +358,7 @@ export function GroupDmSettings() {
   // ── Overview panel ─────────────────────────────────────────────────────
   const overviewPanel = (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('dm:groupSettings.overview')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('dm:groupSettings.overview')}</h2>
 
       {/* Hero icon */}
       <div className="flex flex-col items-center gap-3">
@@ -382,12 +384,9 @@ export function GroupDmSettings() {
             {isOwner && (
               <div
                 data-group-dm-icon-overlay
-                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-medium"
+                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-2xs font-medium"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                <Icon name="camera" size="lg" />
                 <span className="mt-1">{t('dm:groupSettings.clickToUpload')}</span>
               </div>
             )}
@@ -400,11 +399,9 @@ export function GroupDmSettings() {
               onClick={handleClearIcon}
               data-group-dm-icon-clear
               aria-label={t('dm:groupSettings.removeIcon')}
-              className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-surface-elevated border border-border-hard flex items-center justify-center text-txt-tertiary hover:text-txt-danger hover:bg-accent-rose/10 transition-colors"
+              className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-surface-elevated shadow-[inset_0_0_0_1px_var(--glass-border)] flex items-center justify-center text-txt-tertiary hover:text-status-danger transition-colors duration-fast"
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-              </svg>
+              <Icon name="x" size="xs" />
             </button>
           )}
         </div>
@@ -422,7 +419,7 @@ export function GroupDmSettings() {
 
       {/* Group name */}
       <div>
-        <label className="block text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <label className="block text-xs font-medium text-txt-secondary mb-1.5">
           {t('dm:groupSettings.nameLabel')}
         </label>
         <input
@@ -437,14 +434,14 @@ export function GroupDmSettings() {
           aria-label={t('dm:groupSettings.nameAria')}
         />
         {isOwner && (
-          <div className="text-[11px] text-txt-tertiary text-right mt-1">
+          <div className="text-2xs text-txt-tertiary text-right tabular-nums mt-1">
             {t('dm:groupSettings.nameCount', { current: trimmedName.length, max: MAX_NAME_LENGTH })}
           </div>
         )}
       </div>
 
       {saveError && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">
+        <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
           {saveError}
         </div>
       )}
@@ -452,57 +449,35 @@ export function GroupDmSettings() {
       {/* Save / Cancel — owner only, only when dirty */}
       {isOwner && (
         <div className="flex items-center justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="px-3 py-1.5 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-            data-group-dm-cancel
-          >
+          <Button variant="ghost" onClick={handleCancel} data-group-dm-cancel>
             {t('common:actions.cancel')}
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!isDirty || saving}
-            className="px-4 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            data-group-dm-save
-          >
+          </Button>
+          <Button variant="primary" onClick={handleSave} disabled={!isDirty || saving} data-group-dm-save>
             {saving ? t('common:states.saving') : t('common:actions.save')}
-          </button>
+          </Button>
         </div>
       )}
 
       {/* For non-owners: a single Close button (no Save). */}
       {!isOwner && (
         <div className="flex items-center justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={closeModal}
-            className="px-4 py-1.5 bg-surface-elevated hover:bg-interactive-hover text-txt-primary text-sm font-medium rounded-full transition-colors"
-            data-group-dm-close
-          >
+          <Button variant="secondary" onClick={closeModal} data-group-dm-close>
             {t('common:actions.close')}
-          </button>
+          </Button>
         </div>
       )}
 
       {/* Leave Group — destructive footer button, everyone */}
-      <div className="pt-4 border-t border-border-soft">
-        <div className="text-[11px] font-semibold text-txt-danger uppercase tracking-wider mb-1.5">
+      <div className="pt-4 border-t border-border-hard">
+        <div className="text-xs font-medium text-status-danger mb-1.5">
           {t('dm:leave.title')}
         </div>
         <p className="text-xs text-txt-tertiary mb-3">
           {t('dm:leave.explanation')}
         </p>
-        <button
-          type="button"
-          onClick={handleLeaveClick}
-          disabled={leaving}
-          className="px-4 py-2 bg-accent-rose hover:bg-accent-rose/80 text-white text-sm font-medium rounded transition-colors disabled:opacity-50"
-          data-group-dm-leave
-        >
+        <Button variant="danger" icon="log-out" onClick={handleLeaveClick} disabled={leaving} data-group-dm-leave>
           {leaving ? t('dm:leave.inProgress') : t('dm:leave.title')}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -521,8 +496,8 @@ export function GroupDmSettings() {
   const membersPanel = (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-txt-primary">{t('common:labels.members')}</h2>
-        <span className="text-[12px] text-txt-tertiary">
+        <h2 className="text-xl font-semibold text-txt-primary">{t('common:labels.members')}</h2>
+        <span className="text-xs text-txt-tertiary tabular-nums">
           {t('dm:addMember.capacity', { current: memberCount, max: MAX_GROUP_MEMBERS })}
         </span>
       </div>
@@ -532,14 +507,12 @@ export function GroupDmSettings() {
         onClick={() => useUIStore.getState().openModal('addDmMember', { dmChannelId })}
         disabled={!canAddMembers}
         data-group-dm-add-member
-        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md bg-accent-mint/10 hover:bg-accent-mint/20 text-accent-mint text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-[34px] flex items-center gap-2.5 px-3 rounded-lg bg-accent-tone/[0.16] hover:bg-accent-tone/25 text-accent-tone text-sm font-medium transition-colors duration-fast disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <Icon name="user-plus" size="sm" />
         {t('dm:groupSettings.addMember')}
         {!canAddMembers && (
-          <span className="ml-auto text-[11px] text-txt-tertiary">{t('dm:groupSettings.groupFull')}</span>
+          <span className="ml-auto text-2xs text-txt-tertiary">{t('dm:groupSettings.groupFull')}</span>
         )}
       </button>
 
@@ -577,9 +550,9 @@ export function GroupDmSettings() {
     <Modal isOpen={isOpen} onClose={closeModal} size="settings" mobileStyle="fullscreen">
       <div className="flex h-full">
         {/* Desktop sidebar */}
-        <div className="hidden desktop:flex w-52 flex-shrink-0 flex-col p-4 gap-3">
+        <div className="hidden desktop:flex w-56 flex-shrink-0 flex-col p-4 gap-3 border-r border-border-hard">
           {/* Channel card */}
-          <div className="glass-bubble rounded-lg p-3 flex items-center gap-3">
+          <div className="rounded-xl bg-surface-elevated p-3 flex items-center gap-3">
             <AvatarStack
               members={otherMembers}
               origin={viewer.origin}
@@ -593,8 +566,8 @@ export function GroupDmSettings() {
           </div>
 
           {/* Nav list */}
-          <div className="glass-bubble rounded-lg p-2 flex-1 flex flex-col">
-            <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-3 py-1">
+          <div className="flex-1 flex flex-col space-y-0.5">
+            <div className="text-xs font-medium text-txt-tertiary px-3 py-1">
               {t('dm:groupSettings.general')}
             </div>
             <button type="button" onClick={() => handleTabClick('overview')} className={tabBtnClass('overview')}>
@@ -609,7 +582,7 @@ export function GroupDmSettings() {
         {/* Mobile: tab list */}
         {isMobile && mobileView === 'tabs' && (
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            <div className="glass-bubble rounded-lg p-3 flex items-center gap-3">
+            <div className="rounded-xl bg-surface-elevated p-3 flex items-center gap-3">
               <AvatarStack
                 members={otherMembers}
                 origin={viewer.origin}
@@ -622,8 +595,8 @@ export function GroupDmSettings() {
               </div>
             </div>
 
-            <div className="glass-bubble rounded-lg p-2 space-y-0.5">
-              <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-3 py-1">
+            <div className="space-y-0.5">
+              <div className="text-xs font-medium text-txt-tertiary px-3 py-1">
                 {t('dm:groupSettings.general')}
               </div>
               <button type="button" onClick={() => handleTabClick('overview')} className={tabBtnClass('overview')}>
@@ -644,12 +617,10 @@ export function GroupDmSettings() {
                 <button
                   type="button"
                   onClick={() => setMobileView('tabs')}
-                  className="flex items-center gap-1.5 text-txt-tertiary hover:text-txt-secondary mb-4 text-sm"
+                  className="flex items-center gap-1.5 min-h-11 text-txt-secondary hover:text-txt-primary mb-2 text-sm transition-colors duration-fast"
                   aria-label={t('dm:groupSettings.backToMenu')}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-                  </svg>
+                  <Icon name="arrow-left" size="sm" />
                   {t('dm:groupSettings.title')}
                 </button>
               )}

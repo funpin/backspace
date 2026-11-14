@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useFormatters } from '../../../i18n/formatters';
 import { describeError } from '../../../i18n/errors';
 import { Avatar } from '../../ui/Avatar';
+import { Button } from '../../ui/Button';
 import { useSpaceStore, getApiForOrigin } from '../../../stores/spaceStore';
 
 interface Ban {
@@ -65,9 +66,9 @@ export function BansPanel({ spaceId }: BansPanelProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('spaces:bans.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('spaces:bans.title')}</h2>
       {error && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{error}</div>
+        <div className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger">{error}</div>
       )}
 
       <p className="text-xs text-txt-tertiary">{t('spaces:bans.description')}</p>
@@ -76,10 +77,10 @@ export function BansPanel({ spaceId }: BansPanelProps) {
         <div className="text-center py-8 text-txt-tertiary text-sm">{t('spaces:bans.empty')}</div>
       ) : (
         <div>
-          <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+          <div className="text-xs font-medium text-txt-secondary mb-1.5">
             {t('spaces:bans.listHeading', { total: f.formatNumber(bans.length) })}
           </div>
-          <div className="rounded-lg bg-white/[0.02] p-2">
+          <div className="rounded-xl bg-surface-elevated p-1.5">
             <div className="space-y-0.5">
               {bans.map((ban) => {
                 const displayName = ban.user?.displayName ?? ban.user?.username ?? ban.userId;
@@ -87,7 +88,7 @@ export function BansPanel({ spaceId }: BansPanelProps) {
                 const bannedDate = f.formatNumericDate(ban.createdAt);
 
                 return (
-                  <div key={ban.userId} className="flex items-center justify-between p-2 rounded hover:bg-interactive-hover transition-colors">
+                  <div key={ban.userId} className="flex items-center justify-between gap-3 min-h-11 px-2 py-1.5 rounded-lg hover:bg-interactive-hover transition-colors duration-fast">
                     <div className="flex items-center gap-2 min-w-0">
                       <Avatar
                         src={ban.user?.avatar ?? null}
@@ -96,20 +97,17 @@ export function BansPanel({ spaceId }: BansPanelProps) {
                         userId={ban.userId}
                       />
                       <div className="min-w-0">
-                        <div className="text-sm font-medium truncate">{displayName}</div>
-                        <div className="text-[11px] text-txt-tertiary truncate">
+                        <div className="text-sm font-medium text-txt-primary truncate">{displayName}</div>
+                        <div className="text-2xs text-txt-tertiary truncate">
                           {ban.reason
                             ? t('spaces:bans.bannedByWithReason', { moderator: moderatorName, date: bannedDate, reason: ban.reason })
                             : t('spaces:bans.bannedBy', { moderator: moderatorName, date: bannedDate })}
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleUnban(ban.userId)}
-                      className="px-2 py-1 text-xs text-txt-secondary hover:text-txt-primary hover:bg-surface-base rounded transition-colors flex-shrink-0"
-                    >
+                    <Button variant="secondary" size="sm" onClick={() => handleUnban(ban.userId)} className="flex-shrink-0">
                       {t('spaces:bans.unban')}
-                    </button>
+                    </Button>
                   </div>
                 );
               })}

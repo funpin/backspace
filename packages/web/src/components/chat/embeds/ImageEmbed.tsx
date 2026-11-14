@@ -14,13 +14,13 @@ export function ImageEmbed({ embed }: ImageEmbedProps) {
   return (
     <div className="mt-2 max-w-fit">
       <div
-        className="relative rounded-lg overflow-hidden"
+        className="relative rounded-xl overflow-hidden after:pointer-events-none after:absolute after:inset-0 after:rounded-xl after:shadow-[inset_0_0_0_1px_var(--glass-border)]"
         style={width && height ? { aspectRatio: `${width}/${height}`, maxWidth: Math.min(width, 400), maxHeight: 300 } : undefined}
       >
         <img
           src={imageUrl}
           alt={embed.title ?? ''}
-          className="w-full h-full max-w-[400px] max-h-[300px] object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+          className="w-full h-full max-w-[400px] max-h-[300px] object-contain rounded-xl cursor-pointer hover:opacity-90 transition-opacity duration-fast"
           loading="lazy"
           referrerPolicy="no-referrer"
           onClick={() => openImagePreview(imageUrl)}

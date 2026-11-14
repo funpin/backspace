@@ -8,6 +8,8 @@ import { useSpaceStore } from '../../stores/spaceStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { Avatar } from '../ui/Avatar';
 import { Toggle } from '../ui/Toggle';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { api } from '../../api/client';
 import { getApiForOrigin } from '../../utils/crossStoreResolvers';
 import { hasPermissionBit, PermissionBits } from '../../utils/permissions';
@@ -341,25 +343,25 @@ export function DiscoveryPanel({ spaceId }: { spaceId: string }) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('spaces:settings.discovery.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('spaces:settings.discovery.title')}</h2>
       {!flagsUnknown && !discoveryEnabled && (
-        <div className="p-2.5 bg-accent-amber/10 border border-accent-amber/30 rounded text-[13px] text-accent-amber">
+        <div className="px-3 py-2.5 rounded-lg bg-status-warn/10 text-compact text-status-warn">
           {t('spaces:settings.discovery.disabledNotice')}
         </div>
       )}
 
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('spaces:settings.discovery.visibility.label')}</div>
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('spaces:settings.discovery.visibility.label')}</div>
         <p className="text-xs text-txt-tertiary mb-2">{t('spaces:settings.discovery.visibility.hint')}</p>
-        <div className="rounded-lg bg-white/[0.02] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <div className="space-y-1.5">
             {visibilityOptions.map((opt) => (
               <label
                 key={opt.value}
-                className={`flex items-start gap-3 p-2.5 rounded cursor-pointer transition-colors ${
+                className={`flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-colors duration-fast ${
                   visibility === opt.value
-                    ? 'bg-interactive-selected'
-                    : 'hover:bg-interactive-hover'
+                    ? 'bg-accent-tone/[0.16] shadow-[inset_0_0_0_1.5px_rgb(var(--accent-tone))]'
+                    : 'shadow-[inset_0_0_0_1px_var(--glass-border)] hover:bg-interactive-hover'
                 }`}
               >
                 <input
@@ -368,7 +370,7 @@ export function DiscoveryPanel({ spaceId }: { spaceId: string }) {
                   value={opt.value}
                   checked={visibility === opt.value}
                   onChange={() => chooseVisibility(opt.value)}
-                  className="mt-0.5 accent-accent-primary"
+                  className="mt-0.5 accent-accent-tone"
                 />
                 <div>
                   <div className="text-sm font-medium text-txt-primary">{opt.label}</div>
@@ -381,8 +383,8 @@ export function DiscoveryPanel({ spaceId }: { spaceId: string }) {
       </div>
 
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('spaces:explore.outer.title')}</div>
-        <div className="rounded-lg bg-white/[0.02] p-3.5 space-y-2.5">
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('spaces:explore.outer.title')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5 space-y-2.5">
           <label className={`flex items-center justify-between gap-4 ${directoryLocked ? 'cursor-default' : 'cursor-pointer'}`}>
             <div>
               <div className="text-sm font-medium text-txt-primary">{t('spaces:settings.discovery.directory.label')}</div>
@@ -403,14 +405,14 @@ export function DiscoveryPanel({ spaceId }: { spaceId: string }) {
                   type="button"
                   onClick={() => setConfirmingRung(true)}
                   disabled={rungPending}
-                  className="text-xs font-medium text-accent-primary hover:text-accent-primary/80 transition-colors disabled:text-txt-tertiary disabled:cursor-default"
+                  className="text-xs font-medium text-accent-tone hover:underline underline-offset-2 transition-colors disabled:text-txt-tertiary disabled:no-underline disabled:cursor-default"
                 >
                   {t('spaces:settings.discovery.directory.adminOffSelfAction')}
                 </button>
               )}
             </div>
           )}
-          {rungError && <p className="text-xs text-txt-danger">{rungError}</p>}
+          {rungError && <p className="text-xs text-status-danger">{rungError}</p>}
           {rungActionOffered && (
             <ListInDirectoryConfirm
               isOpen={confirmingRung}
@@ -425,7 +427,7 @@ export function DiscoveryPanel({ spaceId }: { spaceId: string }) {
             // is the one line that says why and the only way back: the same
             // treatment the Streaming panel gives its own failed load, at the
             // scale of a reason under a switch.
-            <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs flex flex-wrap items-center gap-2.5">
+            <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger flex flex-wrap items-center gap-2.5">
               <span>{t('common:states.loadSettingsFailed')}</span>
               <button
                 type="button"
@@ -442,9 +444,9 @@ export function DiscoveryPanel({ spaceId }: { spaceId: string }) {
       </div>
 
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('spaces:settings.discovery.description.label')}</div>
+        <div className="text-xs font-medium text-txt-secondary mb-1.5">{t('spaces:settings.discovery.description.label')}</div>
         <p className="text-xs text-txt-tertiary mb-2">{t('spaces:settings.discovery.description.hint')}</p>
-        <div className="rounded-lg bg-white/[0.02] p-3.5">
+        <div className="rounded-xl bg-surface-elevated p-3.5">
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value.slice(0, DESCRIPTION_MAX_LENGTH))}
@@ -452,14 +454,14 @@ export function DiscoveryPanel({ spaceId }: { spaceId: string }) {
             rows={3}
             className="input-standard w-full resize-none"
           />
-          <div className="text-[11px] text-txt-tertiary text-right">
+          <div className="mt-1 text-2xs text-txt-tertiary text-right tabular-nums">
             {t('spaces:settings.discovery.description.counter', { length: description.length, max: DESCRIPTION_MAX_LENGTH })}
           </div>
         </div>
       </div>
 
       {saveError && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{saveError}</div>
+        <div className="px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">{saveError}</div>
       )}
       {/* Pending Join Requests — only shown when visibility is 'request' */}
       {(visibility === 'request' || (space.visibility as SpaceVisibility) === 'request') && (
@@ -469,20 +471,13 @@ export function DiscoveryPanel({ spaceId }: { spaceId: string }) {
       {hasChanges && (
         <div className="sticky bottom-0 z-10 pointer-events-none">
           <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 animate-slide-up pointer-events-auto">
-              <button
-                onClick={handleReset}
-                className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-              >
+            <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 animate-slide-up pointer-events-auto">
+              <Button variant="ghost" size="sm" onClick={handleReset}>
                 {t('common:actions.reset')}
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
-              >
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
                 {saving ? t('common:states.saving') : t('common:actions.save')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -525,13 +520,13 @@ function JoinRequestsSection({ spaceId }: { spaceId: string }) {
   };
 
   return (
-    <div className="pt-4 border-t border-border-soft">
-      <div className="text-[11px] text-txt-tertiary font-semibold uppercase tracking-wider mb-2">
+    <div className="pt-4 border-t border-border-hard">
+      <div className="text-xs font-medium text-txt-secondary mb-2">
         {t('spaces:settings.discovery.requests.title')}
       </div>
 
       {actionError && (
-        <div className="mb-2 p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs">
+        <div className="mb-2 px-3 py-2 rounded-lg bg-status-danger/10 text-xs text-status-danger">
           {actionError}
         </div>
       )}
@@ -547,7 +542,7 @@ function JoinRequestsSection({ spaceId }: { spaceId: string }) {
             const displayName = user?.displayName ?? user?.username ?? t('common:states.unknown');
 
             return (
-              <div key={req.id} className="flex items-start gap-3 p-2.5 rounded bg-surface-base">
+              <div key={req.id} className="flex items-start gap-3 p-2.5 rounded-xl bg-surface-elevated">
                 <Avatar
                   src={user?.avatar}
                   name={displayName}
@@ -564,29 +559,17 @@ function JoinRequestsSection({ spaceId }: { spaceId: string }) {
                   {req.message && (
                     <p className="text-xs text-txt-secondary mt-0.5 line-clamp-2">{req.message}</p>
                   )}
-                  <span className="text-[10px] text-txt-tertiary">
+                  <span className="text-2xs text-txt-tertiary">
                     {f.formatNumericDate(req.createdAt)}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <button
-                    onClick={() => handleDecide(req.id, 'accept')}
-                    className="p-1.5 rounded text-status-online hover:bg-status-online/20 transition-colors"
-                    title={t('common:actions.accept')}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => handleDecide(req.id, 'decline')}
-                    className="p-1.5 rounded text-txt-danger hover:bg-accent-rose/20 transition-colors"
-                    title={t('common:actions.decline')}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                    </svg>
-                  </button>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <Button variant="ghost" size="sm" onClick={() => handleDecide(req.id, 'decline')}>
+                    {t('common:actions.decline')}
+                  </Button>
+                  <Button variant="primary" size="sm" onClick={() => handleDecide(req.id, 'accept')}>
+                    {t('common:actions.accept')}
+                  </Button>
                 </div>
               </div>
             );
@@ -649,9 +632,10 @@ export function SpaceSettingsModal() {
 
   if (!space || !currentSpaceId) return null;
 
+  // 34px rows on the desktop column; the phone list keeps 44px touch targets.
   const tabClass = (target: typeof tab) =>
-    `w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-      tab === target ? 'bg-interactive-selected text-txt-primary font-medium' : 'text-txt-tertiary hover:text-txt-secondary hover:bg-interactive-hover'
+    `w-full text-left px-3 rounded-lg text-sm transition-colors duration-fast ${isMobile ? 'h-11' : 'h-[34px]'} ${
+      tab === target ? 'bg-surface-elevated text-txt-primary font-medium' : 'text-txt-secondary hover:text-txt-primary hover:bg-interactive-hover'
     }`;
 
   const handleTabClick = (target: typeof tab) => {
@@ -663,9 +647,9 @@ export function SpaceSettingsModal() {
     <Modal isOpen={isOpen} onClose={closeModal} size="settings" mobileStyle="fullscreen">
       <div className="flex h-full">
         {/* Desktop Sidebar */}
-        <div className="hidden desktop:flex w-52 flex-shrink-0 flex-col p-4 gap-3">
+        <div className="hidden desktop:flex w-56 flex-shrink-0 flex-col p-4 gap-3 border-r border-border-hard">
           {/* Space card */}
-          <div className="glass-bubble rounded-lg p-3 flex items-center gap-3">
+          <div className="rounded-xl bg-surface-elevated p-3 flex items-center gap-3">
             <Avatar
               src={space.icon}
               name={space.name}
@@ -680,15 +664,15 @@ export function SpaceSettingsModal() {
           </div>
 
           {/* Nav list */}
-          <div className="glass-bubble rounded-lg p-2 flex-1 flex flex-col">
-            <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-3 py-1">{t('spaces:settings.nav.general')}</div>
+          <div className="flex-1 flex flex-col space-y-0.5">
+            <div className="text-xs font-medium text-txt-tertiary px-3 py-1">{t('spaces:settings.nav.general')}</div>
             <button onClick={() => handleTabClick('overview')} className={tabClass('overview')}>{t('spaces:settings.nav.tabs.overview')}</button>
             {canManageSpace && (
               <button onClick={() => handleTabClick('discovery')} className={tabClass('discovery')}>{t('spaces:settings.nav.tabs.discovery')}</button>
             )}
 
-            <div className="border-t border-white/[0.04] my-2 mx-2" />
-            <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-3 py-1">{t('spaces:settings.nav.management')}</div>
+            <div className="border-t border-border-hard my-2 mx-2" />
+            <div className="text-xs font-medium text-txt-tertiary px-3 py-1">{t('spaces:settings.nav.management')}</div>
             <button onClick={() => handleTabClick('members')} className={tabClass('members')}>{t('common:labels.members')}</button>
             {canManageRoles && (
               <button onClick={() => handleTabClick('roles')} className={tabClass('roles')}>{t('spaces:settings.nav.tabs.roles')}</button>
@@ -703,7 +687,7 @@ export function SpaceSettingsModal() {
         {isMobile && mobileView === 'tabs' && (
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {/* Mobile space card */}
-            <div className="glass-bubble rounded-lg p-3 flex items-center gap-3">
+            <div className="rounded-xl bg-surface-elevated p-3 flex items-center gap-3">
               <Avatar
                 src={space.icon}
                 name={space.name}
@@ -717,15 +701,15 @@ export function SpaceSettingsModal() {
               </div>
             </div>
 
-            <div className="glass-bubble rounded-lg p-2 space-y-0.5">
-              <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-3 py-1">{t('spaces:settings.nav.general')}</div>
+            <div className="space-y-0.5">
+              <div className="text-xs font-medium text-txt-tertiary px-3 py-1">{t('spaces:settings.nav.general')}</div>
               <button onClick={() => handleTabClick('overview')} className={tabClass('overview')}>{t('spaces:settings.nav.tabs.overview')}</button>
               {canManageSpace && (
                 <button onClick={() => handleTabClick('discovery')} className={tabClass('discovery')}>{t('spaces:settings.nav.tabs.discovery')}</button>
               )}
 
-              <div className="border-t border-white/[0.04] my-2 mx-2" />
-              <div className="text-[10px] font-semibold text-txt-tertiary uppercase tracking-wider px-3 py-1">{t('spaces:settings.nav.management')}</div>
+              <div className="border-t border-border-hard my-2 mx-2" />
+              <div className="text-xs font-medium text-txt-tertiary px-3 py-1">{t('spaces:settings.nav.management')}</div>
               <button onClick={() => handleTabClick('members')} className={tabClass('members')}>{t('common:labels.members')}</button>
               {canManageRoles && (
                 <button onClick={() => handleTabClick('roles')} className={tabClass('roles')}>{t('spaces:settings.nav.tabs.roles')}</button>
@@ -745,12 +729,10 @@ export function SpaceSettingsModal() {
               {isMobile && (
                 <button
                   onClick={() => setMobileView('tabs')}
-                  className="flex items-center gap-1.5 text-txt-tertiary hover:text-txt-secondary mb-4 text-sm"
+                  className="flex items-center gap-1.5 min-h-11 text-txt-secondary hover:text-txt-primary mb-2 text-sm transition-colors duration-fast"
                   aria-label={t('spaces:settings.backAria')}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-                  </svg>
+                  <Icon name="arrow-left" size="sm" />
                   {t('spaces:settings.title')}
                 </button>
               )}

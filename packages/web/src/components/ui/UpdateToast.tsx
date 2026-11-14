@@ -7,6 +7,9 @@ import {
   statusVersion,
 } from '../../stores/updateStore';
 import { useUIStore } from '../../stores/uiStore';
+import { Button } from './Button';
+import { Icon } from './Icon';
+import { IconButton } from './IconButton';
 
 /**
  * The persistent update prompt.
@@ -65,24 +68,16 @@ export function UpdateToast() {
   }
 
   return (
-    <div className="fixed bottom-6 left-6 z-[300] animate-slide-up max-w-[calc(calc(100*var(--app-vw))-3rem)]">
-      <div className="glass-bubble rounded-2xl p-4 w-[380px] max-w-full">
+    <div className="fixed bottom-6 left-6 z-toast animate-slide-up max-w-[calc(calc(100*var(--app-vw))-3rem)]">
+      <div className="glass-bubble rounded-lg p-4 w-[380px] max-w-full">
         <div className="flex items-start gap-3">
           <div
             className={`shrink-0 mt-0.5 w-8 h-8 rounded-full flex items-center justify-center ${
-              failed ? 'bg-accent-rose/15 text-accent-rose' : 'bg-accent-primary/15 text-accent-primary'
+              failed ? 'bg-status-danger/[0.14] text-status-danger' : 'bg-accent-tone/[0.16] text-accent-tone'
             }`}
             aria-hidden="true"
           >
-            {failed ? (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16" />
-              </svg>
-            )}
+            <Icon name={failed ? 'triangle-alert' : 'download'} size="sm" />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -92,39 +87,28 @@ export function UpdateToast() {
             <p className="text-xs text-txt-secondary mt-1 leading-relaxed">{body}</p>
           </div>
 
-          <button
+          <IconButton
+            icon="x"
+            size="sm"
+            label={t('desktop:update.dismiss')}
             onClick={handleLater}
-            className="shrink-0 -mt-1 -mr-1 p-1.5 rounded-lg text-txt-tertiary hover:text-txt-secondary hover:bg-white/[0.06] transition-colors"
-            aria-label={t('desktop:update.dismiss')}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-            </svg>
-          </button>
+            className="-mt-1 -mr-1"
+          />
         </div>
 
         <div className="flex items-center gap-2 mt-3.5 pl-11">
           {canRestart ? (
-            <button
-              onClick={install}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent-primary hover:bg-accent-primary/80 text-white transition-colors"
-            >
+            <Button variant="primary" size="sm" onClick={install}>
               {t('desktop:update.restartNow')}
-            </button>
+            </Button>
           ) : (
-            <button
-              onClick={openDownloadPage}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent-primary hover:bg-accent-primary/80 text-white transition-colors"
-            >
+            <Button variant="primary" size="sm" onClick={openDownloadPage}>
               {t('desktop:update.download')}
-            </button>
+            </Button>
           )}
-          <button
-            onClick={handleLater}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg text-txt-secondary hover:text-txt-primary hover:bg-white/[0.06] transition-colors"
-          >
+          <Button variant="ghost" size="sm" onClick={handleLater}>
             {t('desktop:update.later')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

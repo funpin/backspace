@@ -5,6 +5,9 @@ import { useUIStore } from '../../../stores/uiStore';
 import { useInstanceStore } from '../../../stores/instanceStore';
 import { useSpaceStore } from '../../../stores/spaceStore';
 import { Avatar } from '../../ui/Avatar';
+import { Button } from '../../ui/Button';
+import { IconButton } from '../../ui/IconButton';
+import { Icon } from '../../ui/Icon';
 import { ImageCropModal } from '../../ui/ImageCropModal';
 import { DeleteAccountModal } from '../DeleteAccountModal';
 import { api } from '../../../api/client';
@@ -17,6 +20,35 @@ import type { User, ChosenUserStatus, AvatarColor } from '@backspace/shared';
 import { describeError } from '../../../i18n/errors';
 
 const BIO_MAX_LENGTH = 190;
+
+/** A section heading above a raised group (AccentThemeSection is the model). */
+const SECTION_LABEL = 'text-xs font-medium text-txt-secondary mb-1.5';
+/** The label of one field inside a group. */
+const FIELD_LABEL = 'block text-xs font-medium text-txt-secondary mb-1.5';
+/** A quiet inline action under a picture (change, remove). */
+const TEXT_ACTION = 'text-xs font-medium text-accent-tone hover:underline text-left disabled:opacity-40';
+const TEXT_ACTION_DANGER = 'text-xs font-medium text-status-danger hover:underline text-left';
+
+/**
+ * A colour swatch. The chosen one carries the accent edge, separated from the
+ * swatch by a ring of the group's own ground so it reads on any colour.
+ */
+function swatchClass(selected: boolean): string {
+  return [
+    'transition-[transform,box-shadow] duration-fast ease-out hover:scale-110',
+    selected ? 'shadow-[0_0_0_2px_rgb(var(--bg-elevated)),0_0_0_3.5px_rgb(var(--accent-tone))]' : '',
+  ].join(' ');
+}
+
+/** Shown over an avatar or banner while its upload runs. */
+function UploadSpinner() {
+  return (
+    <svg className="animate-spin w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  );
+}
 
 export function AccountPanel() {
   const { t } = useTranslation(['settings', 'common']);
@@ -313,42 +345,44 @@ export function AccountPanel() {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-txt-primary mb-6">{t('settings:account.title')}</h2>
+      <h2 className="text-xl font-semibold text-txt-primary mb-6">{t('settings:account.title')}</h2>
       {formerHome && (
-        <div className="rounded-lg bg-accent-amber/10 border border-accent-amber/25 px-3.5 py-3 text-xs text-txt-secondary leading-relaxed mb-4">
+        <div className="rounded-xl bg-status-warn/10 border border-status-warn/20 px-3.5 py-3 text-xs text-txt-secondary leading-relaxed mb-4">
           <span className="font-medium text-txt-primary">{t('settings:account.detached.notice')}</span>{' '}
           {t('settings:account.detached.explanation', { homeInstance: formerHome })}
           {homeConnection && (
             <>
               {' '}{t('settings:account.detached.reattachHint', { username: homeConnection.username, homeInstance: formerHome })}
-              <button
-                type="button"
-                onClick={handleReattach}
-                disabled={reattaching}
-                className="mt-2 block rounded-md bg-accent-amber/20 hover:bg-accent-amber/30 disabled:opacity-50 text-txt-primary px-3 py-1.5 text-xs font-medium transition-colors"
-              >
-                {reattaching
-                  ? t('settings:account.detached.reattaching')
-                  : reattachArmed
-                    ? t('settings:account.detached.reattachConfirm', { username: homeConnection.username })
-                    : t('settings:account.detached.reattachButton', { homeInstance: formerHome })}
-              </button>
-              {reattachError && <div className="mt-1.5 text-accent-rose">{reattachError}</div>}
+              <div className="mt-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleReattach}
+                  disabled={reattaching}
+                >
+                  {reattaching
+                    ? t('settings:account.detached.reattaching')
+                    : reattachArmed
+                      ? t('settings:account.detached.reattachConfirm', { username: homeConnection.username })
+                      : t('settings:account.detached.reattachButton', { homeInstance: formerHome })}
+                </Button>
+              </div>
+              {reattachError && <div className="mt-1.5 text-status-danger">{reattachError}</div>}
             </>
           )}
         </div>
       )}
       {/* ── Profile Customization ── */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">
+        <div className={SECTION_LABEL}>
           {t('settings:account.profile.sectionTitle')}
         </div>
 
         {/* Live Preview Card */}
-        <div className="rounded-lg overflow-hidden border border-white/[0.06] mb-4 bg-surface-channel">
+        <div className="rounded-xl overflow-hidden shadow-[inset_0_0_0_1px_var(--glass-border)] mb-4 bg-surface-channel">
           {/* Banner area */}
           <div
-            className="h-[80px]"
+            className="h-20"
             style={displayBannerSrc
               ? { backgroundImage: `url(${displayBannerSrc})`, backgroundSize: 'cover', backgroundPosition: 'center' }
               : { background: bannerFallback }
@@ -362,17 +396,15 @@ export function AccountPanel() {
               size={56}
               userId={user.homeUserId ?? user.id}
               user={{ ...user, avatarColor: effectiveAvatarColor } as User}
-              ring={{ width: 4, color: 'var(--color-surface-channel, #1e1e2a)' }}
-              className="mt-[-32px] mb-2"
+              ring={{ width: 4, color: 'rgb(var(--bg-channel))' }}
+              className="-mt-8 mb-2"
             />
-            <div
-              className="font-semibold text-[15px] leading-tight text-txt-primary"
-            >
+            <div className="font-semibold text-sm leading-tight text-txt-primary">
               {effectiveDisplayName}
             </div>
-            <div className="text-[12px] text-txt-tertiary">@{user.username}</div>
+            <div className="text-xs text-txt-tertiary">@{user.username}</div>
             {bio.trim() && (
-              <div className="text-[12px] text-txt-secondary mt-1.5 whitespace-pre-wrap break-words line-clamp-3">
+              <div className="text-xs text-txt-secondary mt-1.5 whitespace-pre-wrap break-words line-clamp-3">
                 {bio.trim()}
               </div>
             )}
@@ -380,10 +412,10 @@ export function AccountPanel() {
         </div>
 
         {/* Upload controls */}
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5 space-y-4">
+        <div className="rounded-xl bg-surface-elevated p-3.5 space-y-4">
           {/* Avatar upload */}
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.profile.avatar.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.profile.avatar.label')}</label>
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -391,7 +423,7 @@ export function AccountPanel() {
                 disabled={uploadingAvatar}
                 className="relative group"
               >
-                <div className="w-[64px] h-[64px] rounded-full overflow-hidden">
+                <div className="w-16 h-16 rounded-full overflow-hidden">
                   {displayAvatarSrc ? (
                     <img src={displayAvatarSrc} alt={t('settings:account.profile.avatar.alt')} className="w-full h-full object-cover" />
                   ) : (
@@ -404,18 +436,12 @@ export function AccountPanel() {
                     />
                   )}
                 </div>
-                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
+                  <Icon name="camera" size="lg" />
                 </div>
                 {uploadingAvatar && (
                   <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center">
-                    <svg className="animate-spin w-5 h-5 text-white" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
+                    <UploadSpinner />
                   </div>
                 )}
               </button>
@@ -424,7 +450,7 @@ export function AccountPanel() {
                   type="button"
                   onClick={() => avatarInputRef.current?.click()}
                   disabled={uploadingAvatar}
-                  className="text-xs text-accent-primary hover:underline text-left"
+                  className={TEXT_ACTION}
                 >
                   {t('settings:account.profile.avatar.change')}
                 </button>
@@ -432,7 +458,7 @@ export function AccountPanel() {
                   <button
                     type="button"
                     onClick={handleRemoveAvatar}
-                    className="text-xs text-txt-danger hover:underline text-left"
+                    className={TEXT_ACTION_DANGER}
                   >
                     {t('common:actions.remove')}
                   </button>
@@ -450,12 +476,12 @@ export function AccountPanel() {
 
           {/* Banner upload */}
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.profile.banner.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.profile.banner.label')}</label>
             <button
               type="button"
               onClick={() => bannerInputRef.current?.click()}
               disabled={uploadingBanner}
-              className="relative group w-full h-[72px] rounded-lg overflow-hidden border border-white/[0.06]"
+              className="relative group w-full h-[72px] rounded-lg overflow-hidden border border-border-soft"
             >
               <div
                 className="w-full h-full"
@@ -468,18 +494,12 @@ export function AccountPanel() {
                     ) }
                 }
               />
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
+                <Icon name="camera" size="lg" />
               </div>
               {uploadingBanner && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <svg className="animate-spin w-5 h-5 text-white" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
+                  <UploadSpinner />
                 </div>
               )}
             </button>
@@ -488,7 +508,7 @@ export function AccountPanel() {
                 type="button"
                 onClick={() => bannerInputRef.current?.click()}
                 disabled={uploadingBanner}
-                className="text-xs text-accent-primary hover:underline"
+                className={TEXT_ACTION}
               >
                 {t('settings:account.profile.banner.change')}
               </button>
@@ -496,7 +516,7 @@ export function AccountPanel() {
                 <button
                   type="button"
                   onClick={handleRemoveBanner}
-                  className="text-xs text-txt-danger hover:underline"
+                  className={TEXT_ACTION_DANGER}
                 >
                   {t('common:actions.remove')}
                 </button>
@@ -513,7 +533,7 @@ export function AccountPanel() {
 
           {/* Avatar Color */}
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.profile.avatarColor.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.profile.avatarColor.label')}</label>
             <div className="flex gap-2">
               {AVATAR_COLORS.map((key) => {
                 const entry = AVATAR_GRADIENT_MAP[key];
@@ -522,12 +542,8 @@ export function AccountPanel() {
                     key={key}
                     type="button"
                     onClick={() => setAvatarColorState(key)}
-                    className="w-7 h-7 rounded-full border-2 transition-all hover:scale-110"
-                    style={{
-                      background: entry.gradient,
-                      borderColor: avatarColorState === key ? 'white' : 'transparent',
-                      boxShadow: avatarColorState === key ? `0 0 0 2px ${entry.glow}40` : 'none',
-                    }}
+                    className={`w-7 h-7 rounded-full ${swatchClass(avatarColorState === key)}`}
+                    style={{ background: entry.gradient }}
                     title={t(`common:colors.${key}`)}
                     aria-label={t(`common:colors.${key}`)}
                   />
@@ -538,7 +554,7 @@ export function AccountPanel() {
 
           {/* Banner Color */}
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.profile.bannerColor.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.profile.bannerColor.label')}</label>
             <div className="grid grid-cols-7 gap-1.5 mb-2">
               {[0, 1, 2].map((row) =>
                 BANNER_COLOR_PRESETS.map((family) => {
@@ -548,12 +564,8 @@ export function AccountPanel() {
                       key={color}
                       type="button"
                       onClick={() => { setAccentColor(color); setCustomHex(color); }}
-                      className="w-7 h-7 rounded-full border-2 transition-all hover:scale-110"
-                      style={{
-                        backgroundColor: color,
-                        borderColor: accentColor === color ? 'white' : 'transparent',
-                        boxShadow: accentColor === color ? `0 0 0 2px ${color}40` : 'none',
-                      }}
+                      className={`w-7 h-7 rounded-full ${swatchClass(accentColor === color)}`}
+                      style={{ backgroundColor: color }}
                       title={color}
                     />
                   );
@@ -577,25 +589,25 @@ export function AccountPanel() {
               />
               {accentColor && (
                 <div
-                  className="w-6 h-6 rounded-full border border-white/10 flex-shrink-0"
+                  className="w-6 h-6 rounded-full shadow-[inset_0_0_0_1px_var(--glass-border)] flex-shrink-0"
                   style={{ backgroundColor: accentColor }}
                 />
               )}
               {accentColor && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => { setAccentColor(null); setCustomHex(''); }}
-                  className="text-xs text-txt-tertiary hover:text-txt-secondary transition-colors"
                 >
                   {t('common:actions.clear')}
-                </button>
+                </Button>
               )}
             </div>
           </div>
 
           {/* Bio */}
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.profile.bio.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.profile.bio.label')}</label>
             <div className="relative">
               <textarea
                 value={bio}
@@ -607,7 +619,7 @@ export function AccountPanel() {
                 className="input-standard w-full resize-none"
                 maxLength={BIO_MAX_LENGTH}
               />
-              <span className="absolute bottom-2 right-2 text-[10px] text-txt-tertiary">
+              <span className="absolute bottom-2 right-2 text-2xs text-txt-tertiary tabular-nums">
                 {t('settings:account.profile.bio.counter', { used: bio.length, max: BIO_MAX_LENGTH })}
               </span>
             </div>
@@ -617,10 +629,10 @@ export function AccountPanel() {
 
       {/* ── Account ── */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('settings:account.details.sectionTitle')}</div>
-        <div className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5 space-y-4">
+        <div className={SECTION_LABEL}>{t('settings:account.details.sectionTitle')}</div>
+        <div className="rounded-xl bg-surface-elevated p-3.5 space-y-4">
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.details.status.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.details.status.label')}</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as ChosenUserStatus)}
@@ -633,7 +645,7 @@ export function AccountPanel() {
           </div>
 
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('common:labels.displayName')}</label>
+            <label className={FIELD_LABEL}>{t('common:labels.displayName')}</label>
             <input
               type="text"
               value={displayName}
@@ -643,7 +655,7 @@ export function AccountPanel() {
           </div>
 
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.details.customStatus.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.details.customStatus.label')}</label>
             <input
               type="text"
               value={customStatus}
@@ -657,11 +669,11 @@ export function AccountPanel() {
 
       {/* ── Password ── */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('common:labels.password')}</div>
-        <form onSubmit={(e) => { e.preventDefault(); handleChangePassword(); }} className="rounded-lg bg-white/[0.03] border border-white/[0.04] p-3.5 space-y-3">
+        <div className={SECTION_LABEL}>{t('common:labels.password')}</div>
+        <form onSubmit={(e) => { e.preventDefault(); handleChangePassword(); }} className="rounded-xl bg-surface-elevated p-3.5 space-y-3">
           <input type="text" autoComplete="username" value={user.username} readOnly tabIndex={-1} className="sr-only" />
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.password.current.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.password.current.label')}</label>
             <div className="relative">
               <input
                 type={showCurrentPassword ? 'text' : 'password'}
@@ -671,27 +683,17 @@ export function AccountPanel() {
                 placeholder={t('settings:account.password.current.placeholder')}
                 autoComplete="current-password"
               />
-              <button
-                type="button"
+              <IconButton
+                icon={showCurrentPassword ? 'eye-off' : 'eye'}
+                label={showCurrentPassword ? t('settings:account.password.hide') : t('settings:account.password.show')}
+                size="sm"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                aria-label={showCurrentPassword ? t('settings:account.password.hide') : t('settings:account.password.show')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-txt-tertiary hover:text-txt-secondary transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  {showCurrentPassword ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  ) : (
-                    <>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </>
-                  )}
-                </svg>
-              </button>
+                className="absolute right-1.5 top-1/2 -translate-y-1/2"
+              />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.password.new.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.password.new.label')}</label>
             <div className="relative">
               <input
                 type={showNewPassword ? 'text' : 'password'}
@@ -701,27 +703,17 @@ export function AccountPanel() {
                 placeholder={t('settings:account.password.new.placeholder', { min: PASSWORD_MIN_LENGTH })}
                 autoComplete="new-password"
               />
-              <button
-                type="button"
+              <IconButton
+                icon={showNewPassword ? 'eye-off' : 'eye'}
+                label={showNewPassword ? t('settings:account.password.hide') : t('settings:account.password.show')}
+                size="sm"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                aria-label={showNewPassword ? t('settings:account.password.hide') : t('settings:account.password.show')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-txt-tertiary hover:text-txt-secondary transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  {showNewPassword ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  ) : (
-                    <>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </>
-                  )}
-                </svg>
-              </button>
+                className="absolute right-1.5 top-1/2 -translate-y-1/2"
+              />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-txt-secondary mb-1.5">{t('settings:account.password.confirm.label')}</label>
+            <label className={FIELD_LABEL}>{t('settings:account.password.confirm.label')}</label>
             <input
               type="password"
               value={confirmNewPassword}
@@ -733,55 +725,50 @@ export function AccountPanel() {
           </div>
 
           {passwordError && (
-            <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-xs">{passwordError}</div>
+            <div className="rounded-lg bg-status-danger/10 px-3 py-2 text-xs text-status-danger">{passwordError}</div>
           )}
-          <button
+          <Button
             type="submit"
+            variant="primary"
             disabled={passwordLoading || !currentPassword || !newPassword || !confirmNewPassword}
-            className="px-4 py-2 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {passwordLoading ? t('settings:account.password.submitting') : t('settings:account.password.submit')}
-          </button>
+          </Button>
         </form>
       </div>
 
       {/* ── Danger Zone ── */}
       <div>
-        <div className="text-[11px] font-semibold text-txt-tertiary uppercase tracking-wider mb-1.5">{t('common:labels.dangerZone')}</div>
-        <div className="rounded-lg bg-accent-rose/5 border border-accent-rose/20 p-3.5">
+        <div className={SECTION_LABEL}>{t('common:labels.dangerZone')}</div>
+        <div className="rounded-xl bg-status-danger/5 border border-status-danger/20 p-3.5">
           <p className="text-sm text-txt-secondary mb-3">
             {t('settings:account.danger.description')}
           </p>
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="px-4 py-2 bg-accent-rose hover:bg-accent-rose/80 text-white text-sm font-medium rounded-lg transition-colors"
-          >
+          <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
             {t('settings:account.danger.deleteButton')}
-          </button>
+          </Button>
         </div>
       </div>
 
       {error && (
-        <div className="p-2 bg-accent-rose/10 border border-accent-rose/30 rounded text-txt-danger text-sm">{error}</div>
+        <div className="rounded-lg bg-status-danger/10 px-3 py-2 text-sm text-status-danger">{error}</div>
       )}
 
       {hasChanges && (
-        <div className="sticky bottom-0 z-10 pointer-events-none">
+        <div className="sticky bottom-0 z-raised pointer-events-none">
           <div className="flex justify-center pt-3 pb-1">
-            <div className="glass-bubble rounded-full px-4 py-2 flex items-center gap-2 animate-slide-up pointer-events-auto">
-              <button
-                onClick={handleReset}
-                className="px-3 py-1 text-sm text-txt-tertiary hover:text-txt-secondary transition-colors"
-              >
+            <div className="glass-bubble rounded-xl p-1.5 flex items-center gap-1.5 animate-slide-up pointer-events-auto">
+              <Button variant="ghost" size="sm" onClick={handleReset}>
                 {t('common:actions.reset')}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={handleSave}
                 disabled={isLoading || uploadingAvatar || uploadingBanner}
-                className="px-3 py-1.5 bg-accent-primary hover:bg-accent-primary/80 text-white text-sm font-medium rounded-full transition-colors disabled:opacity-50"
               >
                 {isLoading ? t('common:states.saving') : t('common:actions.save')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

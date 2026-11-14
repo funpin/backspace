@@ -21,6 +21,8 @@ import { AttachmentProgress } from './AttachmentProgress';
 import { EmbedRenderer } from './EmbedRenderer';
 import { FederationGlobeIcon } from '../ui/Username';
 import { Tooltip } from '../ui/Tooltip';
+import { Icon } from '../ui/Icon';
+import { IconButton } from '../ui/IconButton';
 import { EmojiPicker } from './EmojiPicker';
 import { MobilePickerSheet } from './MobilePickerSheet';
 import { ReactionPickerPopover } from './ReactionPickerPopover';
@@ -58,10 +60,10 @@ function PendingAttachmentTile({ transferId }: PendingAttachmentTileProps) {
   const resumeUpload = useTransferStore((s) => s.resumeUpload);
   const abortUpload = useTransferStore((s) => s.abortUpload);
   if (!transfer) {
-    return <div className="w-[140px] h-[96px] rounded-lg bg-surface-channel" />;
+    return <div className="w-[140px] h-[96px] rounded-xl bg-surface-channel" />;
   }
   return (
-    <div className="relative w-[140px] h-[96px] rounded-lg overflow-hidden bg-surface-channel">
+    <div className="relative w-[140px] h-[96px] rounded-xl overflow-hidden bg-surface-channel">
       <AttachmentProgress
         loaded={transfer.progress.loaded}
         total={transfer.progress.total}
@@ -426,10 +428,13 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
   const spaceMemberOf = (userId: string) => (isDmMessage ? undefined : members.find(m => m.userId === userId));
   const displayName = spaceMemberName(spaceMemberOf(message.userId), displayIdentity);
 
-  const getMemberDisplayColor = (userId: string) => {
-    if (isDmMessage) return { color: '#d8d8de' };
+  // A role colour belongs to the space and is drawn as given; without one the
+  // name takes the primary text colour from its class.
+  const getMemberDisplayColor = (userId: string): React.CSSProperties | undefined => {
+    if (isDmMessage) return undefined;
     const member = spaceMemberOf(userId);
-    return { color: memberNameColor(member ?? { userId, roles: [] }, ownerId) ?? '#d8d8de' };
+    const color = memberNameColor(member ?? { userId, roles: [] }, ownerId);
+    return color ? { color } : undefined;
   };
 
   const roleColor = getMemberDisplayColor(message.userId);
@@ -493,10 +498,10 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
       id={`msg-${message.id}`}
       role="article"
       aria-label={t('chat:message.rowLabel', { author: displayName, time: formatMessageTimestamp(t, fmt, message.createdAt) })}
-      className={`group relative flex gap-4 px-5 py-[3px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-primary/60 ${isFirstInGroup || message.replyTo ? 'mt-[1.0625rem]' : ''} ${
+      className={`group relative flex gap-4 px-5 py-[3px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-tone/60 ${isFirstInGroup || message.replyTo ? 'mt-[1.0625rem]' : ''} ${
         isMentioned
-          ? 'bg-accent-amber/10 border-l-2 border-l-accent-amber hover:bg-accent-amber/15'
-          : 'hover:bg-[rgba(255,255,255,0.025)]'
+          ? 'bg-accent-secondary/[0.08] border-l-2 border-l-accent-secondary hover:bg-accent-secondary/[0.12]'
+          : 'hover:bg-interactive-hover'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
@@ -509,7 +514,7 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
     >
       {/* Reply Line */}
       {message.replyTo && (
-        <div className="absolute left-[40px] top-[-14px] w-[30px] h-[22px] border-l-2 border-t-2 border-interactive-muted rounded-tl-[6px] opacity-60" />
+        <div className="absolute left-[40px] top-[-14px] w-[30px] h-[22px] border-l-2 border-t-2 border-interactive-muted rounded-tl opacity-60" />
       )}
 
       {/* Avatar or timestamp column */}
@@ -527,7 +532,7 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
             />
           </div>
         ) : (
-          <span className={`text-[11px] text-txt-tertiary opacity-0 group-hover:opacity-100 select-none w-full text-right whitespace-nowrap leading-[1.375rem]`}>
+          <span className="text-2xs leading-[21px] text-txt-tertiary tabular-nums opacity-0 group-hover:opacity-100 select-none w-full text-right whitespace-nowrap">
             {formatHoverTime(message.createdAt)}
           </span>
         )}
@@ -547,10 +552,10 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
               <PersonName
                 name={replyDisplayName}
                 person={replyIdentity}
-                className="text-[14px] font-bold text-txt-primary"
+                className="text-sm font-semibold text-txt-primary"
                 style={replyRoleColor(replyTo)}
               />
-              <span className="text-[14px] text-txt-message truncate max-w-[400px] group-hover/reply:text-txt-primary transition-colors">
+              <span className="text-sm text-txt-message truncate max-w-[400px] group-hover/reply:text-txt-primary transition-colors">
                 {replyTo.content ? <InlineMessageText content={replyTo.content} channelId={mentionChannelId} /> : ''}
               </span>
             </>
@@ -563,7 +568,7 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
             <button
               type="button"
               onClick={() => jumpToMessage(replyTo.id)}
-              className="group/reply flex items-center gap-1 max-w-full min-w-0 mb-1 ml-[-8px] pl-1 pr-1.5 rounded-md text-left opacity-80 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent-primary/60 transition-opacity cursor-pointer"
+              className="group/reply flex items-center gap-1 max-w-full min-w-0 mb-1 ml-[-8px] pl-1 pr-1.5 rounded text-left opacity-80 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent-tone/60 transition-opacity cursor-pointer"
             >
               <span className="sr-only">{t('chat:message.reply.jump')}</span>
               {preview}
@@ -579,16 +584,16 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
               onClick={handleUsernameClick}
               onContextMenu={handleAuthorMenu}
               onKeyDown={handleUsernameKeyDown}
-              className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/60"
+              className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-tone/60"
             >
               <PersonName
                 name={displayName}
                 person={displayIdentity}
-                className="font-semibold cursor-pointer hover:underline text-[15px] leading-tight"
+                className="text-sm font-semibold text-txt-primary cursor-pointer hover:underline leading-tight"
                 style={roleColor}
               />
             </span>
-            <span className="text-[11px] text-txt-tertiary leading-tight hover:cursor-default">
+            <span className="text-2xs text-txt-tertiary tabular-nums leading-tight hover:cursor-default">
               {formatMessageTimestamp(t, fmt, message.createdAt)}
             </span>
           </div>
@@ -601,11 +606,11 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               onKeyDown={handleEditSubmit}
-              className="input-standard w-full p-3 rounded-lg resize-none text-[15px] leading-[1.5] shadow-inner"
+              className="input-standard w-full p-3 rounded-lg resize-none text-sm leading-[21px]"
               rows={2}
               autoFocus
             />
-            <p className="text-[12px] text-txt-tertiary mt-1.5 ml-1">
+            <p className="text-xs text-txt-tertiary mt-1.5 ml-1">
               <Trans
                 t={t}
                 i18nKey="chat:message.edit.hint"
@@ -633,7 +638,7 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
                 <img
                   src={message.content!.trim()}
                   alt={t('chat:message.gifAlt')}
-                  className="max-w-full max-h-[300px] rounded-lg"
+                  className="max-w-full max-h-[300px] rounded-xl"
                   loading="lazy"
                 />
               </div>
@@ -648,18 +653,18 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
                   </div>
                 )}
                 {message.editedAt && (
-                  <span className="text-[10px] text-txt-tertiary select-none font-medium">{t('chat:message.edited')}</span>
+                  <span className="text-2xs text-txt-tertiary select-none font-medium">{t('chat:message.edited')}</span>
                 )}
               </>
             ) : (
               <>
                 {message.content && (
-                  <div className="text-txt-message text-[15px] leading-[1.5] break-words whitespace-pre-wrap selection:bg-accent-primary/30">
+                  <div className="text-txt-message text-sm leading-[21px] break-words whitespace-pre-wrap selection:bg-accent-tone/30">
                     {isSticker
                       ? <StickerMessage token={message.content} />
                       : <MarkdownRenderer content={message.content} channelId={mentionChannelId} />}
                     {message.editedAt && (
-                      <span className="text-[10px] text-txt-tertiary ml-1 select-none font-medium">{t('chat:message.edited')}</span>
+                      <span className="text-2xs text-txt-tertiary ml-1 select-none font-medium">{t('chat:message.edited')}</span>
                     )}
                   </div>
                 )}
@@ -690,14 +695,12 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
 
             {/* Failed-state retry/discard row */}
             {showRetryDiscardRow && pending && (
-              <div className="mt-2 inline-flex items-center self-start gap-2 px-2.5 py-1.5 rounded-lg bg-accent-rose/10 border border-accent-rose/25 shadow-sm">
-                <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-accent-rose">
-                  <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 4a.875.875 0 01.875.875v4a.875.875 0 11-1.75 0v-4A.875.875 0 0110 6zm0 8.25a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                  </svg>
+              <div className="mt-2 inline-flex items-center self-start gap-2 px-2.5 py-1.5 rounded-lg bg-status-danger/10">
+                <span className="flex items-center gap-1.5 text-2xs font-medium text-status-danger">
+                  <Icon name="circle-alert" size="xs" />
                   {t('chat:message.upload.failed')}
                 </span>
-                <span className="w-px h-3.5 bg-accent-rose/25" aria-hidden="true" />
+                <span className="w-px h-3.5 bg-status-danger/25" aria-hidden="true" />
                 {canRetry && (
                   <button
                     onClick={async () => {
@@ -713,7 +716,7 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
                         await useTransferStore.getState().resumeUpload(tid);
                       }
                     }}
-                    className="px-2 py-0.5 rounded-md text-[11.5px] font-medium text-accent-mint bg-accent-mint/10 hover:bg-accent-mint/20 transition-colors"
+                    className="px-2 py-0.5 rounded text-2xs font-medium text-status-ok bg-status-ok/10 hover:bg-status-ok/20 transition-colors duration-fast"
                   >
                     {t('common:actions.retry')}
                   </button>
@@ -738,7 +741,7 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
                       usePendingMessageStore.getState().removeByClientId(channelKey, pending.clientId);
                     }
                   }}
-                  className="px-2 py-0.5 rounded-md text-[11.5px] font-medium text-txt-secondary bg-surface-channel/50 hover:bg-accent-rose/15 hover:text-accent-rose transition-colors"
+                  className="px-2 py-0.5 rounded text-2xs font-medium text-txt-secondary bg-surface-channel/50 hover:bg-status-danger/15 hover:text-status-danger transition-colors duration-fast"
                 >
                   {t('chat:message.upload.discard')}
                 </button>
@@ -779,51 +782,31 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
 
       {/* Action buttons on hover */}
       {showInteractions && (isHovered || reactionPicker === 'button' || confirmingDelete) && !isEditing && (
-        <div className="absolute -top-[18px] right-4 flex items-center glass rounded-[10px] overflow-hidden z-10 h-8">
+        <div className="absolute -top-[18px] right-4 z-raised flex items-center gap-0.5 p-0.5 glass rounded-lg">
           {canAddReactions && (
-            <div className="flex items-center px-1 border-r border-white/[0.06] h-full">
+            <div className="flex items-center gap-0.5 pr-0.5 mr-0.5 border-r border-border-soft">
               {['👍', '❤️', '😂', '😮'].map(emoji => (
                 <button
                   key={emoji}
                   onClick={() => toggleReaction(emoji)}
-                  className="p-1 hover:bg-interactive-hover rounded transition-colors text-[16px] leading-none"
+                  className="grid place-items-center h-7 w-7 rounded-lg text-base leading-none hover:bg-interactive-hover transition-[background-color,transform] duration-fast ease-out active:scale-[0.92]"
                 >
                   {emoji}
                 </button>
               ))}
-              <button
+              <IconButton
                 ref={reactionPickerBtnRef}
+                icon="smile"
+                size="sm"
+                label={t('common:actions.addReaction')}
                 onClick={() => setReactionPicker((v) => (v ? null : 'button'))}
-                className={`p-1 hover:bg-interactive-hover rounded transition-colors text-[14px] leading-none ${
-                  showReactionPicker ? 'text-accent-primary' : 'text-txt-tertiary hover:text-txt-secondary'
-                }`}
-                title={t('common:actions.addReaction')}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v4H7v2h4v4h2v-4h4v-2h-4V7z" />
-                </svg>
-              </button>
+                className={showReactionPicker ? 'bg-interactive-active !text-accent-tone' : undefined}
+              />
             </div>
           )}
-          <button
-            onClick={startReply}
-            className="px-2 h-full text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover transition-all flex items-center justify-center"
-            title={t('common:actions.reply')}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M10 9V5L3 12L10 19V14.9C15 14.9 18.5 16.5 21 20C20 15 17 10 10 9Z" />
-            </svg>
-          </button>
+          <IconButton icon="reply" size="sm" label={t('common:actions.reply')} onClick={startReply} />
           {canEdit && (
-            <button
-              onClick={startEditing}
-              className="px-2 h-full text-txt-tertiary hover:text-txt-primary hover:bg-interactive-hover transition-all flex items-center justify-center"
-              title={t('common:actions.edit')}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
-              </svg>
-            </button>
+            <IconButton icon="pencil" size="sm" label={t('common:actions.edit')} onClick={startEditing} />
           )}
           {canDelete && (
             <button
@@ -835,31 +818,29 @@ export function Message({ message, isCompact, isFirstInGroup, previousMessageId 
                   startDeleteConfirm();
                 }
               }}
-              className={`px-2 h-full transition-all duration-150 flex items-center justify-center relative w-9 ${
+              className={`relative grid place-items-center h-7 w-7 rounded-lg transition-[background-color,color,transform] duration-fast ease-out active:scale-[0.92] ${
                 confirmingDelete
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'text-txt-tertiary hover:text-txt-danger hover:bg-interactive-hover'
+                  ? 'bg-status-ok/20 text-status-ok'
+                  : 'text-txt-secondary hover:text-status-danger hover:bg-status-danger/10'
               }`}
               title={confirmingDelete ? t('chat:message.actions.confirmDelete') : t('common:actions.delete')}
             >
               {/* Trash icon */}
-              <svg
-                width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
-                className={`absolute transition-all duration-150 ${
+              <span
+                className={`absolute inset-0 grid place-items-center transition-[transform,opacity] duration-fast ease-out ${
                   confirmingDelete ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
                 }`}
               >
-                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-              </svg>
+                <Icon name="trash-2" size="sm" />
+              </span>
               {/* Checkmark icon */}
-              <svg
-                width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
-                className={`absolute transition-all duration-150 ${
+              <span
+                className={`absolute inset-0 grid place-items-center transition-[transform,opacity] duration-fast ease-out ${
                   confirmingDelete ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                 }`}
               >
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-              </svg>
+                <Icon name="check" size="sm" />
+              </span>
             </button>
           )}
         </div>
