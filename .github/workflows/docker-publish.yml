@@ -71,9 +71,12 @@ jobs:
         id: docker_meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
-          # github.repository is the repository this runs in ("funpin/backspace"
-          # for this fork); metadata-action lowercases it for GHCR.
-          images: ghcr.io/${{ github.repository }}
+          # The image keeps the name `backspace` under the owner of the
+          # repository this runs in. It is not derived from the repository
+          # name: the repository was renamed to B-SPACE, and an image named
+          # after it would be a new package that no installed instance pulls
+          # (compose files and update.sh point at ghcr.io/<owner>/backspace).
+          images: ghcr.io/${{ github.repository_owner }}/backspace
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}

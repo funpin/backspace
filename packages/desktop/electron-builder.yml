@@ -40,7 +40,7 @@ afterPack: ./scripts/afterPack.js
 publish:
   - provider: github
     owner: funpin
-    repo: backspace
+    repo: B-SPACE
 protocols:
   - name: Backspace
     schemes:
