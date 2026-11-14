@@ -1,0 +1,312 @@
+<title>Брендбук Backspace</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400..700&display=swap">
+<style>
+/* Layout: a left-aligned reference page; a sticky theme switch recolours every sample. The page wears the system it documents (dark only, by decision). */
+:root{
+  color-scheme:dark;
+  --s0:#0c0c0e; --s1:#121214; --s3:#1b1b1f; --s-in:#151518; --line:rgba(255,255,255,.075);
+  --t1:#ededf0; --tm:#dedee3; --t2:#a0a0a8; --t3:#7e7e89;
+  --acc-f:#6e5bef; --acc-fh:#7c6bf1; --acc:#a99dff; --acc2:#7fb0ff; --on-acc:#fff;
+  --ok:#6fdc9a; --warn:#e8b65a; --danger:#f2777a;
+  --acc-soft:color-mix(in srgb,var(--acc) 16%,transparent);
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-xl:16px;
+  --fast:120ms; --base:220ms; --slow:320ms; --out:cubic-bezier(.22,1,.36,1); --pop:cubic-bezier(.3,1.5,.55,1);
+  --font:'Onest',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--s0);color:var(--tm);font:14px/1.55 var(--font);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 72px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+h1{font-size:34px;line-height:1.1;letter-spacing:-.02em;font-weight:600;margin:0;color:var(--t1);text-wrap:balance}
+h2{font-size:20px;line-height:28px;font-weight:600;margin:0;color:var(--t1)}
+h3{font-size:13px;line-height:18px;font-weight:500;margin:0;color:var(--t3)}
+p{margin:0;max-width:66ch;color:var(--t2)}
+section{display:flex;flex-direction:column;gap:18px}
+code{font:12.5px var(--mono);color:var(--t1);background:var(--s3);padding:1px 5px;border-radius:var(--r-sm)}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:1.5px solid var(--acc);outline-offset:2px;box-shadow:0 0 0 4px var(--acc-soft)}
+.hero{display:flex;flex-direction:column;gap:14px}
+.hero .mk{width:34px;height:46px;color:var(--acc)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding-block:10px;
+  background:color-mix(in srgb,var(--s0) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar span{font-size:13px;color:var(--t3)}
+.th{height:34px;padding:0 12px 0 8px;border-radius:var(--r-md);display:inline-flex;align-items:center;gap:8px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);color:var(--t2);font-weight:500;transition:color var(--fast),box-shadow var(--fast)}
+.th i{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--a) 0 50%,var(--b) 50%)}
+.th[aria-pressed="true"]{color:var(--t1);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.g6{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px 28px}
+.rules b{display:block;color:var(--t1);font-weight:600;margin-bottom:4px}
+.rules p{font-size:13.5px}
+.panel{background:var(--s1);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.sw{border-radius:var(--r-md);overflow:hidden;background:var(--s1)}
+.sw u{display:block;height:54px;background:var(--c);box-shadow:inset 0 0 0 1px var(--line);text-decoration:none}
+.sw div{padding:8px 10px 10px;display:flex;flex-direction:column;gap:1px}
+.sw b{font-weight:500;color:var(--t1);font-size:13px}
+.sw small{font:11.5px var(--mono);color:var(--t3)}
+.role{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--t2)}
+.role u{width:36px;height:36px;border-radius:var(--r-md);background:var(--c);flex:none;display:grid;place-items:center;color:var(--on,transparent);font-weight:600;text-decoration:none}
+.role b{color:var(--t1);font-weight:500;display:block}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:13.5px}
+th,td{text-align:left;padding:9px 16px 9px 0;border-top:1px solid var(--line);vertical-align:baseline}
+thead th{border-top:0;color:var(--t3);font-weight:500;font-size:12px}
+td{color:var(--t2);font-variant-numeric:tabular-nums}td b{color:var(--t1);font-weight:500}
+.spec td:first-child{color:var(--t1);white-space:nowrap}
+.sp i{display:block;height:10px;border-radius:2px;background:var(--acc)}
+.rad{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.rad div{display:flex;flex-direction:column;gap:6px;align-items:center;font-size:12px;color:var(--t3)}
+.rad u{display:block;width:76px;height:56px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);text-decoration:none}
+.stagebg{border-radius:var(--r-lg);padding:26px;background:
+  linear-gradient(120deg,#2b2a55,#1d3b4f 45%,#4a2f52),var(--s1);display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.glass{padding:12px 14px;border-radius:var(--r-lg);background:rgba(27,27,31,.78);backdrop-filter:blur(16px) saturate(120%);-webkit-backdrop-filter:blur(16px) saturate(120%);box-shadow:0 0 0 1px var(--line),0 14px 40px rgba(0,0,0,.5);color:var(--t1);font-size:13px}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.s{width:15px;height:15px}.ic.l{width:20px;height:20px}
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px}
+.icons div{height:64px;border-radius:var(--r-md);background:var(--s1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--t1);font-size:10.5px}
+.icons small{color:var(--t3)}
+.rowx{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{height:34px;padding:0 14px;border-radius:var(--r-md);font-weight:500;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:transform var(--fast) var(--out),background var(--fast),color var(--fast)}
+.btn:active{transform:scale(.96)}
+.btn.pri{background:var(--acc-f);color:var(--on-acc);font-weight:600}.btn.pri:hover{background:var(--acc-fh)}
+.btn.sec{background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);color:var(--t1)}.btn.sec:hover{background:#222227}
+.btn.gh{color:var(--t2)}.btn.gh:hover{background:rgba(255,255,255,.05);color:var(--t1)}
+.btn.dng{color:var(--danger)}.btn.dng:hover{background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.btn[disabled]{opacity:.4;cursor:default;pointer-events:none}
+.ib{width:34px;height:34px;border-radius:var(--r-md);display:grid;place-items:center;color:var(--t2);transition:background var(--fast),color var(--fast),transform var(--fast)}
+.ib:hover{background:rgba(255,255,255,.05);color:var(--t1)}.ib:active{transform:scale(.92)}
+.ib.off{color:var(--danger);background:color-mix(in srgb,var(--danger) 14%,transparent)}
+.ib.on{color:var(--on-acc);background:var(--acc-f)}
+.inp{height:38px;width:220px;max-width:100%;border-radius:var(--r-md);background:var(--s-in);box-shadow:inset 0 0 0 1px var(--line);padding:0 12px;display:flex;align-items:center;color:var(--t1)}
+.inp.ph{color:var(--t3)}
+.inp.focus{box-shadow:inset 0 0 0 1.5px var(--acc),0 0 0 3px var(--acc-soft)}
+.inp.err{box-shadow:inset 0 0 0 1.5px var(--danger)}
+.tg{width:38px;height:22px;border-radius:999px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);position:relative;transition:background var(--base) var(--out)}
+.tg::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--t2);transition:transform var(--base) var(--pop),background var(--base)}
+.tg[aria-pressed="true"]{background:var(--acc-f)}
+.tg[aria-pressed="true"]::after{transform:translateX(16px);background:var(--on-acc)}
+.opt{height:32px;padding:0 14px;border-radius:var(--r-md);background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);color:var(--t2);font-weight:500;transition:background var(--fast),color var(--fast)}
+.opt[aria-pressed="true"]{background:var(--acc-f);color:var(--on-acc);box-shadow:none}
+.list{display:flex;flex-direction:column;gap:2px;position:relative;width:230px;max-width:100%}
+.li{position:relative;z-index:1;height:34px;padding:0 8px;border-radius:var(--r-md);display:flex;align-items:center;gap:8px;color:var(--t2);text-align:left;transition:color var(--fast),background var(--fast)}
+.li:hover{color:var(--t1);background:rgba(255,255,255,.05)}
+.li.on{color:var(--t1);font-weight:500}
+.li i{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--acc2)}
+.mark{position:absolute;left:0;right:0;top:0;height:34px;border-radius:var(--r-md);background:var(--s3);transition:transform var(--base) var(--out)}
+.tag{height:20px;padding:0 7px;border-radius:var(--r-sm);font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.tag.live{background:var(--danger);color:#16090a;letter-spacing:.04em}
+.tag.q{background:var(--s3);color:var(--t2)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c);display:inline-block}
+.mention{color:var(--acc2);background:color-mix(in srgb,var(--acc2) 15%,transparent);padding:0 4px;border-radius:var(--r-sm);font-weight:500}
+.pill{height:26px;padding:0 9px;border-radius:var(--r-md);display:inline-flex;align-items:center;gap:6px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;color:var(--t2);font-variant-numeric:tabular-nums}
+.pill.mine{background:var(--acc-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent);color:var(--t1)}
+.pill.bump{animation:bump 350ms var(--pop)}
+@keyframes bump{40%{transform:scale(1.18)}}
+.faces{display:inline-flex}
+.faces b{width:26px;height:26px;border-radius:50%;margin-left:-8px;box-shadow:0 0 0 2px var(--s1);display:grid;place-items:center;font-size:11px;color:#14131a;transition:margin var(--base) var(--pop)}
+.faces b:first-child{margin-left:0}.faces:hover b{margin-left:3px}
+.speak{width:120px;height:74px;border-radius:var(--r-lg);background:var(--s3);box-shadow:0 0 0 2px var(--ok);animation:speak 1.6s ease-in-out infinite;display:grid;place-items:center;color:var(--t2);font-size:12px}
+@keyframes speak{50%{box-shadow:0 0 0 2px var(--ok),0 0 0 6px color-mix(in srgb,var(--ok) 18%,transparent)}}
+.popd{padding:16px;border-radius:var(--r-xl);background:var(--s3);box-shadow:0 0 0 1px var(--line),0 14px 40px rgba(0,0,0,.5);width:220px;display:flex;flex-direction:column;gap:10px;color:var(--t1)}
+.popd.go{animation:pop var(--slow) var(--out)}
+@keyframes pop{from{opacity:.3;transform:translateY(10px) scale(.96)}}
+.dd{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dd div{padding:12px 14px;border-radius:var(--r-md);background:var(--s1);font-size:13.5px;color:var(--t1)}
+.dd small{display:block;font-size:11.5px;font-weight:500;margin-bottom:4px}
+.dd .y small{color:var(--ok)}.dd .n small{color:var(--danger)}.dd .n{color:var(--t2)}
+.type b{color:var(--t1)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media (max-width:640px){h1{font-size:26px}.dd{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <svg class="mk" viewBox="62 38 133 180" aria-hidden="true"><path fill="currentColor" d="M151.191 38C175.386 38 195 57.5367 195 81.6364C195 103.651 177.153 121.498 155.138 121.498H121.104C119.429 121.498 118.269 120.983 117.625 119.953C116.981 118.795 117.432 117.443 118.978 115.899L149.516 85.5845C151.32 83.7826 151.32 81.9809 149.516 80.179L144.684 75.3519C142.88 73.5498 141.076 73.5498 139.272 75.3519L89.0206 125.553C87.2168 127.355 87.2168 129.222 89.0206 131.152L139.659 181.739C141.463 183.541 143.267 183.541 145.071 181.739L149.516 177.106C151.32 175.304 151.32 173.501 149.516 171.699L118.978 141.192C117.432 139.648 116.981 138.36 117.625 137.33C118.269 136.172 119.429 135.593 121.104 135.593H156.229C177.642 135.593 195 152.951 195 174.364C195 198.463 175.386 218 151.191 218H105.809C81.614 218 62 198.463 62 174.364V81.6364C62 57.5367 81.614 38 105.809 38L151.191 38Z"/></svg>
+    <h1>Брендбук Backspace</h1>
+    <p>Направление «Камень», иконки Lucide, акцент с родственным дополнительным цветом. Здесь значения, из которых собирается интерфейс. Полный текст с правилами и токенами для кода лежит в <code>docs/brand/brandbook.md</code>, порядок внедрения в <code>docs/brand/implementation-plan.md</code>.</p>
+  </header>
+
+  <div class="bar" role="toolbar" aria-label="Цветовая тема"><span>Тема образцов</span><div class="rowx" id="themes"></div></div>
+
+  <section>
+    <h2>Характер</h2>
+    <div class="rules">
+      <div><b>Цвет только у смысла</b><p>Серые поверхности без оттенка. Цветом выделено то, что нажимается, выбрано или требует внимания.</p></div>
+      <div><b>Оттенок вместо линии</b><p>Области разделяет фон. Линия остаётся у шапки, строк настроек и краёв всплывающих окон.</p></div>
+      <div><b>Одна шкала на свойство</b><p>Текст, отступ, радиус, слой и длительность берутся из шкалы, не подбираются на глаз.</p></div>
+      <div><b>Движение отвечает</b><p>Анимация показывает, что изменилось после нажатия. Сама движется только живая связь: кто говорит, кто печатает.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Нейтральные цвета</h2>
+    <p>Не зависят от темы. В скобках контраст с подложкой окна.</p>
+    <div class="grid g4" id="neutrals"></div>
+  </section>
+
+  <section>
+    <h2>Цветовая тема</h2>
+    <p>Тему выбирает человек в настройках. Тема задаёт четыре значения, и у каждого своя работа. Переключите тему в панели выше: образцы на всей странице перекрасятся.</p>
+    <div class="grid g2">
+      <div class="panel">
+        <div class="role"><u style="--c:var(--acc-f);--on:var(--on-acc)">Аа</u><div><b>Заливка и текст на ней</b>Основная кнопка, включённый переключатель, выбранный вариант</div></div>
+        <div class="role"><u style="--c:var(--acc)"></u><div><b>Тон на тёмном</b>Рамка фокуса, ползунки, полосы прогресса, знак на «Главной»</div></div>
+        <div class="role"><u style="--c:var(--acc2)"></u><div><b>Дополнительный</b>Непрочитанное, упоминания, ссылки</div></div>
+      </div>
+      <div class="panel">
+        <div class="rowx"><button class="btn pri">Создать канал</button><button class="tg" aria-pressed="true" aria-label="Образец переключателя"></button><button class="opt" aria-pressed="true">1080p</button><button class="opt" aria-pressed="false">720p</button></div>
+        <div class="rowx"><div class="inp focus">планы-на-релиз</div><span class="pill mine">🔥 3</span></div>
+        <div>Да. <span class="mention">@Тимур</span>, заходи в «Гостиную». <span style="color:var(--acc2)">Заметки к релизу</span></div>
+      </div>
+    </div>
+    <div class="tw"><table id="themetable"></table></div>
+  </section>
+
+  <section>
+    <h2>Служебные цвета</h2>
+    <p>Одинаковы при любой теме: их смысл не должен меняться, когда человек меняет цвета.</p>
+    <div class="grid g2">
+      <div class="panel">
+        <div class="role"><u style="--c:var(--ok)"></u><div><b>Зелёный</b>В сети, кто говорит, принять звонок, хорошая связь</div></div>
+        <div class="role"><u style="--c:var(--warn)"></u><div><b>Жёлтый</b>Отошёл, предупреждение, связь со сбоями</div></div>
+        <div class="role"><u style="--c:var(--danger)"></u><div><b>Красный</b>Ошибка, «В ЭФИРЕ», выключенный микрофон, отключиться</div></div>
+      </div>
+      <div class="panel">
+        <div class="rowx"><span class="tag live">В ЭФИРЕ</span><span class="tag q">1080p · 60 к/с</span><button class="ib off" title="Микрофон выключен" id="i-micoff"></button></div>
+        <div class="rowx" style="gap:16px;font-size:13px;color:var(--t2)"><span><span class="dot" style="--c:var(--ok)"></span> в сети</span><span><span class="dot" style="--c:var(--warn)"></span> отошёл</span><span><span class="dot" style="--c:var(--t3)"></span> не в сети</span></div>
+        <div style="font-size:13px;font-variant-numeric:tabular-nums"><b style="color:var(--ok);font-weight:600">Голосовая связь</b> <span style="color:var(--t3)">Гостиная · 38 мс</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Шрифт</h2>
+    <p>Onest, один на латиницу и кириллицу, лежит внутри сборки. Китайский остаётся на системном шрифте. Насыщенность 400, 500 и 600.</p>
+    <div class="tw"><table class="spec type" id="type"></table></div>
+  </section>
+
+  <section>
+    <h2>Отступы и размеры</h2>
+    <p>Шаг 4 px. Значения 2 и 6 используются только внутри элементов управления.</p>
+    <div class="tw"><table class="spec sp" id="space"></table></div>
+    <div class="tw"><table class="spec"><thead><tr><th>Размер</th><th>px</th><th>Размер</th><th>px</th></tr></thead><tbody>
+      <tr><td>Шапка</td><td>48</td><td>Плитка пространства</td><td>40, шаг 8</td></tr>
+      <tr><td>Строка списка</td><td>34</td><td>Полоса пространств</td><td>60</td></tr>
+      <tr><td>Элемент управления</td><td>28 · 34 · 40</td><td>Список каналов</td><td>244</td></tr>
+      <tr><td>Поле ввода</td><td>38</td><td>Аватары</td><td>20 · 32 · 38 · 64</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section>
+    <h2>Радиусы</h2>
+    <p>У одного вида элемента один радиус. Вложенный элемент скруглён меньше внешнего.</p>
+    <div class="rad">
+      <div><u style="border-radius:6px"></u>sm · 6<br>метки</div>
+      <div><u style="border-radius:10px"></u>md · 10<br>кнопки, поля</div>
+      <div><u style="border-radius:14px"></u>lg · 14<br>плитки, панели</div>
+      <div><u style="border-radius:16px"></u>xl · 16<br>окна</div>
+      <div><u style="border-radius:999px;width:56px"></u>full<br>аватары</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Материалы и слои</h2>
+    <p>Содержимое лежит на матовых поверхностях. Всё, что парит над ним, сделано из плотного стекла с тонкой рамкой и одной тенью.</p>
+    <div class="stagebg"><div class="glass">Поле сообщения, панель звонка</div><div class="glass" style="background:rgba(27,27,31,.86);backdrop-filter:blur(24px) saturate(120%);-webkit-backdrop-filter:blur(24px) saturate(120%);border-radius:16px">Модальное окно</div><span class="pill" style="background:#1b1b1f">👍 2</span><span class="pill mine">🔥 3</span></div>
+    <div class="tw"><table class="spec"><thead><tr><th>Слой</th><th>Значение</th><th>Что на нём</th></tr></thead><tbody>
+      <tr><td>z-raised</td><td>10</td><td>Липкие шапки, метки поверх плиток</td></tr>
+      <tr><td>z-float</td><td>20</td><td>Поле сообщения, панель звонка, карточка пользователя</td></tr>
+      <tr><td>z-popover</td><td>200</td><td>Меню, всплывающие панели, подсказки</td></tr>
+      <tr><td>z-modal</td><td>300</td><td>Модальные окна</td></tr>
+      <tr><td>z-toast</td><td>400</td><td>Уведомления</td></tr>
+      <tr><td>z-confirm</td><td>500</td><td>Подтверждение поверх окна</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section>
+    <h2>Иконки</h2>
+    <p>Lucide, только контур, линия 1,75. Четыре размера: 13 в метках, 15 в малых кнопках, 18 в обычных, 20 в панели звонка. Состояние показывает цвет и подложка кнопки, а не заливка иконки.</p>
+    <div class="icons" id="icons"></div>
+  </section>
+
+  <section>
+    <h2>Состояния</h2>
+    <div class="grid g2">
+      <div class="panel"><h3>Кнопки: основная, вторичная, тихая, опасная, выключенная</h3>
+        <div class="rowx"><button class="btn pri">Сохранить</button><button class="btn sec">Открыть</button><button class="btn gh">Отмена</button><button class="btn dng">Удалить</button><button class="btn pri" disabled>Сохранить</button></div>
+        <h3>Кнопки-иконки: покой, выключено, включено</h3>
+        <div class="rowx" id="ibs"></div></div>
+      <div class="panel"><h3>Поле: пустое, в фокусе, с ошибкой</h3>
+        <div class="rowx"><div class="inp ph">Название канала</div><div class="inp focus">планы-на-релиз</div><div class="inp err">планы на релиз</div></div>
+        <span style="color:var(--danger);font-size:12.5px">В названии нельзя использовать пробелы</span></div>
+      <div class="panel"><h3>Список: наведите и нажмите, выбранная строка переезжает</h3>
+        <div class="list" id="list"><div class="mark" id="mark"></div><button class="li">общий</button><button class="li on">разработка</button><button class="li">мемы<i></i></button></div></div>
+      <div class="panel"><h3>Варианты и переключатель</h3>
+        <div class="rowx" id="opts"><button class="opt" aria-pressed="false">30</button><button class="opt" aria-pressed="true">60</button><button class="tg" aria-pressed="false" aria-label="Образец переключателя"></button></div>
+        <p style="font-size:13px">Фокус с клавиатуры: кольцо 1,5 px и мягкий ореол. Нажмите Tab на этой странице, чтобы увидеть.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Движение</h2>
+    <p>Три длительности и две кривые, без библиотеки анимаций. При системной настройке «уменьшить движение» всё меняется мгновенно.</p>
+    <div class="tw"><table class="spec"><thead><tr><th>Токен</th><th>Значение</th><th>Где</th></tr></thead><tbody>
+      <tr><td>fast</td><td>120 мс</td><td>Цвет, подложка, нажатие</td></tr>
+      <tr><td>base</td><td>220 мс</td><td>Переключатель, выбранная строка, появление панели</td></tr>
+      <tr><td>slow</td><td>320 мс</td><td>Модальное окно, нижний лист</td></tr>
+      <tr><td>ease-out</td><td>.22, 1, .36, 1</td><td>Всё по умолчанию</td></tr>
+      <tr><td>ease-pop</td><td>.3, 1.5, .55, 1</td><td>Отскок: реакция, стопка лиц, стикер</td></tr>
+    </tbody></table></div>
+    <div class="grid g2">
+      <div class="panel"><h3>Нажмите на реакцию, наведите на стопку лиц</h3>
+        <div class="rowx" style="gap:18px"><button class="pill mine" id="rx">🔥 <span>3</span></button><span class="faces"><b style="background:#e9b58a">М</b><b style="background:#d9a6c9">Л</b><b style="background:#a9d1ae">Т</b><b style="background:#e79a86">Н</b></span><div class="speak">говорит</div></div></div>
+      <div class="panel"><h3>Появление окна</h3>
+        <div class="rowx" style="align-items:flex-start;gap:16px"><button class="btn sec" id="replay">Показать ещё раз</button><div class="popd" id="popd"><b style="font-weight:600;font-size:16px">Создать канал</b><span style="color:var(--t2);font-size:13px">Сдвиг на 10 px, масштаб с 0,96, 320 мс</span></div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Тон текстов</h2>
+    <p>На «вы», обычным регистром, без восклицательных знаков. Кнопка называет действие, ошибка говорит, что случилось и что делать.</p>
+    <div class="dd">
+      <div class="y"><small>Так</small>Начать трансляцию</div><div class="n"><small>Не так</small>ОК</div>
+      <div class="y"><small>Так</small>Не отправлен: файл больше 100 МБ</div><div class="n"><small>Не так</small>Что-то пошло не так. Попробуйте позже</div>
+      <div class="y"><small>Так</small>Здесь пока нет сообщений. Напишите первое</div><div class="n"><small>Не так</small>Нет данных</div>
+      <div class="y"><small>Так</small>Сведения о соединении</div><div class="n"><small>Не так</small>Статистика WebRTC</div>
+    </div>
+  </section>
+</div>
+
+<script>
+const IC={"bell":"<path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\" /><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\" />","brush":"<circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /><circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /><circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" /><circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /><path d=\"M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z\" />","chat":"<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\" />","check":"<path d=\"M20 6 9 17l-5-5\" />","chev":"<path d=\"m6 9 6 6 6-6\" />","clip":"<path d=\"m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48\" />","compass":"<path d=\"m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z\" /><circle cx=\"12\" cy=\"12\" r=\"10\" />","copy":"<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\" /><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\" />","dots":"<circle cx=\"12\" cy=\"12\" r=\"1\" /><circle cx=\"19\" cy=\"12\" r=\"1\" /><circle cx=\"5\" cy=\"12\" r=\"1\" />","download":"<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" /><polyline points=\"7 10 12 15 17 10\" /><line x1=\"12\" x2=\"12\" y1=\"15\" y2=\"3\" />","end":"<path d=\"M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91\" /><line x1=\"22\" x2=\"2\" y1=\"2\" y2=\"22\" />","eye":"<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /><circle cx=\"12\" cy=\"12\" r=\"3\" />","eyeoff":"<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\" /><path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\" /><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\" /><path d=\"m2 2 20 20\" />","file":"<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\" /><path d=\"M14 2v4a2 2 0 0 0 2 2h4\" /><path d=\"M10 9H8\" /><path d=\"M16 13H8\" /><path d=\"M16 17H8\" />","grid":"<rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /><rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /><rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /><rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />","hash":"<line x1=\"4\" x2=\"20\" y1=\"9\" y2=\"9\" /><line x1=\"4\" x2=\"20\" y1=\"15\" y2=\"15\" /><line x1=\"10\" x2=\"8\" y1=\"3\" y2=\"21\" /><line x1=\"16\" x2=\"14\" y1=\"3\" y2=\"21\" />","head":"<path d=\"M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3\" />","image":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /><circle cx=\"9\" cy=\"9\" r=\"2\" /><path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\" />","max":"<path d=\"M8 3H5a2 2 0 0 0-2 2v3\" /><path d=\"M21 8V5a2 2 0 0 0-2-2h-3\" /><path d=\"M3 16v3a2 2 0 0 0 2 2h3\" /><path d=\"M16 21h3a2 2 0 0 0 2-2v-3\" />","mic":"<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\" /><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />","micoff":"<line x1=\"2\" x2=\"22\" y1=\"2\" y2=\"22\" /><path d=\"M18.89 13.23A7.12 7.12 0 0 0 19 12v-2\" /><path d=\"M5 10v2a7 7 0 0 0 12 5\" /><path d=\"M15 9.34V5a3 3 0 0 0-5.68-1.33\" /><path d=\"M9 9v3a3 3 0 0 0 5.12 2.12\" /><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />","minus":"<path d=\"M5 12h14\" />","pencil":"<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /><path d=\"m15 5 4 4\" />","phone":"<path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\" />","pin":"<path d=\"M12 17v5\" /><path d=\"M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z\" />","play":"<polygon points=\"6 3 20 12 6 21 6 3\" />","plus":"<path d=\"M5 12h14\" /><path d=\"M12 5v14\" />","reply":"<polyline points=\"9 17 4 12 9 7\" /><path d=\"M20 18v-2a4 4 0 0 0-4-4H4\" />","screen":"<path d=\"M13 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3\" /><path d=\"M8 21h8\" /><path d=\"M12 17v4\" /><path d=\"m17 8 5-5\" /><path d=\"M17 3h5v5\" />","search":"<circle cx=\"11\" cy=\"11\" r=\"8\" /><path d=\"m21 21-4.3-4.3\" />","send":"<path d=\"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z\" /><path d=\"m21.854 2.147-10.94 10.939\" />","set":"<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" /><circle cx=\"12\" cy=\"12\" r=\"3\" />","signal":"<path d=\"M12 20h.01\" /><path d=\"M2 8.82a15 15 0 0 1 20 0\" /><path d=\"M5 12.859a10 10 0 0 1 14 0\" /><path d=\"M8.5 16.429a5 5 0 0 1 7 0\" />","smile":"<circle cx=\"12\" cy=\"12\" r=\"10\" /><path d=\"M8 14s1.5 2 4 2 4-2 4-2\" /><line x1=\"9\" x2=\"9.01\" y1=\"9\" y2=\"9\" /><line x1=\"15\" x2=\"15.01\" y1=\"9\" y2=\"9\" />","trash":"<path d=\"M3 6h18\" /><path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\" /><path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\" /><line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\" /><line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\" />","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /><circle cx=\"12\" cy=\"7\" r=\"4\" />","userplus":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /><circle cx=\"9\" cy=\"7\" r=\"4\" /><line x1=\"19\" x2=\"19\" y1=\"8\" y2=\"14\" /><line x1=\"22\" x2=\"16\" y1=\"11\" y2=\"11\" />","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /><circle cx=\"9\" cy=\"7\" r=\"4\" /><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /><path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />","video":"<path d=\"m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5\" /><rect x=\"2\" y=\"6\" width=\"14\" height=\"12\" rx=\"2\" />","vol":"<path d=\"M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z\" /><path d=\"M16 9a5 5 0 0 1 0 6\" /><path d=\"M19.364 18.364a9 9 0 0 0 0-12.728\" />","x":"<path d=\"M18 6 6 18\" /><path d=\"m6 6 12 12\" />"};
+const ic=(n,c='')=>`<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]||''}</svg>`;
+const THEMES=[['Лаванда','#6e5bef','#7c6bf1','#a99dff','#7fb0ff','#fff','4,8'],['Изумруд','#14805a','#2c8d6a','#5fd6a6','#6fd3d9','#fff','4,9'],['Янтарь','#e9a53c','#ebae50','#f3bd63','#f0906c','#0c0c10','9,2'],['Лёд','#2f6fe6','#447de8','#8ab6ff','#7fdcf0','#fff','4,6'],['Роза','#cf3f7c','#d45289','#ff9cc2','#c79bff','#fff','4,5'],['Моно','#ececf0','#eeeef2','#ececf0','#b4b4bd','#0c0c10','16,6']];
+const $=s=>document.querySelector(s),R=document.documentElement;
+function setTheme(i){const t=THEMES[i];R.style.setProperty('--acc-f',t[1]);R.style.setProperty('--acc-fh',t[2]);R.style.setProperty('--acc',t[3]);R.style.setProperty('--acc2',t[4]);R.style.setProperty('--on-acc',t[5]);
+  [...$('#themes').children].forEach((b,k)=>b.setAttribute('aria-pressed',k===i));try{localStorage.setItem('bb-theme',i)}catch(e){}}
+$('#themes').innerHTML=THEMES.map((t,i)=>`<button class="th" style="--a:${t[1]};--b:${t[4]}" data-t="${i}" aria-pressed="false"><i></i>${t[0]}</button>`).join('');
+$('#themetable').innerHTML='<thead><tr><th>Тема</th><th>Заливка</th><th>Наведение</th><th>Тон на тёмном</th><th>Дополнительный</th><th>Текст на заливке</th></tr></thead><tbody>'+THEMES.map(t=>`<tr><td><b>${t[0]}</b></td>${[1,2,3,4].map(k=>`<td><span class="dot" style="--c:${t[k]}"></span> <code>${t[k]}</code></td>`).join('')}<td>${t[5]==='#fff'?'белый':'тёмный'}, контраст ${t[6]}</td></tr>`).join('')+'</tbody>';
+$('#neutrals').innerHTML=[['Подложка, чат','--bg-base','#0c0c0e'],['Боковые панели','--bg-channel','#121214'],['Плитки, выбранное','--bg-elevated','#1b1b1f'],['Поля ввода','--bg-input','#151518'],['Текст главный (16,7)','--text-primary','#ededf0'],['Текст сообщений (14,6)','--text-message','#dedee3'],['Текст второй (7,5)','--text-secondary','#a0a0a8'],['Текст третий (4,9)','--text-tertiary','#7e7e89']]
+  .map(([n,v,c])=>`<div class="sw"><u style="--c:${c}"></u><div><b>${n}</b><small>${v}</small><small>${c}</small></div></div>`).join('');
+$('#type').innerHTML='<thead><tr><th>Класс</th><th>Размер / строка</th><th>Образец</th></tr></thead><tbody>'+[['text-2xl','24 / 32',600,'Добро пожаловать в #разработка'],['text-xl','20 / 28',600,'Настройки трансляции'],['text-lg','16 / 24',600,'Орбита · Code&Context'],['text-base','14 / 20',400,'Залил сборку на сервер. Указатель теперь видят все зрители.'],['text-sm','13 / 18',400,'В голосовом канале «Гостиная»'],['text-xs','12 / 16',500,'Текстовые каналы · 214 строк · 6,2 КБ'],['text-2xs','11 / 16',600,'В ЭФИРЕ · 1080p · 60 к/с · 14:06']]
+  .map(([c,s,w,x])=>{const[a,b]=s.split(' / ');return `<tr><td><code>${c}</code></td><td>${s}</td><td><b style="font-size:${a}px;line-height:${b}px;font-weight:${w}">${x}</b></td></tr>`}).join('')+'</tbody>';
+$('#space').innerHTML='<thead><tr><th>Шаг</th><th>px</th><th></th></tr></thead><tbody>'+[2,4,6,8,12,16,20,24,32,40,48].map(v=>`<tr><td>${v/4}</td><td>${v}</td><td style="width:70%"><i style="width:${v*2}px"></i></td></tr>`).join('')+'</tbody>';
+const NAMES={hash:'hash',vol:'volume-2',mic:'mic',micoff:'mic-off',head:'headphones',video:'video',screen:'screen-share',end:'phone-off',phone:'phone',set:'settings',download:'download',pin:'pin',users:'users',userplus:'user-plus',compass:'compass',search:'search',bell:'bell',chat:'message-square',smile:'smile',clip:'paperclip',image:'image',send:'send',file:'file-text',copy:'copy',reply:'reply',pencil:'pencil',trash:'trash-2',eye:'eye',eyeoff:'eye-off',max:'maximize',grid:'layout-grid',signal:'wifi',play:'play',plus:'plus',minus:'minus',check:'check',x:'x',chev:'chevron-down',dots:'ellipsis',user:'user',brush:'palette'};
+$('#icons').innerHTML=Object.keys(NAMES).map(k=>`<div>${ic(k)}<small>${NAMES[k]}</small></div>`).join('');
+$('#ibs').innerHTML=`<button class="ib" title="Микрофон">${ic('mic')}</button><button class="ib off" title="Микрофон выключен">${ic('micoff')}</button><button class="ib on" title="Идёт трансляция">${ic('screen')}</button><button class="ib" title="Настройки">${ic('set')}</button>`;
+$('#i-micoff').innerHTML=ic('micoff');
+function mark(){const on=$('#list .li.on');$('#mark').style.transform=`translateY(${on.offsetTop}px)`}
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.t)setTheme(+t.dataset.t);
+  else if(t.classList.contains('li')){document.querySelectorAll('#list .li').forEach(b=>b.classList.remove('on'));t.classList.add('on');mark()}
+  else if(t.classList.contains('tg'))t.setAttribute('aria-pressed',t.getAttribute('aria-pressed')!=='true');
+  else if(t.classList.contains('opt')){[...t.parentElement.querySelectorAll('.opt')].forEach(b=>b.setAttribute('aria-pressed',b===t))}
+  else if(t.id==='rx'){const m=t.classList.toggle('mine');t.querySelector('span').textContent=m?3:2;t.classList.remove('bump');void t.offsetWidth;t.classList.add('bump')}
+  else if(t.id==='replay'){const p=$('#popd');p.classList.remove('go');void p.offsetWidth;p.classList.add('go')}});
+let t0=0;try{t0=+localStorage.getItem('bb-theme')||0}catch(e){}
+setTheme(THEMES[t0]?t0:0);mark();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(mark);
+</script>
