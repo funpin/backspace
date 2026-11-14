@@ -26,6 +26,7 @@ import { useDiscoverStore } from '../stores/discoverStore';
 import { useFederationStore } from '../stores/federationStore';
 import { notePendingOriginReady } from '../stores/pendingMessageRehydrate';
 import { useNotificationSettingsStore } from '../stores/notificationSettingsStore';
+import { useHomeConnectionStore } from '../stores/homeConnectionStore';
 import { detectClientKind } from '../platform/clientKind';
 import { ConnectionState as LiveKitConnectionState } from 'livekit-client';
 
@@ -1508,7 +1509,10 @@ function connectToOrigin(origin: string, token: string): void {
       return;
     }
     const readyAlreadyDelivered = readyDelivered;
-    if (event.type === 'ready') readyDelivered = true;
+    if (event.type === 'ready') {
+      readyDelivered = true;
+      if (origin === HOME_ORIGIN) useHomeConnectionStore.getState().setStatus('open');
+    }
     try {
       handleEvent(origin, event, readyAlreadyDelivered);
     } catch (err) {
@@ -1520,7 +1524,9 @@ function connectToOrigin(origin: string, token: string): void {
     conn.ws = null;
     stopHeartbeat(conn);
     // Mark remote instance as disconnected in instanceStore
-    if (origin !== HOME_ORIGIN) {
+    if (origin === HOME_ORIGIN) {
+      useHomeConnectionStore.getState().setStatus('closed');
+    } else {
       import('../stores/instanceStore').then(({ useInstanceStore }) => {
         useInstanceStore.getState().setInstanceStatus(origin, 'disconnected', 'Connection lost — reconnecting');
       });

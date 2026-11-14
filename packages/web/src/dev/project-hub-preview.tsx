@@ -1,7 +1,7 @@
 // Dev-only workbench for the Backspace page (`/backspace`) and its two entry
 // points. Nothing in the app imports this file; `dev-project-hub.html` is its
 // only entry. It exists so every card state can be looked at and
-// screenshotted at desktop and phone width without a server, a Ko-fi page or
+// screenshotted at desktop and phone width without a server, a support page or
 // a community instance.
 //
 // `?state=<name>&width=desktop|phone` renders one state in one frame:

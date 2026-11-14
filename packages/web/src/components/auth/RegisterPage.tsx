@@ -14,6 +14,9 @@ import { waitForTransferAttachment } from '../../utils/waitForTransfer';
 import { SourceCodeLink } from '../ui/SourceCodeLink';
 import { describeError } from '../../i18n/errors';
 import { Button } from '../ui/Button';
+import { Mascot } from '../ui/Mascot';
+import { PasswordInput } from './PasswordInput';
+import { useAuthMascot } from './authMascot';
 import { Icon } from '../ui/Icon';
 
 // Single-source regex for extracting a bare invite token from a pasted full URL.
@@ -30,6 +33,7 @@ export function RegisterPage() {
   // Step state
   const [step, setStep] = useState<1 | 2>(1);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+  const mascot = useAuthMascot('idle');
 
   // Step 1 fields
   const [username, setUsername] = useState('');
@@ -431,6 +435,7 @@ export function RegisterPage() {
         {step === 1 ? (
           <div key="step1" className={`w-full${direction === 'back' ? ' animate-step-back' : ''}`}>
             <div className="text-center mb-6">
+              <Mascot state={mascot.pose.state} gaze={mascot.pose.gaze} className="w-16 h-16 mx-auto mb-3" />
               <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:register.title')}</h1>
             </div>
 
@@ -521,6 +526,7 @@ export function RegisterPage() {
                   className="input-standard w-full py-2.5 text-base md:text-sm"
                   autoFocus
                   autoComplete="username"
+                  {...mascot.textField()}
                 />
                 {usernameStatus !== 'idle' && (
                   <div className={`mt-1.5 flex items-center gap-1.5 text-xs ${
@@ -549,12 +555,13 @@ export function RegisterPage() {
                 <label className="block text-xs font-medium text-txt-secondary mb-1.5">
                   {t('common:labels.password')} <span className="text-status-danger">*</span>
                 </label>
-                <input
-                  type="password"
+                <PasswordInput
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="input-standard w-full py-2.5 text-base md:text-sm"
                   autoComplete="new-password"
+                  onRevealChange={mascot.onRevealChange}
+                  {...mascot.passwordField()}
                 />
               </div>
 
@@ -562,12 +569,13 @@ export function RegisterPage() {
                 <label className="block text-xs font-medium text-txt-secondary mb-1.5">
                   {t('auth:fields.confirmPassword')} <span className="text-status-danger">*</span>
                 </label>
-                <input
-                  type="password"
+                <PasswordInput
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="input-standard w-full py-2.5 text-base md:text-sm"
                   autoComplete="new-password"
+                  onRevealChange={mascot.onRevealChange}
+                  {...mascot.passwordField()}
                 />
               </div>
 
@@ -605,6 +613,7 @@ export function RegisterPage() {
         ) : (
           <div key="step2" className={`w-full${direction === 'forward' ? ' animate-step-forward' : ''}`}>
             <div className="text-center mb-6">
+              <Mascot state="joy" className="w-16 h-16 mx-auto mb-3" />
               <h1 className="text-2xl font-semibold text-txt-primary">{t('auth:register.personalize.title')}</h1>
               <p className="text-txt-tertiary text-sm mt-1">{t('auth:register.personalize.subtitle')}</p>
             </div>

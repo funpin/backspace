@@ -57,7 +57,7 @@
     "supportCard": {
       "label": "Backspace 页面",
       "toggleLabel": "显示项目支持卡片",
-      "toggleDescription": "在 Backspace 页面上显示一张链接到本项目 Ko-fi 页面的卡片。关闭后只隐藏这张卡片。"
+      "toggleDescription": "在 Backspace 页面上显示一张链接到本项目支持页面的卡片。关闭后只隐藏这张卡片。"
     },
     "gif": {
       "label": "GIF 搜索",

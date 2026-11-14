@@ -405,7 +405,7 @@ Split-pane layout: 60px `glass-strip` space strip on the left + channel list on 
 - Each DM row: avatar, name, message preview, timestamp, unread dot
 - Group DMs: rendered via the shared `<AvatarStack>` (size 40, `border="channel"`, `iconUrl={dm.icon}`) so single-other-member groups, 2-member overlap, and 3+ grids match the desktop sidebar; group name uses `dm.name ?? otherMembers.map(displayName).join(', ')`. A federation globe renders next to the name when any group member is federated. Context menu: "Leave Group".
 - Federated users: `@domain` subtitle below username
-- Empty state: sleeping mascot
+- Empty state: the mascot with closed eyes (`Mascot state="dnd"`)
 - FAB: New DM button (opens `newDm` modal), positioned `bottom-20 right-4`
 
 ### MobileYouScreen

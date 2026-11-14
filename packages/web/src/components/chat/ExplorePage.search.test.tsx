@@ -114,7 +114,6 @@ vi.mock('../../api/client', async (importOriginal) => ({
   api: { instance: { info: instanceInfo } },
 }));
 
-vi.mock('../../hooks/useMascotAnimation', () => ({ useMascotAnimation: vi.fn() }));
 
 // The Inner cards' join hook: the page test never drives a join.
 vi.mock('../../hooks/useSpaceJoin', () => ({

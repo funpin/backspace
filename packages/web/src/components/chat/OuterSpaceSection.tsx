@@ -113,7 +113,7 @@ export function OuterSpaceSection({ query, onConnect }: OuterSpaceSectionProps) 
         ) : (
           <div className="flex flex-col items-center justify-center h-64 opacity-80">
             <div className="mb-3" data-testid="outer-space-mascot">
-              <Mascot state="lonely" className="w-32 h-32" />
+              <Mascot state="look" className="w-32 h-32" />
             </div>
             <p className="text-txt-tertiary text-sm text-center px-6">{t('spaces:explore.outer.empty')}</p>
           </div>

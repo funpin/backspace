@@ -11,9 +11,6 @@ import { api as mockedApi } from '../../api/client';
 pageApi.client = mockedApi;
 
 // Mock the mascot animation hook
-vi.mock('../../hooks/useMascotAnimation', () => ({
-  useMascotAnimation: vi.fn(),
-}));
 
 // Stub AudioManager to avoid AudioWorkletNode reference error in jsdom
 vi.mock('../../audio/AudioManager', () => ({

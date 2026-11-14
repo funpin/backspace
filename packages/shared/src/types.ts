@@ -1158,7 +1158,7 @@ export interface InstanceAdminSettings {
   directoryListedSpaceCount: number;
   /**
    * The web client's Backspace page shows the Support card, which links to
-   * the project's Ko-fi page. Hides only that card; the server does nothing
+   * the project's support page (DaLink). Hides only that card; the server does nothing
    * else with it. Default true. Also on `InstanceInfoResponse`.
    */
   supportCardEnabled: boolean;

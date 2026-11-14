@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B:SPACE logo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap">
+<style>
+/* Layout: one card per take; each card shows the mark large, then in its real places on dark and light. */
+:root{
+  --bg:#0c0c0e; --panel:#121214; --line:#26262a;
+  --fg:#ededf0; --muted:#a0a0a8; --faint:#7e7e89;
+  --accent:#6e5bef;
+  --font:'Onest',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f4f4f6;--panel:#ffffff;--line:#dcdce2;--fg:#0c0c0e;--muted:#55555e;--faint:#7e7e89;color-scheme:light}}
+:root[data-theme="light"]{--bg:#f4f4f6;--panel:#ffffff;--line:#dcdce2;--fg:#0c0c0e;--muted:#55555e;--faint:#7e7e89;color-scheme:light}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:20px}
+.wrap{max-width:1240px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:24px;line-height:32px;font-weight:600;margin:0 0 8px}
+.lead{color:var(--muted);max-width:72ch;margin:0 0 28px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+@media (max-width:420px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card header{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card h2{font-size:16px;line-height:24px;margin:0;font-weight:600}
+.card p{margin:0;color:var(--muted);font-size:13px;line-height:18px}
+.tag{font-size:11px;line-height:16px;font-weight:500;padding:2px 8px;border-radius:6px;background:var(--accent);color:#fff}
+.tag.was{background:transparent;color:var(--faint);box-shadow:inset 0 0 0 1px var(--line)}
+.pair{display:grid;grid-template-columns:1fr 1fr;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.pair > div{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 8px;flex-wrap:wrap;min-width:0}
+.pair.hero > div{padding:22px 8px}
+.d{background:#0c0c0e;color:#ededf0}.l{background:#f4f4f6;color:#0c0c0e}
+.lbl{font-size:11px;line-height:16px;color:var(--faint);margin-bottom:-6px}
+.mac{filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+.menubar{display:flex;align-items:center;gap:10px;padding:4px 10px;border-radius:6px;font-size:12px}
+.d .menubar{background:#26262a}.l .menubar{background:#e4e4ea}
+.tab{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:8px;font-size:11px;line-height:16px;white-space:nowrap}
+.d .tab{background:#1b1b1f;color:#a0a0a8}.l .tab{background:#fff;color:#55555e;box-shadow:0 0 0 1px #dcdce2}
+.tile{width:40px;height:40px;border-radius:14px;display:grid;place-items:center}
+.d .tile{background:#1b1b1f}.l .tile{background:#fff}
+.lockup{display:flex;align-items:center;gap:.34em;font-weight:600;letter-spacing:.02em;white-space:nowrap;line-height:1;font-size:22px}
+canvas.px{image-rendering:pixelated;border-radius:3px}
+.notes{margin-top:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.notes section{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.notes h3{margin:0 0 6px;font-size:14px;font-weight:600}
+.notes p{color:var(--muted);font-size:13px;line-height:19px;margin:0}
+h2.sec{font-size:20px;line-height:28px;font-weight:600;margin:40px 0 6px}
+.states{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.st{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.st .box{background:#1b1b1f;border-radius:10px;display:grid;place-items:center;height:130px;overflow:hidden}
+.st b{font-weight:600;font-size:13px}.st span{color:var(--muted);font-size:12px;line-height:16px}
+.play{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:20px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.play p{color:var(--muted);margin:0;max-width:52ch}
+.stage{background:#1b1b1f;border-radius:12px;height:300px;display:grid;place-items:center;cursor:pointer}
+@media (max-width:640px){.play{grid-template-columns:minmax(0,1fr)}}
+.m{overflow:visible}.m *{transform-box:fill-box;transform-origin:center}
+.m .eyes{transition:transform .18s ease-out}
+@keyframes blink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.08)}}
+.s-blink .eye{animation:blink 3.2s infinite}
+@keyframes look{0%,15%{transform:translate(0,0)}25%,45%{transform:translate(-4.5px,1px)}55%,75%{transform:translate(4px,0)}85%,100%{transform:translate(0,0)}}
+.s-look .eyes{animation:look 4.5s infinite ease-in-out}
+@keyframes hop{0%,55%,100%{transform:translateY(0)}62%{transform:translateY(-9px)}70%{transform:translateY(0)}76%{transform:translateY(-4px)}82%{transform:translateY(0)}}
+@keyframes wide{0%,55%,85%,100%{transform:scale(1)}62%,78%{transform:scale(1.25)}}
+.s-notify .all{animation:hop 2.4s infinite}.s-notify .eye{animation:wide 2.4s infinite}
+.s-notify .badge{animation:pop 2.4s infinite}
+@keyframes pop{0%,58%{transform:scale(0)}64%{transform:scale(1.15)}70%,100%{transform:scale(1)}}
+@keyframes type{0%,100%{transform:scale(1)}50%{transform:scale(1.04,.97)}}
+.s-typing .eyes{transform:translate(-3px,3px)}.s-typing .body{animation:type .7s infinite ease-in-out}
+.s-typing .dot{animation:td 1.2s infinite}.s-typing .dot:nth-child(2){animation-delay:.2s}.s-typing .dot:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{opacity:.25}30%{opacity:1}}
+.s-sleep .eye{transform:scaleY(.12)}.s-sleep .all{opacity:.55}
+.s-sleep .z{animation:z 3s infinite}.s-sleep .z:nth-child(2){animation-delay:1.5s}
+@keyframes z{0%{opacity:0;transform:translate(0,0)}30%{opacity:1}100%{opacity:0;transform:translate(8px,-14px)}}
+.s-joy .eye{opacity:0}.s-joy .arc{opacity:1}.s-joy .all{animation:hop 1.6s infinite}
+.arc{opacity:0}
+@keyframes talk{0%,100%{transform:scale(1)}20%{transform:scale(1.05)}40%{transform:scale(.99)}60%{transform:scale(1.04)}}
+.s-voice .body{animation:talk .9s infinite}.s-voice .ring{animation:ring 1.8s infinite}
+@keyframes ring{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.18)}}
+.s-off .eye{opacity:0}.s-off .cross{opacity:1}.s-off .all{filter:grayscale(1);opacity:.7}
+.cross{opacity:0}
+.joy .eye{opacity:0}.joy .arc{opacity:1}.joy .all{animation:hop 1s 1}
+@keyframes watch{0%,40%{transform:translate(1.5px,3px)}50%,70%{transform:translate(0,0)}80%,100%{transform:translate(1.5px,3px)}}
+.s-screen .eyes{animation:watch 3.6s infinite ease-in-out}
+@keyframes glow{0%,100%{opacity:.12}50%{opacity:.32}}
+.s-screen .glow{animation:glow 2.4s infinite ease-in-out}
+@keyframes live{0%,55%{opacity:1}65%,90%{opacity:.2}100%{opacity:1}}
+.s-screen .live{animation:live 1.6s infinite}
+@media (prefers-reduced-motion: reduce){.m *,.m{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>B:SPACE: логотип и персонаж</h1>
+  <p class="lead">Знак — буква B из двух реплик: верхняя говорит, нижняя отвечает. У головы есть глаза, поэтому знак одновременно и персонаж. Ниже — знак во всех местах, где он будет жить, состояния персонажа и сам персонаж вживую. Файлы и правила лежат в <code>assets/brand/b-space/</code>.</p>
+  <div class="cards" id="cards"></div>
+  <h2 class="sec">Состояния</h2>
+  <p class="lead">Нарисовано на выбранном лице «Как было». Глаза вырезаны в голове, поэтому каждое состояние работает и в один цвет. Под каждым — где оно появляется.</p>
+  <div class="states" id="states"></div>
+  <h2 class="sec">Попробуйте сами</h2>
+  <div class="play"><div class="stage" id="stage"></div><p>Наведите курсор: персонаж смотрит на него. Нажмите — обрадуется. Если ничего не делать, он иногда моргает и оглядывается. Так он может вести себя на экране входа и в пустом списке сообщений.</p></div>
+  <div class="notes">
+    <section><h3>Выбрано: «Как было»</h3><p>Узкие овальные глаза высоко в голове: персонаж спокойный и чуть строгий, а знак при этом остаётся буквой B. В 16 px глаза становятся двумя точками и не мешают читать B. Все состояния ниже нарисованы на этом лице.</p></section>
+    <section><h3>Где жить анимации</h3><p>Экран загрузки и входа, пустые состояния («тут пока никто не написал»), уведомления в трее и в доке, экран без сети, страница «Backspace» в приложении. В строке каналов и в списке пространств знак лучше держать неподвижным, чтобы не отвлекал.</p></section>
+    <section><h3>Как это сделать технически</h3><p>Глаза — отдельные фигуры, поэтому анимация делается обычным CSS или SVG, без видео и без новых библиотек. Иконки приложения, трея и фавикон статичные: на macOS и Windows значок может только сменить картинку, например закрыть глаза, когда нет сети.</p></section>
+  </div>
+</div>
+
+<script>
+// Geometry on a 100-unit grid. Stem at x=20. Top bubble has a tail at its lower left;
+// the bottom bubble's upper-left corner is cut parallel to that tail, offset by `g`.
+function build(p){
+  const L=20, r=p.r, rt=p.rTip, rj=p.rJoin, rc=p.rCut;
+  const R1=(p.tBot-p.tTop)/2, cx1=p.tRight-R1;
+  const dx=L-p.xb, dy=p.yt-p.tBot, len=Math.hypot(dx,dy), u={x:dx/len,y:dy/len};
+  const n={x:u.y,y:-u.x}; // points down-right for this tail direction
+  const f=v=>+v.toFixed(2);
+  const top=`M${L+r} ${p.tTop}H${f(cx1)}A${f(R1)} ${f(R1)} 0 0 1 ${f(cx1)} ${p.tBot}H${f(p.xb+rj)}Q${p.xb} ${p.tBot} ${f(p.xb+u.x*rj)} ${f(p.tBot+u.y*rj)}L${f(L-u.x*rt)} ${f(p.yt-u.y*rt)}Q${L} ${p.yt} ${L} ${f(p.yt-rt)}V${p.tTop+r}${r?`A${r} ${r} 0 0 1 ${L+r} ${p.tTop}`:''}Z`;
+  const bTop=p.tBot+p.g, P0={x:p.xb+n.x*p.g,y:p.tBot+n.y*p.g};
+  const Xc=P0.x+(bTop-P0.y)/u.y*u.x, yc=P0.y+(L-P0.x)/u.x*u.y;
+  const R2=(p.bBot-bTop)/2, cx2=p.bRight-R2;
+  const bot=`M${f(Xc+u.x*rc)} ${f(bTop+u.y*rc)}Q${f(Xc)} ${bTop} ${f(Xc+rc)} ${bTop}H${f(cx2)}A${f(R2)} ${f(R2)} 0 0 1 ${f(cx2)} ${p.bBot}H${L+r}${r?`A${r} ${r} 0 0 1 ${L} ${p.bBot-r}`:''}V${f(yc+rc)}Q${L} ${f(yc)} ${f(L-u.x*rc)} ${f(yc-u.y*rc)}Z`;
+  return [top,bot];
+}
+const base={r:6,rTip:2.5,rJoin:3,rCut:3};
+const A4={...base,tTop:10,tBot:46,tRight:75,xb:33,yt:59,g:5,bBot:90,bRight:80};
+const A4D=build(A4);
+const ell=(x,y,rx,ry)=>`M${x-rx} ${y}a${rx} ${ry} 0 1 0 ${2*rx} 0a${rx} ${ry} 0 1 0 ${-2*rx} 0Z`;
+const smile='M42.5 35.5Q48.5 40 54.5 35.5Q48.5 43.5 42.5 35.5Z';
+const FACES=[
+  {id:'E1',name:'Как было',rec:true,text:'Узкие овальные глаза в верхней части головы. Спокойный, чуть строгий взгляд.',eyes:[[41,26,3.6,5.6],[56,26,3.6,5.6]]},
+  {id:'E2',name:'Точки',text:'Круглые глаза-точки. Самый сдержанный: почти не меняет знак, лицо замечаешь со второго взгляда.',eyes:[[41,28,4.2,4.2],[56,28,4.2,4.2]]},
+  {id:'E3',name:'Крупные',text:'Глаза крупнее и опущены к середине головы, как у детских персонажей. Самый милый, и именно такие глаза лучше всего моргают и бегают в анимации.',eyes:[[40,28,4.6,6.8],[56,28,4.6,6.8]]},
+  {id:'E4',name:'Взгляд вниз',text:'Глаза сдвинуты к хвосту: персонаж смотрит на нижнюю реплику, будто читает ответ. Есть характер, но в иконке выглядит застенчиво.',eyes:[[36,30,4,6.2],[50,30,4,6.2]]},
+  {id:'E5',name:'С улыбкой',text:'Добавлена маленькая улыбка. Самый дружелюбный, но в 16 px улыбка пропадает, а в крупном размере знак становится похож на смайлик.',eyes:[[41,24,3.8,5.6],[56,24,3.8,5.6]],extra:smile},
+];
+const V=FACES.filter(f=>f.id==='E1').map(f=>({...f,d:[A4D[0]+f.eyes.map(e=>ell(...e)).join('')+(f.extra||''),A4D[1]],box:[16,6,68,88]}));
+const DARK={c1:'#ededf0',c2:'#6e5bef'}, LIGHT={c1:'#0c0c0e',c2:'#6e5bef'}, ICON={c1:'#ededf0',c2:'#7f6df5'};
+const SWAP_D={c1:'#7f6df5',c2:'#ededf0'}, SWAP_L={c1:'#6e5bef',c2:'#0c0c0e'};
+const part=(v,d,col)=>`<path d="${d}" fill="${col}" fill-rule="${v.rule||'evenodd'}"${v.sw?` stroke="${col}" stroke-width="${v.sw}" stroke-linejoin="round"`:''}/>`;
+let mk=0;
+// "Внахлёст": the back reply is cut around the front one, so the overlap reads in one colour too
+const paths=(v,c)=>{let defs='',m='';if(v.mask){const id='m'+(mk++);defs=`<defs><mask id="${id}" maskUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140"><rect x="-20" y="-20" width="140" height="140" fill="#fff"/><path d="${v.d[1]}" fill="#000" stroke="#000" stroke-width="${v.mask}" stroke-linejoin="round"/></mask></defs>`;m=` mask="url(#${id})"`}
+  return `${defs}<g${v.t?` transform="${v.t}"`:''}><g${m}>${part(v,v.d[0],c.c1)}</g>${part(v,v.d[1],c.c2)}</g>`};
+const svg=(v,c,s)=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${s}" height="${s}">${paths(v,c)}</svg>`;
+const tight=(v,c,h)=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${v.box.join(' ')}" height="${h}" width="${h*v.box[2]/v.box[3]}">${paths(v,c)}</svg>`;
+const mono=(v,col,s)=>svg(v,{c1:col,c2:col},s);
+const mac=(v,s)=>`<svg class="mac" width="${s}" height="${s}" viewBox="0 0 1024 1024"><rect x="100" y="100" width="824" height="824" rx="186" fill="#1b1b1f"/><rect x="100.5" y="100.5" width="823" height="823" rx="185.5" fill="none" stroke="#fff" stroke-opacity=".08"/><g transform="translate(232 232) scale(5.6)">${paths(v,ICON)}</g></svg>`;
+const px=(v,col,bg)=>`<canvas class="px" data-v="${v.id}" data-c="${col}" data-bg="${bg}"></canvas>`;
+const lock=(v,c)=>`<div class="lockup">${tight(v,c,29)}<span>B:SPACE</span></div>`;
+document.getElementById('cards').innerHTML=V.map(v=>`
+<article class="card">
+  <header><h2>${v.name}</h2>${v.rec?'':''}${v.was?'<span class="tag was">прошлый круг</span>':''}</header>
+  <div class="pair hero"><div class="d">${svg(v,DARK,104)}</div><div class="l">${svg(v,LIGHT,104)}</div></div>
+  <p>${v.text}</p>
+  <div class="lbl">Иконка приложения · трей 32 и 16 px</div>
+  <div class="pair"><div class="d">${mac(v,64)}${mac(v,32)}<div class="menubar">${mono(v,'#fff',16)}</div></div><div class="l">${mono(v,'#000',32)}<div class="menubar">${mono(v,'#000',16)}</div></div></div>
+  <div class="lbl">16 px как есть, пиксели ×6 · вкладка · кнопка «Главная»</div>
+  <div class="pair"><div class="d">${px(v,'#ededf0','#0c0c0e')}<div class="tile">${mono(v,'#a99dff',24)}</div></div><div class="l">${px(v,'#0c0c0e','#f4f4f6')}<div class="tab">${svg(v,LIGHT,16)}B:SPACE</div></div></div>
+  <div class="lbl">С написанием</div>
+  <div class="pair"><div class="d">${lock(v,DARK)}</div><div class="l">${lock(v,LIGHT)}</div></div>
+  <div class="lbl">Цвет наоборот · один цвет</div>
+  <div class="pair"><div class="d">${svg(v,SWAP_D,56)}${mono(v,'#a99dff',56)}</div><div class="l">${svg(v,SWAP_L,56)}${mono(v,'#6e5bef',56)}</div></div>
+</article>`).join('');
+// rasterise at a true 16 px, then enlarge those pixels
+document.querySelectorAll('canvas.px').forEach(cv=>{
+  const v=V.find(x=>x.id===cv.dataset.v), n=16, z=6;
+  cv.width=cv.height=n*z; cv.style.width=cv.style.height=n*z+'px';
+  const small=document.createElement('canvas'); small.width=small.height=n;
+  const img=new Image();
+  img.onload=()=>{const s=small.getContext('2d');s.fillStyle=cv.dataset.bg;s.fillRect(0,0,n,n);s.drawImage(img,0,0,n,n);
+    const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(small,0,0,n*z,n*z)};
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(mono(v,cv.dataset.c,n));
+});
+
+// ---- animated character: eyes are separate shapes painted in the tile colour
+const SCREEN='M43 60H65A3 3 0 0 1 68 63V77A3 3 0 0 1 65 80H43A3 3 0 0 1 40 77V63A3 3 0 0 1 43 60Z';
+const FACE=FACES.find(f=>f.id==='E1');
+function character(cls,size,bg){
+  const [l,r]=FACE.eyes;
+  const arc=([x,y])=>`<path class="arc" d="M${x-4.6} ${y+2}Q${x} ${y-6} ${x+4.6} ${y+2}" fill="none" stroke="${bg}" stroke-width="3.2" stroke-linecap="round"/>`;
+  const cross=([x,y])=>`<path class="cross" d="M${x-3.5} ${y-3.5}L${x+3.5} ${y+3.5}M${x+3.5} ${y-3.5}L${x-3.5} ${y+3.5}" stroke="${bg}" stroke-width="2.8" stroke-linecap="round"/>`;
+  return `<svg class="m ${cls}" viewBox="0 0 100 100" width="${size}" height="${size}">
+   <g class="all">
+    <path class="ring" d="${A4D[1]}" fill="none" stroke="#6fdc9a" stroke-width="2.5" opacity="0"/>
+    <path class="body" d="${A4D[1]}${cls.includes('screen')?SCREEN:''}" fill="#6e5bef" fill-rule="evenodd"/>
+    ${cls.includes('screen')?`<rect class="glow" x="40" y="60" width="28" height="20" rx="3" fill="#a99dff"/><circle class="live" cx="46.5" cy="66.5" r="2.8" fill="#f2777a"/>`:''}
+    <path class="head" d="${A4D[0]}" fill="#ededf0"/>
+    <g class="eyes">${[l,r].map(([x,y,rx,ry])=>`<ellipse class="eye" cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${bg}"/>`).join('')}${arc(l)}${arc(r)}${cross(l)}${cross(r)}</g>
+    ${cls.includes('typing')?`<g>${[42,52,62].map(x=>`<circle class="dot" cx="${x}" cy="70" r="3.4" fill="#ededf0"/>`).join('')}</g>`:''}
+   </g>
+   ${cls.includes('notify')?`<circle class="badge" cx="80" cy="14" r="8" fill="#f2777a"/>`:''}
+   ${cls.includes('sleep')?`<g><text class="z" x="74" y="14" font-size="12" font-weight="600" fill="#a0a0a8" font-family="Onest,sans-serif">z</text><text class="z" x="74" y="14" font-size="9" font-weight="600" fill="#a0a0a8" font-family="Onest,sans-serif">z</text></g>`:''}
+  </svg>`;
+}
+const STATES=[
+  ['s-blink','Моргает','Обычное состояние: иконка в доке, экран входа, пустые экраны.'],
+  ['s-look','Оглядывается','Ожидание: загрузка, поиск, подключение к серверу.'],
+  ['s-notify','Новое сообщение','Уведомление: прыжок и широко открытые глаза, красная точка.'],
+  ['s-typing','Пишет','Кто-то печатает: смотрит вниз, в нижней реплике бегут точки.'],
+  ['s-voice','Говорит','Голосовой канал: тело пульсирует, зелёный контур как у говорящего.'],
+  ['s-screen','Показывает экран','Демонстрация экрана («В ЭФИРЕ»): тело стало экраном, глаза смотрят на него и обратно, мигает точка эфира.'],
+  ['s-joy','Радуется','Сообщение отправлено, вход выполнен, приглашение принято.'],
+  ['s-sleep','Спит','«Не беспокоить» или «Отошёл»: глаза закрыты, плывут «z».'],
+  ['s-off','Нет связи','Сервер недоступен: серый, глаза-крестики.'],
+];
+document.getElementById('states').innerHTML=STATES.map(([c,t,d])=>`<div class="st"><div class="box">${character(c,96,'#1b1b1f')}</div><b>${t}</b><span>${d}</span></div>`).join('');
+// playground: eyes follow the pointer, click = joy, idle = blink and glance
+const stage=document.getElementById('stage');
+stage.innerHTML=character('s-blink',200,'#1b1b1f');
+const svgEl=stage.querySelector('svg'), eyesEl=svgEl.querySelector('.eyes');
+let idle;
+function lookAt(dx,dy){eyesEl.style.transform=`translate(${dx}px,${dy}px)`}
+stage.addEventListener('pointermove',e=>{
+  const r=svgEl.getBoundingClientRect(), cx=r.left+r.width*.48, cy=r.top+r.height*.28;
+  const vx=e.clientX-cx, vy=e.clientY-cy, len=Math.hypot(vx,vy)||1, k=Math.min(1,len/120);
+  lookAt(vx/len*5*k, vy/len*3.5*k); clearTimeout(idle); idle=setTimeout(()=>lookAt(0,0),1800);
+});
+stage.addEventListener('pointerleave',()=>lookAt(0,0));
+stage.addEventListener('click',()=>{svgEl.classList.remove('joy');void svgEl.getBoundingClientRect();svgEl.classList.add('joy');setTimeout(()=>svgEl.classList.remove('joy'),1100)});
+setInterval(()=>{if(stage.matches(':hover'))return;const d=[[-4.5,1],[4,0],[0,0]][Math.floor(Math.random()*3)];lookAt(...d);setTimeout(()=>lookAt(0,0),900)},3800);
+</script>
+
+</body>
+</html>

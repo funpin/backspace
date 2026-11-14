@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChatStore, addedRealtimeMessageEvents } from '../stores/chatStore';
 import { useVoiceStore } from '../stores/voiceStore';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore, selectMyChosenStatus } from '../stores/authStore';
 import { isElectron } from '../platform/platform';
-import { onNotificationClick, updateBadgeCount } from '../platform/notifications';
+import { onNotificationClick, updateBadgeCount, updateTrayState } from '../platform/notifications';
+import { useHomeConnectionStore } from '../stores/homeConnectionStore';
+import { pickTrayState, type TrayState } from '../utils/trayState';
 import { messageAlertsUser, showAlertNotification } from '../utils/alerts';
 import i18n from '../i18n';
 import { useSpaceStore } from '../stores/spaceStore';
@@ -119,6 +121,31 @@ export function NotificationController() {
       updateBadgeCount(state.unreadChannels.size);
     });
     return unsubscribe;
+  }, []);
+
+  // Tray character (Electron only): offline, screen sharing, unread, DND/idle
+  useEffect(() => {
+    if (!isElectron()) return undefined;
+    let last: TrayState | null = null;
+    const push = () => {
+      const next = pickTrayState({
+        homeConnection: useHomeConnectionStore.getState().status,
+        isScreenSharing: useVoiceStore.getState().isScreenSharing,
+        unreadCount: useChatStore.getState().unreadChannels.size,
+        chosenStatus: selectMyChosenStatus(useAuthStore.getState()),
+      });
+      if (next === last) return;
+      last = next;
+      updateTrayState(next);
+    };
+    push();
+    const unsubscribers = [
+      useHomeConnectionStore.subscribe(push),
+      useVoiceStore.subscribe(push),
+      useChatStore.subscribe(push),
+      useAuthStore.subscribe(push),
+    ];
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
   }, []);
 
   // DM call notification

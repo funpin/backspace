@@ -1,4 +1,5 @@
 import { isElectron } from './platform';
+import type { TrayState } from '../utils/trayState';
 
 export interface NotificationOptions {
   channelId?: string;
@@ -41,5 +42,12 @@ export function requestNotificationPermission(): Promise<boolean> {
 export function updateBadgeCount(count: number): void {
   if (isElectron()) {
     window.backspace!.setBadgeCount(count);
+  }
+}
+
+/** The character in the desktop tray. Older desktop builds lack the bridge method; they keep the idle icon. */
+export function updateTrayState(state: TrayState): void {
+  if (isElectron()) {
+    window.backspace?.setTrayState?.(state);
   }
 }

@@ -27,7 +27,7 @@ import { api } from '../../../api/client';
 import { useSettingsStore } from '../../../stores/settingsStore';
 
 const SUPPORT = 'Show the Support card';
-const SUPPORT_DESCRIPTION = "Shows a card on the Backspace page that links to the project's Ko-fi page. Turning it off hides only that card.";
+const SUPPORT_DESCRIPTION = "Shows a card on the Backspace page that links to the project's support page. Turning it off hides only that card.";
 
 const base: InstanceAdminSettings = {
   instanceName: 'Workbench',

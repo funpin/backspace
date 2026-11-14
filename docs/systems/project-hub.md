@@ -22,7 +22,7 @@ Source files:
 - `packages/web/src/hooks/useHubUpdateState.ts` - the hook every dot and the What's new card read
 - `packages/web/src/hooks/useHomeInstanceInfo.ts` - the shared reader of `GET /api/instance/info` (version, `supportCardEnabled`); `invalidateHomeInstanceInfo` after an admin save marks the value stale and rereads it, keeping the old value on screen until the answer replaces it (and keeping it if the reread fails)
 - `packages/web/src/utils/homeNav.ts` - `activeHomeNavItem`, which of Friends, Explore and Backspace is selected
-- `packages/web/src/components/projectHub/` - `ProjectHubPage`, `HubCard`, `WhatsNewCard`, `CommunityCard`, `ReportCard`, `InstanceSection`, `BackspaceMark`, `HubUpdateDot`
+- `packages/web/src/components/projectHub/` - `ProjectHubPage`, `HubCard`, `WhatsNewCard`, `CommunityCard`, `ReportCard`, `InstanceSection`, `HubUpdateDot` (the mark in the header is `components/brand/BrandMark.tsx`)
 - `packages/web/src/components/layout/ChannelSidebar.tsx` - the sidebar item; `MobileYouScreen.tsx` - the row; `MobileShell.tsx` - `MobileBackspaceScreen`; `MobileBottomNav.tsx` - the You tab dot
 - `packages/web/src/locales/*/project.json` - the `project` namespace
 - `packages/web/dev-project-hub.html`, `packages/web/src/dev/project-hub-preview.tsx` - the design workbench
@@ -36,9 +36,9 @@ it there; this document does not copy them. Links always point upstream. The
 instance's own source offer (a fork's `BACKSPACE_SOURCE_URL`) comes from the
 instance info and is shown only in "This instance".
 
-`funding` holds the project's Ko-fi page; `community` ships as `null`. A null
+`funding` holds the project's support page on DaLink (`https://dalink.to/funpinworld`); `community` ships as `null`. A null
 value hides its card, so no card renders a dead link. `.github/FUNDING.yml`
-names the same Ko-fi page for the repository's Sponsor button.
+names the same page (as a `custom` link) for the repository's Sponsor button.
 `projectLinks.test.ts` runs `projectLinksProblems` over the real constant:
 every URL must parse and be `https:`, and `community.origin` must be a bare
 origin with a non-empty `spaceId`.

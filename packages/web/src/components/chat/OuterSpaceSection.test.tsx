@@ -56,9 +56,6 @@ vi.mock('../../hooks/useSpaceJoin', () => ({
   }),
 }));
 
-vi.mock('../../hooks/useMascotAnimation', () => ({
-  useMascotAnimation: vi.fn(),
-}));
 
 function entry(id: string, origin = 'https://orbit.example'): DirectoryEntry {
   return {

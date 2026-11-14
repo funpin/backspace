@@ -24,7 +24,7 @@ import { useFloatingPosition } from '../../hooks/useFloatingPosition';
 import { describeCodedError } from '../../i18n/errors';
 import { Icon, type IconName } from '../ui/Icon';
 import { Badge } from '../ui/Tag';
-import { BackspaceMark } from '../projectHub/BackspaceMark';
+import { BrandMark } from '../brand/BrandMark';
 
 // ─── Resolved layout types ─────────────────────────────────────────────────
 
@@ -110,7 +110,7 @@ function SidebarItem({ id, name, icon, avatarColor, active, onClick, onContextMe
     <button onClick={onClick} className={`${getButtonClasses()} ${dimmed ? 'opacity-40 saturate-50' : ''}`} style={backgroundStyle} title={tooltipText ? undefined : name} aria-current={active ? 'page' : undefined}>
       {type === 'dm' ? (
         <>
-          <BackspaceMark size={25} />
+          <BrandMark size={25} />
           <span className="sr-only">{t('common:appName')}</span>
         </>
       ) : type === 'action' ? (

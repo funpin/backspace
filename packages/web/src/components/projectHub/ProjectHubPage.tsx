@@ -9,7 +9,7 @@ import { isElectron } from '../../platform/platform';
 import { PROJECT_LINKS, type ProjectLinks } from '../../utils/projectLinks';
 import { MemberListToggleButton } from '../layout/MemberListToggleButton';
 import { Icon } from '../ui/Icon';
-import { BackspaceMark } from './BackspaceMark';
+import { BrandMark } from '../brand/BrandMark';
 import { CommunityCard } from './CommunityCard';
 import { HUB_ACTION, HubCard, HubLinkAction } from './HubCard';
 import { InstanceSection } from './InstanceSection';
@@ -121,7 +121,7 @@ export function ProjectHubPage(props: { links?: ProjectLinks; showTopBar?: boole
       {showTopBar && (
         <div className="h-12 px-4 flex items-center border-b border-border-hard flex-shrink-0 z-raised bg-surface-chat">
           <div className="flex items-center gap-2 mr-4">
-            <BackspaceMark size={20} className="text-accent-tone" />
+            <BrandMark size={20} className="text-accent-tone" />
             <span className="text-lg font-semibold text-txt-primary">{t('header.title')}</span>
           </div>
           <div className="ml-auto flex items-center gap-1">
@@ -138,7 +138,7 @@ export function ProjectHubPage(props: { links?: ProjectLinks; showTopBar?: boole
               data-hub-mark-tile
               className="w-12 h-12 rounded-xl bg-surface-elevated shadow-[inset_0_0_0_1px_var(--glass-border)] text-accent-tone flex items-center justify-center flex-shrink-0"
             >
-              <BackspaceMark size={28} />
+              <BrandMark size={28} />
             </div>
             <div className="min-w-0">
               <h1 className="text-2xl font-semibold text-txt-primary">{t('header.title')}</h1>

@@ -28,7 +28,7 @@ import { useAudioDevices } from '../../hooks/useAudioDevices';
 import { useInstanceUpdateBadge } from '../../hooks/useInstanceUpdateBadge';
 import { useHubUpdateState } from '../../hooks/useHubUpdateState';
 import { activeHomeNavItem } from '../../utils/homeNav';
-import { BackspaceMark } from '../projectHub/BackspaceMark';
+import { BrandMark } from '../brand/BrandMark';
 import { HubUpdateDot } from '../projectHub/HubUpdateDot';
 import { DropdownItem } from '../modals/settingsPanels/_shared/SettingsPickerPrimitives';
 import type { UserSettingsTab } from '../modals/UserSettings';
@@ -473,7 +473,7 @@ export function ChannelSidebar() {
             onClick={() => navigate('/backspace')}
             className={`${HOME_ROW} ${activeHomeItem === 'backspace' ? HOME_ROW_SELECTED : HOME_ROW_IDLE}`}
           >
-            <BackspaceMark size={18} className={`flex-shrink-0 ${activeHomeItem === 'backspace' ? 'text-accent-tone' : ''}`} />
+            <BrandMark size={18} className={`flex-shrink-0 ${activeHomeItem === 'backspace' ? 'text-accent-tone' : ''}`} />
             <span>{t('project:nav.label')}</span>
             {hubUpdate.state === 'updated' && <HubUpdateDot className="ml-auto" />}
           </div>
@@ -511,7 +511,7 @@ export function ChannelSidebar() {
             ))}
             {dmChannels.length === 0 && (
               <div className="flex flex-col items-center py-6 opacity-80">
-                <Mascot state="sleeping" className="w-20 h-20 mb-2" />
+                <Mascot state="dnd" className="w-20 h-20 mb-2" />
                 <p className="text-compact text-txt-tertiary">{t('spaces:sidebar.dmList.empty')}</p>
               </div>
             )}

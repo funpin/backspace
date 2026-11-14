@@ -1,41 +1,34 @@
 #!/usr/bin/env node
 /**
- * Backspace icon generator
+ * B:SPACE icon generator
  *
  * Reads from assets/brand/{app-icon.svg, app-icon-small.svg, mark-icon.svg,
- * mark-small.svg, mark-mono-light.svg, mark-tray.svg} and writes the
- * entire desktop + web icon set:
+ * mark-small.svg, mark-mono-light.svg} and assets/brand/tray/*.svg and
+ * writes the entire desktop + web icon set:
  *   - macOS .icns (10-rep iconset)
  *   - Windows .ico (multi-size)
  *   - Linux per-size PNGs (electron-builder dir mode)
- *   - macOS menu-bar template + @2x (18x22 / 36x44)
- *   - Windows tray .ico (multi-size, DPI-auto, glyph inset per frame)
- *   - Linux tray PNG (22x22, 18px glyph)
+ *   - per tray state: macOS menu-bar template + @2x (18x22 / 36x44),
+ *     Windows tray .ico (multi-size, glyph inset per frame), Linux tray PNG
  *   - Web favicons, PWA, in-app brand logo, PWA maskable
  *   - assets/brand/app-icon-1024.png, a reference export of the app icon
  *
- * Run via `pnpm gen-icons` after artwork changes; commit the diff.
+ * The masters themselves are generated: `node scripts/b-space-kit.mjs`
+ * draws them from the mark's geometry. Run that, then `pnpm gen-icons`,
+ * after artwork changes; commit the diff.
  *
- * FLAT VS DIMENSIONAL: the split is by surface, not by file type. UI
- * surfaces (the in-app sidebar tile, web favicons, desktop/menu-bar tray
- * icons) stay the flat two-colour mark. The app-icon family, meaning
- * everywhere an OS shows this app as a single launchable icon (dock,
- * taskbar, Start menu, Alt-Tab, PWA install, iOS home screen), is the
- * contributor's original dimensional composition recoloured to the
- * lavender system: a badge (a rounded rectangle at Apple's own 22.37%
- * template corner radius) on a `#232327`-to-`#0c0c0e` graphite gradient,
- * drop shadow, inner shadow and a soft-light stroke overlay, with the
- * glyph itself a white-to-`#6e5bef` gradient. See
- * `docs/systems/design-system.md`'s Brand section for the full rule.
+ * THE MARK: the letter B made of two chat replies, the upper one with eyes
+ * (the B:SPACE character). App icons put the two-tone mark (head
+ * `#ededf0`, body `#6e5bef`) on a flat `#1b1b1f` badge at Apple's 22.37%
+ * corner radius. Favicons and the Windows/Linux tray use the one-colour
+ * lavender mark with larger eyes (mark-small); the macOS tray uses black
+ * templates. See assets/brand/b-space/README.md for the rules.
  *
- * APP-ICON RENDERING: every app-icon output renders straight from vector.
- * `app-icon.svg` already carries its own badge, drop shadow and
- * inner shadow, so there is no raster source and no post-render masking —
+ * APP-ICON RENDERING: every app-icon output renders straight from vector:
  * sharp/librsvg renders the SVG at the target size and that's the pixel
- * output. Sizes 16 and 32 render from `app-icon-small.svg` instead: at
- * that size the standard mark's inset strokes and shadow read as noise,
- * so the small variant carries a bolder, simplified mark inside the same
- * badge geometry. See APP_ICON_SMALL_MAX.
+ * output. Sizes 16 and 32 render from `app-icon-small.svg` instead, whose
+ * mark fills more of the badge and has larger eyes so they survive at that
+ * size. See APP_ICON_SMALL_MAX.
  *
  * DETERMINISM: byte-stable for a given lockfile only. After bumping
  * sharp / png-to-ico / png2icons, expect a follow-up regen+commit in
@@ -59,7 +52,6 @@ const SRC = {
   markIcon:      join(ROOT, 'assets/brand/mark-icon.svg'),
   markSmall:     join(ROOT, 'assets/brand/mark-small.svg'),
   markMonoLight: join(ROOT, 'assets/brand/mark-mono-light.svg'),
-  markTray:      join(ROOT, 'assets/brand/mark-tray.svg'),
 };
 
 const DESKTOP_BUILD = join(ROOT, 'packages/desktop/build');
@@ -67,22 +59,19 @@ const DESKTOP_RES   = join(ROOT, 'packages/desktop/resources');
 const WEB_ICONS      = join(ROOT, 'packages/web/public/icons');
 const BRAND          = join(ROOT, 'assets/brand');
 
-// app-icon.svg's badge ground: a vertical gradient from plum to
-// near-black, matching the badge's own `paint0_linear` gradient exactly.
-// Reused here as an opaque background for outputs that must carry zero
-// transparent pixels: the apple-touch-icon (iOS paints transparent
-// corners black) and the maskable PWA icon (Android launcher masks crop
-// past the mark's own bounding box, so anything outside it must already
-// look like the badge). Kept as hex constants rather than re-parsing
-// app-icon.svg's gradient stops: the two files sharing these literal
-// values is the intended coupling; if the badge gradient ever changes,
-// both need editing together regardless.
-const GROUND_GRADIENT_TOP = '#232327';
-const GROUND_GRADIENT_BOTTOM = '#0c0c0e';
+// app-icon.svg's badge ground, flat `#1b1b1f` (the brandbook's
+// --bg-elevated). Reused as an opaque background for outputs that must
+// carry zero transparent pixels: the apple-touch-icon (iOS paints
+// transparent corners black) and the maskable PWA icon (Android launcher
+// masks crop past the mark's own bounding box, so anything outside it must
+// already look like the badge). Kept as a gradient pair so a future badge
+// gradient needs no code change; both stops are the same colour today.
+const GROUND_GRADIENT_TOP = '#1b1b1f';
+const GROUND_GRADIENT_BOTTOM = '#1b1b1f';
 
 // SVG render density. app-icon(-small).svg's viewBox is 256; mark(-small)
-// is 133x180. At density 1200, the 256 box pre-renders to ~3200px and the
-// 180-tall box to ~2250px — comfortably above every target here (largest
+// is drawn at 120x160. At density 1200, the 256 box pre-renders to ~3200px
+// and the 160-tall mark to ~2650px — comfortably above every target here (largest
 // is the 1024 reference export), so every output is a downscale. Sharp/
 // libvips downscales with Lanczos, so over-rendering then resizing is
 // fine and keeps output stable across all target sizes.
@@ -114,7 +103,7 @@ async function renderPng(svg, size) {
 
 async function renderTemplatePng(svg, height) {
   // Render a non-square SVG at an exact pixel height, width following the
-  // SVG's own aspect ratio. mark-tray.svg carries its own 18x22 canvas
+  // SVG's own aspect ratio. the tray templates carry their own 18x22 canvas
   // with the glyph already inset and centred, so nothing is fitted here.
   return sharp(svg, { density: SVG_DENSITY })
     .resize({ height })
@@ -187,9 +176,12 @@ async function renderTrayGlyphPng(markSvg, canvasW, canvasH, glyphH) {
 // the glyph is 14, 18, 21, 28, 35, 42 tall in the 16..48 frames (Windows
 // 11 draws its own tray glyphs about 14px inside the 16px cell).
 const TRAY_ICO_SIZES = [16, 20, 24, 32, 40, 48];
+
+// Must match TRAY_STATES in packages/desktop/src/trayState.ts.
+const TRAY_STATES = ['idle', 'notify', 'screen', 'dnd', 'offline'];
 const trayGlyphHeight = (size) => size - Math.floor(size / 8);
 
-function plumGradientSvg(size) {
+function groundSvg(size) {
   // Full-bleed vertical gradient rect, no rounding: the badge shape
   // itself provides the rounding when composited on top; this is only
   // the fill that shows through the badge's transparent corners (or,
@@ -325,7 +317,7 @@ async function writeAppleTouchIcon(path, icons, size) {
   // corners read as continuous badge, not a hard-edged cutout, while the
   // final PNG carries no transparent pixel (iOS paints transparent
   // corners black, which would look like a defect here).
-  const bg = plumGradientSvg(size);
+  const bg = groundSvg(size);
   const icon = await renderAppIconPng(icons, size);
   mkdirSync(dirname(path), { recursive: true });
   const composed = await sharp(bg)
@@ -336,21 +328,21 @@ async function writeAppleTouchIcon(path, icons, size) {
 }
 
 async function writeMaskableIcon(path, markSvg, canvas, heightScale) {
-  // PWA maskable icon: the badge's graphite gradient fills the full canvas
+  // PWA maskable icon: the badge's ground fills the full canvas
   // (Android launcher masks, such as circle, squircle or rounded-square,
   // crop arbitrarily past the icon's own bounding box, so the ground must
-  // extend to every edge), with the gradient mark centred at
+  // extend to every edge), with the mark centred at
   // heightScale × canvas height. Scaling by height (not by fitting a
   // square) keeps the mark's proportions identical to every other
-  // rendering of it. `markSvg` is mark-icon.svg, the same white-to-
-  // lavender gradient glyph as the app icon's own badge, transparent
-  // outside the glyph itself so the plum ground shows through.
+  // rendering of it. `markSvg` is mark-icon.svg, the same two-tone mark
+  // as on the app icon's badge, transparent outside the glyph itself so
+  // the ground shows through.
   const innerHeight = Math.round(canvas * heightScale);
   const inner = await sharp(markSvg, { density: SVG_DENSITY })
     .resize({ height: innerHeight })
     .png({ compressionLevel: 9, palette: false })
     .toBuffer();
-  const bg = plumGradientSvg(canvas);
+  const bg = groundSvg(canvas);
   mkdirSync(dirname(path), { recursive: true });
   const composed = await sharp(bg)
     .composite([{ input: inner, gravity: 'center' }])
@@ -364,7 +356,11 @@ async function writeMaskableIcon(path, markSvg, canvas, heightScale) {
 async function main() {
   // Spec: refuse to run if any source SVG is missing — fail loudly, not on
   // a downstream sharp error with a cryptic ENOENT.
-  for (const [, path] of Object.entries(SRC)) {
+  const traySources = TRAY_STATES.flatMap((state) => [
+    join(BRAND, `tray/${state}-template.svg`),
+    join(BRAND, `tray/${state}.svg`),
+  ]);
+  for (const path of [...Object.values(SRC), ...traySources]) {
     if (!existsSync(path)) {
       throw new Error(`Missing source SVG: ${relative(ROOT, path)} — see assets/brand/`);
     }
@@ -375,7 +371,6 @@ async function main() {
   const markIcon      = loadSvg(SRC.markIcon);
   const markSmall     = loadSvg(SRC.markSmall);
   const markMonoLight = loadSvg(SRC.markMonoLight);
-  const markTray      = loadSvg(SRC.markTray);
 
   // Rendered once at the top of the pipeline: it's both the .icns
   // synthesis input and the standalone reference export, and every
@@ -445,34 +440,37 @@ async function main() {
   );
   await trace('win-ico', join(DESKTOP_BUILD, 'icon.ico'), '7 sizes', winIcoMeasured);
 
-  // --- Desktop: tray ---
-  // macOS menu bar: mark-tray.svg is a silhouette tuned for the menu bar
-  // (16px body on an 18x22 canvas, 2.8px arrow channel, centred by alpha
-  // centroid), so it renders 1:1 here with no further fitting. The canvas
-  // is 18 wide, not 22: the status item pads the image itself, and a 22px
-  // box around a 12px glyph left a wider gap than the system icons keep.
-  // main.ts marks the PNG as a template image and macOS tints the alpha;
-  // the file must stay pure black. Electron resolves the @2x by suffix.
-  await writeTemplatePng(join(DESKTOP_RES, 'tray-iconTemplate.png'), markTray, 22);
-  await trace('tray-mac-1x', join(DESKTOP_RES, 'tray-iconTemplate.png'), '18x22 (mark-tray)');
+  // --- Desktop: tray, one icon per tray state ---
+  // The B:SPACE character shows the app's state in the tray: idle, unread
+  // (notify), screen sharing (screen), do-not-disturb (dnd) and no server
+  // connection (offline). packages/desktop/src/trayState.ts picks one and
+  // main.ts swaps the image. Masters: assets/brand/tray/<state>-template.svg
+  // and <state>.svg, written by scripts/b-space-kit.mjs.
+  //
+  // macOS menu bar: the template is the character's silhouette (eyes cut
+  // out) on an 18x22 canvas, glyph 16px tall like the system's own glyphs,
+  // rendered 1:1. main.ts marks it a template image and macOS tints the
+  // alpha, so the file stays pure black. Electron resolves @2x by suffix.
+  //
+  // Windows and Linux render the colour glyph inset in their cell the way
+  // each platform's own tray glyphs are (Windows 11: about 14px in the 16px
+  // cell; Ubuntu/KDE indicators: about 18px in 22) and centred by alpha
+  // centroid, see renderTrayGlyphPng.
+  for (const state of TRAY_STATES) {
+    const template = loadSvg(join(BRAND, `tray/${state}-template.svg`));
+    const colour = loadSvg(join(BRAND, `tray/${state}.svg`));
 
-  await writeTemplatePng(join(DESKTOP_RES, 'tray-iconTemplate@2x.png'), markTray, 44);
-  await trace('tray-mac-2x', join(DESKTOP_RES, 'tray-iconTemplate@2x.png'), '36x44 (mark-tray)');
+    await writeTemplatePng(join(DESKTOP_RES, `tray-${state}Template.png`), template, 22);
+    await trace('tray-mac-1x', join(DESKTOP_RES, `tray-${state}Template.png`), `18x22 (${state})`);
+    await writeTemplatePng(join(DESKTOP_RES, `tray-${state}Template@2x.png`), template, 44);
+    await trace('tray-mac-2x', join(DESKTOP_RES, `tray-${state}Template@2x.png`), `36x44 (${state})`);
 
-  // Windows and Linux trays render in colour from the bold small-size
-  // variant, inset in their cell the way each platform's own tray glyphs
-  // are (Windows 11: about 14px in the 16px cell; Ubuntu/KDE indicators:
-  // about 18px in 22) and centred by alpha centroid, see
-  // renderTrayGlyphPng. The .ico's 16 and 20px frames fall under the
-  // 1.5px small-size rule with the standard mark (its channel is ~1.2px
-  // at 16), and the whole tray set takes the same source so every frame
-  // is the same glyph. The app icons are a different family and stay
-  // full-bleed; this inset applies to the tray only.
-  const trayIcoMeasured = await writeTrayIco(join(DESKTOP_RES, 'tray-icon.ico'), markSmall, TRAY_ICO_SIZES);
-  await trace('tray-win-ico', join(DESKTOP_RES, 'tray-icon.ico'), '6 sizes (mark-small, inset)', trayIcoMeasured);
+    const icoMeasured = await writeTrayIco(join(DESKTOP_RES, `tray-${state}.ico`), colour, TRAY_ICO_SIZES);
+    await trace('tray-win-ico', join(DESKTOP_RES, `tray-${state}.ico`), `6 sizes (${state}, inset)`, icoMeasured);
 
-  const trayPngMeasured = await writeTrayPng(join(DESKTOP_RES, 'tray-icon.png'), markSmall, 22, 22, 18);
-  await trace('tray-linux', join(DESKTOP_RES, 'tray-icon.png'), '22x22 (mark-small, 18px glyph)', trayPngMeasured);
+    const pngMeasured = await writeTrayPng(join(DESKTOP_RES, `tray-${state}.png`), colour, 22, 22, 18);
+    await trace('tray-linux', join(DESKTOP_RES, `tray-${state}.png`), `22x22 (${state}, 18px glyph)`, pngMeasured);
+  }
 
   // --- Web: favicons + PWA + in-app ---
   // Favicons render from mark-small.svg on transparent, not the app-icon
@@ -494,22 +492,16 @@ async function main() {
   await trace('pwa-512', join(WEB_ICONS, 'icon-512.png'), '512 (app-icon)');
 
   await writeMaskableIcon(join(WEB_ICONS, 'icon-maskable-512.png'), markIcon, 512, 0.6);
-  await trace('pwa-maskable', join(WEB_ICONS, 'icon-maskable-512.png'), '512 (plum ground, 60% gradient mark)');
+  await trace('pwa-maskable', join(WEB_ICONS, 'icon-maskable-512.png'), '512 (badge ground, 60% mark)');
 
-  // In-app logo for the SpaceSidebar home tile: same app-icon render as
-  // every other ≥128px consumer (dock, launcher, homescreen), just sized
-  // for the sidebar slot. The badge's own rounded corners and flat
-  // lavender fill read cleanly against the sidebar's `#1a1a23` surface
-  // without any extra masking here.
+  // logo.png: the app icon at 256, for places outside the app that need
+  // one raster logo (the README's header until it moves to the lockup).
   await writeAppIconPng(join(WEB_ICONS, 'logo.png'), icons, 256);
-  await trace('in-app-logo', join(WEB_ICONS, 'logo.png'), '256 (app-icon, sidebar tile)');
+  await trace('in-app-logo', join(WEB_ICONS, 'logo.png'), '256 (app-icon)');
 
-  // logo-mark.svg is a byte copy of mark-mono-light.svg: the SpaceSidebar
-  // home tile renders it on the same lavender tile as the app icon's own
-  // badge, so the mark needs the white mono fill, not the flat-lavender
-  // mark.svg fill. Task 1 measured the arrow channel at a 25px sidebar
-  // render as ~1.95 device px, clearing the 1.5px small-size legibility
-  // rule, so no bolder variant is needed here.
+  // logo-mark.svg is a byte copy of mark-mono-light.svg: the one-colour
+  // white mark served with the app, for pages that cannot import the
+  // BrandMark component. In the app itself the mark is inline SVG.
   copyFileSync(SRC.markMonoLight, join(WEB_ICONS, 'logo-mark.svg'));
   await trace('logo-mark-svg', join(WEB_ICONS, 'logo-mark.svg'), 'copy of mark-mono-light.svg');
 

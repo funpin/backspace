@@ -26,6 +26,11 @@ contextBridge.exposeInMainWorld('backspace', {
   setBadgeCount: (count: number) => {
     ipcRenderer.send('set-badge-count', count);
   },
+  // The character in the tray: 'idle' | 'notify' | 'screen' | 'dnd' | 'offline'.
+  // Older desktop builds lack it, so the web client calls it optionally.
+  setTrayState: (state: string) => {
+    ipcRenderer.send('set-tray-state', state);
+  },
 
   // Auto-update, legacy per-event channels.
   //

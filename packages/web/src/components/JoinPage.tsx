@@ -14,6 +14,7 @@ import { sendInviteJoinRequest, type InviteRequestOutcome } from '../utils/invit
 import { FallbackNotice } from './modals/RemotePasswordStep';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
+import { Mascot } from './ui/Mascot';
 
 /**
  * A router link that looks like a `Button`: the primary and secondary
@@ -299,9 +300,7 @@ export function JoinPage() {
       <div className="h-full overflow-y-auto flex flex-col items-center bg-surface-base relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--accent-primary)/0.06)_0%,transparent_50%)]" />
         <div className={`${PANEL} text-center`}>
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-status-danger/[0.14] text-status-danger flex items-center justify-center">
-            <Icon name="triangle-alert" size="lg" />
-          </div>
+          <Mascot state="offline" className="w-16 h-16 mx-auto mb-4" />
           <h1 className="text-2xl font-semibold text-txt-primary mb-2">{t('auth:join.invalid.title')}</h1>
           <p className="text-txt-secondary text-sm mb-6">
             {previewError || t('auth:join.invalid.description')}

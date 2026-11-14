@@ -31,7 +31,7 @@ export interface ProjectLinks {
   license: string;
   security: string;
   contributors: string;
-  /** Ko-fi page; null hides the Support card. */
+  /** The project's support page (DaLink); null hides the Support card. */
   funding: string | null;
   /** The community space; null until the instance exists. */
   community: CommunityTarget | null;
@@ -47,7 +47,7 @@ export const PROJECT_LINKS: ProjectLinks = {
   license: `${REPOSITORY}/blob/main/LICENSE`,
   security: `${REPOSITORY}/blob/main/SECURITY.md`,
   contributors: `${REPOSITORY}/graphs/contributors`,
-  funding: 'https://ko-fi.com/backspacechat',
+  funding: 'https://dalink.to/funpinworld',
   community: null,
 };
 

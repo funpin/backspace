@@ -251,7 +251,7 @@ describe('ProjectHubPage: cards', () => {
     renderPage({ links: FILLED });
 
     const support = await screen.findByRole('article', { name: 'Support the project' });
-    expect(within(support).getByRole('link', { name: /Support on Ko-fi/ })).toHaveAttribute(
+    expect(within(support).getByRole('link', { name: /Support on DaLink/ })).toHaveAttribute(
       'href',
       'https://ko-fi.com/example',
     );
