@@ -219,11 +219,11 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
   }
 
   // Render a single tile polymorphically
-  const renderTile = (tile: GridTile, large?: boolean, compact?: boolean) =>
+  const renderTile = (tile: GridTile, large?: boolean, compact?: boolean, dense?: boolean) =>
     tile.kind === 'user' ? (
       <VoiceUser tile={tile} large={large} />
     ) : (
-      <StreamTile tile={tile} large={large} compact={compact} stats={streamStats} />
+      <StreamTile tile={tile} large={large} compact={compact} dense={dense} stats={streamStats} />
     );
 
   // A camera the viewer moved out of its owner's screen tile can go back.
@@ -295,7 +295,7 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
           }
           : {})}
       >
-        {renderTile(cell.main, variant === 'focused', compact)}
+        {renderTile(cell.main, variant === 'focused', compact, variant === 'thumbnail')}
         {showInset && <TileInset cell={cell} />}
         {cell.inset !== null && !showInset && (
           <div
@@ -422,7 +422,7 @@ export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridPro
             // the bar: it floats just above it and comes and goes with it.
             className={stripToggleFloats
               ? `absolute inset-x-0 bottom-24 z-float flex justify-center pointer-events-none transition-opacity duration-slow ease-out ${
-                chromeRevealed ? 'opacity-100' : 'opacity-0 focus-within:opacity-100 [@media(hover:none)]:opacity-100 [@media(any-pointer:coarse)]:opacity-100'
+                chromeRevealed ? 'opacity-100' : 'opacity-0 has-[:focus-visible]:opacity-100 [@media(hover:none)]:opacity-100 [@media(any-pointer:coarse)]:opacity-100'
               }`
               : 'flex justify-center flex-shrink-0 py-1'}
             {...(stripToggleFloats ? { [VOICE_CHROME_ATTR]: '' } : {})}

@@ -32,6 +32,11 @@ interface StreamTileProps {
    * preview): no LIVE badge, no quality or health row, a bare-name caption.
    */
   compact?: boolean;
+  /**
+   * A strip thumbnail: full chrome, but too narrow for a row of viewer faces
+   * beside the name, so the viewers are an eye and a number.
+   */
+  dense?: boolean;
   stats: TrackStatsSnapshot | null;
 }
 
@@ -177,7 +182,7 @@ function StreamAttenuationItem() {
   );
 }
 
-export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
+export function StreamTile({ tile, large, compact, dense, stats }: StreamTileProps) {
   const { t } = useTranslation(['voice', 'common']);
   const videoRef = useRef<HTMLVideoElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -224,6 +229,10 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
     freezeCountDelta: screenStat?.freezeCountDelta ?? null,
   });
   const healthWarning = useStreamHealthWarning(healthCandidate, stats);
+  // A received track often reports no frame rate in its settings, which left
+  // the badge at the bare height while the connection popover showed one. The
+  // rate measured from the track's own stats fills in.
+  const badgeFps = qualityBadge?.fps ?? finitePositiveRounded(screenStat?.fps ?? undefined);
 
   // --- VIDEO --- use LiveKit's track.attach() to register the element
   // with the adaptive stream observer (enables SFU layer switching by viewport size)
@@ -484,8 +493,8 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
             // "1438p" grow leftward and move nothing else.
             <span data-testid="stream-quality-badge" className={`${large ? 'h-7' : 'h-5'} flex flex-shrink-0 items-center`}>
               <Tag tone="onMedia">
-                {qualityBadge.fps !== null
-                  ? t('voice:stream.qualityValue', { height: qualityBadge.height, fps: qualityBadge.fps })
+                {badgeFps !== null
+                  ? t('voice:stream.qualityValue', { height: qualityBadge.height, fps: badgeFps })
                   // i18n-check: allow-literal "720p" is the format's name and reads the same in every language
                   : <>{qualityBadge.height}p</>}
               </Tag>
@@ -496,11 +505,12 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
 
       {/* Caption: a compact chip in the bottom-left corner, so the rest of
           the picture's bottom edge stays undimmed. */}
-      {hasVideo && isWatching && (
-        <div
-          data-testid="stream-tile-caption"
-          className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] h-[26px] px-2 rounded-lg bg-black/60 backdrop-blur-md flex items-center gap-1.5 min-w-0"
-        >
+      {hasVideo && isWatching && <div
+        data-testid="stream-tile-caption"
+        // Short of the right edge on a thumbnail: that corner holds the badge of a second source.
+        className={`absolute flex ${compact ? 'bottom-1 left-1 right-1' : dense ? 'bottom-2 left-2 right-9' : 'bottom-2 left-2 right-2'} pointer-events-none`}
+      >
+        <div className={`pointer-events-auto flex items-center gap-1.5 min-w-0 max-w-full rounded-lg bg-black/60 backdrop-blur-md ${compact ? 'px-1.5 py-0.5' : 'h-[26px] px-2'}`}>
           <Icon name="monitor" size="xs" className="text-white/70" />
           <span className={`font-semibold text-white truncate ${compact ? 'text-2xs' : 'text-compact'}`}>
             {isLocal && compact ? t('voice:badges.youShort') : displayName}
@@ -510,9 +520,9 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
           )}
           {/* After the name rather than at the right edge: that corner
               belongs to the inset and its badge. */}
-          <span className="ml-0.5 flex"><StreamViewerCount sharer={participant} compact={compact} large={large} /></span>
+          <span className="ml-0.5 flex"><StreamViewerCount sharer={participant} compact={compact} dense={dense} large={large} /></span>
         </div>
-      )}
+      </div>}
     </div>
   );
 }

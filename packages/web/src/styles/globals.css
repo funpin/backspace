@@ -215,6 +215,17 @@
     transform-origin: 0 0;
     transform: translate(var(--stage-zoom-x, 0px), var(--stage-zoom-y, 0px)) scale(var(--stage-zoom-scale, 1));
   }
+  /* A chat message over the voice grid (components/voice/VoiceChatToasts.tsx). */
+  .voice-chat-toast {
+    animation: voice-chat-toast-in 180ms ease-out;
+  }
+  @keyframes voice-chat-toast-in {
+    0% { transform: translateX(16px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .voice-chat-toast { animation: none; }
+  }
   /* Viewer faces on a stream tile (components/voice/StreamViewers.tsx): a
      face pops in when its owner starts watching, its name fades up on hover. */
   .stream-viewer-face {

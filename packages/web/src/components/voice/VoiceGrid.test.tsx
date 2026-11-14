@@ -603,3 +603,23 @@ describe('VoiceGrid zoom controls', () => {
     expect(stage().style.getPropertyValue('--focus-quality-right')).toBe('316px');
   });
 });
+
+describe('VoiceGrid strip thumbnails', () => {
+  it('shows viewers as a number on a strip thumbnail, where faces would not fit beside the name', () => {
+    useVoiceStore.setState({
+      focusedParticipantId: 'bob:stream',
+      participants: [participant('ada', true), sharing('bob', { screen: true }), sharing('eve', { screen: true }), participant('dan', false)],
+      watchingStreams: new Set(['bob', 'eve']),
+      streamWatchers: new Map([['eve', new Set(['dan'])], ['bob', new Set(['dan'])]]),
+    });
+    render(<VoiceGrid participants={useVoiceStore.getState().participants} />);
+
+    const strip = screen.getByTestId('voice-strip');
+    const thumbnailCount = strip.querySelector('[data-testid="stream-viewer-count"]') as HTMLElement;
+    expect(thumbnailCount).toHaveTextContent('2');
+    expect(strip.querySelector('[data-testid="stream-viewer-face"]')).toBeNull();
+    // The focused tile above still shows faces.
+    expect(screen.getAllByTestId('stream-viewer-face').length).toBeGreaterThan(0);
+  });
+});
+
