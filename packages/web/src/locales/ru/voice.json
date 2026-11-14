@@ -43,7 +43,10 @@
     "swapSources": "Поменять экран и камеру местами",
     "splitCamera": "Вынести камеру отдельно",
     "mergeCamera": "Вернуть камеру в угол",
-    "resetZoom": "Сбросить масштаб"
+    "resetZoom": "Сбросить масштаб",
+    "pointerOn": "Показывать указку (P)",
+    "pointerOff": "Убрать указку (P)",
+    "pointerActive": "Указка"
   },
   "connectionInfo": {
     "title": "Сведения о соединении",
@@ -175,7 +178,8 @@
     "viewersLabel_few": "{{count}} зрителя",
     "viewersLabel_many": "{{count}} зрителей",
     "viewersLabel_other": "{{count}} зрителя",
-    "noViewers": "Пока никто не смотрит"
+    "noViewers": "Пока никто не смотрит",
+    "showPointers": "Показывать указки зрителей"
   },
   "streamDiagnostics": {
     "publisherNetwork": "Нестабильная сеть у транслирующего",

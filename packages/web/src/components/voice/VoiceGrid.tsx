@@ -19,10 +19,21 @@ import {
   type GridCell,
 } from '../../utils/voiceGridLayout';
 import { hideParticipantTile } from '../../utils/voiceTileActions';
+import { useStreamPointerStore } from '../../stores/streamPointerStore';
+import { VOICE_CHROME_ATTR } from '../../hooks/usePointerReveal';
 
 interface VoiceGridProps {
   participants: ParticipantInfo[];
+  /**
+   * Voice fullscreen only: the header band and the control bar are showing
+   * over the grid right now (see usePointerReveal). The grid moves what they
+   * would cover out from under them.
+   */
+  chromeRevealed?: boolean;
 }
+
+/** Fullscreen: on a pointer that cannot hover the chrome never hides, so its room is always kept. */
+const WHEN_CHROME_IS_PERMANENT = '[@media(hover:none)]:top-14 [@media(any-pointer:coarse)]:top-14';
 
 /** Below this tile width a corner inset is a smudge; the cell shows a badge instead. */
 const MIN_TILE_WIDTH_FOR_INSET = 280;
@@ -38,6 +49,14 @@ function EyeOffIcon() {
   );
 }
 
+function PointerIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M3 2.5 17 9l-6.2 1.9L8.5 17.2Z" />
+    </svg>
+  );
+}
+
 function MergeIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -46,7 +65,7 @@ function MergeIcon() {
   );
 }
 
-export function VoiceGrid({ participants }: VoiceGridProps) {
+export function VoiceGrid({ participants, chromeRevealed = false }: VoiceGridProps) {
   const { t } = useTranslation(['voice', 'common']);
   const focusedParticipantId = useVoiceStore((s) => s.focusedParticipantId);
   const setFocusedParticipant = useVoiceStore((s) => s.setFocusedParticipant);
@@ -66,6 +85,8 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
   // so every picture opens unzoomed.
   const stageZoom = useStageZoom(focusedParticipantId);
   const { isZoomed, reset: resetZoom } = stageZoom;
+  const pointing = useStreamPointerStore((s) => s.pointing);
+  const setPointing = useStreamPointerStore((s) => s.setPointing);
 
   const layout = useMemo(
     () => deriveVoiceGridLayout(participants, {
@@ -81,6 +102,34 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
     () => layout.ribbon.flatMap((entry) => (entry.kind === 'self' ? [entry.cell] : [])),
     [layout],
   );
+
+  // Pointing needs a picture to point at: someone else's share, large and arriving.
+  const focusedForPointer = findFocusedCell(focusable, focusedParticipantId);
+  const canPoint = focusedForPointer !== null
+    && focusedForPointer.main.kind === 'stream'
+    && !focusedForPointer.participant.isLocal
+    && watchingStreams.has(focusedForPointer.participant.userId);
+
+  // Pointing never outlives the picture it was switched on for: leaving focus,
+  // or focusing something that cannot be pointed at, switches it off.
+  useEffect(() => {
+    if (!canPoint && useStreamPointerStore.getState().pointing) setPointing(false);
+  }, [canPoint, setPointing]);
+
+  // P toggles pointing. Read by physical key, so it works on any keyboard layout.
+  useEffect(() => {
+    if (!canPoint) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== 'KeyP' || e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+      const target = e.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
+      e.preventDefault();
+      const store = useStreamPointerStore.getState();
+      store.setPointing(!store.pointing);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canPoint]);
 
   const shouldCollectStreamStats = focusable.some((cell) =>
     [cell.main, cell.inset].some((tile) =>
@@ -165,6 +214,7 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
   // A camera the viewer moved out of its owner's screen tile can go back.
   const canMerge = (cell: GridCell) =>
     cell.main.kind === 'user'
+    && !cell.participant.isLocal
     && cell.inset === null
     && cell.participant.isScreenSharing
     && splitCameraUserIds.has(cell.participant.userId);
@@ -261,17 +311,50 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
   if (focusedCell) {
     const otherCells = focusable.filter((cell) => cell !== focusedCell);
     const hasStrip = otherCells.length > 0 || layout.ribbon.some((entry) => entry.kind !== 'self');
+    const isPointing = canPoint && pointing;
+    // Fullscreen floats the control bar over the bottom edge. The strip keeps
+    // clear of it; with the strip hidden the picture takes the whole height
+    // and the bar passes over it, as fullscreen means.
+    const stripOpen = hasStrip && !stripHidden;
+    const stripToggleFloats = voiceFullscreen && hasStrip && stripHidden;
     return (
-      <div className="flex-1 flex flex-col overflow-hidden relative">
+      <div className={`flex-1 flex flex-col overflow-hidden relative ${voiceFullscreen && stripOpen ? 'pb-20' : ''}`}>
         {/* Main focused view. A click anywhere on it returns to the grid,
             unless the picture is zoomed: then the click belongs to the pan. */}
         <div
           className="flex-1 p-2 min-h-0 cursor-pointer relative"
-          onClick={() => setFocusedParticipant(null)}
+          // While pointing, a click on the picture is a ping for the others,
+          // and must not also throw the viewer back to the grid.
+          onClick={() => { if (!isPointing) setFocusedParticipant(null); }}
         >
           {renderCell(focusedCell, 'focused')}
-          {/* Tile actions and the Grid button — top-right */}
-          <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          {/* Tile actions and the Grid button — top-right. In fullscreen
+              they step down while the header band is over the top edge. */}
+          <div
+            data-testid="focus-actions"
+            className={`absolute right-4 z-10 flex items-center gap-2 transition-[top] duration-300 ease-out ${
+              voiceFullscreen ? `${chromeRevealed ? 'top-14' : 'top-4'} ${WHEN_CHROME_IS_PERMANENT}` : 'top-4'
+            }`}
+          >
+            {canPoint && (
+              <button
+                type="button"
+                data-testid="pointer-toggle"
+                aria-pressed={pointing}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPointing(!pointing);
+                }}
+                className={pointing
+                  ? 'h-7 px-2.5 gap-1.5 bg-accent-primary hover:bg-accent-primary-hover rounded-lg flex items-center justify-center text-white transition-colors'
+                  : `${OVERLAY_BUTTON} w-7`}
+                aria-label={pointing ? t('voice:grid.pointerOff') : t('voice:grid.pointerOn')}
+                title={pointing ? t('voice:grid.pointerOff') : t('voice:grid.pointerOn')}
+              >
+                <PointerIcon />
+                {pointing && <span className="text-xs font-medium">{t('voice:grid.pointerActive')}</span>}
+              </button>
+            )}
             {isZoomed && (
               <button
                 type="button"
@@ -331,14 +414,23 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
 
         {/* Centered Hide/Show Members button — divider between focused tile and strip */}
         {hasStrip && (
-          <div className="flex justify-center flex-shrink-0 py-1">
+          <div
+            // With the strip hidden in fullscreen the toggle is chrome like
+            // the bar: it floats just above it and comes and goes with it.
+            className={stripToggleFloats
+              ? `absolute inset-x-0 bottom-24 z-20 flex justify-center pointer-events-none transition-opacity duration-300 ease-out ${
+                chromeRevealed ? 'opacity-100' : 'opacity-0 focus-within:opacity-100 [@media(hover:none)]:opacity-100 [@media(any-pointer:coarse)]:opacity-100'
+              }`
+              : 'flex justify-center flex-shrink-0 py-1'}
+            {...(stripToggleFloats ? { [VOICE_CHROME_ATTR]: '' } : {})}
+          >
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setStripHidden(!stripHidden);
               }}
-              className="px-4 py-1 bg-black/50 hover:bg-black/70 rounded-full flex items-center gap-2 text-white/60 hover:text-white transition-colors text-xs"
+              className="pointer-events-auto px-4 py-1 bg-black/50 hover:bg-black/70 rounded-full flex items-center gap-2 text-white/60 hover:text-white transition-colors text-xs"
               title={stripHidden ? t('voice:grid.showMembers') : t('voice:grid.hideMembers')}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -356,7 +448,7 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
         )}
 
         {/* Bottom strip: the other pictures, then the people without one */}
-        {!stripHidden && hasStrip && (
+        {stripOpen && (
           <div
             data-testid="voice-strip"
             className={`${otherCells.length > 0 ? 'h-[120px] max-h-[calc(20*var(--app-vh))] min-h-[80px]' : 'h-[76px]'} flex-shrink-0 flex items-center justify-center gap-2 p-2 bg-surface-base/50 overflow-x-auto no-scrollbar`}
@@ -372,7 +464,10 @@ export function VoiceGrid({ participants }: VoiceGridProps) {
   // Default grid mode — container-aware layout via ResizeObserver. The ribbon
   // row under it exists only while someone shows a camera or a screen.
   return (
-    <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+    // In fullscreen the header band and the control bar float over the top and
+    // bottom edges; a grid of tiles keeps clear of both rather than hide a row
+    // of names and buttons under them.
+    <div className={`flex-1 flex flex-col overflow-hidden min-h-0 ${voiceFullscreen ? 'pt-12 pb-20' : ''}`}>
       <div ref={gridRef} className="flex-1 overflow-hidden min-h-0">
         <div
           className="grid h-full w-full"

@@ -40,6 +40,8 @@ import {
   resolveNativeOverdrive,
   syncScreenShareAudio,
 } from '../utils/screenShare';
+import { parseStreamPointer } from '../utils/streamPointerProtocol';
+import { useStreamPointerStore } from '../stores/streamPointerStore';
 import { encodeStreamWatch, parseShareSignal, parseStreamWatch, streamWatchFor, streamWatchKey } from '../utils/streamWatchProtocol';
 import { StreamRepublishTracker } from '../utils/streamRepublish';
 import { StreamResumeMemory, type RememberedStream } from '../utils/streamResume';
@@ -60,6 +62,7 @@ const _resumeMemories = new WeakMap<Room, StreamResumeMemory>();
 function clearRoomStreamState(room: Room): void {
   _republishTrackers.get(room)?.clear();
   _resumeMemories.get(room)?.clear();
+  useStreamPointerStore.getState().reset();
 }
 /**
  * Serialises screen-share / camera track updates.
@@ -252,6 +255,7 @@ export function endRemoteStream(identity: string): void {
   // own watch here without a ping, so without this the set would carry them
   // into the sharer's next share.
   state.clearStreamWatchers(identity);
+  useStreamPointerStore.getState().clearSharer(identity);
 }
 
 /**
@@ -497,6 +501,18 @@ export function useLiveKit() {
         if (sharerIdentity) {
           useVoiceStore.getState().recordStreamWatch(sharerIdentity, participant.identity, sw.watching);
         }
+        return;
+      }
+      const pointer = parseStreamPointer(payload);
+      if (pointer) {
+        // Keyed like the watcher set: the sharer's and the sender's LiveKit
+        // identities, the two strings every client in the room agrees on.
+        useStreamPointerStore.getState().record(
+          pointer.target,
+          participant.identity,
+          pointer.x !== null && pointer.y !== null ? { x: pointer.x, y: pointer.y } : null,
+          pointer.ping === true,
+        );
         return;
       }
       const signal = parseShareSignal(payload);
@@ -887,6 +903,7 @@ export function useLiveKit() {
         if (newRoom.state === ConnectionState.Connected) {
           useVoiceStore.getState().evictWatcher(participant.identity);
         }
+        useStreamPointerStore.getState().clearSender(participant.identity);
         if (bridgedShareEnded) {
           rememberWatchedShare(resume, participant.identity);
           endRemoteStream(participant.identity);

@@ -168,6 +168,9 @@ export interface VoiceState {
   setSoundEffectVolume: (volume: number) => void;
   messageSoundAllChannels: boolean;          // false (default) = DM + mention only; true = every channel
   setMessageSoundAllChannels: (allChannels: boolean) => void;
+  /** Whether other viewers' pointers are drawn over the shares this client watches; persisted. */
+  showStreamPointers: boolean;
+  setShowStreamPointers: (show: boolean) => void;
   pipEnabled: boolean;                       // true (default) = floating window shows while browsing other channels
   setPipEnabled: (enabled: boolean) => void;
   streamAttenuationEnabled: boolean;        // global toggle, default true
@@ -353,6 +356,8 @@ export const useVoiceStore = create<VoiceState>()(
       setSoundEffectVolume: (volume) => set({ soundEffectVolume: volume }),
       messageSoundAllChannels: false,
       setMessageSoundAllChannels: (allChannels) => set({ messageSoundAllChannels: allChannels }),
+      showStreamPointers: true,
+      setShowStreamPointers: (show) => set({ showStreamPointers: show }),
       pipEnabled: true,
       setPipEnabled: (enabled) => set({ pipEnabled: enabled }),
 
@@ -1026,6 +1031,7 @@ export const useVoiceStore = create<VoiceState>()(
         soundEffectVolume: state.soundEffectVolume,
         messageSoundAllChannels: state.messageSoundAllChannels,
         pipEnabled: state.pipEnabled,
+        showStreamPointers: state.showStreamPointers,
         streamAttenuationEnabled: state.streamAttenuationEnabled,
         streamAttenuationStrength: state.streamAttenuationStrength,
         // Per-user preferences (Map → plain object for JSON)

@@ -43,7 +43,10 @@
     "swapSources": "Bildschirm und Kamera tauschen",
     "splitCamera": "Kamera separat anzeigen",
     "mergeCamera": "Kamera zurück in die Ecke",
-    "resetZoom": "Zoom zurücksetzen"
+    "resetZoom": "Zoom zurücksetzen",
+    "pointerOn": "Auf den Bildschirm zeigen (P)",
+    "pointerOff": "Zeigen beenden (P)",
+    "pointerActive": "Zeiger"
   },
   "connectionInfo": {
     "title": "Verbindungsinfo",
@@ -173,7 +176,8 @@
     "viewers": "Zuschauer",
     "viewersLabel_one": "{{count}} Zuschauer",
     "viewersLabel_other": "{{count}} Zuschauer",
-    "noViewers": "Noch schaut niemand zu"
+    "noViewers": "Noch schaut niemand zu",
+    "showPointers": "Zeiger der Zuschauer anzeigen"
   },
   "streamDiagnostics": {
     "publisherNetwork": "Das Netzwerk des Streamers ist instabil",

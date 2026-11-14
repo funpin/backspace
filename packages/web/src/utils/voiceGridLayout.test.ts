@@ -228,4 +228,13 @@ describe('the viewer\'s own order', () => {
     expect(reorderCells(['a', 'b'], ['b'], 'a', 'a')).toEqual(['b']);
     expect(reorderCells(['a', 'b'], ['b'], 'a', 'gone')).toEqual(['b']);
   });
+
+  it('never tucks the viewer\'s own camera into the corner of their own share', () => {
+    const layout = deriveVoiceGridLayout(
+      [participant('me', { local: true, screen: true, camera: true }), participant('bob')],
+      prefs({ swapped: ['me'] }),
+    );
+
+    expect(layout.cells.map((c) => [c.key, c.inset])).toEqual([['me:stream', null], ['me', null]]);
+  });
 });

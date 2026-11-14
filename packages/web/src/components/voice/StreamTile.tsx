@@ -12,6 +12,8 @@ import { handleViewerWatchToggle } from '../../utils/voiceTileActions';
 import { ScreenShareSettingsPopover } from './ScreenShareSettingsPopover';
 import { useVoiceParticipantMeta } from '../../hooks/useVoiceParticipantMeta';
 import { StreamViewerCount, StreamViewersItem } from './StreamViewers';
+import { StreamPointerLayer } from './StreamPointers';
+import { useStreamPointerStore } from '../../stores/streamPointerStore';
 import type { StreamTile as StreamTileType } from '../../hooks/useLiveKit';
 import type { TrackStatsSnapshot } from '../../hooks/useTrackStats';
 import {
@@ -181,6 +183,8 @@ function StreamAttenuationItem() {
 export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
   const { t } = useTranslation(['voice', 'common']);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const pointing = useStreamPointerStore((s) => s.pointing);
 
   const watchingStreams = useVoiceStore((s) => s.watchingStreams);
 
@@ -284,6 +288,15 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
         render: () => React.createElement(StreamViewersItem, { sharerIdentity: participant.identity }),
       });
       items.push({ key: 'viewers-sep', type: 'separator' });
+      items.push({
+        key: 'show-pointers',
+        type: 'checkbox',
+        label: t('voice:stream.showPointers'),
+        subscribe: useVoiceStore.subscribe,
+        getChecked: () => useVoiceStore.getState().showStreamPointers,
+        onChange: (checked) => useVoiceStore.getState().setShowStreamPointers(checked),
+      });
+      items.push({ key: 'pointers-sep', type: 'separator' });
 
       if (isLocal) {
         // Local stream: stop, change, quality
@@ -404,6 +417,7 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
 
   return (
     <div
+      ref={rootRef}
       data-context-menu
       className={`relative bg-surface-base rounded-xl overflow-hidden flex items-center justify-center group transition-all duration-200 ring-1 ring-white/[0.06] hover:ring-white/10 ${
         'h-full w-full'
@@ -416,7 +430,8 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
           autoPlay
           playsInline
           muted
-          className="w-full h-full object-contain bg-black"
+          // While pointing, the labelled pointer drawn over the picture is the cursor.
+          className={`w-full h-full object-contain bg-black ${large && !isLocal && pointing ? 'cursor-none' : ''}`}
         />
       ) : (
         <div data-testid="stream-tile-placeholder" className={`w-full h-full min-h-0 flex items-center justify-center bg-surface-channel ${large ? 'px-4 py-6' : 'px-4 pt-9 pb-3'}`}>
@@ -440,6 +455,10 @@ export function StreamTile({ tile, large, compact, stats }: StreamTileProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {hasVideo && isWatching && !compact && (
+        <StreamPointerLayer rootRef={rootRef} videoRef={videoRef} sharer={participant} canPoint={large === true && !isLocal} />
       )}
 
       {/* LIVE badge — top left */}
