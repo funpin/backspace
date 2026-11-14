@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VoiceGrid } from './VoiceGrid';
+import { pictureView } from './StageZoomControls';
 import { useVoiceStore } from '../../stores/voiceStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useStreamPointerStore } from '../../stores/streamPointerStore';
@@ -487,3 +488,103 @@ describe('VoiceGrid in voice fullscreen', () => {
   });
 });
 
+describe('VoiceGrid zoom controls', () => {
+  const people = () => [participant('ada', true), sharing('bob', { screen: true })];
+  const size = { left: 0, top: 0, width: 1000, height: 500, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) };
+
+  function renderFocused() {
+    Object.defineProperty(HTMLVideoElement.prototype, 'videoWidth', { configurable: true, get: () => 1600 });
+    Object.defineProperty(HTMLVideoElement.prototype, 'videoHeight', { configurable: true, get: () => 900 });
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream', watchingStreams: new Set(['bob']) });
+    // jsdom lays nothing out, and the stage is measured as it mounts.
+    const measured = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(size as DOMRect);
+    render(<VoiceGrid participants={people()} />);
+    measured.mockRestore();
+    const stage = document.querySelector('[data-zoom-stage]') as HTMLElement;
+    stage.getBoundingClientRect = () => size;
+    return stage;
+  }
+
+  it('always shows the zoom level, and opens into a slider once zoomed', async () => {
+    const stage = renderFocused();
+    expect(screen.getByTestId('zoom-chip')).toHaveTextContent('100');
+    expect(screen.queryByTestId('zoom-slider')).toBeNull();
+    expect(screen.queryByTestId('zoom-minimap')).toBeNull();
+
+    await userEvent.click(screen.getByTestId('zoom-chip'));
+
+    expect(stage).toHaveAttribute('data-zoomed', 'true');
+    expect(screen.getByTestId('zoom-slider')).toHaveValue('200');
+    expect(screen.getByTestId('zoom-reset')).toHaveTextContent('200');
+    // Pressing a zoom control never leaves focus mode.
+    expect(useVoiceStore.getState().focusedParticipantId).toBe('bob:stream');
+  });
+
+  it('zooms with the slider around the middle of the view, and back to 100 % from the percentage', async () => {
+    const stage = renderFocused();
+    await userEvent.click(screen.getByTestId('zoom-chip'));
+
+    fireEvent.change(screen.getByTestId('zoom-slider'), { target: { value: '400' } });
+
+    expect(stage.style.getPropertyValue('--stage-zoom-scale')).toBe('4');
+    // The middle of the stage stays in the middle: 500 - 500 * 4, 250 - 250 * 4.
+    expect(stage.style.getPropertyValue('--stage-zoom-x')).toBe('-1500px');
+    expect(stage.style.getPropertyValue('--stage-zoom-y')).toBe('-750px');
+
+    await userEvent.click(screen.getByTestId('zoom-reset'));
+    expect(stage).not.toHaveAttribute('data-zoomed');
+    expect(screen.getByTestId('zoom-chip')).toBeInTheDocument();
+  });
+
+  it('frames the visible part in the minimap and moves the view where the minimap is pressed', async () => {
+    const stage = renderFocused();
+    await userEvent.click(screen.getByTestId('zoom-chip'));
+    fireEvent.wheel(stage, { deltaY: -1, clientX: 500, clientY: 250 });
+
+    const minimap = screen.getByTestId('zoom-minimap');
+    // The picture is 1600x900 on a 1000x500 stage: the map takes the picture's
+    // 16:9 shape, not the stage's 2:1, so it has no letterbox bands of its own.
+    expect(minimap.style.width).toBe('148px');
+    expect(minimap.style.height).toBe('83px');
+    minimap.getBoundingClientRect = () => ({ ...size, width: 148, height: 83, right: 148, bottom: 83 });
+    fireEvent.pointerDown(minimap, { clientX: 148, clientY: 83, buttons: 1 });
+
+    // Pressed in the bottom-right corner: the view goes as far there as it can.
+    const scale = Number(stage.style.getPropertyValue('--stage-zoom-scale'));
+    expect(parseFloat(stage.style.getPropertyValue('--stage-zoom-x'))).toBeCloseTo(1000 - 1000 * scale, 3);
+    expect(parseFloat(stage.style.getPropertyValue('--stage-zoom-y'))).toBeCloseTo(500 - 500 * scale, 3);
+    expect(useVoiceStore.getState().focusedParticipantId).toBe('bob:stream');
+  });
+
+  it('cuts the minimap frame to the picture when the view reaches into a letterbox band', () => {
+    // The picture fills the middle 80 % of the stage's width.
+    const picture = { left: 0.1, top: 0, width: 0.8, height: 1 };
+    // A view over the left half of the stage sees the picture's first 40 % of stage width.
+    expect(pictureView({ left: 0, top: 0, width: 0.5, height: 0.5 }, picture))
+      .toEqual({ left: 0, top: 0, width: 0.5, height: 0.5 });
+    const inside = pictureView({ left: 0.5, top: 0.25, width: 0.25, height: 0.5 }, picture);
+    expect(inside.left).toBeCloseTo(0.5);
+    expect(inside.width).toBeCloseTo(0.3125);
+  });
+
+  it('moves the quality row under the LIVE badge when the focus bar leaves no room beside it', () => {
+    const narrow = { ...size, width: 420, right: 420 };
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, get: () => 300 });
+    useVoiceStore.setState({ focusedParticipantId: 'bob:stream', watchingStreams: new Set(['bob']) });
+    const measured = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(narrow as DOMRect);
+    const { unmount } = render(<VoiceGrid participants={people()} />);
+    measured.mockRestore();
+
+    const stage = () => document.querySelector('[data-zoom-stage]') as HTMLElement;
+    expect(stage()).toHaveAttribute('data-focus-tight');
+    expect(stage().style.getPropertyValue('--focus-quality-right')).toBe('0.5rem');
+    unmount();
+
+    // A wide stage keeps the row beside the bar, ending where the bar begins.
+    const wide = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(size as DOMRect);
+    render(<VoiceGrid participants={people()} />);
+    wide.mockRestore();
+    expect(stage()).not.toHaveAttribute('data-focus-tight');
+    expect(stage().style.getPropertyValue('--focus-quality-right')).toBe('316px');
+  });
+});

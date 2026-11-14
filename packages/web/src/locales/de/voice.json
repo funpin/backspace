@@ -46,7 +46,12 @@
     "resetZoom": "Zoom zurücksetzen",
     "pointerOn": "Auf den Bildschirm zeigen (P)",
     "pointerOff": "Zeigen beenden (P)",
-    "pointerActive": "Zeiger"
+    "pointerActive": "Zeiger",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "zoomLevel": "Zoomstufe",
+    "zoomHint": "Vergrößern (oder über dem Bild scrollen)",
+    "zoomMinimap": "Welcher Teil des Bildes zu sehen ist; zum Verschieben ziehen"
   },
   "connectionInfo": {
     "title": "Verbindungsinfo",

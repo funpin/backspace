@@ -46,7 +46,12 @@
     "resetZoom": "Reset Zoom",
     "pointerOn": "Point at the screen (P)",
     "pointerOff": "Stop pointing (P)",
-    "pointerActive": "Pointing"
+    "pointerActive": "Pointing",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomLevel": "Zoom level",
+    "zoomHint": "Zoom in (or scroll over the picture)",
+    "zoomMinimap": "What part of the picture is on screen; drag to move"
   },
   "connectionInfo": {
     "title": "Connection Info",

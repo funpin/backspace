@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { IDENTITY_ZOOM, MAX_ZOOM, clampZoom, zoomAt } from './useStageZoom';
+import { IDENTITY_ZOOM, MAX_ZOOM, centeredOn, clampZoom, viewportOf, zoomAt } from './useStageZoom';
 
 const W = 1000;
 const H = 500;
@@ -51,3 +51,22 @@ describe('clampZoom', () => {
     expect(clampZoom(before, 800, 400)).toEqual({ scale: 2, x: -800, y: -400 });
   });
 });
+
+describe('viewport geometry', () => {
+  it('reports the visible part of the stage as fractions of it', () => {
+    expect(viewportOf({ scale: 1, x: 0, y: 0 }, 1000, 500)).toEqual({ left: 0, top: 0, width: 1, height: 1 });
+    // 2x, panned so the view starts a quarter in from the left and at the top.
+    expect(viewportOf({ scale: 2, x: -500, y: 0 }, 1000, 500)).toMatchObject({ left: 0.25, width: 0.5, height: 0.5 });
+    expect(viewportOf({ scale: 2, x: 0, y: 0 }, 0, 0)).toEqual({ left: 0, top: 0, width: 1, height: 1 });
+  });
+
+  it('centres the view on a point of the stage, stopping at its edges', () => {
+    const centred = centeredOn({ scale: 2, x: 0, y: 0 }, 0.5, 0.5, 1000, 500);
+    expect(viewportOf(centred, 1000, 500)).toEqual({ left: 0.25, top: 0.25, width: 0.5, height: 0.5 });
+
+    // A corner cannot be centred: the view stops with its own corner there.
+    const corner = centeredOn({ scale: 2, x: 0, y: 0 }, 1, 1, 1000, 500);
+    expect(viewportOf(corner, 1000, 500)).toEqual({ left: 0.5, top: 0.5, width: 0.5, height: 0.5 });
+  });
+});
+

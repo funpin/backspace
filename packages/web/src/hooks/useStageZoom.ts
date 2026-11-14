@@ -58,10 +58,48 @@ export function zoomAt(
   );
 }
 
+/** The part of the stage on screen, as fractions of the stage (0..1). At 1x it is the whole stage. */
+export interface StageViewport {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+export function viewportOf(zoom: StageZoom, width: number, height: number): StageViewport {
+  if (width <= 0 || height <= 0) return { left: 0, top: 0, width: 1, height: 1 };
+  return {
+    // `+ 0` turns the -0 of an unpanned view into 0.
+    left: -zoom.x / (zoom.scale * width) + 0,
+    top: -zoom.y / (zoom.scale * height) + 0,
+    width: 1 / zoom.scale,
+    height: 1 / zoom.scale,
+  };
+}
+
+/** The zoom that keeps the scale and puts the stage point (`fx`, `fy`, fractions) in the middle of the view. */
+export function centeredOn(zoom: StageZoom, fx: number, fy: number, width: number, height: number): StageZoom {
+  return clampZoom(
+    { scale: zoom.scale, x: width / 2 - fx * width * zoom.scale, y: height / 2 - fy * height * zoom.scale },
+    width,
+    height,
+  );
+}
+
 export interface StageZoomControls {
   zoom: StageZoom;
   isZoomed: boolean;
   reset: () => void;
+  /** Sets the scale, keeping the middle of the view where it is (the slider and the +/- buttons). */
+  setScale: (scale: number) => void;
+  /** Moves the view so the stage point at these fractions is in its middle (the minimap). */
+  centerOn: (fx: number, fy: number) => void;
+  /** What part of the stage is on screen, as fractions of it. */
+  viewport: StageViewport;
+  /** The stage element, once mounted. */
+  stageElement: HTMLDivElement | null;
+  /** The stage's size in px, 0 before it is measured. */
+  stageSize: { width: number; height: number };
   /** Spread on the stage element. Carries the transform as CSS variables. */
   stageProps: {
     ref: (element: HTMLDivElement | null) => void;
@@ -95,8 +133,23 @@ export function useStageZoom(resetKey: string | null): StageZoomControls {
   // Set when a press turned into a pan, so the click that ends it is not a click.
   const pannedRef = useRef(false);
 
+  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+
   const ref = useCallback((el: HTMLDivElement | null) => setElement(el), []);
   const reset = useCallback(() => setZoom(IDENTITY_ZOOM), []);
+  const setScale = useCallback((scale: number) => {
+    if (!element) return;
+    const bounds = element.getBoundingClientRect();
+    if (bounds.width === 0 || bounds.height === 0) return;
+    setZoom((current) =>
+      zoomAt(current, clamp(scale, MIN_ZOOM, MAX_ZOOM) / current.scale, bounds.width / 2, bounds.height / 2, bounds.width, bounds.height),
+    );
+  }, [element]);
+  const centerOn = useCallback((fx: number, fy: number) => {
+    if (!element) return;
+    const bounds = element.getBoundingClientRect();
+    setZoom((current) => (current.scale === MIN_ZOOM ? current : centeredOn(current, fx, fy, bounds.width, bounds.height)));
+  }, [element]);
 
   useEffect(() => {
     setZoom(IDENTITY_ZOOM);
@@ -128,9 +181,16 @@ export function useStageZoom(resetKey: string | null): StageZoomControls {
 
   // A resized stage (window resize, the strip toggling) keeps the picture covering it.
   useEffect(() => {
-    if (!element || typeof ResizeObserver === 'undefined') return;
+    if (!element) return;
+    const measure = () => {
+      const bounds = element.getBoundingClientRect();
+      setStageSize((size) => (size.width === bounds.width && size.height === bounds.height ? size : { width: bounds.width, height: bounds.height }));
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(() => {
       const bounds = element.getBoundingClientRect();
+      measure();
       setZoom((current) => (current.scale === MIN_ZOOM ? current : clampZoom(current, bounds.width, bounds.height)));
     });
     observer.observe(element);
@@ -190,6 +250,11 @@ export function useStageZoom(resetKey: string | null): StageZoomControls {
     zoom,
     isZoomed,
     reset,
+    setScale,
+    centerOn,
+    viewport: viewportOf(zoom, stageSize.width, stageSize.height),
+    stageElement: element,
+    stageSize,
     stageProps: {
       ref,
       style: {

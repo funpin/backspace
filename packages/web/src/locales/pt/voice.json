@@ -46,7 +46,12 @@
     "resetZoom": "Redefinir zoom",
     "pointerOn": "Apontar na tela (P)",
     "pointerOff": "Parar de apontar (P)",
-    "pointerActive": "Ponteiro"
+    "pointerActive": "Ponteiro",
+    "zoomIn": "Aproximar",
+    "zoomOut": "Afastar",
+    "zoomLevel": "Nível de zoom",
+    "zoomHint": "Aproximar (ou role sobre a imagem)",
+    "zoomMinimap": "Que parte da imagem está na tela; arraste para mover"
   },
   "connectionInfo": {
     "title": "Informações da conexão",
